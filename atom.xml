@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yulewei.github.io/"/>
-  <updated>2017-04-24T11:38:34.000Z</updated>
+  <updated>2017-04-24T11:55:50.000Z</updated>
   <id>http://yulewei.github.io/</id>
   
   <author>
@@ -17,17 +17,17 @@
   
   <entry>
     <title></title>
-    <link href="http://yulewei.github.io/2017/04/2017-04-24/"/>
-    <id>http://yulewei.github.io/2017/04/2017-04-24/</id>
+    <link href="http://yulewei.github.io/2017/04/hexo-blog/"/>
+    <id>http://yulewei.github.io/2017/04/hexo-blog/</id>
     <published>2017-04-24T11:38:34.000Z</published>
-    <updated>2017-04-24T11:38:34.000Z</updated>
+    <updated>2017-04-24T11:55:50.000Z</updated>
     
-    <content type="html"><![CDATA[<p># </p>
+    <content type="html"><![CDATA[<p>hexo + github博客搭建笔记</p>
 ]]></content>
     
     <summary type="html">
     
-      &lt;p&gt;# &lt;/p&gt;
+      &lt;p&gt;hexo + github博客搭建笔记&lt;/p&gt;
 
     
     </summary>
@@ -40,13 +40,13 @@
     <link href="http://yulewei.github.io/2017/04/javac-api/"/>
     <id>http://yulewei.github.io/2017/04/javac-api/</id>
     <published>2017-04-20T03:53:53.000Z</published>
-    <updated>2017-04-24T09:57:18.000Z</updated>
+    <updated>2017-04-24T12:21:12.000Z</updated>
     
     <content type="html"><![CDATA[<p>javac是Java代码的编译器 [<a href="http://openjdk.java.net/groups/compiler/" target="_blank" rel="external">openjdk</a>, <a href="http://docs.oracle.com/javase/8/docs/technotes/guides/javac/" target="_blank" rel="external">oracle</a>]，初学Java的时候就应该接触过。本笔记整理一些javac相关的高级用法。</p>
 <h1 id="javac命令行"><a href="#javac命令行" class="headerlink" title="javac命令行"></a>javac命令行</h1><p>javac命令行工具，官方文档有完整的使用说明，<a href="http://docs.oracle.com/javase/8/docs/technotes/tools/unix/javac.html" target="_blank" rel="external">doc</a>。当然也可以，运行<code>javac -help</code>或<code>man javac</code>查看帮助信息。下面是经典的<a href="https://en.wikipedia.org/wiki/%22Hello,_World!%22_program" target="_blank" rel="external">hello world</a>代码：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.test.javac;</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Hello</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        System.out.println(<span class="string">"hello world"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>编译与运行</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="meta">$</span><span class="bash"> tree   <span class="comment"># 代码目录结构</span></span></div><div class="line">.</div><div class="line">├── pom.xml</div><div class="line">└── src</div><div class="line">    └── main</div><div class="line">        ├── java</div><div class="line">        │   └── com</div><div class="line">        │       └── test</div><div class="line">        │           └── javac</div><div class="line">        │               └── Hello.java</div><div class="line">        └── resources</div><div class="line"><span class="meta">$</span><span class="bash"> mkdir -p target/classes   <span class="comment"># 创建class文件的存放目录</span></span></div><div class="line"><span class="meta">$</span><span class="bash"> javac src/main/java/com/<span class="built_in">test</span>/javac/Hello.java <span class="_">-d</span> target/classes</span></div><div class="line"><span class="meta">$</span><span class="bash"> java -cp <span class="string">"target/classes"</span> com.test.javac.Hello </span></div><div class="line">hello world</div></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="meta">$</span> tree   # 代码目录结构</div><div class="line">.</div><div class="line">├── pom.xml</div><div class="line">└── src</div><div class="line">    └── main</div><div class="line">        ├── java</div><div class="line">        │   └── com</div><div class="line">        │       └── test</div><div class="line">        │           └── javac</div><div class="line">        │               └── Hello.java</div><div class="line">        └── resources</div><div class="line"><span class="meta">$</span> mkdir -p target/classes   # 创建class文件的存放目录</div><div class="line"><span class="meta">$</span> javac src/main/java/com/test/javac/Hello.java -d target/classes</div><div class="line"><span class="meta">$</span> java -cp "target/classes" com.test.javac.Hello </div><div class="line">hello world</div></pre></td></tr></table></figure>
 <h1 id="javac相关API"><a href="#javac相关API" class="headerlink" title="javac相关API"></a>javac相关API</h1><p>除了使用命令行工具编译Java代码，JDK 6增加了规范JSR-199和JSR-296，开始还提供相关的API。Java编译器的实现代码和API的整体结构如图所示[<a href="http://openjdk.java.net/groups/compiler/doc/package-overview/index.html" target="_blank" rel="external">doc</a>]：</p>
 <p><img src="http://oovjaial8.bkt.clouddn.com/2017-04-24-1492606028088_5.png" alt="Compiler Package Overview"></p>
 <p>绿色标注的包是官方API（Official API），即JSR-199和JSR-296，黄色标注的包为（Supported API），紫色标注的包代码全部在<code>com.sun.tools.javac.*</code>包下，为内部API（Internal API）和编译器的实现类。完整的包说明如下：</p>
@@ -118,33 +118,6 @@
       <category term="编译器" scheme="http://yulewei.github.io/tags/%E7%BC%96%E8%AF%91%E5%99%A8/"/>
     
       <category term="javac" scheme="http://yulewei.github.io/tags/javac/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="http://yulewei.github.io/2017/02/hello-world/"/>
-    <id>http://yulewei.github.io/2017/02/hello-world/</id>
-    <published>2017-02-10T03:53:53.000Z</published>
-    <updated>2017-04-24T04:05:57.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
-    
-    </summary>
-    
     
   </entry>
   
