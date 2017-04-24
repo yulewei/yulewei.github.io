@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Hexo</title>
+  <title>yulewei&#39;s blog</title>
   
   <link href="/atom.xml" rel="self"/>
   
-  <link href="http://yoursite.com/"/>
+  <link href="http://yulewei.github.io/"/>
   <updated>2017-04-24T04:08:27.000Z</updated>
-  <id>http://yoursite.com/</id>
+  <id>http://yulewei.github.io/</id>
   
   <author>
-    <name>John Doe</name>
+    <name>yulewei</name>
     
   </author>
   
@@ -17,8 +17,8 @@
   
   <entry>
     <title>Java编译器javac笔记</title>
-    <link href="http://yoursite.com/2017/04/20/javac-api/"/>
-    <id>http://yoursite.com/2017/04/20/javac-api/</id>
+    <link href="http://yulewei.github.io/2017/04/javac-api/"/>
+    <id>http://yulewei.github.io/2017/04/javac-api/</id>
     <published>2017-04-20T03:53:53.000Z</published>
     <updated>2017-04-24T04:08:27.000Z</updated>
     
@@ -91,18 +91,18 @@
     </summary>
     
     
-      <category term="java" scheme="http://yoursite.com/tags/java/"/>
+      <category term="java" scheme="http://yulewei.github.io/tags/java/"/>
     
-      <category term="javac" scheme="http://yoursite.com/tags/javac/"/>
+      <category term="编译器" scheme="http://yulewei.github.io/tags/%E7%BC%96%E8%AF%91%E5%99%A8/"/>
     
-      <category term="编译器" scheme="http://yoursite.com/tags/%E7%BC%96%E8%AF%91%E5%99%A8/"/>
+      <category term="javac" scheme="http://yulewei.github.io/tags/javac/"/>
     
   </entry>
   
   <entry>
     <title>Hello World</title>
-    <link href="http://yoursite.com/2017/02/10/hello-world/"/>
-    <id>http://yoursite.com/2017/02/10/hello-world/</id>
+    <link href="http://yulewei.github.io/2017/02/hello-world/"/>
+    <id>http://yulewei.github.io/2017/02/hello-world/</id>
     <published>2017-02-10T03:53:53.000Z</published>
     <updated>2017-04-24T04:05:57.000Z</updated>
     
