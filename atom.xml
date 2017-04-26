@@ -728,7 +728,7 @@
     <link href="http://yulewei.github.io/2016/12/gulp-hello-world/"/>
     <id>http://yulewei.github.io/2016/12/gulp-hello-world/</id>
     <published>2016-12-09T19:17:59.000Z</published>
-    <updated>2017-04-25T07:44:08.000Z</updated>
+    <updated>2017-04-26T08:24:45.000Z</updated>
     
     <content type="html"><![CDATA[<p>示例代码，实现JS和CSS的文件压缩和版本控制</p>
 <a id="more"></a>
@@ -744,7 +744,7 @@
     
     </summary>
     
-      <category term="JavaScript" scheme="http://yulewei.github.io/categories/JavaScript/"/>
+      <category term="Web" scheme="http://yulewei.github.io/categories/Web/"/>
     
     
       <category term="代码" scheme="http://yulewei.github.io/tags/%E4%BB%A3%E7%A0%81/"/>
@@ -1092,12 +1092,16 @@
     <link href="http://yulewei.github.io/2016/11/javascript-libs-and-tools/"/>
     <id>http://yulewei.github.io/2016/11/javascript-libs-and-tools/</id>
     <published>2016-11-25T19:22:02.000Z</published>
-    <updated>2017-04-26T06:24:06.000Z</updated>
+    <updated>2017-04-26T08:25:40.000Z</updated>
     
     <summary type="html">
     
     </summary>
     
+      <category term="Web" scheme="http://yulewei.github.io/categories/Web/"/>
+    
+    
+      <category term="JavaScript" scheme="http://yulewei.github.io/tags/JavaScript/"/>
     
   </entry>
   
@@ -1116,16 +1120,26 @@
   </entry>
   
   <entry>
-    <title>javascript-books</title>
-    <link href="http://yulewei.github.io/2016/11/javascript-books/"/>
-    <id>http://yulewei.github.io/2016/11/javascript-books/</id>
+    <title>Web前端书籍资料整理</title>
+    <link href="http://yulewei.github.io/2016/11/front-end-books/"/>
+    <id>http://yulewei.github.io/2016/11/front-end-books/</id>
     <published>2016-11-25T19:20:47.000Z</published>
-    <updated>2017-04-26T06:24:38.000Z</updated>
+    <updated>2017-04-26T08:33:37.000Z</updated>
     
     <summary type="html">
     
     </summary>
     
+      <category term="Web" scheme="http://yulewei.github.io/categories/Web/"/>
+    
+    
+      <category term="书籍" scheme="http://yulewei.github.io/tags/%E4%B9%A6%E7%B1%8D/"/>
+    
+      <category term="JavaScript" scheme="http://yulewei.github.io/tags/JavaScript/"/>
+    
+      <category term="HTML" scheme="http://yulewei.github.io/tags/HTML/"/>
+    
+      <category term="CSS" scheme="http://yulewei.github.io/tags/CSS/"/>
     
   </entry>
   
@@ -1134,7 +1148,7 @@
     <link href="http://yulewei.github.io/2016/11/java-official-doc/"/>
     <id>http://yulewei.github.io/2016/11/java-official-doc/</id>
     <published>2016-11-19T19:21:32.000Z</published>
-    <updated>2017-04-26T06:22:26.000Z</updated>
+    <updated>2017-04-26T08:31:20.000Z</updated>
     
     <content type="html"><![CDATA[<p>本文整理一些学习Java需要翻阅或必须的官方文档资料。</p>
 <a id="more"></a>
@@ -1174,9 +1188,11 @@
 </ul>
 </li>
 <li>HotSpot Ergonomics，<a href="http://www.oracle.com/technetwork/java/ergo5-140223.html" target="_blank" rel="external">link</a></li>
-<li>HotSpot Performance and Tuning，<a href="http://www.oracle.com/technetwork/java/performance-138178.html" target="_blank" rel="external">link</a></li>
+<li>HotSpot Performance and Tuning，<a href="http://www.oracle.com/technetwork/java/performance-138178.html" target="_blank" rel="external">link</a><ul>
 <li>2007.10, Java SE 6.0 Performance White Paper，<a href="http://www.oracle.com/technetwork/java/6-performance-137236.html" target="_blank" rel="external">link</a></li>
 <li>2005.03, J2SE 5.0 Performance White Paper，<a href="http://www.oracle.com/technetwork/java/5-136747.html" target="_blank" rel="external">link</a></li>
+</ul>
+</li>
 <li>HotSpot Publications，<a href="http://www.oracle.com/technetwork/java/javase/tech/publications-140132.html" target="_blank" rel="external">link</a></li>
 </ol>
 <p><strong>Troubleshooting Java SE 8，<a href="http://www.oracle.com/technetwork/java/javase/index-138283.html" target="_blank" rel="external">link</a> 资料汇总</strong></p>
@@ -1205,9 +1221,9 @@
     <link href="http://yulewei.github.io/2016/11/java-books/"/>
     <id>http://yulewei.github.io/2016/11/java-books/</id>
     <published>2016-11-19T17:47:08.000Z</published>
-    <updated>2017-04-26T05:41:14.000Z</updated>
+    <updated>2017-04-26T08:23:41.000Z</updated>
     
-    <content type="html"><![CDATA[<p><a href="http://en.wikipedia.org/wiki/Template:Java_%28software_platform%29" target="_blank" rel="external">http://en.wikipedia.org/wiki/Template:Java_%28software_platform%29</a><br><a href="http://c2.com/cgi/wiki?JavaIdioms" target="_blank" rel="external">http://c2.com/cgi/wiki?JavaIdioms</a><br><a href="http://c2.com/cgi/wiki?JavaDesignFlaws" target="_blank" rel="external">http://c2.com/cgi/wiki?JavaDesignFlaws</a> Java语言设计缺陷</p>
+    <content type="html"><![CDATA[<p><a href="https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29" target="_blank" rel="external">https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29</a><br><a href="http://c2.com/cgi/wiki?JavaIdioms" target="_blank" rel="external">http://c2.com/cgi/wiki?JavaIdioms</a><br><a href="http://c2.com/cgi/wiki?JavaDesignFlaws" target="_blank" rel="external">http://c2.com/cgi/wiki?JavaDesignFlaws</a> Java语言设计缺陷</p>
 <ol>
 <li>2011-06 Java Books Reading Order <a href="http://stackoverflow.com/q/6341593" target="_blank" rel="external">http://stackoverflow.com/q/6341593</a></li>
 <li>2009-03 Java书籍Top 10 <a href="http://coolshell.cn/articles/14.html" target="_blank" rel="external">http://coolshell.cn/articles/14.html</a></li>
@@ -1274,7 +1290,7 @@
     
     <summary type="html">
     
-      &lt;p&gt;&lt;a href=&quot;http://en.wikipedia.org/wiki/Template:Java_%28software_platform%29&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;http://en.wikipedia.org/wiki/
+      &lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://en.wikipedia.org/wik
     
     </summary>
     
