@@ -451,9 +451,9 @@
         
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> 代码 </tag>
+            
+            <tag> Java </tag>
             
             <tag> 工具 </tag>
             
@@ -715,9 +715,9 @@
         
         <tags>
             
-            <tag> 代码 </tag>
-            
             <tag> JavaScript </tag>
+            
+            <tag> 代码 </tag>
             
         </tags>
         
@@ -915,9 +915,9 @@
         
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> 代码 </tag>
+            
+            <tag> Java </tag>
             
         </tags>
         
@@ -1044,60 +1044,6 @@
             <tag> CS </tag>
             
             <tag> 语言 </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[javascript-libs-and-tools]]></title>
-      <url>/2016/11/javascript-libs-and-tools/</url>
-      <content type="html"></content>
-      
-        <categories>
-            
-            <category> Web </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> JavaScript </tag>
-            
-        </tags>
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[java-libs-and-tools]]></title>
-      <url>/2016/11/java-libs-and-tools/</url>
-      <content type="html"></content>
-      
-        
-    </entry>
-    
-    <entry>
-      <title><![CDATA[Web前端书籍资料整理]]></title>
-      <url>/2016/11/front-end-books/</url>
-      <content type="html"></content>
-      
-        <categories>
-            
-            <category> Web </category>
-            
-        </categories>
-        
-        
-        <tags>
-            
-            <tag> 书籍 </tag>
-            
-            <tag> HTML </tag>
-            
-            <tag> CSS </tag>
-            
-            <tag> JavaScript </tag>
             
         </tags>
         
