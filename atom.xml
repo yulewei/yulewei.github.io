@@ -1135,11 +1135,11 @@
     
       <category term="书籍" scheme="http://yulewei.github.io/tags/%E4%B9%A6%E7%B1%8D/"/>
     
-      <category term="JavaScript" scheme="http://yulewei.github.io/tags/JavaScript/"/>
-    
       <category term="HTML" scheme="http://yulewei.github.io/tags/HTML/"/>
     
       <category term="CSS" scheme="http://yulewei.github.io/tags/CSS/"/>
+    
+      <category term="JavaScript" scheme="http://yulewei.github.io/tags/JavaScript/"/>
     
   </entry>
   
