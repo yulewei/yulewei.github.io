@@ -2,100 +2,107 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://yulewei.github.io/2017/04/javac-api/</loc>
+    <loc>http://yulewei.github.io/2017/05/java-method-parameter/</loc>
     
-    <lastmod>2017-04-26T18:06:30.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yulewei.github.io/2016/12/mybatis-generator/</loc>
-    
-    <lastmod>2017-04-26T10:37:28.000Z</lastmod>
+    <lastmod>2017-05-06T18:08:54.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://yulewei.github.io/2016/11/java-official-doc/</loc>
     
-    <lastmod>2017-04-26T08:31:20.000Z</lastmod>
+    <lastmod>2017-05-05T15:51:32.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://yulewei.github.io/2016/12/gulp-hello-world/</loc>
     
-    <lastmod>2017-04-26T08:24:45.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yulewei.github.io/2016/11/java-books/</loc>
-    
-    <lastmod>2017-04-26T08:23:41.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yulewei.github.io/2016/11/lang-and-compiler-books/</loc>
-    
-    <lastmod>2017-04-26T06:26:28.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yulewei.github.io/2016/11/apache-commons/</loc>
-    
-    <lastmod>2017-04-26T05:40:22.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yulewei.github.io/2016/12/software-dev-books/</loc>
-    
-    <lastmod>2017-04-26T05:39:50.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yulewei.github.io/2017/01/mysql-data-types/</loc>
-    
-    <lastmod>2017-04-26T05:10:50.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yulewei.github.io/2016/11/database-books/</loc>
-    
-    <lastmod>2017-04-26T05:09:27.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yulewei.github.io/2016/12/mac-mysql-5.7/</loc>
-    
-    <lastmod>2017-04-25T20:35:45.000Z</lastmod>
+    <lastmod>2017-04-27T09:32:31.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://yulewei.github.io/2016/12/itext-pdf/</loc>
     
-    <lastmod>2017-04-25T19:39:15.000Z</lastmod>
+    <lastmod>2017-04-27T09:31:45.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://yulewei.github.io/2016/12/java-8-stream-api/</loc>
+    <loc>http://yulewei.github.io/2017/04/javac-api/</loc>
     
-    <lastmod>2017-04-25T19:38:56.000Z</lastmod>
+    <lastmod>2017-04-27T09:31:09.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yulewei.github.io/2016/11/java-books/</loc>
+    
+    <lastmod>2017-04-27T09:30:47.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yulewei.github.io/2016/11/apache-commons/</loc>
+    
+    <lastmod>2017-04-27T09:30:25.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yulewei.github.io/2016/12/mac-mysql-5.7/</loc>
+    
+    <lastmod>2017-04-27T09:29:57.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://yulewei.github.io/2016/12/mysql-5.7-json/</loc>
     
-    <lastmod>2017-04-25T08:24:41.000Z</lastmod>
+    <lastmod>2017-04-27T09:29:11.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yulewei.github.io/2016/12/java-8-stream-api/</loc>
+    
+    <lastmod>2017-04-27T09:28:42.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yulewei.github.io/2016/12/mybatis-generator/</loc>
+    
+    <lastmod>2017-04-27T09:28:28.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yulewei.github.io/2017/01/mysql-data-types/</loc>
+    
+    <lastmod>2017-04-27T09:27:35.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yulewei.github.io/2016/11/database-books/</loc>
+    
+    <lastmod>2017-04-27T09:27:02.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yulewei.github.io/2016/12/software-dev-books/</loc>
+    
+    <lastmod>2017-04-27T09:26:09.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yulewei.github.io/2016/11/lang-and-compiler-books/</loc>
+    
+    <lastmod>2017-04-27T09:24:22.000Z</lastmod>
     
   </url>
   
