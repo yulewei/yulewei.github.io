@@ -500,56 +500,14 @@
 
       
         
-          
-            <p>在Java领域，最流行的的工具库就是Apache Commons和Google Guava [<a href="http://java.dzone.com/articles/github%E2%80%99s-10000-most-popular" target="_blank" rel="external">ref</a>]。</p>
-<p>Apache Commons，<a href="http://en.wikipedia.org/wiki/Apache_Commons" target="_blank" rel="external">wiki</a>，<a href="http://commons.apache.org/" target="_blank" rel="external">commons.apache.org</a>：Commons包含各种各样的子项目，其中比较流行的有IO, Lang, Logging, <a href="https://commons.apache.org/proper/commons-codec/" target="_blank" rel="external">Codec</a>, Collections, dbcp等[<a href="http://java.dzone.com/articles/github%E2%80%99s-10000-most-popular" target="_blank" rel="external">ref</a>]</p>
-<ol>
-<li>Commons IO，<a href="http://commons.apache.org/proper/commons-io/" target="_blank" rel="external">home</a>，<a href="http://commons.apache.org/proper/commons-io/description.html" target="_blank" rel="external">guide</a>，<a href="https://github.com/apache/commons-io" target="_blank" rel="external">github</a>，<a href="http://mvnrepository.com/artifact/commons-io/commons-io" target="_blank" rel="external">mvn</a>，<a href="https://javadoc.io/doc/commons-io/commons-io" target="_blank" rel="external">javadoc</a>：Commons-IO contains <a href="http://commons.apache.org/proper/commons-io/description.html#Utility_classes" target="_blank" rel="external">utility classes</a> (IOUtils, <a href="http://commons.apache.org/proper/commons-io/description.html#FileUtils" target="_blank" rel="external">FileUtils</a>, FilenameUtils, FileSystemUtils), <a href="http://commons.apache.org/proper/commons-io/description.html#Endian_classes" target="_blank" rel="external">endian classes</a> (EndianUtils), <a href="http://commons.apache.org/proper/commons-io/description.html#Line_iterator" target="_blank" rel="external">line iterator</a>, <a href="http://commons.apache.org/proper/commons-io/description.html#File_filters" target="_blank" rel="external">file filters</a> (IOFileFilter), <a href="http://commons.apache.org/proper/commons-io/description.html#File_comparators" target="_blank" rel="external">file comparators</a> and <a href="http://commons.apache.org/proper/commons-io/description.html#Streams" target="_blank" rel="external">stream implementations</a>.</li>
-<li>Commons Lang，<a href="http://commons.apache.org/proper/commons-lang/" target="_blank" rel="external">home</a>，<a href="https://github.com/apache/commons-lang" target="_blank" rel="external">github</a>，<a href="http://mvnrepository.com/artifact/org.apache.commons/commons-lang3" target="_blank" rel="external">mvn</a>，<a href="https://javadoc.io/doc/org.apache.commons/commons-lang3" target="_blank" rel="external">javadoc</a>：String manipulation (<a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/StringUtils.html" target="_blank" rel="external">StringUtils</a>, <a href="http://commons.apache.org/proper/commons-lang/javadocs/api-release/org/apache/commons/lang3/StringEscapeUtils.html" target="_blank" rel="external">StringEscapeUtils</a>, RandomStringUtils); Character handling (CharSetUtils, CharSet, CharRange, CharUtils); JVM interaction (SystemUtils, CharEncoding); Serialization (SerializationUtils, SerializationException); Assorted functions (ObjectUtils, ClassUtils, ArrayUtils, BooleanUtils)，使用，如jsoup库[<a href="http://www.infoq.com/cn/news/2010/08/jsoup1.3.1/" target="_blank" rel="external">ref</a>]</li>
-<li>Commons Collections，<a href="http://commons.apache.org/proper/commons-collections/" target="_blank" rel="external">home</a>，<a href="https://javadoc.io/doc/org.apache.commons/commons-collections4" target="_blank" rel="external">javadoc</a>：或者Google Guava</li>
-<li>Commons BeanUtils，<a href="http://commons.apache.org/proper/commons-beanutils/" target="_blank" rel="external">home</a>，<a href="https://javadoc.io/doc/commons-beanutils/commons-beanutils" target="_blank" rel="external">javadoc</a></li>
-<li>HttpClient，<a href="https://hc.apache.org/" target="_blank" rel="external">home</a>，<a href="http://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient" target="_blank" rel="external">mvn</a>：2007年，旧的Commons HttpClient 3.x升级为Apache HttpClient 4.x[<a href="http://hc.apache.org/httpclient-legacy/index.html" target="_blank" rel="external">ref</a>]</li>
-<li><del>Commons Logging，<a href="http://commons.apache.org/proper/commons-logging/" target="_blank" rel="external">home</a>：可以使用SLF4J替代</del></li>
-<li>其他</li>
-</ol>
-<p>Apache Commons下的库，部分文档比较简陋，或者过时没有及时更新。部分功能的使用需要反复翻javadoc才搞明白用法。本文是，平时本人在使用BeanUtils和Collections中，一些典型用法的总结。</p>
-<h1 id="Commons-BeanUtils"><a href="#Commons-BeanUtils" class="headerlink" title="Commons BeanUtils"></a>Commons BeanUtils</h1><p>关于<a href="http://commons.apache.org/proper/commons-beanutils/" target="_blank" rel="external">BeanUtils</a>的使用，官方的<a href="http://commons.apache.org/proper/commons-beanutils/javadocs/v1.9.2/apidocs/org/apache/commons/beanutils/package-summary.html#package_description" target="_blank" rel="external">包描述</a>有好介绍。这里记录部分常见的用法。<br>Bean的定义（为了使代码更加简洁，这里使用了<a href="https://projectlombok.org/" target="_blank" rel="external">Lombok</a>）：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> lombok.Data;</div><div class="line"> </div><div class="line"><span class="meta">@Data</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> Integer id;</div><div class="line">    <span class="keyword">private</span> Name name;</div><div class="line">    <span class="keyword">private</span> String[] address;</div><div class="line"> </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">()</span> </span>&#123;</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">(Integer id, Name name, String[] address)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.id = id;</div><div class="line">        <span class="keyword">this</span>.name = name;</div><div class="line">        <span class="keyword">this</span>.address = address;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> lombok.Data;</div><div class="line"> </div><div class="line"><span class="meta">@Data</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Name</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> String first;</div><div class="line">    <span class="keyword">private</span> String last;</div><div class="line"> </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Name</span><span class="params">(String first, String last)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.first = first;</div><div class="line">        <span class="keyword">this</span>.last = last;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> lombok.Data;</div><div class="line"><span class="keyword">import</span> java.util.List;</div><div class="line"><span class="keyword">import</span> java.util.Map;</div><div class="line"> </div><div class="line"><span class="meta">@Data</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PersonWrapper</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> List&lt;Person&gt; list;</div><div class="line">    <span class="keyword">private</span> Map&lt;String, Person&gt; map;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="访问Bean属性"><a href="#访问Bean属性" class="headerlink" title="访问Bean属性"></a>访问Bean属性</h2><p>涉及到的类方法：PropertyUtils.<a href="http://commons.apache.org/proper/commons-beanutils/javadocs/v1.9.2/apidocs/org/apache/commons/beanutils/PropertyUtils.html#getSimpleProperty%28java.lang.Object,%20java.lang.String%29" target="_blank" rel="external">getSimpleProperty</a>、PropertyUtils.<a href="http://commons.apache.org/proper/commons-beanutils/javadocs/v1.9.2/apidocs/org/apache/commons/beanutils/PropertyUtils.html#getIndexedProperty%28java.lang.Object,%20java.lang.String%29" target="_blank" rel="external">getIndexedProperty</a>、PropertyUtils.<a href="http://commons.apache.org/proper/commons-beanutils/javadocs/v1.9.2/apidocs/org/apache/commons/beanutils/PropertyUtils.html#getNestedProperty%28java.lang.Object,%20java.lang.String%29" target="_blank" rel="external">getNestedProperty</a>、PropertyUtils.<a href="http://commons.apache.org/proper/commons-beanutils/javadocs/v1.9.2/apidocs/org/apache/commons/beanutils/PropertyUtils.html#getMappedProperty%28java.lang.Object,%20java.lang.String%29" target="_blank" rel="external">getMappedProperty</a>和PropertyUtils.<a href="http://commons.apache.org/proper/commons-beanutils/javadocs/v1.9.2/apidocs/org/apache/commons/beanutils/PropertyUtils.html#getProperty%28java.lang.Object,%20java.lang.String%29" target="_blank" rel="external">getProperty</a></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">Person person = <span class="keyword">new</span> Person(<span class="number">1</span>, <span class="keyword">new</span> Name(<span class="string">"Bill"</span>, <span class="string">"Gates"</span>), <span class="keyword">new</span> String[]&#123;<span class="string">"北京"</span>, <span class="string">"上海"</span>&#125;);</div><div class="line">System.out.println((Integer) PropertyUtils.getSimpleProperty(person, <span class="string">"id"</span>));</div><div class="line">PropertyUtils.setSimpleProperty(person, <span class="string">"id"</span>, <span class="number">42</span>);</div><div class="line">System.out.println(person.getId());</div><div class="line">System.out.println((String) PropertyUtils.getIndexedProperty(person, <span class="string">"address[1]"</span>));</div><div class="line">System.out.println((String) PropertyUtils.getNestedProperty(person, <span class="string">"name.first"</span>));</div><div class="line"> </div><div class="line">Person person2 = <span class="keyword">new</span> Person(<span class="number">2</span>, <span class="keyword">new</span> Name(<span class="string">"Steve"</span>, <span class="string">"Jobs"</span>), <span class="keyword">new</span> String[]&#123;<span class="string">"纽约"</span>, <span class="string">"洛杉矶"</span>&#125;);</div><div class="line">PersonWrapper personWrapper = <span class="keyword">new</span> PersonWrapper();</div><div class="line">personWrapper.setList(Arrays.asList(person, person2));</div><div class="line">Map&lt;String, Person&gt; map = <span class="keyword">new</span> HashMap&lt;&gt;();</div><div class="line">map.put(<span class="string">"person"</span>, person);</div><div class="line">map.put(<span class="string">"person2"</span>, person2);</div><div class="line">personWrapper.setMap(map);</div><div class="line">System.out.println((Person) PropertyUtils.getMappedProperty(personWrapper, <span class="string">"map(person)"</span>));</div><div class="line">System.out.println((String) PropertyUtils.getProperty(personWrapper, <span class="string">"map(person2).address[1]"</span>));</div></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">1</div><div class="line">42</div><div class="line">上海</div><div class="line">Bill</div><div class="line">Person(id=42, name=Name(first=Bill, last=Gates), address=[北京, 上海])</div><div class="line">洛杉矶</div></pre></td></tr></table></figure>
-<h2 id="复制Bean属性"><a href="#复制Bean属性" class="headerlink" title="复制Bean属性"></a>复制Bean属性</h2><p>需要注意的点：</p>
-<ul>
-<li>BeanUtils.<a href="http://commons.apache.org/proper/commons-beanutils/javadocs/v1.9.2/apidocs/org/apache/commons/beanutils/BeanUtils.html#cloneBean%28java.lang.Object%29" target="_blank" rel="external">cloneBean</a>、PropertyUtils.<a href="http://commons.apache.org/proper/commons-beanutils/javadocs/v1.9.2/apidocs/org/apache/commons/beanutils/PropertyUtils.html#copyProperties%28java.lang.Object,%20java.lang.Object%29" target="_blank" rel="external">copyProperties</a>和BeanUtils.<a href="http://commons.apache.org/proper/commons-beanutils/javadocs/v1.9.2/apidocs/org/apache/commons/beanutils/BeanUtils.html#copyProperties%28java.lang.Object,%20java.lang.Object%29" target="_blank" rel="external">copyProperties</a>全部都是浅拷贝。深拷贝需要使用<a href="https://commons.apache.org/proper/commons-lang/apidocs/org/apache/commons/lang3/SerializationUtils.html" target="_blank" rel="external">SerializationUtils</a>。</li>
-<li>BeanUtils.cloneBean，内部实现是先创建同类型的bean实例，然后在调用PropertyUtils.copyProperties。</li>
-</ul>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> lombok.Data;</div><div class="line"> </div><div class="line"><span class="meta">@Data</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Person2</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> Integer id;</div><div class="line">    <span class="keyword">private</span> String name;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">Person person = <span class="keyword">new</span> Person(<span class="number">1</span>, <span class="keyword">new</span> Name(<span class="string">"Bill"</span>, <span class="string">"Gates"</span>), <span class="keyword">new</span> String[]&#123;<span class="string">"北京"</span>, <span class="string">"上海"</span>&#125;);</div><div class="line">Person person2 = (Person) BeanUtils.cloneBean(person);</div><div class="line">System.out.println(person2);</div><div class="line">System.out.println(person2.getName() == person.getName()); <span class="comment">// 浅拷贝</span></div><div class="line"> </div><div class="line">Person person3 = <span class="keyword">new</span> Person();</div><div class="line">PropertyUtils.copyProperties(person3, person);</div><div class="line">System.out.println(person3);</div><div class="line"> </div><div class="line">Person2 person4 = <span class="keyword">new</span> Person2();</div><div class="line">BeanUtils.copyProperties(person4, person); <span class="comment">// 属性的类型不同将尝试自动转换</span></div><div class="line">System.out.println(person4.getName());</div></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Person(id=1, name=Name(first=Bill, last=Gates), address=[北京, 上海])</div><div class="line">true</div><div class="line">Person(id=1, name=Name(first=Bill, last=Gates), address=[北京, 上海])</div><div class="line">Name(first=Bill, last=Gates)</div></pre></td></tr></table></figure>
-<h1 id="Commons-Collections"><a href="#Commons-Collections" class="headerlink" title="Commons Collections"></a>Commons Collections</h1><p><a href="http://commons.apache.org/proper/commons-collections/" target="_blank" rel="external">Commons Collections</a>在<a href="http://commons.apache.org/proper/commons-collections/release_4_0.html" target="_blank" rel="external">版本4</a>之后加入泛型的支持，但官方介绍文档没有及时更新。这里记录部分常见的用法。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> lombok.Data;</div><div class="line"> </div><div class="line"><span class="meta">@Data</span></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Hello</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> Integer id;</div><div class="line">    <span class="keyword">private</span> String name;</div><div class="line"> </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Hello</span><span class="params">(Integer id, String name)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.id = id;</div><div class="line">        <span class="keyword">this</span>.name = name;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="列表中提取属性"><a href="#列表中提取属性" class="headerlink" title="列表中提取属性"></a>列表中提取属性</h2><p>涉及到的类方法：CollectionUtils.<a href="https://commons.apache.org/proper/commons-collections/apidocs/org/apache/commons/collections4/CollectionUtils.html#collect%28java.lang.Iterable,%20org.apache.commons.collections4.Transformer%29" target="_blank" rel="external">collect</a>、TransformerUtils.<a href="https://commons.apache.org/proper/commons-collections/apidocs/org/apache/commons/collections4/TransformerUtils.html#invokerTransformer%28java.lang.String%29" target="_blank" rel="external">invokerTransformer</a>。同时包含Java 8的写法，Stream.<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#collect-java.util.stream.Collector-" target="_blank" rel="external">collect</a>。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> org.apache.commons.collections4.CollectionUtils;</div><div class="line"><span class="keyword">import</span> org.apache.commons.collections4.TransformerUtils;</div><div class="line"><span class="keyword">import</span> org.apache.commons.lang3.StringUtils;</div><div class="line"> </div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"><span class="keyword">import</span> java.util.ArrayList;</div><div class="line"><span class="keyword">import</span> java.util.Arrays;</div><div class="line"><span class="keyword">import</span> java.util.Collection;</div><div class="line"><span class="keyword">import</span> java.util.List;</div><div class="line"><span class="keyword">import</span> java.util.stream.Collectors;</div><div class="line"> </div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CollectionTest</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        Hello h1 = <span class="keyword">new</span> Hello(<span class="number">1</span>, <span class="string">"Andy"</span>);</div><div class="line">        Hello h2 = <span class="keyword">new</span> Hello(<span class="number">3</span>, <span class="string">"Cell"</span>);</div><div class="line">        Hello h3 = <span class="keyword">new</span> Hello(<span class="number">2</span>, <span class="string">"Bill"</span>);</div><div class="line">        Hello h4 = <span class="keyword">new</span> Hello(<span class="number">2</span>, <span class="string">"Billy"</span>);</div><div class="line">        List&lt;Hello&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;(Arrays.asList(h1, h2, h3, h4));</div><div class="line"> </div><div class="line">        Collection&lt;String&gt; nameList1 = CollectionUtils.collect(list, TransformerUtils.&lt;Hello, String&gt;invokerTransformer(<span class="string">"getName"</span>));</div><div class="line">        List&lt;String&gt; nameList2 = list.stream().map(Hello::getName).collect(Collectors.toList());</div><div class="line">        System.out.println(StringUtils.join(nameList1));</div><div class="line">        System.out.println(StringUtils.join(nameList2));</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[Andy, Cell, Bill, Billy]</div><div class="line">[Andy, Cell, Bill, Billy]</div></pre></td></tr></table></figure>
-<h2 id="列表筛选"><a href="#列表筛选" class="headerlink" title="列表筛选"></a>列表筛选</h2><p>涉及的类方法：CollectionUtils.<a href="https://commons.apache.org/proper/commons-collections/apidocs/org/apache/commons/collections4/CollectionUtils.html#select%28java.lang.Iterable,%20org.apache.commons.collections4.Predicate%29" target="_blank" rel="external">select</a>。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">Collection&lt;Hello&gt; result1 = CollectionUtils.select(list, PredicateUtils.&lt;Hello&gt;equalPredicate(h2));</div><div class="line">System.out.println(StringUtils.join(result1));</div><div class="line"> </div><div class="line">Collection&lt;Hello&gt; result2 = CollectionUtils.select(list, <span class="keyword">new</span> Predicate&lt;Hello&gt;() &#123;</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">evaluate</span><span class="params">(Hello object)</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> object.getName().startsWith(<span class="string">"B"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;);</div><div class="line">System.out.println(StringUtils.join(result2));</div></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[Hello(id=3, name=Cell)]</div><div class="line">[Hello(id=2, name=Bill), Hello(id=2, name=Billy)]</div></pre></td></tr></table></figure>
-<h2 id="分割成多个子列表"><a href="#分割成多个子列表" class="headerlink" title="分割成多个子列表"></a>分割成多个子列表</h2><p>涉及的类方法：ListUtils.<a href="https://commons.apache.org/proper/commons-collections/apidocs/org/apache/commons/collections4/ListUtils.html#partition%28java.util.List,%20int%29" target="_blank" rel="external">partition</a></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">List&lt;List&lt;Hello&gt;&gt; subLists = ListUtils.partition(list, <span class="number">3</span>);</div><div class="line"><span class="keyword">for</span> (List&lt;Hello&gt; subList : subLists) &#123;</div><div class="line">    System.out.println(StringUtils.join(subList));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>输出：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[Hello(id=1, name=Andy), Hello(id=3, name=Cell), Hello(id=2, name=Bill)]</div><div class="line">[Hello(id=2, name=Billy)]</div></pre></td></tr></table></figure>
-<h2 id="列表排序"><a href="#列表排序" class="headerlink" title="列表排序"></a>列表排序</h2><p>包含倒序、多级排序、null处理的写法</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">Collections.sort(list, <span class="keyword">new</span> BeanComparator&lt;&gt;(<span class="string">"id"</span>));</div><div class="line">System.out.println(StringUtils.join(list));</div><div class="line"> </div><div class="line">Collections.sort(list, <span class="keyword">new</span> BeanComparator&lt;&gt;(<span class="string">"id"</span>, Comparator.reverseOrder())); <span class="comment">// 倒序</span></div><div class="line">System.out.println(StringUtils.join(list));</div><div class="line"> </div><div class="line">ComparatorChain&lt;Hello&gt; comparatorChain = <span class="keyword">new</span> ComparatorChain&lt;&gt;();</div><div class="line">comparatorChain.addComparator(<span class="keyword">new</span> BeanComparator&lt;&gt;(<span class="string">"id"</span>));</div><div class="line">comparatorChain.addComparator(<span class="keyword">new</span> BeanComparator&lt;&gt;(<span class="string">"name"</span>), <span class="keyword">true</span>); <span class="comment">// 倒序</span></div><div class="line">Collections.sort(list, comparatorChain);</div><div class="line">System.out.println(StringUtils.join(list));</div><div class="line"> </div><div class="line">list.add(<span class="keyword">new</span> Hello(<span class="keyword">null</span>, <span class="string">"Bill"</span>));</div><div class="line">Collections.sort(list, <span class="keyword">new</span> BeanComparator&lt;&gt;(<span class="string">"id"</span>, <span class="keyword">new</span> NullComparator(<span class="keyword">false</span>))); <span class="comment">// null排最前</span></div><div class="line">System.out.println(StringUtils.join(list));</div></pre></td></tr></table></figure>
-<p> 输出：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">[Hello(id=1, name=Andy), Hello(id=2, name=Bill), Hello(id=2, name=Billy), Hello(id=3, name=Cell)]</div><div class="line">[Hello(id=3, name=Cell), Hello(id=2, name=Bill), Hello(id=2, name=Billy), Hello(id=1, name=Andy)]</div><div class="line">[Hello(id=1, name=Andy), Hello(id=2, name=Billy), Hello(id=2, name=Bill), Hello(id=3, name=Cell)]</div><div class="line">[Hello(id=null, name=bill), Hello(id=1, name=Andy), Hello(id=2, name=Billy), Hello(id=2, name=Bill), Hello(id=3, name=Cell)]﻿​</div></pre></td></tr></table></figure>
-
-          
+          <p>在Java领域，最流行的的工具库就是Apache Commons和Google Guava [<a href="http://java.dzone.com/articles/github%E2%80%99s-10000-most-popular">ref</a>]。</p>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/11/apache-commons/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1094,192 +1052,19 @@
 
       
         
-          
-            <p><a href="https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29" target="_blank" rel="external">https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29</a><br><a href="http://c2.com/cgi/wiki?JavaIdioms" target="_blank" rel="external">http://c2.com/cgi/wiki?JavaIdioms</a><br><a href="http://c2.com/cgi/wiki?JavaDesignFlaws" target="_blank" rel="external">http://c2.com/cgi/wiki?JavaDesignFlaws</a> Java语言设计缺陷</p>
+          <p><a href="https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29">https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29</a><br><a href="http://c2.com/cgi/wiki?JavaIdioms">http://c2.com/cgi/wiki?JavaIdioms</a><br><a href="http://c2.com/cgi/wiki?JavaDesignFlaws">http://c2.com/cgi/wiki?JavaDesignFlaws</a> Java语言设计缺陷</p>
 <ol>
-<li>2011-06 Java Books Reading Order <a href="http://stackoverflow.com/q/6341593" target="_blank" rel="external">http://stackoverflow.com/q/6341593</a></li>
-<li>2009-03 Java书籍Top 10 <a href="http://coolshell.cn/articles/14.html" target="_blank" rel="external">http://coolshell.cn/articles/14.html</a></li>
-<li>2012-03 JVM程序员的阅读清单 <a href="http://blog.jobbole.com/15342/" target="_blank" rel="external">http://blog.jobbole.com/15342/</a></li>
+<li>2011-06 Java Books Reading Order <a href="http://stackoverflow.com/q/6341593">http://stackoverflow.com/q/6341593</a></li>
+<li>2009-03 Java书籍Top 10 <a href="http://coolshell.cn/articles/14.html">http://coolshell.cn/articles/14.html</a></li>
+<li>2012-03 JVM程序员的阅读清单 <a href="http://blog.jobbole.com/15342/">http://blog.jobbole.com/15342/</a></li>
 </ol>
-<hr>
-<h1 id="Java官方文档与书籍"><a href="#Java官方文档与书籍" class="headerlink" title="Java官方文档与书籍"></a>Java官方文档与书籍</h1><p><a href="http://docs.oracle.com/javase/8/" target="_blank" rel="external">http://docs.oracle.com/javase/8/</a><br><a href="http://docs.oracle.com/javase/tutorial/" target="_blank" rel="external">http://docs.oracle.com/javase/tutorial/</a></p>
-<p>Java Language and Virtual Machine Specifications <a href="http://docs.oracle.com/javase/specs/" target="_blank" rel="external">http://docs.oracle.com/javase/specs/</a></p>
-<p>Sun官方Addison-Wesley出版的Java Series，<a href="http://www.informit.com/imprint/series_detail.aspx?ser=334838" target="_blank" rel="external">link</a></p>
-<ol>
-<li>1996-2014，<a href="http://en.wikipedia.org/wiki/James_Gosling" target="_blank" rel="external">Gosling</a>, <a href="http://en.wikipedia.org/wiki/Bill_Joy" target="_blank" rel="external">Joy</a>, <a href="http://en.wikipedia.org/wiki/Guy_L._Steele" target="_blank" rel="external">Steele</a>, <a href="http://en.wikipedia.org/wiki/Gilad_Bracha" target="_blank" rel="external">Bracha</a>，《Java语言规范》（The Java Language Specification, <a href="http://amzn.com/0201310082" target="_blank" rel="external">2nd</a> 2000, <a href="http://amzn.com/0321246780" target="_blank" rel="external">3rd</a> 2005, <a href="http://amzn.com/013390069X" target="_blank" rel="external">Java SE 8</a> 2014），Java 7 <a href="http://docs.oracle.com/javase/specs/jls/se7/html/index.html" target="_blank" rel="external">online</a>，第3版<a href="http://book.douban.com/subject/1837615/" target="_blank" rel="external">豆瓣</a>，Java 8中文<a href="https://book.douban.com/subject/26740358/" target="_blank" rel="external">豆瓣</a></li>
-<li>1996-2013，Lindholm, Yellin, <a href="http://en.wikipedia.org/wiki/Gilad_Bracha" target="_blank" rel="external">Bracha</a>, etc，《<strong>Java虚拟机规范</strong>》（The Java Virtual Machine Specification, <a href="http://amzn.com/020163452X" target="_blank" rel="external">1st</a> 1996, <a href="http://amzn.com/0201432943" target="_blank" rel="external">2nd</a> 1999, <a href="http://www.amazon.com/Virtual-Machine-Specification-Edition-Series/dp/0133260445" target="_blank" rel="external">Java SE 7</a> 2013, <a href="http://amzn.com/013390590X" target="_blank" rel="external">Java SE 8</a> 2014），Java 7 <a href="http://docs.oracle.com/javase/specs/jvms/se7/html/" target="_blank" rel="external">online</a>，<a href="http://book.douban.com/subject/25792515/" target="_blank" rel="external">豆瓣</a></li>
-<li>1996-2005，<a href="http://en.wikipedia.org/wiki/Ken_Arnold" target="_blank" rel="external">Arnold</a>, <a href="http://en.wikipedia.org/wiki/James_Gosling" target="_blank" rel="external">Gosling</a>, etc，《Java程序设计语言》（The Java Programming Language, 1st 1996，2nd 1997，<a href="http://amzn.com/0321349806" target="_blank" rel="external">4th</a> 2005），第4版<a href="http://book.douban.com/subject/1908274/" target="_blank" rel="external">豆瓣</a>：涵盖J2SE 5.0，内容比《Java编程思想》精简，条理更清晰，覆盖面更广</li>
-<li>1998-2013，《Java教程》（The Java Tutorial: A Short Course on the Basics, <a href="http://amzn.com/0201310074" target="_blank" rel="external">2nd</a> 1998, <a href="http://amzn.com/0201703939%20" target="_blank" rel="external">3rd</a> 2001, <a href="http://amzn.com/0321334205" target="_blank" rel="external">4th</a> 2006, <a href="http://www.amazon.com/The-Java-Tutorial-Course-Edition/dp/0132761696" target="_blank" rel="external">5th</a> 2013），第4版<a href="http://book.douban.com/subject/2208538/" target="_blank" rel="external">豆瓣</a>：全书415页，涵盖Java 5.0和6.0，内容比《Java程序设计语言》简单，是官方在线指定文档</li>
-<li>1997，《Java经典问答》（The Java Faq, 1997），<a href="http://book.douban.com/subject/1244713/" target="_blank" rel="external">豆瓣</a></li>
-<li>1997.06，《Java语言编码规范》（Code Conventions for the Java Programming Language），oracle.com <a href="http://www.oracle.com/technetwork/java/index-135089.html" target="_blank" rel="external">html</a>, <a href="http://www.oracle.com/technetwork/java/codeconventions-150003.pdf" target="_blank" rel="external">pdf</a></li>
-</ol>
-<hr>
-<h1 id="Java书籍"><a href="#Java书籍" class="headerlink" title="Java书籍"></a>Java书籍</h1><ol>
-<li>1998-2006，<a href="http://en.wikipedia.org/wiki/Bruce_Eckel" target="_blank" rel="external">Bruce Eckel</a>，《Java编程思想》（<a href="http://en.wikipedia.org/wiki/Thinking_in_Java" target="_blank" rel="external">Thinking in Java</a>, <a href="http://amzn.com/0136597238" target="_blank" rel="external">1st</a> 1998, <a href="http://www.amazon.com/Thinking-Java-4th-Bruce-Eckel/dp/0131872486" target="_blank" rel="external">4th</a> 2006），<a href="http://mindview.net/Books/TIJ4" target="_blank" rel="external">home</a>，<a href="http://book.douban.com/subject/2130190/" target="_blank" rel="external">豆瓣</a>：内容有深度，但组织混乱，抓不住脉络，杂糅了Java与C++比较、设计模式等内容，2003年Jolt震撼大奖</li>
-<li>1996-2012，Cay S. Horstmann，《Java核心技术，2卷》（Core Java 2, <a href="http://dl.acm.org/citation.cfm?id=230334" target="_blank" rel="external">1st</a> 1996, <a href="http://www.informit.com/store/core-java-volume-i-fundamentals-9780132354769" target="_blank" rel="external">8th</a> 2007, <a href="http://www.amazon.com/Core-Java-I--Fundamentals-9th/dp/0137081898" target="_blank" rel="external">9th</a> 2012），<a href="http://www.horstmann.com/corejava.html" target="_blank" rel="external">home</a>，第10版卷1<a href="https://book.douban.com/subject/26880667/" target="_blank" rel="external">豆瓣</a>、卷2<a href="http://book.douban.com/subject/25841326/" target="_blank" rel="external">豆瓣</a></li>
-<li>2001、2008，<a href="http://en.wikipedia.org/wiki/Joshua_Bloch" target="_blank" rel="external">Joshua Bloch</a>，《Effective Java》，<a href="http://www.amazon.com/Effective-Java-Edition-Joshua-Bloch/dp/0321356683" target="_blank" rel="external">2nd</a> 2008，<a href="http://book.douban.com/subject/3360807/" target="_blank" rel="external">豆瓣</a>：2002年Jolt震撼大奖</li>
-<li>2005，<a href="http://en.wikipedia.org/wiki/Joshua_Bloch" target="_blank" rel="external">Joshua Bloch</a> &amp; Neal Gafter，《Java解惑》（Java Puzzlers: Traps, Pitfalls, and Corner Cases, <a href="http://www.amazon.com/Java%C2%BF-Puzzlers-Traps-Pitfalls-Corner/dp/032133678X" target="_blank" rel="external">amazon</a>），<a href="http://www.javapuzzlers.com/" target="_blank" rel="external">home</a>，<a href="http://www.ituring.com.cn/book/88" target="_blank" rel="external">图灵</a><a href="http://www.ituring.com.cn/book/88" target="_blank" rel="external">2010</a>，<a href="http://book.douban.com/subject/5362860/" target="_blank" rel="external">豆瓣</a></li>
-<li>Java语言精粹 Java: The Good Parts <a href="http://book.douban.com/subject/6516576/" target="_blank" rel="external">http://book.douban.com/subject/6516576/</a></li>
-<li>2006，Metsker，《Java设计模式》（Design Patterns in Java, <a href="http://amzn.com/0321333020" target="_blank" rel="external">amazon</a>），<a href="http://book.douban.com/subject/1972333/" target="_blank" rel="external">豆瓣</a>，修订版<a href="http://book.douban.com/subject/11629400/" target="_blank" rel="external">豆瓣</a></li>
-<li><a href="http://en.wikipedia.org/wiki/Herbert_Schildt" target="_blank" rel="external">Herbert Schildt</a>，《Java完全参考手册》（Java: The Complete Reference, <a href="http://amzn.com/0071606300" target="_blank" rel="external">8th</a> 2011），第8版<a href="http://book.douban.com/subject/19955764/" target="_blank" rel="external">豆瓣</a>，第9版<a href="http://book.douban.com/subject/26556574/" target="_blank" rel="external">豆瓣</a>：Oracle Press，全书1105页，参考手册，可读性不高，涵盖Java 7</li>
-<li><a href="http://en.wikipedia.org/wiki/Herbert_Schildt" target="_blank" rel="external">Herbert Schildt</a>，《Java编程入门教程》（Java: A Beginner’s Guide），第6版<a href="http://book.douban.com/subject/26320992/" target="_blank" rel="external">豆瓣</a></li>
-<li>2012，Sarang，《Java 7编程高级进阶》（Java Programming, <a href="http://amzn.com/007163360X" target="_blank" rel="external">amazon</a>），<a href="http://book.douban.com/subject/22226750/" target="_blank" rel="external">豆瓣</a>：Oracle Press，内容条理清晰，但<strong>深度、广度不够</strong>，Java虚拟机技术总监Pampuch作序，客户端软件的首席架构师Coward技术校审</li>
-<li>Jakarta Commons Cookbook中文版 <a href="https://book.douban.com/subject/1936665/" target="_blank" rel="external">https://book.douban.com/subject/1936665/</a></li>
-</ol>
-<p><a href="https://github.com/iluwatar/java-design-patterns" target="_blank" rel="external">https://github.com/iluwatar/java-design-patterns</a></p>
-<h1 id="Java并发编程"><a href="#Java并发编程" class="headerlink" title="Java并发编程"></a>Java并发编程</h1><ol>
-<li>2006，<a href="https://www.linkedin.com/in/briangoetz" target="_blank" rel="external">Goetz</a>, Peierls, <a href="http://en.wikipedia.org/wiki/Joshua_Bloch" target="_blank" rel="external">Joshua Bloch</a>, <a href="http://en.wikipedia.org/wiki/Doug_Lea" target="_blank" rel="external">Doug Lea</a> &amp; etc，《Java并发编程实战》（Java Concurrency in Practice, <a href="http://www.amazon.com/Java-Concurrency-Practice-Brian-Goetz/dp/0321349601" target="_blank" rel="external">amazon</a>），<a href="http://book.douban.com/subject/10484692/" target="_blank" rel="external">豆瓣</a>：top1书籍，Sun官方书籍，相对偏向理论的并发编程书籍见“多处理器编程的艺术，修订版2012”</li>
-<li>2011，Subramaniam，《Java虚拟机并发编程》（Programming Concurrency on the JVM, <a href="http://www.amazon.com/Programming-Concurrency-JVM-Mastering-Synchronization/dp/193435676X" target="_blank" rel="external">amazon</a>），<a href="http://book.douban.com/subject/24533312/" target="_blank" rel="external">豆瓣</a>：全书216页，主要讲Scala下的Akka</li>
-<li>1999，<a href="http://en.wikipedia.org/wiki/Doug_Lea" target="_blank" rel="external">Doug Lea</a>，《Java并发编程：设计原则与模式》（Concurrent Programming in Java, <a href="http://amzn.com/0201310090" target="_blank" rel="external">2nd</a> 1999），<a href="http://book.douban.com/subject/1244021/" target="_blank" rel="external">豆瓣</a>：过时</li>
-<li>2012，[西] González，《Java 7并发编程实战手册》（Java 7 Concurrency Cookbook, <a href="http://amzn.com/1849687889%20" target="_blank" rel="external">amazon</a>），<a href="http://book.douban.com/subject/25844475/" target="_blank" rel="external">豆瓣</a>：amazon评价不高，可作辅助阅读，难度低于Goetz版</li>
-</ol>
-<p>2012-12 Review : Java 7 Concurrency Cookbook，原文：<a href="http://www.mkyong.com/book-review/review-java-7-concurrency-cookbook/" target="_blank" rel="external">mkyong.com</a>，译文：<a href="http://www.importnew.com/2346.html" target="_blank" rel="external">importnew.com</a></p>
-<h1 id="Java高级内容（Java-7-amp-Java-8）"><a href="#Java高级内容（Java-7-amp-Java-8）" class="headerlink" title="Java高级内容（Java 7 &amp; Java 8）"></a>Java高级内容（Java 7 &amp; Java 8）</h1><ol>
-<li>2012，Evans &amp; Verburg，《Java程序员修炼之道》（The Well-Grounded Java Developer, <a href="http://www.amazon.com/The-Well-Grounded-Java-Developer-Programming/dp/1617290068" target="_blank" rel="external">amazon</a>），<a href="http://www.ituring.com.cn/book/1027" target="_blank" rel="external">图灵2013</a>，<a href="http://book.douban.com/subject/24841235/" target="_blank" rel="external">豆瓣</a>：全面解读Groovy、Scala在JVM上的应用</li>
-<li>2014，《Java 8实战》（Java 8 in Action, <a href="http://amzn.com/1617291994" target="_blank" rel="external">amazon</a>），<a href="https://book.douban.com/subject/26772632/" target="_blank" rel="external">豆瓣</a></li>
-<li>2014，Horstmann，《写给大忙人看的Java SE 8》（Java SE 8 for the Really Impatient, <a href="https://amzn.com/0321927761" target="_blank" rel="external">amazon</a>），<a href="http://book.douban.com/subject/26274206/" target="_blank" rel="external">豆瓣</a>：极好的全面介绍Java 8</li>
-<li>2014，《Java 8函数式编程》（Java 8 Lambdas, <a href="https://amzn.com/1449370772" target="_blank" rel="external">amazon</a>），<a href="http://book.douban.com/subject/26346017/" target="_blank" rel="external">豆瓣</a></li>
-<li>2014，Subramaniam，“Functional Programming in Java”, <a href="http://amzn.com/1937785467" target="_blank" rel="external">amazon</a>，<a href="http://book.douban.com/subject/25830739/" target="_blank" rel="external">豆瓣</a></li>
-</ol>
-<h1 id="Java虚拟机与底层书籍"><a href="#Java虚拟机与底层书籍" class="headerlink" title="Java虚拟机与底层书籍"></a>Java虚拟机与底层书籍</h1><ol>
-<li>2014，Scott Oaks，《Java性能权威指南》（Java Performance: The Definitive Guide），<a href="https://book.douban.com/subject/26740520/" target="_blank" rel="external">豆瓣</a></li>
-<li>2011，Charlie Hunt, Binu John，《Java性能优化权威指南》（Java Performance, <a href="http://www.amazon.com/Java-Performance-Charlie-Hunt/dp/0137142528" target="_blank" rel="external">amazon</a>），<a href="http://book.douban.com/subject/25828043/" target="_blank" rel="external">豆瓣</a>：第1作者是Oracle JVM性能主管工程师</li>
-<li>2000，Bill Venners，《深入Java虚拟机》（Inside the Java Virtual Machine, <a href="http://www.amazon.com/Inside-Java-2-Virtual-Machine/dp/0071350934" target="_blank" rel="external">2nd</a> 2000），<a href="http://book.douban.com/subject/1138768/" target="_blank" rel="external">豆瓣</a></li>
-<li>2011、2013，周志明，《深入理解Java虚拟机：VM高级特性与最佳实践》，<a href="http://book.douban.com/subject/24722612/" target="_blank" rel="external">豆瓣</a>：相比较陈涛版更偏向概念和理论</li>
-<li>2014，陈涛，《HotSpot实战》，<a href="http://book.douban.com/subject/25847620/" target="_blank" rel="external">豆瓣</a>：内容有大量的HotSpot源码解析</li>
-<li>2015，高翔龙，《Java虚拟机精讲》，<a href="http://book.douban.com/subject/26353219/" target="_blank" rel="external">豆瓣</a></li>
-<li>2014，《大规模Java平台虚拟化与调优》</li>
-<li>Scott Oaks, Java Performance: The Definitive Guide，<a href="http://book.douban.com/subject/25872755/" target="_blank" rel="external">豆瓣</a></li>
-<li>2015，OpenJDK cookbook，<a href="http://amzn.com/1849698406" target="_blank" rel="external">amazon</a></li>
-</ol>
-<hr>
-<h1 id="偏向Java-EE"><a href="#偏向Java-EE" class="headerlink" title="偏向Java EE"></a>偏向Java EE</h1><ol>
-<li>2004，<a href="http://en.wikipedia.org/wiki/Bruce_Tate" target="_blank" rel="external">Bruce Tate</a>，《轻快的Java》（Better, Faster, Lighter Java, <a href="http://shop.oreilly.com/product/9780596006761.do" target="_blank" rel="external">O’Reilly</a>, <a href="http://www.amazon.com/Better-Faster-Lighter-Java-Bruce/dp/0596006764" target="_blank" rel="external">amazon</a>），<a href="http://book.douban.com/subject/1911882/" target="_blank" rel="external">豆瓣</a>：2005年Jolt震撼大奖</li>
-<li>2005，<a href="http://en.wikipedia.org/wiki/Bruce_Tate" target="_blank" rel="external">Bruce Tate</a>，《超越Java：探讨程序语言的未来》（Beyond Java, <a href="http://shop.oreilly.com/product/9780596100940.do" target="_blank" rel="external">O’Reilly</a>, <a href="http://www.amazon.com/Beyond-Java-Bruce-Tate/dp/0596100949" target="_blank" rel="external">amazon</a>），<a href="http://book.douban.com/subject/2043934/" target="_blank" rel="external">豆瓣</a></li>
-<li>2010，<a href="http://en.wikipedia.org/wiki/Bruce_Tate" target="_blank" rel="external">Bruce Tate</a>，《七周七语言：理解多种编程范型》（Seven Languages in Seven Weeks, <a href="http://pragprog.com/book/btlang/seven-languages-in-seven-weeks" target="_blank" rel="external">Pragmatic</a>, <a href="http://www.amazon.com/Seven-Languages-Weeks-Programming-Programmers/dp/193435659X" target="_blank" rel="external">amazon</a>），<a href="http://book.douban.com/subject/10555435/" target="_blank" rel="external">豆瓣</a>：2011年Jolt生产力大奖</li>
-</ol>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://nullwy.me/2016/10/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="nullwy">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="nullwy's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/10/hello-world/" itemprop="url">Hello World</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-10-10T11:53:53+08:00">
-                2016-10-10
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-
-          
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2016/11/java-books/#more" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
         
       
     </div>
@@ -1361,7 +1146,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

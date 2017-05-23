@@ -92,19 +92,19 @@
 
 
 
-<meta name="description" content="javac是Java代码的编译器 [openjdk, oracle]，初学Java的时候就应该接触过。本笔记整理一些javac相关的高级用法。 javac命令行javac命令行工具，官方文档有完整的使用说明，doc。当然也可以，运行javac -help或man javac查看帮助信息。下面是经典的hello world代码： 123456package com.test.javac;public">
+<meta name="description" content="javac是Java代码的编译器 [openjdk, oracle]，初学Java的时候就应该接触过。本笔记整理一些javac相关的高级用法。">
 <meta name="keywords" content="Java,编译器,javac">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java编译器javac笔记">
 <meta property="og:url" content="http://nullwy.me/2017/04/javac-api/index.html">
 <meta property="og:site_name" content="nullwy's blog">
-<meta property="og:description" content="javac是Java代码的编译器 [openjdk, oracle]，初学Java的时候就应该接触过。本笔记整理一些javac相关的高级用法。 javac命令行javac命令行工具，官方文档有完整的使用说明，doc。当然也可以，运行javac -help或man javac查看帮助信息。下面是经典的hello world代码： 123456package com.test.javac;public">
+<meta property="og:description" content="javac是Java代码的编译器 [openjdk, oracle]，初学Java的时候就应该接触过。本笔记整理一些javac相关的高级用法。">
 <meta property="og:image" content="http://oovjaial8.bkt.clouddn.com/2017-04-24-1492606028088_5.png">
 <meta property="og:image" content="http://oovjaial8.bkt.clouddn.com/2017-04-24-javac-flow.png">
-<meta property="og:updated_time" content="2017-04-27T09:31:09.000Z">
+<meta property="og:updated_time" content="2017-05-23T14:40:59.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java编译器javac笔记">
-<meta name="twitter:description" content="javac是Java代码的编译器 [openjdk, oracle]，初学Java的时候就应该接触过。本笔记整理一些javac相关的高级用法。 javac命令行javac命令行工具，官方文档有完整的使用说明，doc。当然也可以，运行javac -help或man javac查看帮助信息。下面是经典的hello world代码： 123456package com.test.javac;public">
+<meta name="twitter:description" content="javac是Java代码的编译器 [openjdk, oracle]，初学Java的时候就应该接触过。本笔记整理一些javac相关的高级用法。">
 <meta name="twitter:image" content="http://oovjaial8.bkt.clouddn.com/2017-04-24-1492606028088_5.png">
 
 
@@ -376,10 +376,11 @@
 
       
         <p>javac是Java代码的编译器 [<a href="http://openjdk.java.net/groups/compiler/" target="_blank" rel="external">openjdk</a>, <a href="http://docs.oracle.com/javase/8/docs/technotes/guides/javac/" target="_blank" rel="external">oracle</a>]，初学Java的时候就应该接触过。本笔记整理一些javac相关的高级用法。</p>
+<a id="more"></a>
 <h1 id="javac命令行"><a href="#javac命令行" class="headerlink" title="javac命令行"></a>javac命令行</h1><p>javac命令行工具，官方文档有完整的使用说明，<a href="http://docs.oracle.com/javase/8/docs/technotes/tools/unix/javac.html" target="_blank" rel="external">doc</a>。当然也可以，运行<code>javac -help</code>或<code>man javac</code>查看帮助信息。下面是经典的<a href="https://en.wikipedia.org/wiki/%22Hello,_World!%22_program" target="_blank" rel="external">hello world</a>代码：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.test.javac;</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Hello</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        System.out.println(<span class="string">"hello world"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>编译与运行</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="meta">$</span><span class="bash"> tree   <span class="comment"># 代码目录结构</span></span></div><div class="line">.</div><div class="line">├── pom.xml</div><div class="line">└── src</div><div class="line">    └── main</div><div class="line">        ├── java</div><div class="line">        │   └── com</div><div class="line">        │       └── test</div><div class="line">        │           └── javac</div><div class="line">        │               └── Hello.java</div><div class="line">        └── resources</div><div class="line"><span class="meta">$</span><span class="bash"> mkdir -p target/classes   <span class="comment"># 创建class文件的存放目录</span></span></div><div class="line"><span class="meta">$</span><span class="bash"> javac src/main/java/com/<span class="built_in">test</span>/javac/Hello.java <span class="_">-d</span> target/classes</span></div><div class="line"><span class="meta">$</span><span class="bash"> java -cp <span class="string">"target/classes"</span> com.test.javac.Hello </span></div><div class="line">hello world</div></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="meta">$</span> tree   # 代码目录结构</div><div class="line">.</div><div class="line">├── pom.xml</div><div class="line">└── src</div><div class="line">    └── main</div><div class="line">        ├── java</div><div class="line">        │   └── com</div><div class="line">        │       └── test</div><div class="line">        │           └── javac</div><div class="line">        │               └── Hello.java</div><div class="line">        └── resources</div><div class="line"><span class="meta">$</span> mkdir -p target/classes   # 创建class文件的存放目录</div><div class="line"><span class="meta">$</span> javac src/main/java/com/test/javac/Hello.java -d target/classes</div><div class="line"><span class="meta">$</span> java -cp "target/classes" com.test.javac.Hello </div><div class="line">hello world</div></pre></td></tr></table></figure>
 <h1 id="javac相关API"><a href="#javac相关API" class="headerlink" title="javac相关API"></a>javac相关API</h1><p>除了使用命令行工具编译Java代码，JDK 6增加了规范JSR-199和JSR-296，开始还提供相关的API。Java编译器的实现代码和API的整体结构如图所示[<a href="http://openjdk.java.net/groups/compiler/doc/package-overview/index.html" target="_blank" rel="external">doc</a>]：</p>
 <p><img src="http://oovjaial8.bkt.clouddn.com/2017-04-24-1492606028088_5.png" alt="Compiler Package Overview"></p>
 <p><span style="background-color: #cbe29a">绿色</span>标注的包是官方API（Official API），即JSR-199和JSR-296，<span style="background-color: #e4e48a;">黄色</span>标注的包为（Supported API），<span style="background-color: #ccccff">紫色</span>标注的包代码全部在<code>com.sun.tools.javac.*</code>包下，为内部API（Internal API）和编译器的实现类。完整的包说明如下：</p>
@@ -567,7 +568,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>

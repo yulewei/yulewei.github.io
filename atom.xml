@@ -229,13 +229,14 @@ blockquote {
     <link href="http://nullwy.me/2017/04/javac-api/"/>
     <id>http://nullwy.me/2017/04/javac-api/</id>
     <published>2017-04-20T03:53:53.000Z</published>
-    <updated>2017-04-27T09:31:09.000Z</updated>
+    <updated>2017-05-23T14:40:59.000Z</updated>
     
     <content type="html"><![CDATA[<p>javac是Java代码的编译器 [<a href="http://openjdk.java.net/groups/compiler/" target="_blank" rel="external">openjdk</a>, <a href="http://docs.oracle.com/javase/8/docs/technotes/guides/javac/" target="_blank" rel="external">oracle</a>]，初学Java的时候就应该接触过。本笔记整理一些javac相关的高级用法。</p>
+<a id="more"></a>
 <h1 id="javac命令行"><a href="#javac命令行" class="headerlink" title="javac命令行"></a>javac命令行</h1><p>javac命令行工具，官方文档有完整的使用说明，<a href="http://docs.oracle.com/javase/8/docs/technotes/tools/unix/javac.html" target="_blank" rel="external">doc</a>。当然也可以，运行<code>javac -help</code>或<code>man javac</code>查看帮助信息。下面是经典的<a href="https://en.wikipedia.org/wiki/%22Hello,_World!%22_program" target="_blank" rel="external">hello world</a>代码：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.test.javac;</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Hello</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</div><div class="line">        System.out.println(<span class="string">"hello world"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>编译与运行</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="meta">$</span><span class="bash"> tree   <span class="comment"># 代码目录结构</span></span></div><div class="line">.</div><div class="line">├── pom.xml</div><div class="line">└── src</div><div class="line">    └── main</div><div class="line">        ├── java</div><div class="line">        │   └── com</div><div class="line">        │       └── test</div><div class="line">        │           └── javac</div><div class="line">        │               └── Hello.java</div><div class="line">        └── resources</div><div class="line"><span class="meta">$</span><span class="bash"> mkdir -p target/classes   <span class="comment"># 创建class文件的存放目录</span></span></div><div class="line"><span class="meta">$</span><span class="bash"> javac src/main/java/com/<span class="built_in">test</span>/javac/Hello.java <span class="_">-d</span> target/classes</span></div><div class="line"><span class="meta">$</span><span class="bash"> java -cp <span class="string">"target/classes"</span> com.test.javac.Hello </span></div><div class="line">hello world</div></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="meta">$</span> tree   # 代码目录结构</div><div class="line">.</div><div class="line">├── pom.xml</div><div class="line">└── src</div><div class="line">    └── main</div><div class="line">        ├── java</div><div class="line">        │   └── com</div><div class="line">        │       └── test</div><div class="line">        │           └── javac</div><div class="line">        │               └── Hello.java</div><div class="line">        └── resources</div><div class="line"><span class="meta">$</span> mkdir -p target/classes   # 创建class文件的存放目录</div><div class="line"><span class="meta">$</span> javac src/main/java/com/test/javac/Hello.java -d target/classes</div><div class="line"><span class="meta">$</span> java -cp "target/classes" com.test.javac.Hello </div><div class="line">hello world</div></pre></td></tr></table></figure>
 <h1 id="javac相关API"><a href="#javac相关API" class="headerlink" title="javac相关API"></a>javac相关API</h1><p>除了使用命令行工具编译Java代码，JDK 6增加了规范JSR-199和JSR-296，开始还提供相关的API。Java编译器的实现代码和API的整体结构如图所示[<a href="http://openjdk.java.net/groups/compiler/doc/package-overview/index.html" target="_blank" rel="external">doc</a>]：</p>
 <p><img src="http://oovjaial8.bkt.clouddn.com/2017-04-24-1492606028088_5.png" alt="Compiler Package Overview"></p>
 <p><span style="background-color: #cbe29a">绿色</span>标注的包是官方API（Official API），即JSR-199和JSR-296，<span style="background-color: #e4e48a;">黄色</span>标注的包为（Supported API），<span style="background-color: #ccccff">紫色</span>标注的包代码全部在<code>com.sun.tools.javac.*</code>包下，为内部API（Internal API）和编译器的实现类。完整的包说明如下：</p>
@@ -295,7 +296,7 @@ blockquote {
     
     <summary type="html">
     
-      &lt;p&gt;javac是Java代码的编译器 [&lt;a href=&quot;http://openjdk.java.net/groups/compiler/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;openjdk&lt;/a&gt;, &lt;a href=&quot;http://docs.ora
+      &lt;p&gt;javac是Java代码的编译器 [&lt;a href=&quot;http://openjdk.java.net/groups/compiler/&quot;&gt;openjdk&lt;/a&gt;, &lt;a href=&quot;http://docs.oracle.com/javase/8/docs/technotes/guides/javac/&quot;&gt;oracle&lt;/a&gt;]，初学Java的时候就应该接触过。本笔记整理一些javac相关的高级用法。&lt;/p&gt;
     
     </summary>
     
@@ -515,9 +516,10 @@ blockquote {
     <link href="http://nullwy.me/2016/12/mybatis-generator/"/>
     <id>http://nullwy.me/2016/12/mybatis-generator/</id>
     <published>2016-12-25T13:47:02.000Z</published>
-    <updated>2017-04-27T09:28:28.000Z</updated>
+    <updated>2017-05-23T14:40:11.000Z</updated>
     
     <content type="html"><![CDATA[<p><a href="https://en.wikipedia.org/wiki/MyBatis" target="_blank" rel="external">MyBatis</a>是流行的持久化框架，通过抽象底层的JDBC代码，在类对象和数据库列之间自动映射SQL的参数和结果，以SQL为映射的间接层，实现SQL映射器。<a href="http://www.mybatis.org/generator/" target="_blank" rel="external">MyBatis Generator</a> (MBG) 是一个Mybatis的代码生成器，内省数据库的表，然后自动生成映射表的实体类，并生成CRUD（插入，查询，更新，删除）操作的样板代码。MyBatis，之前所在的公司在用，生成器也在用。虽然生成器大大提供了开发效率，但生成的代码可读性比较低，尤其是自动生成的实体类，如下：</p>
+<a id="more"></a>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">* This field was generated by MyBatis Generator. This field corresponds to the database column author.book_id</div><div class="line">* <span class="doctag">@mbggenerated</span>  Tue Jan 19 13:37:24 CST 2016</div><div class="line">*/</div><div class="line"><span class="keyword">private</span> Integer bookId;</div></pre></td></tr></table></figure>
 <p>这些自动生成注释，没有实质性信息，其实真正有用的是，设计表时，该字段的用途，即表字段的注释。</p>
 <h1 id="addRemarkComments选项"><a href="#addRemarkComments选项" class="headerlink" title="addRemarkComments选项"></a>addRemarkComments选项</h1><p>庆幸的是，MyBatis生成器在版本1.3.3中添加了，<code>addRemarkComments</code>选项 [<a href="https://github.com/mybatis/generator/issues/23" target="_blank" rel="external">github</a>]，可以在生成的实体类中附带表字段的注释。<code>addRemarkComments</code>官方文档的介绍 [<a href="http://www.mybatis.org/generator/configreference/commentGenerator.html" target="_blank" rel="external">doc</a>]：</p>
@@ -541,7 +543,7 @@ blockquote {
     
     <summary type="html">
     
-      &lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/MyBatis&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;MyBatis&lt;/a&gt;是流行的持久化框架，通过抽象底层的JDBC代码，在类对象和数据库列之间自动映射SQL的参数和结
+      &lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/MyBatis&quot;&gt;MyBatis&lt;/a&gt;是流行的持久化框架，通过抽象底层的JDBC代码，在类对象和数据库列之间自动映射SQL的参数和结果，以SQL为映射的间接层，实现SQL映射器。&lt;a href=&quot;http://www.mybatis.org/generator/&quot;&gt;MyBatis Generator&lt;/a&gt; (MBG) 是一个Mybatis的代码生成器，内省数据库的表，然后自动生成映射表的实体类，并生成CRUD（插入，查询，更新，删除）操作的样板代码。MyBatis，之前所在的公司在用，生成器也在用。虽然生成器大大提供了开发效率，但生成的代码可读性比较低，尤其是自动生成的实体类，如下：&lt;/p&gt;
     
     </summary>
     
@@ -559,9 +561,10 @@ blockquote {
     <link href="http://nullwy.me/2016/12/java-8-stream-api/"/>
     <id>http://nullwy.me/2016/12/java-8-stream-api/</id>
     <published>2016-12-25T13:10:34.000Z</published>
-    <updated>2017-04-27T09:28:42.000Z</updated>
+    <updated>2017-05-23T14:40:16.000Z</updated>
     
     <content type="html"><![CDATA[<p>Java 8增加了函数式编程的能力，通过流（Stream）API来支持对集合的<a href="https://en.wikipedia.org/wiki/Filter_%28higher-order_function%29" target="_blank" rel="external">filter</a>/<a href="https://en.wikipedia.org/wiki/Map_%28higher-order_function%29" target="_blank" rel="external">map</a>/<a href="https://en.wikipedia.org/wiki/Fold_%28higher-order_function%29" target="_blank" rel="external">reduce</a>操作。流是Java 8中处理集合的关键抽象概念，实现声明式的集合处理方式。</p>
+<a id="more"></a>
 <h1 id="Java-8流API示例"><a href="#Java-8流API示例" class="headerlink" title="Java 8流API示例"></a>Java 8流API示例</h1><p>对集合的filter、map和reduce操作，示例代码如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 计算偶数个数</span></div><div class="line">List&lt;Integer&gt; list = Arrays.asList(<span class="number">3</span>, <span class="number">2</span>, <span class="number">12</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">11</span>, <span class="number">13</span>);</div><div class="line"><span class="keyword">long</span> count = list.stream()</div><div class="line">        .filter(x -&gt; x % <span class="number">2</span> == <span class="number">0</span>).count();</div><div class="line">System.out.println(count);</div><div class="line"></div><div class="line"><span class="comment">// 筛选出偶数列表</span></div><div class="line">List&lt;Integer&gt; evenList = list.stream()</div><div class="line">        .filter(x -&gt; x % <span class="number">2</span> == <span class="number">0</span>).collect(Collectors.toList());</div><div class="line">System.out.println(evenList);</div><div class="line"></div><div class="line"><span class="comment">// 筛选出偶数列表, 然后全部元素加1</span></div><div class="line">List&lt;Integer&gt; plusList = list.stream()</div><div class="line">        .filter(x -&gt; x % <span class="number">2</span> == <span class="number">0</span>)</div><div class="line">        .map(x -&gt; x + <span class="number">1</span>).collect(Collectors.toList());</div><div class="line">System.out.println(plusList); </div><div class="line"></div><div class="line"><span class="comment">// 全部偶数求和</span></div><div class="line"><span class="keyword">int</span> sum = list.stream()</div><div class="line">        .filter(x -&gt; x % <span class="number">2</span> == <span class="number">0</span>)</div><div class="line">        .mapToInt(Integer::intValue).sum();</div><div class="line">System.out.println(sum);</div><div class="line"></div><div class="line"><span class="comment">// 全部偶数求和</span></div><div class="line">sum = list.stream()</div><div class="line">        .filter(x -&gt; x % <span class="number">2</span> == <span class="number">0</span>)</div><div class="line">        .reduce(<span class="number">0</span>, (x, y) -&gt; x + y);</div><div class="line">System.out.println(sum);</div></pre></td></tr></table></figure>
 <h1 id="流与集合的区别"><a href="#流与集合的区别" class="headerlink" title="流与集合的区别"></a>流与集合的区别</h1><p>流（Stream）和集合（collection）有以下区别 [<a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html#package.description" target="_blank" rel="external">doc</a>]：</p>
@@ -643,7 +646,7 @@ blockquote {
     
     <summary type="html">
     
-      &lt;p&gt;Java 8增加了函数式编程的能力，通过流（Stream）API来支持对集合的&lt;a href=&quot;https://en.wikipedia.org/wiki/Filter_%28higher-order_function%29&quot; target=&quot;_blank&quot; rel=&quot;ex
+      &lt;p&gt;Java 8增加了函数式编程的能力，通过流（Stream）API来支持对集合的&lt;a href=&quot;https://en.wikipedia.org/wiki/Filter_%28higher-order_function%29&quot;&gt;filter&lt;/a&gt;/&lt;a href=&quot;https://en.wikipedia.org/wiki/Map_%28higher-order_function%29&quot;&gt;map&lt;/a&gt;/&lt;a href=&quot;https://en.wikipedia.org/wiki/Fold_%28higher-order_function%29&quot;&gt;reduce&lt;/a&gt;操作。流是Java 8中处理集合的关键抽象概念，实现声明式的集合处理方式。&lt;/p&gt;
     
     </summary>
     
@@ -659,9 +662,10 @@ blockquote {
     <link href="http://nullwy.me/2016/12/itext-pdf/"/>
     <id>http://nullwy.me/2016/12/itext-pdf/</id>
     <published>2016-12-23T14:59:09.000Z</published>
-    <updated>2017-04-27T09:31:45.000Z</updated>
+    <updated>2017-05-23T14:41:57.000Z</updated>
     
     <content type="html"><![CDATA[<p>将文档1中的书签转存到文档2﻿​：</p>
+<a id="more"></a>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">PdfReader reader1 = <span class="keyword">new</span> PdfReader(<span class="string">"in1.pdf"</span>);</div><div class="line">List&lt;HashMap&lt;String, Object&gt;&gt; bookmarks = SimpleBookmark.getBookmark(reader1);</div><div class="line"> </div><div class="line">PdfReader reader2 = <span class="keyword">new</span> PdfReader(<span class="string">"in2.pdf"</span>);</div><div class="line">PdfStamper stamper = <span class="keyword">new</span> PdfStamper(reader2, <span class="keyword">new</span> FileOutputStream(<span class="string">"out.pdf"</span>));</div><div class="line">stamper.getWriter().setOutlines(bookmarks);</div><div class="line">stamper.close();</div></pre></td></tr></table></figure>
 <p>导出书签文件﻿​：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">PdfReader reader = <span class="keyword">new</span> PdfReader(<span class="string">"in.pdf"</span>);</div><div class="line">List&lt;HashMap&lt;String, Object&gt;&gt; bookmarks = SimpleBookmark.getBookmark(reader);</div><div class="line">SimpleBookmark.exportToXML(bookmarks, <span class="keyword">new</span> FileWriter(<span class="string">"out.xml"</span>), <span class="string">"utf-8"</span>, <span class="keyword">false</span>);</div><div class="line"></div><div class="line">导入书签到文件﻿​：</div><div class="line">PdfReader reader = <span class="keyword">new</span> PdfReader(<span class="string">"in.pdf"</span>);</div><div class="line">List&lt;HashMap&lt;String, Object&gt;&gt; bookmarks = SimpleBookmark.importFromXML(<span class="keyword">new</span> FileReader(<span class="string">"out.xml"</span>));</div><div class="line">PdfStamper stamper = <span class="keyword">new</span> PdfStamper(reader, <span class="keyword">new</span> FileOutputStream(<span class="string">"out.pdf"</span>));</div><div class="line">stamper.getWriter().setOutlines(bookmarks);</div><div class="line">stamper.close();</div></pre></td></tr></table></figure>
@@ -679,7 +683,6 @@ blockquote {
     <summary type="html">
     
       &lt;p&gt;将文档1中的书签转存到文档2﻿​：&lt;/p&gt;
-&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div
     
     </summary>
     
@@ -699,9 +702,10 @@ blockquote {
     <link href="http://nullwy.me/2016/12/mysql-5.7-json/"/>
     <id>http://nullwy.me/2016/12/mysql-5.7-json/</id>
     <published>2016-12-19T19:18:31.000Z</published>
-    <updated>2017-04-27T09:29:11.000Z</updated>
+    <updated>2017-05-23T14:40:26.000Z</updated>
     
     <content type="html"><![CDATA[<p>MySQL在5.7.8开始提供的对json的原生支持[<a href="http://dev.mysql.com/doc/refman/5.7/en/mysql-nutshell.html" target="_blank" rel="external">doc</a>]，本文是对MySQL的json类型的用法的简单整理。</p>
+<a id="more"></a>
 <h1 id="JSON函数完整列表"><a href="#JSON函数完整列表" class="headerlink" title="JSON函数完整列表"></a>JSON函数完整列表</h1><p>MySQL官方列出json相关的函数，完整列表如下[<a href="https://dev.mysql.com/doc/refman/5.7/en/json-function-reference.html" target="_blank" rel="external">doc</a>]：</p>
 <table>
 <thead>
@@ -865,7 +869,7 @@ blockquote {
     
     <summary type="html">
     
-      &lt;p&gt;MySQL在5.7.8开始提供的对json的原生支持[&lt;a href=&quot;http://dev.mysql.com/doc/refman/5.7/en/mysql-nutshell.html&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;doc&lt;/a&gt;]，本
+      &lt;p&gt;MySQL在5.7.8开始提供的对json的原生支持[&lt;a href=&quot;http://dev.mysql.com/doc/refman/5.7/en/mysql-nutshell.html&quot;&gt;doc&lt;/a&gt;]，本文是对MySQL的json类型的用法的简单整理。&lt;/p&gt;
     
     </summary>
     
@@ -1100,9 +1104,10 @@ blockquote {
     <link href="http://nullwy.me/2016/11/apache-commons/"/>
     <id>http://nullwy.me/2016/11/apache-commons/</id>
     <published>2016-11-26T19:17:32.000Z</published>
-    <updated>2017-04-27T09:30:25.000Z</updated>
+    <updated>2017-05-23T14:42:29.000Z</updated>
     
     <content type="html"><![CDATA[<p>在Java领域，最流行的的工具库就是Apache Commons和Google Guava [<a href="http://java.dzone.com/articles/github%E2%80%99s-10000-most-popular" target="_blank" rel="external">ref</a>]。</p>
+<a id="more"></a>
 <p>Apache Commons，<a href="http://en.wikipedia.org/wiki/Apache_Commons" target="_blank" rel="external">wiki</a>，<a href="http://commons.apache.org/" target="_blank" rel="external">commons.apache.org</a>：Commons包含各种各样的子项目，其中比较流行的有IO, Lang, Logging, <a href="https://commons.apache.org/proper/commons-codec/" target="_blank" rel="external">Codec</a>, Collections, dbcp等[<a href="http://java.dzone.com/articles/github%E2%80%99s-10000-most-popular" target="_blank" rel="external">ref</a>]</p>
 <ol>
 <li>Commons IO，<a href="http://commons.apache.org/proper/commons-io/" target="_blank" rel="external">home</a>，<a href="http://commons.apache.org/proper/commons-io/description.html" target="_blank" rel="external">guide</a>，<a href="https://github.com/apache/commons-io" target="_blank" rel="external">github</a>，<a href="http://mvnrepository.com/artifact/commons-io/commons-io" target="_blank" rel="external">mvn</a>，<a href="https://javadoc.io/doc/commons-io/commons-io" target="_blank" rel="external">javadoc</a>：Commons-IO contains <a href="http://commons.apache.org/proper/commons-io/description.html#Utility_classes" target="_blank" rel="external">utility classes</a> (IOUtils, <a href="http://commons.apache.org/proper/commons-io/description.html#FileUtils" target="_blank" rel="external">FileUtils</a>, FilenameUtils, FileSystemUtils), <a href="http://commons.apache.org/proper/commons-io/description.html#Endian_classes" target="_blank" rel="external">endian classes</a> (EndianUtils), <a href="http://commons.apache.org/proper/commons-io/description.html#Line_iterator" target="_blank" rel="external">line iterator</a>, <a href="http://commons.apache.org/proper/commons-io/description.html#File_filters" target="_blank" rel="external">file filters</a> (IOFileFilter), <a href="http://commons.apache.org/proper/commons-io/description.html#File_comparators" target="_blank" rel="external">file comparators</a> and <a href="http://commons.apache.org/proper/commons-io/description.html#Streams" target="_blank" rel="external">stream implementations</a>.</li>
@@ -1153,7 +1158,7 @@ blockquote {
     
     <summary type="html">
     
-      &lt;p&gt;在Java领域，最流行的的工具库就是Apache Commons和Google Guava [&lt;a href=&quot;http://java.dzone.com/articles/github%E2%80%99s-10000-most-popular&quot; target=&quot;_blan
+      &lt;p&gt;在Java领域，最流行的的工具库就是Apache Commons和Google Guava [&lt;a href=&quot;http://java.dzone.com/articles/github%E2%80%99s-10000-most-popular&quot;&gt;ref&lt;/a&gt;]。&lt;/p&gt;
     
     </summary>
     
@@ -1374,7 +1379,7 @@ blockquote {
     <link href="http://nullwy.me/2016/11/java-books/"/>
     <id>http://nullwy.me/2016/11/java-books/</id>
     <published>2016-11-19T17:47:08.000Z</published>
-    <updated>2017-04-27T09:30:47.000Z</updated>
+    <updated>2017-05-23T14:43:35.000Z</updated>
     
     <content type="html"><![CDATA[<p><a href="https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29" target="_blank" rel="external">https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29</a><br><a href="http://c2.com/cgi/wiki?JavaIdioms" target="_blank" rel="external">http://c2.com/cgi/wiki?JavaIdioms</a><br><a href="http://c2.com/cgi/wiki?JavaDesignFlaws" target="_blank" rel="external">http://c2.com/cgi/wiki?JavaDesignFlaws</a> Java语言设计缺陷</p>
 <ol>
@@ -1382,6 +1387,7 @@ blockquote {
 <li>2009-03 Java书籍Top 10 <a href="http://coolshell.cn/articles/14.html" target="_blank" rel="external">http://coolshell.cn/articles/14.html</a></li>
 <li>2012-03 JVM程序员的阅读清单 <a href="http://blog.jobbole.com/15342/" target="_blank" rel="external">http://blog.jobbole.com/15342/</a></li>
 </ol>
+<a id="more"></a>
 <hr>
 <h1 id="Java官方文档与书籍"><a href="#Java官方文档与书籍" class="headerlink" title="Java官方文档与书籍"></a>Java官方文档与书籍</h1><p><a href="http://docs.oracle.com/javase/8/" target="_blank" rel="external">http://docs.oracle.com/javase/8/</a><br><a href="http://docs.oracle.com/javase/tutorial/" target="_blank" rel="external">http://docs.oracle.com/javase/tutorial/</a></p>
 <p>Java Language and Virtual Machine Specifications <a href="http://docs.oracle.com/javase/specs/" target="_blank" rel="external">http://docs.oracle.com/javase/specs/</a></p>
@@ -1443,7 +1449,12 @@ blockquote {
     
     <summary type="html">
     
-      &lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://en.wikipedia.org/wik
+      &lt;p&gt;&lt;a href=&quot;https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29&quot;&gt;https://en.wikipedia.org/wiki/Template:Java_%28software_platform%29&lt;/a&gt;&lt;br&gt;&lt;a href=&quot;http://c2.com/cgi/wiki?JavaIdioms&quot;&gt;http://c2.com/cgi/wiki?JavaIdioms&lt;/a&gt;&lt;br&gt;&lt;a href=&quot;http://c2.com/cgi/wiki?JavaDesignFlaws&quot;&gt;http://c2.com/cgi/wiki?JavaDesignFlaws&lt;/a&gt; Java语言设计缺陷&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;2011-06 Java Books Reading Order &lt;a href=&quot;http://stackoverflow.com/q/6341593&quot;&gt;http://stackoverflow.com/q/6341593&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;2009-03 Java书籍Top 10 &lt;a href=&quot;http://coolshell.cn/articles/14.html&quot;&gt;http://coolshell.cn/articles/14.html&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;2012-03 JVM程序员的阅读清单 &lt;a href=&quot;http://blog.jobbole.com/15342/&quot;&gt;http://blog.jobbole.com/15342/&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
     
     </summary>
     
@@ -1453,33 +1464,6 @@ blockquote {
       <category term="Java" scheme="http://nullwy.me/tags/Java/"/>
     
       <category term="书籍" scheme="http://nullwy.me/tags/%E4%B9%A6%E7%B1%8D/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="http://nullwy.me/2016/10/hello-world/"/>
-    <id>http://nullwy.me/2016/10/hello-world/</id>
-    <published>2016-10-10T03:53:53.000Z</published>
-    <updated>2017-04-24T18:36:47.000Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
-    
-    </summary>
-    
     
   </entry>
   
