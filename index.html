@@ -363,6 +363,7 @@
       
         
           <p>本文整理 Java 并发框架 Executor 的用法，并对 JDK 相关的实现源码作简单分析。</p>
+<h1 id="任务与线程池"><a href="#任务与线程池" class="headerlink" title="任务与线程池"></a>任务与线程池</h1><p>Executor 框架的 javadoc 描述如下 [ <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/package-summary.html#package_description">ref1</a> <a href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html#package.description">ref2</a> ]</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/05/java-executor/#more" rel="contents">
@@ -501,6 +502,7 @@
       
         
           <p>本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。</p>
+<h1 id="Java-8-的新特性"><a href="#Java-8-的新特性" class="headerlink" title="Java 8 的新特性"></a>Java 8 的新特性</h1><p>翻阅 Java 8 的<a href="http://openjdk.java.net/projects/jdk8/features">新特性</a>，可以看到有这么一条“<a href="http://openjdk.java.net/jeps/118">JEP 118</a>: Access to Parameter Names at Runtime”。这个特性就是为了能运行时获取参数名新加的。这个 <a href="https://en.wikipedia.org/wiki/JDK_Enhancement_Proposal">JEP</a> 只是功能增强的提案，并没有最终实现的 JDK 相关的 API 的介绍。查看“<a href="http://docs.oracle.com/javase/8/docs/technotes/guides/reflection/enhancements.html">Enhancements to the Reflection API</a>” 会看到如下介绍：</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/05/java-method-parameter/#more" rel="contents">
@@ -639,6 +641,7 @@
       
         
           <p>javac是Java代码的编译器 [<a href="http://openjdk.java.net/groups/compiler/">openjdk</a>, <a href="http://docs.oracle.com/javase/8/docs/technotes/guides/javac/">oracle</a>]，初学Java的时候就应该接触过。本笔记整理一些javac相关的高级用法。</p>
+<h1 id="javac命令行"><a href="#javac命令行" class="headerlink" title="javac命令行"></a>javac命令行</h1><p>javac命令行工具，官方文档有完整的使用说明，<a href="http://docs.oracle.com/javase/8/docs/technotes/tools/unix/javac.html">doc</a>。当然也可以，运行<code>javac -help</code>或<code>man javac</code>查看帮助信息。下面是经典的<a href="https://en.wikipedia.org/wiki/%22Hello,_World!%22_program">hello world</a>代码：</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/04/javac-api/#more" rel="contents">
@@ -777,6 +780,7 @@
       
         
           <p>文本整理MySQL字段类型的常见问题和用法。</p>
+<h1 id="数值类型"><a href="#数值类型" class="headerlink" title="数值类型"></a>数值类型</h1><h2 id="int和int-3"><a href="#int和int-3" class="headerlink" title="int和int(3)"></a>int和int(3)</h2><p>新手在定义整数字段时，常常想当然通过，如<code>int(3)</code>，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用<code>tinyint</code>（1个字节）、<code>smallint</code>（2个字节）、<code>mediumint</code>（3个字节）、<code>int</code>（4个字节）或<code>bigint</code>（8个字节）。MySQL的相关文档如下[<a href="http://dev.mysql.com/doc/refman/5.7/en/numeric-type-attributes.html">doc</a>]：</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/01/mysql-data-types/#more" rel="contents">
@@ -1329,6 +1333,7 @@
       
         
           <p>MySQL在5.7.8开始提供的对json的原生支持[<a href="http://dev.mysql.com/doc/refman/5.7/en/mysql-nutshell.html">doc</a>]，本文是对MySQL的json类型的用法的简单整理。</p>
+<h1 id="JSON函数完整列表"><a href="#JSON函数完整列表" class="headerlink" title="JSON函数完整列表"></a>JSON函数完整列表</h1><p>MySQL官方列出json相关的函数，完整列表如下[<a href="https://dev.mysql.com/doc/refman/5.7/en/json-function-reference.html">doc</a>]：</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2016/12/mysql-5.7-json/#more" rel="contents">

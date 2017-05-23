@@ -92,20 +92,20 @@
 
 
 
-<meta name="description" content="本文整理 Java 并发框架 Executor 的用法，并对 JDK 相关的实现源码作简单分析。">
+<meta name="description" content="本文整理 Java 并发框架 Executor 的用法，并对 JDK 相关的实现源码作简单分析。 任务与线程池Executor 框架的 javadoc 描述如下 [ ref1 ref2 ]">
 <meta name="keywords" content="Java,并发">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java Executor 框架笔记">
 <meta property="og:url" content="http://nullwy.me/2017/05/java-executor/index.html">
 <meta property="og:site_name" content="nullwy's blog">
-<meta property="og:description" content="本文整理 Java 并发框架 Executor 的用法，并对 JDK 相关的实现源码作简单分析。">
+<meta property="og:description" content="本文整理 Java 并发框架 Executor 的用法，并对 JDK 相关的实现源码作简单分析。 任务与线程池Executor 框架的 javadoc 描述如下 [ ref1 ref2 ]">
 <meta property="og:image" content="http://oovjaial8.bkt.clouddn.com/2017-05-21-future.png">
 <meta property="og:image" content="http://oovjaial8.bkt.clouddn.com/2017-05-21-executor.png">
 <meta property="og:image" content="http://nullwy.me/media/task.png">
-<meta property="og:updated_time" content="2017-05-23T13:09:31.000Z">
+<meta property="og:updated_time" content="2017-05-23T14:56:20.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java Executor 框架笔记">
-<meta name="twitter:description" content="本文整理 Java 并发框架 Executor 的用法，并对 JDK 相关的实现源码作简单分析。">
+<meta name="twitter:description" content="本文整理 Java 并发框架 Executor 的用法，并对 JDK 相关的实现源码作简单分析。 任务与线程池Executor 框架的 javadoc 描述如下 [ ref1 ref2 ]">
 <meta name="twitter:image" content="http://oovjaial8.bkt.clouddn.com/2017-05-21-future.png">
 
 
@@ -377,8 +377,9 @@
 
       
         <p>本文整理 Java 并发框架 Executor 的用法，并对 JDK 相关的实现源码作简单分析。</p>
+<h1 id="任务与线程池"><a href="#任务与线程池" class="headerlink" title="任务与线程池"></a>任务与线程池</h1><p>Executor 框架的 javadoc 描述如下 [ <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/package-summary.html#package_description" target="_blank" rel="external">ref1</a> <a href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html#package.description" target="_blank" rel="external">ref2</a> ]</p>
 <a id="more"></a>
-<h1 id="任务与线程池"><a href="#任务与线程池" class="headerlink" title="任务与线程池"></a>任务与线程池</h1><p>Executor 框架的 javadoc 描述如下 [ <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/package-summary.html#package_description" target="_blank" rel="external">ref1</a> <a href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html#package.description" target="_blank" rel="external">ref2</a> ]<br>接口：</p>
+<p>接口：</p>
 <ul>
 <li><a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Executor.html" target="_blank" rel="external">Executor</a> 是一个简单的标准化接口，用于定义类似于线程的自定义子系统，包括线程池、异步 IO 和轻量级任务框架。根据所使用的具体 Executor 类的不同，可能在新创建的线程中，现有的任务执行线程中，或者调用 execute() 的线程中执行任务，并且可能顺序或并发执行。</li>
 <li><a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ExecutorService.html" target="_blank" rel="external">ExecutorService</a> 提供了多个完整的异步任务执行框架。ExecutorService 管理任务的排队和安排，并允许受控制的关闭。<a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ScheduledExecutorService.html" target="_blank" rel="external">ScheduledExecutorService</a> 子接口及相关的接口添加了对延迟的和定期任务执行的支持。ExecutorService 提供了安排异步执行的方法，可执行由 <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Callable.html" target="_blank" rel="external">Callable</a> 表示的任何函数，结果类似于 Runnable。</li>

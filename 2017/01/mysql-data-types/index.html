@@ -92,17 +92,17 @@
 
 
 
-<meta name="description" content="文本整理MySQL字段类型的常见问题和用法。">
+<meta name="description" content="文本整理MySQL字段类型的常见问题和用法。 数值类型int和int(3)新手在定义整数字段时，常常想当然通过，如int(3)，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用tinyint（1个字节）、smallint（2个字节）、mediumint（3个字节）、int（4个字节）或bigint（8个字节）。MySQL的相关文档如下[doc]：">
 <meta name="keywords" content="MySQL,数据库">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL数据库字段类型杂记">
 <meta property="og:url" content="http://nullwy.me/2017/01/mysql-data-types/index.html">
 <meta property="og:site_name" content="nullwy's blog">
-<meta property="og:description" content="文本整理MySQL字段类型的常见问题和用法。">
-<meta property="og:updated_time" content="2017-04-27T09:27:35.000Z">
+<meta property="og:description" content="文本整理MySQL字段类型的常见问题和用法。 数值类型int和int(3)新手在定义整数字段时，常常想当然通过，如int(3)，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用tinyint（1个字节）、smallint（2个字节）、mediumint（3个字节）、int（4个字节）或bigint（8个字节）。MySQL的相关文档如下[doc]：">
+<meta property="og:updated_time" content="2017-05-23T14:56:50.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL数据库字段类型杂记">
-<meta name="twitter:description" content="文本整理MySQL字段类型的常见问题和用法。">
+<meta name="twitter:description" content="文本整理MySQL字段类型的常见问题和用法。 数值类型int和int(3)新手在定义整数字段时，常常想当然通过，如int(3)，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用tinyint（1个字节）、smallint（2个字节）、mediumint（3个字节）、int（4个字节）或bigint（8个字节）。MySQL的相关文档如下[doc]：">
 
 
 
@@ -373,8 +373,8 @@
 
       
         <p>文本整理MySQL字段类型的常见问题和用法。</p>
-<a id="more"></a>
 <h1 id="数值类型"><a href="#数值类型" class="headerlink" title="数值类型"></a>数值类型</h1><h2 id="int和int-3"><a href="#int和int-3" class="headerlink" title="int和int(3)"></a>int和int(3)</h2><p>新手在定义整数字段时，常常想当然通过，如<code>int(3)</code>，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用<code>tinyint</code>（1个字节）、<code>smallint</code>（2个字节）、<code>mediumint</code>（3个字节）、<code>int</code>（4个字节）或<code>bigint</code>（8个字节）。MySQL的相关文档如下[<a href="http://dev.mysql.com/doc/refman/5.7/en/numeric-type-attributes.html" target="_blank" rel="external">doc</a>]：</p>
+<a id="more"></a>
 <blockquote>
 <p>MySQL supports an extension for optionally specifying the <em>display width</em> of integer data types in parentheses following the base keyword for the type. For example, <a href="http://dev.mysql.com/doc/refman/5.7/en/integer-types.html" target="_blank" rel="external">INT(4)</a> specifies an <a href="http://dev.mysql.com/doc/refman/5.7/en/integer-types.html" target="_blank" rel="external">INT</a> with a display width of four digits.</p>
 <p>The display width does <em>not</em> constrain the range of values that can be stored in the column. Nor does it prevent values wider than the column display width from being displayed correctly. For example, a column specified as <a href="http://dev.mysql.com/doc/refman/5.7/en/integer-types.html" target="_blank" rel="external">SMALLINT(3)</a> has the usual <a href="http://dev.mysql.com/doc/refman/5.7/en/integer-types.html" target="_blank" rel="external">SMALLINT</a> range of <code>-32768</code> to <code>32767</code>, and values outside the range permitted by three digits are displayed in full using more than three digits.</p>

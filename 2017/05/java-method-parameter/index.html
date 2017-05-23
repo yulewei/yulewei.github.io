@@ -92,18 +92,18 @@
 
 
 
-<meta name="description" content="本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。">
+<meta name="description" content="本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。 Java 8 的新特性翻阅 Java 8 的新特性，可以看到有这么一条“JEP 118: Access to Parameter Names at Runtime”。这个特性就是为了能运行时获取参数名新加的。这个 JEP 只是功能增强的提案，并没有最终实现的 JDK 相关的 API 的介绍">
 <meta name="keywords" content="Java,字节码">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java 运行时获取方法参数名">
 <meta property="og:url" content="http://nullwy.me/2017/05/java-method-parameter/index.html">
 <meta property="og:site_name" content="nullwy's blog">
-<meta property="og:description" content="本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。">
+<meta property="og:description" content="本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。 Java 8 的新特性翻阅 Java 8 的新特性，可以看到有这么一条“JEP 118: Access to Parameter Names at Runtime”。这个特性就是为了能运行时获取参数名新加的。这个 JEP 只是功能增强的提案，并没有最终实现的 JDK 相关的 API 的介绍">
 <meta property="og:image" content="http://oovjaial8.bkt.clouddn.com/2017-05-06-Jietu20170506-174601.png">
-<meta property="og:updated_time" content="2017-05-07T17:46:05.000Z">
+<meta property="og:updated_time" content="2017-05-23T14:55:57.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java 运行时获取方法参数名">
-<meta name="twitter:description" content="本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。">
+<meta name="twitter:description" content="本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。 Java 8 的新特性翻阅 Java 8 的新特性，可以看到有这么一条“JEP 118: Access to Parameter Names at Runtime”。这个特性就是为了能运行时获取参数名新加的。这个 JEP 只是功能增强的提案，并没有最终实现的 JDK 相关的 API 的介绍">
 <meta name="twitter:image" content="http://oovjaial8.bkt.clouddn.com/2017-05-06-Jietu20170506-174601.png">
 
 
@@ -375,8 +375,8 @@
 
       
         <p>本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。</p>
-<a id="more"></a>
 <h1 id="Java-8-的新特性"><a href="#Java-8-的新特性" class="headerlink" title="Java 8 的新特性"></a>Java 8 的新特性</h1><p>翻阅 Java 8 的<a href="http://openjdk.java.net/projects/jdk8/features" target="_blank" rel="external">新特性</a>，可以看到有这么一条“<a href="http://openjdk.java.net/jeps/118" target="_blank" rel="external">JEP 118</a>: Access to Parameter Names at Runtime”。这个特性就是为了能运行时获取参数名新加的。这个 <a href="https://en.wikipedia.org/wiki/JDK_Enhancement_Proposal" target="_blank" rel="external">JEP</a> 只是功能增强的提案，并没有最终实现的 JDK 相关的 API 的介绍。查看“<a href="http://docs.oracle.com/javase/8/docs/technotes/guides/reflection/enhancements.html" target="_blank" rel="external">Enhancements to the Reflection API</a>” 会看到如下介绍：</p>
+<a id="more"></a>
 <blockquote>
 <p><strong>Enhancements in Java SE 8</strong><br>Method Parameter Reflection: You can obtain the names of the formal parameters of any method or constructor with the method <a href="http://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Executable.html#getParameters--" target="_blank" rel="external">java.lang.reflect.Executable.getParameters</a>. However, <code>.class</code> files do not store formal parameter names by default. To store formal parameter names in a particular <code>.class</code> file, and thus enable the Reflection API to retrieve formal parameter names, compile the source file with the <code>-parameters</code> option of the <code>javac</code> compiler.</p>
 </blockquote>
