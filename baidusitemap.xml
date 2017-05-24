@@ -3,6 +3,28 @@
 
 
     
+  <url>
+    <loc>http://nullwy.me/2017/05/java-executor/</loc>
+    <lastmod>2017-05-24T14:29:52.000Z</lastmod>
+    <data>
+        <display>
+        <title>Java Executor 框架笔记</title>
+        <pubTime>2017-05-23T07:09:51.000Z</pubTime>
+        
+        <tag>Java</tag>
+         
+        <tag>并发</tag>
+         
+         
+           
+             
+              <breadCrumb title="Java" url="http://nullwy.me/categories/Java/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
     
     
   <url>
@@ -89,28 +111,6 @@
            
              
               <breadCrumb title="数据库" url="http://nullwy.me/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://nullwy.me/2017/05/java-executor/</loc>
-    <lastmod>2017-05-23T14:56:20.000Z</lastmod>
-    <data>
-        <display>
-        <title>Java Executor 框架笔记</title>
-        <pubTime>2017-05-23T07:09:51.000Z</pubTime>
-        
-        <tag>Java</tag>
-         
-        <tag>并发</tag>
-         
-         
-           
-             
-              <breadCrumb title="Java" url="http://nullwy.me/categories/Java/"/>
           
         </display>
     </data>

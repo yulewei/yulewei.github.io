@@ -362,8 +362,8 @@
 
       
         
-          <p>本文整理 Java 并发框架 Executor 的用法，并对 JDK 相关的实现源码作简单分析。</p>
-<h1 id="任务与线程池"><a href="#任务与线程池" class="headerlink" title="任务与线程池"></a>任务与线程池</h1><p>Executor 框架的 javadoc 描述如下 [ <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/package-summary.html#package_description">ref1</a> <a href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html#package.description">ref2</a> ]</p>
+          <p>本文整理 Java 并发框架 Executor 的用法，并对结合 JDK 相关的实现源码作简单分析。</p>
+<h1 id="任务与线程池"><a href="#任务与线程池" class="headerlink" title="任务与线程池"></a>任务与线程池</h1><p>先来看下 Executor 框架的 javadoc 描述 [ <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/package-summary.html#package_description">ref1</a> <a href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html#package.description">ref2</a> ]</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/05/java-executor/#more" rel="contents">
@@ -1920,6 +1920,28 @@
   
 
   
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
 
   
 
