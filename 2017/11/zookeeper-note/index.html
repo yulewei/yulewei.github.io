@@ -92,21 +92,21 @@
 
 
 
-<meta name="description" content="ZooKeeper 介绍ZooKeeper（wiki，github，mvn） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ ref ]。">
+<meta name="description" content="ZooKeeper 介绍ZooKeeper（wiki，github，mvn） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ doc ]。">
 <meta name="keywords" content="ZooKeeper,分布式">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ZooKeeper 学习笔记">
 <meta property="og:url" content="http://nullwy.me/2017/11/zookeeper-note/index.html">
 <meta property="og:site_name" content="nullwy's blog">
-<meta property="og:description" content="ZooKeeper 介绍ZooKeeper（wiki，github，mvn） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ ref ]。">
+<meta property="og:description" content="ZooKeeper 介绍ZooKeeper（wiki，github，mvn） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ doc ]。">
 <meta property="og:image" content="http://nullwy.me/media/zookeeper-service.png">
 <meta property="og:image" content="http://nullwy.me/media/zookeeper-read-write.png">
 <meta property="og:image" content="http://nullwy.me/media/zk-data-model.jpg">
 <meta property="og:image" content="http://nullwy.me/media/ZooInspector.png">
-<meta property="og:updated_time" content="2018-01-20T09:42:24.000Z">
+<meta property="og:updated_time" content="2018-01-20T09:46:18.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ZooKeeper 学习笔记">
-<meta name="twitter:description" content="ZooKeeper 介绍ZooKeeper（wiki，github，mvn） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ ref ]。">
+<meta name="twitter:description" content="ZooKeeper 介绍ZooKeeper（wiki，github，mvn） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ doc ]。">
 <meta name="twitter:image" content="http://nullwy.me/media/zookeeper-service.png">
 
 
@@ -389,7 +389,7 @@
       
 
       
-        <h1 id="ZooKeeper-介绍"><a href="#ZooKeeper-介绍" class="headerlink" title="ZooKeeper 介绍"></a>ZooKeeper 介绍</h1><p>ZooKeeper（<a href="https://en.wikipedia.org/wiki/Apache_ZooKeeper" target="_blank" rel="external">wiki</a>，<a href="https://github.com/apache/zookeeper" target="_blank" rel="external">github</a>，<a href="http://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper" target="_blank" rel="external">mvn</a>） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ <a href="http://zookeeper.apache.org/doc/current/zookeeperOver.html" target="_blank" rel="external">ref</a> ]。</p>
+        <h1 id="ZooKeeper-介绍"><a href="#ZooKeeper-介绍" class="headerlink" title="ZooKeeper 介绍"></a>ZooKeeper 介绍</h1><p>ZooKeeper（<a href="https://en.wikipedia.org/wiki/Apache_ZooKeeper" target="_blank" rel="external">wiki</a>，<a href="https://github.com/apache/zookeeper" target="_blank" rel="external">github</a>，<a href="http://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper" target="_blank" rel="external">mvn</a>） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ <a href="http://zookeeper.apache.org/doc/current/zookeeperOver.html" target="_blank" rel="external">doc</a> ]。</p>
 <a id="more"></a>
 <p>2006 年 Google 在 OSDI 发表关于 <a href="https://academic.microsoft.com/#/detail/2624304035" target="_blank" rel="external">Bigtable</a> 和 <a href="https://academic.microsoft.com/#/detail/1992479210" target="_blank" rel="external">Chubby</a> 的两篇会议论文，之后再在 2007 年 PODC 会议上发表了论文“<a href="https://academic.microsoft.com/#/detail/2143149536" target="_blank" rel="external">Paxos Made Live</a>”，介绍 Chubby 底层实现的共识算法 Multi-Paxos。受 Chubby 的影响，来自 Yahoo 研究院的 Benjamin Reed 和 Flavio Junqueira 等人开发了被业界成为开源版的 Chubby 的 ZooKeeper（内部实现事实上稍有不同 [ <a href="https://zhuanlan.zhihu.com/p/30856272" target="_blank" rel="external">ref</a> ]）。重要的时间线如下：</p>
 <ul>
