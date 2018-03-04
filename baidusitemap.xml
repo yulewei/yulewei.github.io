@@ -4,6 +4,38 @@
 
     
   <url>
+    <loc>http://nullwy.me/2018/01/java-ffi/</loc>
+    <lastmod>2018-03-04T07:07:49.000Z</lastmod>
+    <data>
+        <display>
+        <title>Java 外部函数接口：JNI, JNA, JNR</title>
+        <pubTime>2018-01-24T08:09:51.000Z</pubTime>
+        
+        <tag>Java</tag>
+         
+        <tag>JNI</tag>
+         
+        <tag>JNA</tag>
+         
+        <tag>JNR</tag>
+         
+        <tag>FFI</tag>
+         
+        <tag>Pyhon</tag>
+         
+        <tag>Ruby</tag>
+         
+         
+           
+             
+              <breadCrumb title="Java" url="http://nullwy.me/categories/Java/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://nullwy.me/2018/01/stack-frame-calling-convention/</loc>
     <lastmod>2018-03-04T07:05:59.000Z</lastmod>
     <data>
@@ -44,38 +76,6 @@
         <tag>HotSpot</tag>
          
         <tag>cmake</tag>
-         
-         
-           
-             
-              <breadCrumb title="Java" url="http://nullwy.me/categories/Java/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://nullwy.me/2018/01/java-ffi/</loc>
-    <lastmod>2018-03-04T06:22:53.000Z</lastmod>
-    <data>
-        <display>
-        <title>Java 外部函数接口：JNI, JNA, JNR</title>
-        <pubTime>2018-01-24T08:09:51.000Z</pubTime>
-        
-        <tag>Java</tag>
-         
-        <tag>JNI</tag>
-         
-        <tag>JNA</tag>
-         
-        <tag>JNR</tag>
-         
-        <tag>FFI</tag>
-         
-        <tag>Pyhon</tag>
-         
-        <tag>Ruby</tag>
          
          
            

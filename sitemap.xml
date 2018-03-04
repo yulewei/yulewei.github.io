@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://nullwy.me/2018/01/java-ffi/</loc>
+    
+    <lastmod>2018-03-04T07:07:49.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://nullwy.me/2018/01/stack-frame-calling-convention/</loc>
     
     <lastmod>2018-03-04T07:05:59.000Z</lastmod>
@@ -12,13 +19,6 @@
     <loc>http://nullwy.me/2018/02/build-debug-openjdk/</loc>
     
     <lastmod>2018-03-04T06:56:30.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2018/01/java-ffi/</loc>
-    
-    <lastmod>2018-03-04T06:22:53.000Z</lastmod>
     
   </url>
   
