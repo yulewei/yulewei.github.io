@@ -1,0 +1,979 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="OpenJDK,HotSpot,cmake," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.png?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="编译 OpenJDK关于编译 OpenJDK 官方文档有很好的介绍，http://openjdk.java.net/groups/build/，汇总了 JDK 6, JDK 7, JDK 8, JDK 9 的 build OpenJDK 的 README 文件。编译 JDK 8 需要 Xcode 4，现在 Xcode 版本已远高于 4 了，前人尝试编译发现有很多坑 [ doc, blog ]，所以">
+<meta name="keywords" content="OpenJDK,HotSpot,cmake">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编译与调试 OpenJDK">
+<meta property="og:url" content="http://nullwy.me/2018/02/build-debug-openjdk/index.html">
+<meta property="og:site_name" content="nullwy's blog">
+<meta property="og:description" content="编译 OpenJDK关于编译 OpenJDK 官方文档有很好的介绍，http://openjdk.java.net/groups/build/，汇总了 JDK 6, JDK 7, JDK 8, JDK 9 的 build OpenJDK 的 README 文件。编译 JDK 8 需要 Xcode 4，现在 Xcode 版本已远高于 4 了，前人尝试编译发现有很多坑 [ doc, blog ]，所以">
+<meta property="og:updated_time" content="2018-03-04T06:23:55.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="编译与调试 OpenJDK">
+<meta name="twitter:description" content="编译 OpenJDK关于编译 OpenJDK 官方文档有很好的介绍，http://openjdk.java.net/groups/build/，汇总了 JDK 6, JDK 7, JDK 8, JDK 9 的 build OpenJDK 的 README 文件。编译 JDK 8 需要 Xcode 4，现在 Xcode 版本已远高于 4 了，前人尝试编译发现有很多坑 [ doc, blog ]，所以">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://nullwy.me/2018/02/build-debug-openjdk/"/>
+
+
+
+
+
+  <title>编译与调试 OpenJDK | nullwy's blog</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">nullwy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://nullwy.me/2018/02/build-debug-openjdk/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/media/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">编译与调试 OpenJDK</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-02-05T15:22:51+08:00">
+                2018-02-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/02/build-debug-openjdk/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/02/build-debug-openjdk/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/02/build-debug-openjdk/" class="leancloud_visitors" data-flag-title="编译与调试 OpenJDK">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="编译-OpenJDK"><a href="#编译-OpenJDK" class="headerlink" title="编译 OpenJDK"></a>编译 OpenJDK</h1><p>关于编译 OpenJDK 官方文档有很好的介绍，<a href="http://openjdk.java.net/groups/build/" target="_blank" rel="external">http://openjdk.java.net/groups/build/</a>，汇总了 JDK 6, JDK 7, JDK 8, JDK 9 的 build OpenJDK 的 README 文件。编译 JDK 8 需要 Xcode 4，现在 Xcode 版本已远高于 4 了，前人尝试编译发现有很多坑 [ <a href="http://hg.openjdk.java.net/jdk8u/jdk8u/raw-file/tip/README-builds.html" target="_blank" rel="external">doc</a>, <a href="https://juejin.im/post/5a6d7d106fb9a01ca47abd8b" target="_blank" rel="external">blog</a> ]，所以本文直接开始尝试编译 OpenJDK 9。OpenJDK 9 源码根目录下的 README 文件有如下提示信息（<a href="https://github.com/dmlloyd/openjdk/tree/jdk9/jdk9" target="_blank" rel="external">github</a>, <a href="http://hg.openjdk.java.net/jdk9/jdk9/file/tip" target="_blank" rel="external">hg</a>）：</p>
+<a id="more"></a>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">For information about building OpenJDK, including how to fully retrieve all</div><div class="line">source code, please see either of these:</div><div class="line"></div><div class="line">  * common/doc/building.html   (html version)</div><div class="line">  * common/doc/building.md     (markdown version)</div></pre></td></tr></table></figure>
+<p>common/doc/<a href="http://hg.openjdk.java.net/jdk9/jdk9/raw-file/a08cbfc0e4ec/common/doc/building.html" target="_blank" rel="external">building.html</a> 和 common/doc/<a href="https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/common/doc/building.md" target="_blank" rel="external">building.md</a> 就是本文的主要参考来源。</p>
+<h2 id="长话短说-TL-DR"><a href="#长话短说-TL-DR" class="headerlink" title="长话短说 TL;DR"></a>长话短说 TL;DR</h2><p>building.md 首先给如下的 <a href="https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/common/doc/building.md" target="_blank" rel="external">TL;DR</a>：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$ hg <span class="built_in">clone</span> http://hg.openjdk.java.net/jdk9/jdk9 jdk9</div><div class="line">$ <span class="built_in">cd</span> jdk9</div><div class="line">$ bash get_source.sh   <span class="comment"># 下载全部源代码</span></div><div class="line">$ bash configure       <span class="comment"># configure 编译环境，若编译报错，需要添加 `--disable-warnings-as-errors`</span></div><div class="line">$ make images          <span class="comment"># 编译 OpenJDK</span></div></pre></td></tr></table></figure>
+<p>现在就按照，这个几个命令尝试。</p>
+<p>注意，如果运行 <code>bash get_source.sh</code> 时出现类似以下错误，是网络问题造成，多运行几次 <code>bash get_source.sh</code>，直到不出现错误为止。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">WARNING: langtools exited abnormally (255)</div><div class="line">WARNING: nashorn exited abnormally (255)</div></pre></td></tr></table></figure>
+<p>若不想使用 <code>hg clone</code> 加 <code>get_source.sh</code> 下载全部源代码，可以从 OpenJDK 的 github 镜像（非官方）下载： </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ git clone -b jdk9/jdk9 https://github.com/dmlloyd/openjdk.git</div></pre></td></tr></table></figure>
+<p>下载好全部源代码后，接下来需要运行 <code>bash configure</code>，控制台最后输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">··· 省略</div><div class="line"></div><div class="line">A new configuration has been successfully created in</div><div class="line">/Users/yulewei/jdk9/build/macosx-x86_64-normal-server-release</div><div class="line">using default settings.</div><div class="line"></div><div class="line">Configuration summary:</div><div class="line">* Debug level:    release</div><div class="line">* HS debug level: product</div><div class="line">* JDK variant:    normal</div><div class="line">* JVM variants:   server</div><div class="line">* OpenJDK target: OS: macosx, CPU architecture: x86, address length: 64</div><div class="line">* Version string: 9-internal+0-adhoc.yulewei.jdk9-hg (9-internal)</div><div class="line"></div><div class="line">Tools summary:</div><div class="line">* Boot JDK:       java version &quot;1.8.0_144&quot; Java(TM) SE Runtime Environment (build 1.8.0_144-b01) Java HotSpot(TM) 64-Bit Server VM (build 25.144-b01, mixed mode)  (at /Library/Java/JavaVirtualMachines/jdk1.8.0_144.jdk/Contents/Home)</div><div class="line">* Toolchain:      clang (clang/LLVM)</div><div class="line">* C Compiler:     Version 9.0.0 (at /usr/bin/clang)</div><div class="line">* C++ Compiler:   Version 9.0.0 (at /usr/bin/clang++)</div><div class="line"></div><div class="line">Build performance summary:</div><div class="line">* Cores to use:   8</div><div class="line">* Memory limit:   16384 MB</div></pre></td></tr></table></figure>
+<p>可以看到 <code>Debug level:    release</code>，除了默认的 <code>release</code>，还有 <code>fastdebug</code>, <code>slowdebug</code> 和 <code>optimized</code> 这三个调试级别 [ <a href="https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/common/doc/building.md#configure-arguments-for-tailoring-the-build" target="_blank" rel="external">doc</a> ]。现在试试 <code>slowdebug</code> 这个调试级别：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">$ bash ./configure --with-debug-level=slowdebug</div><div class="line">... 省略</div><div class="line">A new configuration has been successfully created in</div><div class="line">/Users/yulewei/CODING/openjdk/openjdk-git/build/macosx-x86_64-normal-server-slowdebug</div><div class="line">using configure arguments &apos;--with-debug-level=slowdebug&apos;.</div><div class="line"></div><div class="line">Configuration summary:</div><div class="line">* Debug level:    slowdebug</div><div class="line">* HS debug level: debug</div><div class="line">* JDK variant:    normal</div><div class="line">* JVM variants:   server</div><div class="line">* OpenJDK target: OS: macosx, CPU architecture: x86, address length: 64</div><div class="line">* Version string: 9-internal+0-adhoc.yulewei.openjdk-git (9-internal)</div><div class="line">... 省略</div></pre></td></tr></table></figure>
+<p>现在开始编译这个 OpenJDK，运行 <code>make images</code>。但是会报如下的编译错误：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">/Users/yulewei/jdk9/hotspot/src/share/vm/memory/binaryTreeDictionary.hpp:167:12: error: instantiation of variable &apos;TreeChunk&lt;FreeChunk, AdaptiveFreeList&lt;FreeChunk&gt; &gt;::_min_tree_chunk_size&apos; required here, but no definition is available [-Werror,-Wundefined-var-template]</div><div class="line">    return _min_tree_chunk_size;</div><div class="line">           ^</div></pre></td></tr></table></figure>
+<p>对个这个编译错误，<code>configure</code> 命令后需要添加的 <code>--disable-warnings-as-errors</code>  [ <a href="https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/common/doc/building.md#macos" target="_blank" rel="external">doc</a> <a href="http://mail.openjdk.java.net/pipermail/build-dev/2017-May/019179.html" target="_blank" rel="external">mail.openjdk</a> ]，即将原先的命令修改为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ bash configure --disable-warnings-as-errors --with-debug-level=slowdebug</div><div class="line">$ make images</div></pre></td></tr></table></figure>
+<p>但依然报错，如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">/Users/yulewei/jdk9/hotspot/src/share/vm/memory/virtualspace.cpp:585:14: error: ordered comparison between pointer and zero (&apos;char *&apos; and &apos;int&apos;)</div><div class="line">  if (base() &gt; 0) &#123;</div><div class="line">      ~~~~~~ ^ ~</div><div class="line">...</div><div class="line">/Users/yulewei/jdk9/hotspot/src/share/vm/opto/lcm.cpp:42:35: error: ordered comparison between pointer and zero (&apos;address&apos; (aka &apos;unsigned char *&apos;) and &apos;int&apos;)</div><div class="line">  if (Universe::narrow_oop_base() &gt; 0) &#123; // Implies UseCompressedOops.</div><div class="line">      ~~~~~~~~~~~~~~~~~~~~~~~~~~~ ^ ~ </div><div class="line">...</div><div class="line">/Users/yulewei/jdk9/hotspot/src/share/vm/opto/loopPredicate.cpp:915:73: error: ordered comparison between pointer and zero (&apos;const TypeInt *&apos; and &apos;int&apos;)</div><div class="line">      assert(rng-&gt;Opcode() == Op_LoadRange || _igvn.type(rng)-&gt;is_int() &gt;= 0, &quot;must be&quot;);</div><div class="line">                                              ~~~~~~~~~~~~~~~~~~~~~~~~~ ^ ~</div></pre></td></tr></table></figure>
+<p>使用 Google 搜索这个编译错误，发现 OpenJDK 官方早就有人提了相关 bug，<a href="https://bugs.openjdk.java.net/browse/JDK-8174050" target="_blank" rel="external">JDK-8174050</a> 和 <a href="https://bugs.openjdk.java.net/browse/JDK-8187787" target="_blank" rel="external">JDK-8187787</a>。至于如何修改，可以参考，hg <a href="http://hg.openjdk.java.net/jdk10/jdk10/hotspot/rev/316854ef2fa2" target="_blank" rel="external">316854ef2fa2</a> 或这 git 镜像 <a href="https://github.com/dmlloyd/openjdk/commit/a05122ab59783077da42d45dacc44bb1088d2f3e" target="_blank" rel="external">a05122a</a>。</p>
+<p>这个错误是 XCode 版本不一致造成的，博主机器运行的版本是 9.0，而文档上说 Mac 下 JDK 9 的代码是用 XCode 8.3.2 和 <code>--disable-warnings-as-errors</code> 编译成功的 [ <a href="https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/common/doc/building.md#macos" target="_blank" rel="external">doc</a> ]。</p>
+<p>修改这 3 个 cpp 文件代码后，重新运行 <code>configure</code> 和 <code>make</code>，不出意外的话，就可以编译成功。等待十几分钟后，最后一行输出：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">... 省略</div><div class="line">Finished building target &apos;images&apos; in configuration &apos;macosx-x86_64-normal-server-release&apos;</div></pre></td></tr></table></figure>
+<p>全部编译结果都在 <code>build/macosx-x86_64-normal-server-slowdebug</code> 目录下。来验证下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">$ build/macosx-x86_64-normal-server-slowdebug/jdk/bin/java -version</div><div class="line">openjdk version &quot;9-internal&quot;</div><div class="line">OpenJDK Runtime Environment (build 9-internal+0-adhoc.yulewei.jdk9-hg)</div><div class="line">OpenJDK 64-Bit Server VM (build 9-internal+0-adhoc.yulewei.jdk9-hg, mixed mode)</div></pre></td></tr></table></figure>
+<h2 id="命令小结"><a href="#命令小结" class="headerlink" title="命令小结"></a>命令小结</h2><p>编译 debug 版 OpenJDK 需要的命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$ hg <span class="built_in">clone</span> http://hg.openjdk.java.net/jdk9/jdk9 jdk9</div><div class="line">$ <span class="built_in">cd</span> jdk9</div><div class="line">$ bash get_source.sh   <span class="comment"># 下载全部源代码</span></div><div class="line">$ bash configure --disable-warnings-as-errors --with-debug-level=slowdebug</div><div class="line">$ make images          <span class="comment"># 编译 OpenJDK</span></div></pre></td></tr></table></figure>
+<h1 id="阅读和调试-HotSpot-代码"><a href="#阅读和调试-HotSpot-代码" class="headerlink" title="阅读和调试 HotSpot 代码"></a>阅读和调试 HotSpot 代码</h1><p>我们使用 <code>slowdebug</code> 编译了 jdk 源代码，build 目录下会生成 <code>java.dSYM</code>、<code>javac.dSYM</code>、<code>libjava.dylib.dSYM</code>、<code>libjvm.dylib.dSYM</code> 等调试信息文件。有这些调试信息文件，就可以用 <code>gdb</code> 或者 <code>lldb</code> 调试 HotSpot 了。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">lldb java</div><div class="line">(lldb) b main</div><div class="line">Breakpoint 1: 19 locations.</div><div class="line">(lldb) run</div><div class="line">Process 6276 launched: &apos;/Users/yulewei/jdk9/build/macosx-x86_64-normal-server-slowdebug/jdk/bin/java&apos; (x86_64)</div><div class="line">Process 6276 stopped</div><div class="line">* thread #1, queue = &apos;com.apple.main-thread&apos;, stop reason = breakpoint 1.1</div><div class="line">    frame #0: 0x0000000100001813 java`main(argc=1, argv=0x00007fff5fbfef98) at main.c:98</div><div class="line">   95  	&#123;</div><div class="line">   96  	    int margc;</div><div class="line">   97  	    char** margv;</div><div class="line">-&gt; 98  	    const jboolean const_javaw = JNI_FALSE;</div><div class="line">   99  	#endif /* JAVAW */</div><div class="line">   100</div><div class="line">   101 	    JLI_InitArgProcessing(!HAS_JAVA_ARGS, const_disable_argfile);</div><div class="line">Target 0: (java) stopped.</div><div class="line">(lldb) source info</div><div class="line">Lines found in module `java</div><div class="line">[0x0000000100001813-0x0000000100001817): /Users/yulewei/CODING/jdk9/jdk/src/java.base/share/native/launcher/main.c:98:20</div></pre></td></tr></table></figure>
+<h2 id="使用-CLion"><a href="#使用-CLion" class="headerlink" title="使用 CLion"></a>使用 CLion</h2><p>使用命令行工具太原始了，CLion 下阅读和调试更加方便。但是 CLion 目前只支持 cmake，不支持 make 项目。Google 下，发现 JDK 10 下有个官方分支 JDK-8177329-cmake-branch，能生成 <code>CMakeLists.txt</code> [ <a href="http://mail.openjdk.java.net/pipermail/build-dev/2017-March/018837.html" target="_blank" rel="external">mail</a>, <a href="http://hg.openjdk.java.net/jdk10/sandbox/file/caf2c30b1959/README-cmake.md" target="_blank" rel="external">README-cmake.md</a> ]，但博主尝试生成 <code>CMakeLists.txt</code>，失败了。只好退而求其次，使用简单的 <code>CMakeLists.txt</code> 文件，好让 CLion 能语法索引整个 HotSpot 项目，方便在 CLion 下阅读代码。<code>CMakeLists.txt</code> 文件如下：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">3.7</span>)</div><div class="line"><span class="keyword">project</span>(hotspot)</div><div class="line"></div><div class="line"><span class="keyword">include_directories</span>(</div><div class="line">        src/share/vm</div><div class="line">        src/os/linux/vm</div><div class="line">        src/cpu/x86/vm</div><div class="line">        src/os_cpu/linux_x86/vm</div><div class="line">        src/share/vm/precompiled)</div><div class="line"></div><div class="line">file(GLOB_RECURSE SOURCE_FILES <span class="string">"*.cpp"</span> <span class="string">"*.hpp"</span> <span class="string">"*.c"</span> <span class="string">"*.h"</span>)</div><div class="line"><span class="keyword">add_executable</span>(hotspot <span class="variable">$&#123;SOURCE_FILES&#125;</span>)</div></pre></td></tr></table></figure>
+<h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
+<li>Building OpenJDK <a href="https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/common/doc/building.md" target="_blank" rel="external">https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/common/doc/building.md</a></li>
+<li>2018-01 自己动手，在macOS High Sierra中编译一个可debug的JDK <a href="https://juejin.im/post/5a6d7d106fb9a01ca47abd8b" target="_blank" rel="external">https://juejin.im/post/5a6d7d106fb9a01ca47abd8b</a></li>
+<li>2017-04 Compile &amp; Debug openjdk <a href="https://liuzhengyang.github.io/2017/04/28/buildopenjdk/" target="_blank" rel="external">https://liuzhengyang.github.io/2017/04/28/buildopenjdk/</a></li>
+<li>2014-08 在Ubuntu 12.04 上编译调试 OpenJDK8 <a href="http://blog.csdn.net/on_1y/article/details/387615112017-04" target="_blank" rel="external">http://blog.csdn.net/on_1y/article/details/387615112017-04</a></li>
+<li>openjdk code compilation/ IDE setup <a href="https://stackoverflow.com/a/44522565" target="_blank" rel="external">https://stackoverflow.com/a/44522565</a></li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/OpenJDK/" rel="tag"># OpenJDK</a>
+          
+            <a href="/tags/HotSpot/" rel="tag"># HotSpot</a>
+          
+            <a href="/tags/cmake/" rel="tag"># cmake</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/stack-frame-calling-convention/" rel="prev" title="栈帧与调用惯例">
+                栈帧与调用惯例 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/media/avatar.png"
+               alt="nullwy" />
+          <p class="site-author-name" itemprop="name">nullwy</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">6</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/yulewei" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://www.douban.com/people/yulewei/" target="_blank" title="豆瓣">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  豆瓣
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="mailto:yulewei@gmail.com" target="_blank" title="Email">
+                  
+                    <i class="fa fa-fw fa-envelope-o"></i>
+                  
+                  Email
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#编译-OpenJDK"><span class="nav-number">1.</span> <span class="nav-text">编译 OpenJDK</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#长话短说-TL-DR"><span class="nav-number">1.1.</span> <span class="nav-text">长话短说 TL;DR</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#命令小结"><span class="nav-number">1.2.</span> <span class="nav-text">命令小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#阅读和调试-HotSpot-代码"><span class="nav-number">2.</span> <span class="nav-text">阅读和调试 HotSpot 代码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-CLion"><span class="nav-number">2.1.</span> <span class="nav-text">使用 CLion</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://yulewei.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://nullwy.me/2018/02/build-debug-openjdk/';
+          this.page.identifier = '2018/02/build-debug-openjdk/';
+          this.page.title = '编译与调试 OpenJDK';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://yulewei.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("oBkAyR9bv2zBy8BPHzdohx1Y-gzGzoHsz", "gbvCf9BDUpCCixOCAjmye5JK");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+  
+
+</body>
+</html>
