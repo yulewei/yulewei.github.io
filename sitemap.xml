@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://nullwy.me/2018/06/mysql-binlog/</loc>
+    
+    <lastmod>2018-09-02T12:32:12.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nullwy.me/2016/11/database-books/</loc>
+    
+    <lastmod>2018-09-02T12:26:53.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://nullwy.me/2017/01/mysql-data-types/</loc>
     
     <lastmod>2018-09-02T12:25:27.000Z</lastmod>
@@ -19,13 +33,6 @@
     <loc>http://nullwy.me/2016/12/mysql-5.7-json/</loc>
     
     <lastmod>2018-09-02T12:25:12.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2018/06/mysql-binlog/</loc>
-    
-    <lastmod>2018-09-02T12:23:31.000Z</lastmod>
     
   </url>
   
@@ -138,13 +145,6 @@
     <loc>http://nullwy.me/2016/12/itext-pdf/</loc>
     
     <lastmod>2017-05-23T14:41:57.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2016/11/database-books/</loc>
-    
-    <lastmod>2017-04-27T09:27:02.000Z</lastmod>
     
   </url>
   

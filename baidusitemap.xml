@@ -4,6 +4,56 @@
 
     
   <url>
+    <loc>http://nullwy.me/2018/06/mysql-binlog/</loc>
+    <lastmod>2018-09-02T12:32:12.000Z</lastmod>
+    <data>
+        <display>
+        <title>MySQL binlog 笔记</title>
+        <pubTime>2018-06-18T07:09:51.000Z</pubTime>
+        
+        <tag>MySQL</tag>
+         
+        <tag>数据库</tag>
+         
+        <tag>binlog</tag>
+         
+         
+           
+             
+              <breadCrumb title="MySQL" url="http://nullwy.me/categories/MySQL/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://nullwy.me/2016/11/database-books/</loc>
+    <lastmod>2018-09-02T12:26:53.000Z</lastmod>
+    <data>
+        <display>
+        <title>数据库书籍资料整理</title>
+        <pubTime>2016-11-26T07:56:02.000Z</pubTime>
+        
+        <tag>书籍</tag>
+         
+        <tag>MySQL</tag>
+         
+        <tag>数据库</tag>
+         
+        <tag>CS</tag>
+         
+         
+           
+             
+              <breadCrumb title="计算机系统" url="http://nullwy.me/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://nullwy.me/2017/01/mysql-data-types/</loc>
     <lastmod>2018-09-02T12:25:27.000Z</lastmod>
     <data>
@@ -54,28 +104,6 @@
         <display>
         <title>MySQL 5.7的JSON类型</title>
         <pubTime>2016-12-19T19:18:31.000Z</pubTime>
-        
-        <tag>MySQL</tag>
-         
-        <tag>数据库</tag>
-         
-         
-           
-             
-              <breadCrumb title="MySQL" url="http://nullwy.me/categories/MySQL/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://nullwy.me/2018/06/mysql-binlog/</loc>
-    <lastmod>2018-09-02T12:23:31.000Z</lastmod>
-    <data>
-        <display>
-        <title>MySQL binlog 笔记</title>
-        <pubTime>2018-06-18T07:09:51.000Z</pubTime>
         
         <tag>MySQL</tag>
          
@@ -430,32 +458,6 @@
 
     
   <url>
-    <loc>http://nullwy.me/2016/11/database-books/</loc>
-    <lastmod>2017-04-27T09:27:02.000Z</lastmod>
-    <data>
-        <display>
-        <title>数据库书籍资料整理</title>
-        <pubTime>2016-11-26T07:56:02.000Z</pubTime>
-        
-        <tag>MySQL</tag>
-         
-        <tag>数据库</tag>
-         
-        <tag>书籍</tag>
-         
-        <tag>CS</tag>
-         
-         
-           
-             
-              <breadCrumb title="数据库" url="http://nullwy.me/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://nullwy.me/2016/12/software-dev-books/</loc>
     <lastmod>2017-04-27T09:26:09.000Z</lastmod>
     <data>
@@ -487,9 +489,9 @@
         
         <tag>书籍</tag>
          
-        <tag>语言</tag>
-         
         <tag>CS</tag>
+         
+        <tag>语言</tag>
          
          
            
