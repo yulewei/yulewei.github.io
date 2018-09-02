@@ -976,7 +976,7 @@ blockquote {
     <link href="http://nullwy.me/2017/01/mysql-data-types/"/>
     <id>http://nullwy.me/2017/01/mysql-data-types/</id>
     <published>2017-01-04T15:26:28.000Z</published>
-    <updated>2017-05-23T14:56:50.000Z</updated>
+    <updated>2018-09-02T12:25:27.000Z</updated>
     
     <content type="html"><![CDATA[<p>文本整理MySQL字段类型的常见问题和用法。</p>
 <h1 id="数值类型"><a href="#数值类型" class="headerlink" title="数值类型"></a>数值类型</h1><h2 id="int和int-3"><a href="#int和int-3" class="headerlink" title="int和int(3)"></a>int和int(3)</h2><p>新手在定义整数字段时，常常想当然通过，如<code>int(3)</code>，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用<code>tinyint</code>（1个字节）、<code>smallint</code>（2个字节）、<code>mediumint</code>（3个字节）、<code>int</code>（4个字节）或<code>bigint</code>（8个字节）。MySQL的相关文档如下[<a href="http://dev.mysql.com/doc/refman/5.7/en/numeric-type-attributes.html" target="_blank" rel="external">doc</a>]：</p>
@@ -1170,7 +1170,7 @@ blockquote {
     
     </summary>
     
-      <category term="数据库" scheme="http://nullwy.me/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+      <category term="MySQL" scheme="http://nullwy.me/categories/MySQL/"/>
     
     
       <category term="MySQL" scheme="http://nullwy.me/tags/MySQL/"/>
@@ -1372,7 +1372,7 @@ blockquote {
     <link href="http://nullwy.me/2016/12/mysql-5.7-json/"/>
     <id>http://nullwy.me/2016/12/mysql-5.7-json/</id>
     <published>2016-12-19T19:18:31.000Z</published>
-    <updated>2017-05-23T14:58:48.000Z</updated>
+    <updated>2018-09-02T12:25:12.000Z</updated>
     
     <content type="html"><![CDATA[<p>MySQL在5.7.8开始提供的对json的原生支持[<a href="http://dev.mysql.com/doc/refman/5.7/en/mysql-nutshell.html" target="_blank" rel="external">doc</a>]，本文是对MySQL的json类型的用法的简单整理。</p>
 <h1 id="JSON函数完整列表"><a href="#JSON函数完整列表" class="headerlink" title="JSON函数完整列表"></a>JSON函数完整列表</h1><p>MySQL官方列出json相关的函数，完整列表如下[<a href="https://dev.mysql.com/doc/refman/5.7/en/json-function-reference.html" target="_blank" rel="external">doc</a>]：</p>
@@ -1546,7 +1546,7 @@ blockquote {
     
     </summary>
     
-      <category term="数据库" scheme="http://nullwy.me/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+      <category term="MySQL" scheme="http://nullwy.me/categories/MySQL/"/>
     
     
       <category term="MySQL" scheme="http://nullwy.me/tags/MySQL/"/>
@@ -1560,7 +1560,7 @@ blockquote {
     <link href="http://nullwy.me/2016/12/mac-mysql-5.7/"/>
     <id>http://nullwy.me/2016/12/mac-mysql-5.7/</id>
     <published>2016-12-10T19:18:17.000Z</published>
-    <updated>2018-06-17T07:01:37.000Z</updated>
+    <updated>2018-09-02T12:25:18.000Z</updated>
     
     <content type="html"><![CDATA[<p>本文是 Mac 下 MySQL 5.7 安装与配置遇到的问题整理。</p>
 <a id="more"></a>
@@ -1609,7 +1609,7 @@ blockquote {
     
     </summary>
     
-      <category term="数据库" scheme="http://nullwy.me/categories/%E6%95%B0%E6%8D%AE%E5%BA%93/"/>
+      <category term="MySQL" scheme="http://nullwy.me/categories/MySQL/"/>
     
     
       <category term="MySQL" scheme="http://nullwy.me/tags/MySQL/"/>
