@@ -4,8 +4,28 @@
 
     
   <url>
+    <loc>http://nullwy.me/2018/06/mysql-binlog/</loc>
+    <lastmod>2018-09-02T12:20:56.000Z</lastmod>
+    <data>
+        <display>
+        <title>MySQL binlog 笔记</title>
+        <pubTime>2018-06-18T07:09:51.000Z</pubTime>
+        
+        <tag>MySQL</tag>
+         
+         
+           
+             
+              <breadCrumb title="MySQL" url="http://nullwy.me/categories/MySQL/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://nullwy.me/2016/12/mac-mysql-5.7/</loc>
-    <lastmod>2018-06-17T04:32:01.000Z</lastmod>
+    <lastmod>2018-06-17T07:01:37.000Z</lastmod>
     <data>
         <display>
         <title>Mac下MySQL 5.7安装与配置</title>
