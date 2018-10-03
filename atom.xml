@@ -720,9 +720,9 @@ blockquote {
     
       <category term="Java" scheme="http://nullwy.me/tags/Java/"/>
     
-      <category term="字节码" scheme="http://nullwy.me/tags/%E5%AD%97%E8%8A%82%E7%A0%81/"/>
-    
       <category term="JVM" scheme="http://nullwy.me/tags/JVM/"/>
+    
+      <category term="字节码" scheme="http://nullwy.me/tags/%E5%AD%97%E8%8A%82%E7%A0%81/"/>
     
   </entry>
   
@@ -812,11 +812,11 @@ blockquote {
     
       <category term="Java" scheme="http://nullwy.me/tags/Java/"/>
     
-      <category term="JVM" scheme="http://nullwy.me/tags/JVM/"/>
-    
       <category term="编译器" scheme="http://nullwy.me/tags/%E7%BC%96%E8%AF%91%E5%99%A8/"/>
     
       <category term="javac" scheme="http://nullwy.me/tags/javac/"/>
+    
+      <category term="JVM" scheme="http://nullwy.me/tags/JVM/"/>
     
   </entry>
   
