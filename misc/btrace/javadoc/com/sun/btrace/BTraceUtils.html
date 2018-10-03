@@ -1,282 +1,4 @@
-<!doctype html>
-
-
-
-  
-
-
-<html class="theme-next mist use-motion" lang="zh-Hans">
-<head>
-  <meta charset="UTF-8"/>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-
-
-
-
-
-
-<meta http-equiv="Cache-Control" content="no-transform" />
-<meta http-equiv="Cache-Control" content="no-siteapp" />
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
-
-
-
-
-  
-  
-  
-  
-
-  
-    
-    
-  
-
-  
-
-  
-
-  
-
-  
-
-  
-    
-    
-    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
-  
-
-
-
-
-
-
-<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
-
-<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
-
-
-  <meta name="keywords" content="Hexo, NexT" />
-
-
-
-
-
-  <link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml" />
-
-
-
-
-  <link rel="shortcut icon" type="image/x-icon" href="/favicon.png?v=5.1.1" />
-
-
-
-
-
-
-<meta name="description" content="BTraceUtils (btrace 1.3.11.1 API)       var methods = {&quot;i0&quot;:9,&quot;i1&quot;:9,&quot;i2&quot;:9,&quot;i3&quot;:9,&quot;i4&quot;:9,&quot;i5&quot;:9,&quot;i6&quot;:9,&quot;i7&quot;:9,&quot;i8&quot;:9,&quot;i9&quot;:9,&quot;i10&quot;:9,&quot;i11&quot;:9,&quot;i12&quot;:9,&quot;i13&quot;:9,&quot;i14&quot;:9,&quot;i15&quot;:9,&quot;i16&quot;:9,&quot;i17&quot;:9,&quot;i18&quot;:">
-<meta property="og:type" content="website">
-<meta property="og:title" content="nullwy's blog">
-<meta property="og:url" content="http://nullwy.me/misc/btrace/javadoc/com/sun/btrace/BTraceUtils.html">
-<meta property="og:site_name" content="nullwy's blog">
-<meta property="og:description" content="BTraceUtils (btrace 1.3.11.1 API)       var methods = {&quot;i0&quot;:9,&quot;i1&quot;:9,&quot;i2&quot;:9,&quot;i3&quot;:9,&quot;i4&quot;:9,&quot;i5&quot;:9,&quot;i6&quot;:9,&quot;i7&quot;:9,&quot;i8&quot;:9,&quot;i9&quot;:9,&quot;i10&quot;:9,&quot;i11&quot;:9,&quot;i12&quot;:9,&quot;i13&quot;:9,&quot;i14&quot;:9,&quot;i15&quot;:9,&quot;i16&quot;:9,&quot;i17&quot;:9,&quot;i18&quot;:">
-<meta property="og:updated_time" content="2018-10-03T07:10:42.000Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="nullwy's blog">
-<meta name="twitter:description" content="BTraceUtils (btrace 1.3.11.1 API)       var methods = {&quot;i0&quot;:9,&quot;i1&quot;:9,&quot;i2&quot;:9,&quot;i3&quot;:9,&quot;i4&quot;:9,&quot;i5&quot;:9,&quot;i6&quot;:9,&quot;i7&quot;:9,&quot;i8&quot;:9,&quot;i9&quot;:9,&quot;i10&quot;:9,&quot;i11&quot;:9,&quot;i12&quot;:9,&quot;i13&quot;:9,&quot;i14&quot;:9,&quot;i15&quot;:9,&quot;i16&quot;:9,&quot;i17&quot;:9,&quot;i18&quot;:">
-
-
-
-<script type="text/javascript" id="hexo.configurations">
-  var NexT = window.NexT || {};
-  var CONFIG = {
-    root: '/',
-    scheme: 'Mist',
-    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
-    fancybox: true,
-    motion: true,
-    duoshuo: {
-      userId: '0',
-      author: '博主'
-    },
-    algolia: {
-      applicationID: '',
-      apiKey: '',
-      indexName: '',
-      hits: {"per_page":10},
-      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
-    }
-  };
-</script>
-
-
-
-  <link rel="canonical" href="http://nullwy.me/misc/btrace/javadoc/com/sun/btrace/BTraceUtils.html"/>
-
-
-
-
-
-  <title> | nullwy's blog</title>
-</head>
-
-<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  
-    
-  
-
-  <div class="container sidebar-position-left  ">
-    <div class="headband"></div>
-
-    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
-      <div class="header-inner"><div class="site-brand-wrapper">
-  <div class="site-meta ">
-    
-
-    <div class="custom-logo-site-title">
-      <a href="/"  class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">nullwy's blog</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-      
-        <p class="site-subtitle"></p>
-      
-  </div>
-
-  <div class="site-nav-toggle">
-    <button>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-      <span class="btn-bar"></span>
-    </button>
-  </div>
-</div>
-
-<nav class="site-nav">
-  
-
-  
-    <ul id="menu" class="menu">
-      
-        
-        <li class="menu-item menu-item-home">
-          <a href="/" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
-            
-            首页
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-archives">
-          <a href="/archives" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
-            
-            归档
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-categories">
-          <a href="/categories" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
-            
-            分类
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-tags">
-          <a href="/tags" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
-            
-            标签
-          </a>
-        </li>
-      
-        
-        <li class="menu-item menu-item-about">
-          <a href="/about" rel="section">
-            
-              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
-            
-            关于
-          </a>
-        </li>
-      
-
-      
-    </ul>
-  
-
-  
-</nav>
-
-
-
- </div>
-    </header>
-
-    <main id="main" class="main">
-      <div class="main-inner">
-        <div class="content-wrap">
-          <div id="content" class="content">
-            
-
-  <div id="posts" class="posts-expand">
-  <header class="post-header">
-
-	<h1 class="post-title" itemprop="name headline"></h1>
-
-
-
-</header>
-
-    
-    
-      <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <!-- NewPage -->
 <html lang="en">
 <head>
@@ -481,7 +203,7 @@ extends java.lang.Object</pre>
 </a>
 <h3>Method Summary</h3>
 <table class="memberSummary" border="0" cellpadding="3" cellspacing="0" summary="Method Summary table, listing methods, and an explanation">
-<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);" target="_blank" rel="external">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);" target="_blank" rel="external">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);" target="_blank" rel="external">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
+<caption><span id="t0" class="activeTableTab"><span>All Methods</span><span class="tabEnd">&nbsp;</span></span><span id="t1" class="tableTab"><span><a href="javascript:show(1);">Static Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t4" class="tableTab"><span><a href="javascript:show(8);">Concrete Methods</a></span><span class="tabEnd">&nbsp;</span></span><span id="t6" class="tableTab"><span><a href="javascript:show(32);">Deprecated Methods</a></span><span class="tabEnd">&nbsp;</span></span></caption>
 <tr>
 <th class="colFirst" scope="col">Modifier and Type</th>
 <th class="colLast" scope="col">Method and Description</th>
@@ -2403,7 +2125,7 @@ extends java.lang.Object</pre>
 
  <p>A thread interruption ignored because a thread was not alive
  at the time of the interrupt will be reflected by this method
- returning false.</p></div>
+ returning false.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd><code>true</code> if this thread has been interrupted;
@@ -2641,7 +2363,7 @@ extends java.lang.Object</pre>
  the current thread already holds a specified lock:
  <pre>
      assert Thread.holdsLock(obj);
- </pre></p></div>
+ </pre></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>obj</code> - the object on which to test lock ownership</dd>
@@ -4147,7 +3869,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  how frequently values change. Differences in successive calls
  that span greater than approximately 292 years (2<sup>63</sup>
  nanoseconds) will not accurately compute elapsed time due to
- numerical overflow.</p></div>
+ numerical overflow.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The current value of the system timer, in nanoseconds.</dd>
@@ -4161,7 +3883,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
 <li class="blockList">
 <h4>timestamp</h4>
 <pre>public static&nbsp;java.lang.String&nbsp;timestamp(java.lang.String&nbsp;format)</pre>
-<div class="block"><p>Generates a string getTimestamp (current date&amp;time)</p></div>
+<div class="block"><p>Generates a string getTimestamp (current date&amp;time)</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>format</code> - The format to be used - see SimpleDateFormat</dd>
@@ -4179,7 +3901,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
 <li class="blockList">
 <h4>timestamp</h4>
 <pre>public static&nbsp;java.lang.String&nbsp;timestamp()</pre>
-<div class="block"><p>Generates a string getTimestamp (current date&amp;time) in the default system format</p></div>
+<div class="block"><p>Generates a string getTimestamp (current date&amp;time) in the default system format</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>Returns a string representing current date&amp;time</dd>
@@ -4489,9 +4211,9 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  <blockquote><pre>
  Pattern.compile(regex).matcher(input).matches()</pre></blockquote>
 
- </p><p>
+ <p>
  If a pattern is to be used multiple times, compiling it once and reusing
- it will be more efficient than invoking this method each time.</p></div>
+ it will be more efficient than invoking this method each time.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>regex</code> - The expression to be compiled</dd>
@@ -4525,13 +4247,13 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  value.  Special cases:
  <ul><li>If the argument is NaN or less than zero, then the result
  is NaN.
- </li><li>If the argument is positive infinity, then the result is
+ <li>If the argument is positive infinity, then the result is
  positive infinity.
- </li><li>If the argument is positive zero or negative zero, then the
- result is negative infinity.</li></ul>
+ <li>If the argument is positive zero or negative zero, then the
+ result is negative infinity.</ul>
 
  <p>The computed result must be within 1 ulp of the exact result.
- Results must be semi-monotonic.</p></div>
+ Results must be semi-monotonic.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>a</code> - a value</dd>
@@ -4553,16 +4275,16 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
 
  <ul><li>If the argument is NaN or less than zero, then the result
  is NaN.
- </li><li>If the argument is positive infinity, then the result is
+ <li>If the argument is positive infinity, then the result is
  positive infinity.
- </li><li>If the argument is positive zero or negative zero, then the
+ <li>If the argument is positive zero or negative zero, then the
  result is negative infinity.
- </li><li> If the argument is equal to 10<sup><i>n</i></sup> for
+ <li> If the argument is equal to 10<sup><i>n</i></sup> for
  integer <i>n</i>, then the result is <i>n</i>.
- </li></ul>
+ </ul>
 
  <p>The computed result must be within 1 ulp of the exact result.
- Results must be semi-monotonic.</p></div>
+ Results must be semi-monotonic.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>a</code> - a value</dd>
@@ -4581,13 +4303,13 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
 <div class="block">Returns Euler's number <i>e</i> raised to the power of a
  <code>double</code> value.  Special cases:
  <ul><li>If the argument is NaN, the result is NaN.
- </li><li>If the argument is positive infinity, then the result is
+ <li>If the argument is positive infinity, then the result is
  positive infinity.
- </li><li>If the argument is negative infinity, then the result is
- positive zero.</li></ul>
+ <li>If the argument is negative infinity, then the result is
+ positive zero.</ul>
 
  <p>The computed result must be within 1 ulp of the exact result.
- Results must be semi-monotonic.</p></div>
+ Results must be semi-monotonic.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>a</code> - the exponent to raise <i>e</i> to.</dd>
@@ -4681,7 +4403,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  is not <code>null</code> and is equal, ignoring case, to the string
  <code>"true"</code>. <p>
  Example: <code>Boolean.parseBoolean("True")</code> returns <tt>true</tt>.<br>
- Example: <code>Boolean.parseBoolean("yes")</code> returns <tt>false</tt>.</p></div>
+ Example: <code>Boolean.parseBoolean("yes")</code> returns <tt>false</tt>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>s</code> - the <code>String</code> containing the boolean
@@ -4776,7 +4498,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  (<code>'&#92;u004C'</code>) nor <code>l</code>
  (<code>'&#92;u006C'</code>) is permitted to appear at the end
  of the string as a type indicator, as would be permitted in
- Java programming language source code.</p></div>
+ Java programming language source code.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>s</code> - a <code>String</code> containing the <code>long</code>
@@ -5172,7 +4894,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  </pre></blockquote>
  These are the characters <code>'&#92;u0030'</code> through
  <code>'&#92;u0039'</code> and <code>'&#92;u0061'</code> through
- <code>'&#92;u0066'</code>.</p></div>
+ <code>'&#92;u0066'</code>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>i</code> - an integer to be converted to a string.</dd>
@@ -5225,7 +4947,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  </pre></blockquote>
  These are the characters <code>'&#92;u0030'</code> through
  <code>'&#92;u0039'</code> and  <code>'&#92;u0061'</code> through
- <code>'&#92;u0066'</code>.</p></div>
+ <code>'&#92;u0066'</code>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>l</code> - a <code>long</code> to be converted to a string.</dd>
@@ -5248,7 +4970,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  <ul>
  <li>If the argument is NaN, the result is the string
  &quot;<code>NaN</code>&quot;.
- </li><li>Otherwise, the result is a string that represents the sign and
+ <li>Otherwise, the result is a string that represents the sign and
      magnitude (absolute value) of the argument. If the sign is
      negative, the first character of the result is
      '<code>-</code>' (<code>'&#92;u002D'</code>); if the sign is
@@ -5259,18 +4981,18 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
      <code>"Infinity"</code>; thus, positive infinity produces
      the result <code>"Infinity"</code> and negative infinity
      produces the result <code>"-Infinity"</code>.
- </li><li>If <i>m</i> is zero, it is represented by the characters
+ <li>If <i>m</i> is zero, it is represented by the characters
      <code>"0.0"</code>; thus, negative zero produces the result
      <code>"-0.0"</code> and positive zero produces the result
      <code>"0.0"</code>.
- </li><li> If <i>m</i> is greater than or equal to 10<sup>-3</sup> but
+ <li> If <i>m</i> is greater than or equal to 10<sup>-3</sup> but
       less than 10<sup>7</sup>, then it is represented as the
       integer part of <i>m</i>, in decimal form with no leading
       zeroes, followed by '<code>.</code>'
       (<code>'&#92;u002E'</code>), followed by one or more
       decimal digits representing the fractional part of
       <i>m</i>.
- </li><li> If <i>m</i> is less than 10<sup>-3</sup> or greater than or
+ <li> If <i>m</i> is less than 10<sup>-3</sup> or greater than or
       equal to 10<sup>7</sup>, then it is represented in
       so-called "computerized scientific notation." Let <i>n</i>
       be the unique integer such that 10<sup><i>n</i> </sup>&lt;=
@@ -5285,8 +5007,8 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
       (<code>'&#92;u0045'</code>), followed by a representation
       of <i>n</i> as a decimal integer, as produced by the
       method <code><code>Integer.toString(int)</code></code>.
- </li></ul>
- </li></ul>
+ </ul>
+ </ul>
  How many digits must be printed for the fractional part of
  <i>m</i> or <i>a</i>? There must be at least one digit
  to represent the fractional part, and beyond that as many, but
@@ -5300,7 +5022,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  equally close to <i>x</i>, then <i>f</i> must be one of
  them and the least significant bit of the significand of
  <i>f</i> must be <code>0</code>.
- <p></p></div>
+ <p></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>f</code> - the float to be converted.</dd>
@@ -5321,7 +5043,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  <ul>
  <li>If the argument is NaN, the result is the string
      &quot;<code>NaN</code>&quot;.
- </li><li>Otherwise, the result is a string that represents the sign and
+ <li>Otherwise, the result is a string that represents the sign and
  magnitude (absolute value) of the argument. If the sign is negative,
  the first character of the result is '<code>-</code>'
  (<code>'&#92;u002D'</code>); if the sign is positive, no sign character
@@ -5332,18 +5054,18 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  <code>"Infinity"</code> and negative infinity produces the result
  <code>"-Infinity"</code>.
 
- </li><li>If <i>m</i> is zero, it is represented by the characters
+ <li>If <i>m</i> is zero, it is represented by the characters
  <code>"0.0"</code>; thus, negative zero produces the result
  <code>"-0.0"</code> and positive zero produces the result
  <code>"0.0"</code>.
 
- </li><li>If <i>m</i> is greater than or equal to 10<sup>-3</sup> but less
+ <li>If <i>m</i> is greater than or equal to 10<sup>-3</sup> but less
  than 10<sup>7</sup>, then it is represented as the integer part of
  <i>m</i>, in decimal form with no leading zeroes, followed by
  '<code>.</code>' (<code>'&#92;u002E'</code>), followed by one or
  more decimal digits representing the fractional part of <i>m</i>.
 
- </li><li>If <i>m</i> is less than 10<sup>-3</sup> or greater than or
+ <li>If <i>m</i> is less than 10<sup>-3</sup> or greater than or
  equal to 10<sup>7</sup>, then it is represented in so-called
  "computerized scientific notation." Let <i>n</i> be the unique
  integer such that 10<sup><i>n</i></sup> &lt;= <i>m</i> &lt;
@@ -5357,8 +5079,8 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  letter '<code>E</code>' (<code>'&#92;u0045'</code>), followed
  by a representation of <i>n</i> as a decimal integer, as
  produced by the method <code>Integer.toString(int)</code>.
- </li></ul>
- </li></ul>
+ </ul>
+ </ul>
  How many digits must be printed for the fractional part of
  <i>m</i> or <i>a</i>? There must be at least one digit to represent
  the fractional part, and beyond that as many, but only as many, more
@@ -5370,7 +5092,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  to <i>x</i>; or if two <code>double</code> values are equally close
  to <i>x</i>, then <i>d</i> must be one of them and the least
  significant bit of the significand of <i>d</i> must be <code>0</code>.
- <p></p></div>
+ <p></div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>d</code> - the <code>double</code> to be converted.</dd>
@@ -5683,7 +5405,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
 <div class="block">Sets the current instrumentation level.
  <p>
  Instrumentation level is used in evaluating <a href="../../../com/sun/btrace/annotations/OnMethod.html#enableAt--">OnMethod.enableAt()</a>
- expressions to enable/disable the probe handler.</p></div>
+ expressions to enable/disable the probe handler.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>level</code> - an arbitrary non negative integer number</dd>
@@ -5702,7 +5424,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
 <div class="block">Returns the current instrumentation level.
  <p>
  Instrumentation level is used in evaluating <a href="../../../com/sun/btrace/annotations/OnMethod.html#enableAt--">OnMethod.enableAt()</a>
- expressions to enable/disable the probe handler.</p></div>
+ expressions to enable/disable the probe handler.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the instrumentation level (non negative integer)</dd>
@@ -5863,7 +5585,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
 
  <p>May <a href="package-summary.html#Spurious">fail spuriously</a>
  and does not provide ordering guarantees, so is only rarely an
- appropriate alternative to <code>compareAndSet</code>.</p></div>
+ appropriate alternative to <code>compareAndSet</code>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>ai</code> - AtomicInteger whose value is weakly compared and set.</dd>
@@ -6090,7 +5812,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
 
  <p>May fail spuriously
  and does not provide ordering guarantees, so is only rarely an
- appropriate alternative to <code>compareAndSet</code>.</p></div>
+ appropriate alternative to <code>compareAndSet</code>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>al</code> - AtomicLong whose value is compared and set.</dd>
@@ -6377,7 +6099,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  This value may change during a particular invocation of the virtual
  machine.  Applications that are sensitive to the number of available
  processors should therefore occasionally poll this property and adjust
- their resource usage appropriately.</p></div>
+ their resource usage appropriately.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the maximum number of processors available to the virtual
@@ -6415,7 +6137,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  the host environment.
  <p>
  Note that the amount of memory required to hold an object of any
- given type may be implementation-dependent.</p></div>
+ given type may be implementation-dependent.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the total amount of memory currently available for current
@@ -6532,11 +6254,11 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  from multiple different sources: for examples, arguments passed from
  the application that launches the Java virtual machine such as
  the 'java' command, environment variables, configuration files, etc.
- </p><p>
+ <p>
  Typically, not all command-line options to the 'java' command
  are passed to the Java virtual machine.
  Thus, the returned input arguments may not
- include all command-line options.</p></div>
+ include all command-line options.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>a list of <tt>String</tt> objects; each element
@@ -6604,11 +6326,11 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  path separator character of the platform on which the Java
  virtual machine is running.
 
- </p><p>A Java virtual machine implementation may not support
+ <p>A Java virtual machine implementation may not support
  the boot class path mechanism for the bootstrap class loader
  to search for class files.
  The <a href="../../../com/sun/btrace/BTraceUtils.html#isBootClassPathSupported--"><code>isBootClassPathSupported()</code></a> method can be used
- to determine if the Java virtual machine supports this method.</p></div>
+ to determine if the Java virtual machine supports this method.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the boot class path.</dd>
@@ -6645,7 +6367,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
 
  <p> Multiple paths in the Java library path are separated by the
  path separator character of the platform of the Java virtual machine
- being monitored.</p></div>
+ being monitored.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>the Java library path.</dd>
@@ -6829,7 +6551,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  make the memory they currently occupy available for quick reuse.
  When control returns from the method call, the Java Virtual
  Machine has made a best effort to reclaim space from all discarded
- objects. This method calls Sys.gc() to perform GC.</p></div>
+ objects. This method calls Sys.gc() to perform GC.</div>
 </li>
 </ul>
 <a name="runFinalization--">
@@ -6847,7 +6569,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  methods have not yet been run. When control returns from the
  method call, the Java Virtual Machine has made a best effort to
  complete all outstanding finalizations. This method calls
- Sys.runFinalization() to run finalization.</p></div>
+ Sys.runFinalization() to run finalization.</div>
 </li>
 </ul>
 <a name="serialize-java.io.Serializable-java.lang.String-">
@@ -7118,7 +6840,7 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
  preserved. If <code>count</code> is negative the smallest values will be preserved. If <code>count</code>
  is zero then all elements will be removed.
 
- </p><p>Behavior is intended to be similar to the dtrace <code>trunc()</code> function.</p></div>
+ <p>Behavior is intended to be similar to the dtrace <code>trunc()</code> function.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>aggregation</code> - the aggregation to be truncated</dd>
@@ -7228,461 +6950,5 @@ public static&nbsp;java.lang.String&nbsp;probeMethod()</pre>
 <!--   -->
 </a></div>
 <!-- ======== END OF BOTTOM NAVBAR ======= -->
-</body>
-</html>
-
-    
-  </div>
-
-
-          </div>
-          
-
-
-          
-  <div class="comments" id="comments">
-    
-      <div id="disqus_thread">
-        <noscript>
-          Please enable JavaScript to view the
-          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
-        </noscript>
-      </div>
-    
-  </div>
-
-
-        </div>
-        
-          
-  
-  <div class="sidebar-toggle">
-    <div class="sidebar-toggle-line-wrap">
-      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
-      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
-    </div>
-  </div>
-
-  <aside id="sidebar" class="sidebar">
-    <div class="sidebar-inner">
-
-      
-
-      
-
-      <section class="site-overview sidebar-panel sidebar-panel-active">
-        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
-          <img class="site-author-image" itemprop="image"
-               src="/media/avatar.png"
-               alt="nullwy" />
-          <p class="site-author-name" itemprop="name">nullwy</p>
-           
-              <p class="site-description motion-element" itemprop="description"></p>
-          
-        </div>
-        <nav class="site-state motion-element">
-
-          
-            <div class="site-state-item site-state-posts">
-              <a href="/archives">
-                <span class="site-state-item-count">21</span>
-                <span class="site-state-item-name">日志</span>
-              </a>
-            </div>
-          
-
-          
-            
-            
-            <div class="site-state-item site-state-categories">
-              <a href="/categories/index.html">
-                <span class="site-state-item-count">6</span>
-                <span class="site-state-item-name">分类</span>
-              </a>
-            </div>
-          
-
-          
-            
-            
-            <div class="site-state-item site-state-tags">
-              <a href="/tags/index.html">
-                <span class="site-state-item-count">33</span>
-                <span class="site-state-item-name">标签</span>
-              </a>
-            </div>
-          
-
-        </nav>
-
-        
-          <div class="feed-link motion-element">
-            <a href="/atom.xml" rel="alternate">
-              <i class="fa fa-rss"></i>
-              RSS
-            </a>
-          </div>
-        
-
-        <div class="links-of-author motion-element">
-          
-            
-              <span class="links-of-author-item">
-                <a href="https://github.com/yulewei" target="_blank" title="GitHub">
-                  
-                    <i class="fa fa-fw fa-github"></i>
-                  
-                  GitHub
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="https://www.douban.com/people/yulewei/" target="_blank" title="豆瓣">
-                  
-                    <i class="fa fa-fw fa-globe"></i>
-                  
-                  豆瓣
-                </a>
-              </span>
-            
-              <span class="links-of-author-item">
-                <a href="mailto:yulewei@gmail.com" target="_blank" title="Email">
-                  
-                    <i class="fa fa-fw fa-envelope-o"></i>
-                  
-                  Email
-                </a>
-              </span>
-            
-          
-        </div>
-
-        
-        
-
-        
-        
-
-        
-
-
-      </section>
-
-      
-
-      
-
-    </div>
-  </aside>
-
-
-        
-      </div>
-    </main>
-
-    <footer id="footer" class="footer">
-      <div class="footer-inner">
-        <div class="copyright" >
-  
-  &copy; 
-  <span itemprop="copyrightYear">2018</span>
-  <span class="with-love">
-    <i class="fa fa-heart"></i>
-  </span>
-  <span class="author" itemprop="copyrightHolder">nullwy</span>
-</div>
-
-
-<div class="powered-by">
-  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
-</div>
-
-<div class="theme-info">
-  主题 -
-  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Mist
-  </a>
-</div>
-
-
-        
-
-        
-      </div>
-    </footer>
-
-    
-      <div class="back-to-top">
-        <i class="fa fa-arrow-up"></i>
-        
-      </div>
-    
-
-  </div>
-
-  
-
-<script type="text/javascript">
-  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
-    window.Promise = null;
-  }
-</script>
-
-
-
-
-
-
-
-
-
-  
-
-
-
-
-
-
-
-
-
-
-
-
-  
-  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
-
-  
-  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
-
-  
-  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
-
-  
-  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
-
-  
-  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-
-
-  
-
-
-  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
-
-  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
-
-
-
-  
-  
-
-  
-
-  
-
-
-  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
-
-
-
-  
-
-
-  
-
-    
-      <script id="dsq-count-scr" src="https://yulewei.disqus.com/count.js" async></script>
-    
-
-    
-      <script type="text/javascript">
-        var disqus_config = function () {
-          this.page.url = 'http://nullwy.me/misc/btrace/javadoc/com/sun/btrace/BTraceUtils.html';
-          this.page.identifier = 'misc/btrace/javadoc/com/sun/btrace/BTraceUtils.html';
-          this.page.title = '';
-        };
-        var d = document, s = d.createElement('script');
-        s.src = 'https://yulewei.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', '' + +new Date());
-        (d.head || d.body).appendChild(s);
-      </script>
-    
-
-  
-
-
-
-
-	
-
-
-
-
-
-  
-
-
-
-
-
-  
-
-
-
-
-
-
-
-
-  
-
-
-
-
-
-  
-
-  
-  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
-  <script>AV.initialize("oBkAyR9bv2zBy8BPHzdohx1Y-gzGzoHsz", "gbvCf9BDUpCCixOCAjmye5JK");</script>
-  <script>
-    function showTime(Counter) {
-      var query = new AV.Query(Counter);
-      var entries = [];
-      var $visitors = $(".leancloud_visitors");
-
-      $visitors.each(function () {
-        entries.push( $(this).attr("id").trim() );
-      });
-
-      query.containedIn('url', entries);
-      query.find()
-        .done(function (results) {
-          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
-
-          if (results.length === 0) {
-            $visitors.find(COUNT_CONTAINER_REF).text(0);
-            return;
-          }
-
-          for (var i = 0; i < results.length; i++) {
-            var item = results[i];
-            var url = item.get('url');
-            var time = item.get('time');
-            var element = document.getElementById(url);
-
-            $(element).find(COUNT_CONTAINER_REF).text(time);
-          }
-          for(var i = 0; i < entries.length; i++) {
-            var url = entries[i];
-            var element = document.getElementById(url);
-            var countSpan = $(element).find(COUNT_CONTAINER_REF);
-            if( countSpan.text() == '') {
-              countSpan.text(0);
-            }
-          }
-        })
-        .fail(function (object, error) {
-          console.log("Error: " + error.code + " " + error.message);
-        });
-    }
-
-    function addCount(Counter) {
-      var $visitors = $(".leancloud_visitors");
-      var url = $visitors.attr('id').trim();
-      var title = $visitors.attr('data-flag-title').trim();
-      var query = new AV.Query(Counter);
-
-      query.equalTo("url", url);
-      query.find({
-        success: function(results) {
-          if (results.length > 0) {
-            var counter = results[0];
-            counter.fetchWhenSave(true);
-            counter.increment("time");
-            counter.save(null, {
-              success: function(counter) {
-                var $element = $(document.getElementById(url));
-                $element.find('.leancloud-visitors-count').text(counter.get('time'));
-              },
-              error: function(counter, error) {
-                console.log('Failed to save Visitor num, with error message: ' + error.message);
-              }
-            });
-          } else {
-            var newcounter = new Counter();
-            /* Set ACL */
-            var acl = new AV.ACL();
-            acl.setPublicReadAccess(true);
-            acl.setPublicWriteAccess(true);
-            newcounter.setACL(acl);
-            /* End Set ACL */
-            newcounter.set("title", title);
-            newcounter.set("url", url);
-            newcounter.set("time", 1);
-            newcounter.save(null, {
-              success: function(newcounter) {
-                var $element = $(document.getElementById(url));
-                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
-              },
-              error: function(newcounter, error) {
-                console.log('Failed to create');
-              }
-            });
-          }
-        },
-        error: function(error) {
-          console.log('Error:' + error.code + " " + error.message);
-        }
-      });
-    }
-
-    $(function() {
-      var Counter = AV.Object.extend("Counter");
-      if ($('.leancloud_visitors').length == 1) {
-        addCount(Counter);
-      } else if ($('.post-title-link').length > 1) {
-        showTime(Counter);
-      }
-    });
-  </script>
-
-
-
-  
-
-  
-  
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Config({
-        tex2jax: {
-          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
-          processEscapes: true,
-          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
-        }
-      });
-    </script>
-
-    <script type="text/x-mathjax-config">
-      MathJax.Hub.Queue(function() {
-        var all = MathJax.Hub.getAllJax(), i;
-        for (i=0; i < all.length; i += 1) {
-          all[i].SourceElement().parentNode.className += ' has-jax';
-        }
-      });
-    </script>
-    <script type="text/javascript" src="//cdn.bootcss.com/mathjax/2.6.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-  
-
-
-  
-
-  
-
 </body>
 </html>

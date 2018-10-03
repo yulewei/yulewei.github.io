@@ -691,9 +691,9 @@ blockquote {
             
             <tag> Java </tag>
             
-            <tag> JVM </tag>
-            
             <tag> 字节码 </tag>
+            
+            <tag> JVM </tag>
             
         </tags>
         
@@ -780,11 +780,11 @@ blockquote {
             
             <tag> Java </tag>
             
+            <tag> JVM </tag>
+            
             <tag> 编译器 </tag>
             
             <tag> javac </tag>
-            
-            <tag> JVM </tag>
             
         </tags>
         
