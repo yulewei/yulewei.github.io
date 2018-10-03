@@ -225,27 +225,27 @@ specified the location. In OnMethod annotation, traced class name is specified b
 "clazz" property and traced method is specified by "method" property. "clazz" may be 
 a fully qualified class name (like <b><code>java.awt.Component</code></b> or a regular 
 expression specified within two forward slashes.  Refer to the samples
-<b><a href="../samples/NewComponent.java">NewComponent.java</a></b> and <b><a href="../samples/Classload.java">
+<b><a href="https://github.com/btraceio/btrace/tree/master/samples/NewComponent.java">NewComponent.java</a></b> and <b><a href="https://github.com/btraceio/btrace/tree/master/samples/Classload.java">
 Classload.java</a></b>. The regular expression can match zero or more 
 classes in which case all matching classes are instrumented. For example <b><code>/java\\.awt\\..+/</code></b> 
 matches all classes in java.awt package. Also, method name can be a regular expression as well - matching 
-zero or more methods. Refer to the sample <b><a href="../samples/MultiClass.java">MultiClass.java</a></b>.
+zero or more methods. Refer to the sample <b><a href="https://github.com/btraceio/btrace/tree/master/samples/MultiClass.java">MultiClass.java</a></b>.
 There is another way to abstractly specify traced class(es) and method(s). Traced classes and methods may be
 specified by annotation. For example, if the "clazz" attribute is specified as <b><code>@javax.jws.WebService</code></b>
 BTrace will instrument all classes that are annotated by the WebService annotation. Similarly, method level annotations
 may be used to specify methods abstractly. Refer to the sample
-<b><a href="../samples/WebServiceTracker.java">WebServiceTracker.java</a></b>.
+<b><a href="https://github.com/btraceio/btrace/tree/master/samples/WebServiceTracker.java">WebServiceTracker.java</a></b>.
 It is also possible to combine regular expressions with annotations - like
 <b><code>@/com\\.acme\\..+/</code></b> matches any class that is annotated by any annotation that matches the given
 regular expression. It is possible to match multiple classes by specifying super type. i.e., match all classes that are subtypes of
 a given super type. <b><code>+java.lang.Runnable</code></b> matches all classes implementing java.lang.Runnable
-interface. Refer to the sample <b><a href="../samples/SubtypeTracer.java">SubtypeTracer.java</a></b>.
+interface. Refer to the sample <b><a href="https://github.com/btraceio/btrace/tree/master/samples/SubtypeTracer.java">SubtypeTracer.java</a></b>.
 
 <li><b><a href="javadoc/com/sun/btrace/annotations/OnTimer.html">@com.sun.btrace.annotations.OnTimer</a></b> 
 annotation can be used to specify tracing 
 actions that have to run periodically once every N milliseconds. Time period is specified as long
 "value" property of this annotation. Refer to the sample
-<b><a href="../samples/Histogram.java">Histogram.java</a></b>
+<b><a href="https://github.com/btraceio/btrace/tree/master/samples/Histogram.java">Histogram.java</a></b>
 
 <li><b><a href="javadoc/com/sun/btrace/annotations/OnError.html">@com.sun.btrace.annotations.OnError</a></b> 
 annotation can be used to specify 
@@ -255,7 +255,7 @@ the other BTrace action methods in the same BTrace class.
 <li><b><a href="javadoc/com/sun/btrace/annotations/OnExit.html">@com.sun.btrace.annotations.OnExit</a></b> 
 annotation can be used to specify
 actions that are run when BTrace code calls "exit(int)" built-in function to finish the tracing
-"session". Refer to the sample <b><a href="../samples/ProbeExit.java">ProbeExit.java</a></b>.
+"session". Refer to the sample <b><a href="https://github.com/btraceio/btrace/tree/master/samples/ProbeExit.java">ProbeExit.java</a></b>.
 <li><b><a href="javadoc/com/sun/btrace/annotations/OnEvent.html">@com.sun.btrace.annotations.OnEvent</a></b>
  annotation is used to associate tracing
 methods with "external" events send by BTrace client. BTrace methods annotated by this annotation are called when
@@ -265,18 +265,18 @@ This way certain tracing actions can be executed whenever an external event "fir
 the command line BTrace client sends "events" whenever use presses Ctrl-C (SIGINT). On SIGINT,
 a console menu is shown to send an event or exit the client [which is the default for SIGINT].
 Refer to the sample
-<b><a href="../samples/HistoOnEvent.java">HistoOnEvent.java</a></b>
+<b><a href="https://github.com/btraceio/btrace/tree/master/samples/HistoOnEvent.java">HistoOnEvent.java</a></b>
 
 <li><b><a href="javadoc/com/sun/btrace/annotations/OnLowMemory.html">@com.sun.btrace.annotations.OnLowMemory</a></b>
 annotation can be used to trace memory threshold exceed event.
-See sample <b><a href="../samples/MemAlerter.java">MemAlerter.java</a></b>
+See sample <b><a href="https://github.com/btraceio/btrace/tree/master/samples/MemAlerter.java">MemAlerter.java</a></b>
 
 <li><b><a href="javadoc/com/sun/btrace/annotations/OnProbe.html">@com.sun.btrace.annotations.OnProbe</a></b> 
 annotation can be used to specify to avoid using implementation internal classes
 in BTrace scripts. @OnProbe probe specifications are mapped to one or more @OnMethod
 specifications by the BTrace VM agent. Currently, this mapping is done using a XML probe descriptor
-file [accessed by the BTrace agent]. Refer to the sample <b><a href="../samples/SocketTracker1.java">SocketTracker1.java</a></b>
-and associated probe descriptor file <b><a href="../samples/java.net.socket.xml">java.net.socket.xml</a></b>.
+file [accessed by the BTrace agent]. Refer to the sample <b><a href="https://github.com/btraceio/btrace/tree/master/samples/SocketTracker1.java">SocketTracker1.java</a></b>
+and associated probe descriptor file <b><a href="https://github.com/btraceio/btrace/tree/master/samples/java.net.socket.xml">java.net.socket.xml</a></b>.
 When running this sample, this xml file needs to be copied in the directory where
 the target JVM runs (or fix probeDescPath option in btracer.bat to point to whereever
 the .xml file is).
@@ -286,25 +286,25 @@ the .xml file is).
     <li><b><a href="javadoc/com/sun/btrace/annotations/Self.html">@com.sun.btrace.annotations.Self</a></b>
         annotation can be used to mark an argument to hold *this* (or *self*) value. Refer to the samples
 
-        <b><a href="../samples/AWTEventTracer.java">AWTEventTracer.java</a></b> or
-        <b><a href="../samples/AllCalls1.java">AllCalls1.java</a></b>
+        <b><a href="https://github.com/btraceio/btrace/tree/master/samples/AWTEventTracer.java">AWTEventTracer.java</a></b> or
+        <b><a href="https://github.com/btraceio/btrace/tree/master/samples/AllCalls1.java">AllCalls1.java</a></b>
 
     </li>
     <li><b><a href="javadoc/com/sun/btrace/annotations/Return.html">@com.sun.btrace.annotations.Return</a></b>
         annotation can be used to mark an argument to hold the return value. Refer to the sample
 
-        <b><a href="../samples/Classload.java">Classload.java</a></b>
+        <b><a href="https://github.com/btraceio/btrace/tree/master/samples/Classload.java">Classload.java</a></b>
     </li>
     <li><b><a href="javadoc/com/sun/btrace/annotations/CalledInstance.html">@com.sun.btrace.annotations.CalledInstance</a></b>
         annotation can be used to mark an argument to hold the called instance value. Refer to the sample
 
-        <b><a href="../samples/AllCalls2.java">AllCalls2.java</a></b>
+        <b><a href="https://github.com/btraceio/btrace/tree/master/samples/AllCalls2.java">AllCalls2.java</a></b>
     </li>
     <li><b><a href="javadoc/com/sun/btrace/annotations/CalledMethod.html">@com.sun.btrace.annotations.CalledMethod</a></b>
         can be used to mark an argument to hold the called method name. Refer to the samples
 
-        <b><a href="../samples/AllCalls1.java">AllCalls1.java</a></b> or
-        <b><a href="../samples/AllCalls2.java">AllCalls2.java</a></b>
+        <b><a href="https://github.com/btraceio/btrace/tree/master/samples/AllCalls1.java">AllCalls1.java</a></b> or
+        <b><a href="https://github.com/btraceio/btrace/tree/master/samples/AllCalls2.java">AllCalls2.java</a></b>
     </li>
 </ul>
 <h4>Field Annotations</h4>
@@ -313,30 +313,30 @@ the .xml file is).
 (static fields) to specify that the field has to be mapped to a jvmstat counter. Using this, a BTrace
 program can expose tracing counters to external jvmstat clients (such as jstat). Refer to the sample
 
-<b><a href="../samples/ThreadCounter.java">ThreadCounter.java</a></b>
+<b><a href="https://github.com/btraceio/btrace/tree/master/samples/ThreadCounter.java">ThreadCounter.java</a></b>
 
 <li><b><code><a href="javadoc/com/sun/btrace/annotations/Property.html">@com.sun.btrace.annotations.Property</a></code></b> annotation
 can be used to flag a specific (static) field as a MBean attribute. If a BTrace class has atleast one static field with
 @Property attribute, then a MBean is created and registered with platform MBean server. JMX clients such as VisualVM, jconsole can be
 used to view such BTrace MBeans. After attaching BTrace to the target program, you can attach VisualVM or jconsole to the same
 program and view the newly created BTrace MBean. With VisualVM and jconsole, you can use MBeans tab to view the BTrace domain and
-check out it's attributes. Refer to the samples <b><a href="../samples/ThreadCounterBean.java">ThreadCounterBean</a></b> and
-<b><a href="../samples/HistogramBean.java">HistogramBean.java</a></b>.
+check out it's attributes. Refer to the samples <b><a href="https://github.com/btraceio/btrace/tree/master/samples/ThreadCounterBean.java">ThreadCounterBean</a></b> and
+<b><a href="https://github.com/btraceio/btrace/tree/master/samples/HistogramBean.java">HistogramBean.java</a></b>.
 
 <li><b><code><a href="javadoc/com/sun/btrace/annotations/TLS.html">@com.sun.btrace.annotations.TLS</a></code></b> annotation can be used with BTrace fields (static
 fields) to specify that the field is a thread local field. Each Java thread gets a separate "copy" of
 the field. These thread local fields may be used by BTrace programs to identify whether we reached multiple
 probe actions from the same thread or not. Refer to the samples 
-<b><a href="../samples/OnThrow.java">OnThrow.java</a></b> and
-<b><a href="../samples/WebServiceTracker.java">WebServiceTracker.java</a></b>
+<b><a href="https://github.com/btraceio/btrace/tree/master/samples/OnThrow.java">OnThrow.java</a></b> and
+<b><a href="https://github.com/btraceio/btrace/tree/master/samples/WebServiceTracker.java">WebServiceTracker.java</a></b>
 </ul>
 
 <h4>Class Annotations</h4>
 <ul>
 <li><b><code><a href="javadoc/com/sun/btrace/annotations/DTrace.html">@com.sun.btrace.annotations.DTrace</a></code></b> annotation can be used to associate a simple one-liner D-script (inlined in BTrace Java class) with
-the BTrace program. Refer to the sample <b><a href="../samples/DTraceInline.java">DTraceInline.java</a></b>.
+the BTrace program. Refer to the sample <b><a href="https://github.com/btraceio/btrace/tree/master/samples/DTraceInline.java">DTraceInline.java</a></b>.
 <li><b><code><a href="javadoc/com/sun/btrace/annotations/DTraceRef.html">@com.sun.btrace.annotations.DTraceRef</a></code></b> annotation can be used to associate a D-script (stored in a separate file) with the BTrace 
-program. Refer to the sample <b><a href="../samples/DTraceRefDemo.java">DTraceRefDemo.java</a></b>.
+program. Refer to the sample <b><a href="https://github.com/btraceio/btrace/tree/master/samples/DTraceRefDemo.java">DTraceRefDemo.java</a></b>.
 <li><b><code><a href="javadoc/com/sun/btrace/annotations/BTrace.html">@com.sun.btrace.annotations.BTrace</a></code></b> annotation must be used to designate a given Java class as a BTrace program. This annotation is 
 enforced by the BTrace compiler as well as by the BTrace agent.
 </ul>
@@ -365,136 +365,136 @@ platforms (Solaris 10 or below or any other OS).
 <h3>BTrace Samples</h3>
 
 <p>
-<b><a href="../samples">BTrace samples</a></b>
+<b><a href="https://github.com/btraceio/btrace/tree/master/samples">BTrace samples</a></b>
 </p>
 
 <p>
 One lines about samples:
 <ul>
-<li><a href="../samples/AWTEventTracer.java">AWTEventTracer.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/AWTEventTracer.java">AWTEventTracer.java</a> -
 demonstates tracing of AWT events by instrumenting EventQueue.dispatchEvent()
 method. Can filter events by instanceof check. This sample filters and prints
 only focus events.
-<li><a href="../samples/AllLines.java">AllLines.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/AllLines.java">AllLines.java</a> -
 demonstates line number based BTrace probes. It is possible to probe
 into any class (or classes) and line number(s). When the specified
 line number(s) of specified class(es) is reached, the BTrace probe
 fires and the corresponding action is executed.
-<li><a href="../samples/ArgArray.java">ArgArray.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/ArgArray.java">ArgArray.java</a> -
 prints all input arguments in every readXXX method of every class
 in java.io package. Demonstrates argument array access and multiple
 class/method matching in probe specifications.
-<li><a href="../samples/Classload.java">Classload.java</a> - prints stack trace
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/Classload.java">Classload.java</a> - prints stack trace
 on every successful classload (<code>defineClass</code> returns) by any userdefined
 class loader.
-<li><a href="../samples/CommandArg.java">CommandArg.java</a> - demonstrates
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/CommandArg.java">CommandArg.java</a> - demonstrates
 BTrace command line argument access.
-<li><a href="../samples/Deadlock.java">Deadlock.java</a> - demonstrates
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/Deadlock.java">Deadlock.java</a> - demonstrates
 @OnTimer probe and <code>deadlock()</code> built-in function.
-<li><a href="../samples/DTraceInline.java">DTraceInline.java</a> - demonstrates
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/DTraceInline.java">DTraceInline.java</a> - demonstrates
 @DTrace annotation to associate a simple one-line D-script with the BTrace
 program.
-<li><a href="../samples/DTraceRefDemo.java">DTraceRefDemo.java</a> - demonstrates @DTraceRef annotation to associate a D-script file with the BTrace
-program. This sample associates <a href="../samples/classload.d">classload.d</a>with itself.
-<li><a href="../samples/FileTracker.java">FileTracker.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/DTraceRefDemo.java">DTraceRefDemo.java</a> - demonstrates @DTraceRef annotation to associate a D-script file with the BTrace
+program. This sample associates <a href="https://github.com/btraceio/btrace/tree/master/samples/classload.d">classload.d</a>with itself.
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/FileTracker.java">FileTracker.java</a> -
 prints file open for read/write by probing into <code>File{Input/Output}Stream</code>
 constructor entry points.
-<li><a href="../samples/FinalizeTracker.java">FinalizeTracker.java</a>
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/FinalizeTracker.java">FinalizeTracker.java</a>
 - demonstrates that we can print all fields of an object and access
 (private) fields (read-only) as well. This is useful in debugging
 / troubleshooting scenarios. This sample prints info on close()
 /finalize() methods of java.io.FileInputStream class.
-<li><a href="../samples/Histogram.java">Histogram.java</a> - demonstates
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/Histogram.java">Histogram.java</a> - demonstates
 usage of BTrace maps for collecting histogram (of <code>javax.swing.JComponent</code>
 objects created by an app - histogram by subclass name and count).
-<li><a href="../samples/HistogramBean.java">HistogramBean.java</a> - demonstates
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/HistogramBean.java">HistogramBean.java</a> - demonstates
 JMX integration. This sample exposes a Map as MBean attribute using <code>@Property</code>
 annotation.
-<li><a href="../samples/HistoOnEvent.java">HistoOnEvent.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/HistoOnEvent.java">HistoOnEvent.java</a> -
 demonstrates getting trace output based on client side event. After
 starting the script by BTrace client, press Ctrl-C to get menu to
 send event or exit. On sending event, histogram is printed. This way
 client can "pull" trace output whenever needed rather than BTrace
 agent pushing the trace output always or based on timer.
 
-<li><a href="../samples/JdbcQueries.java">JdbcQueries.java</a> - demonstrates
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/JdbcQueries.java">JdbcQueries.java</a> - demonstrates
 BTrace aggregation facility. This facility is similar to <b><a href="http://dlc.sun.com/osol/docs/content/DTRCUG/gcggh.html">
 DTrace aggregation</a></b> facility.
 
-<li><a href="../samples/JInfo.java">JInfo.java</a> - demonstrates
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/JInfo.java">JInfo.java</a> - demonstrates
 <code>printVmArguments()</code>, <code>printProperties()</code> and
 <code>printEnv()</code> built-in functions.
-<li><a href="../samples/JMap.java">JMap.java</a> - demonstrates
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/JMap.java">JMap.java</a> - demonstrates
 <code>dumpHeap()</code> built-in function to dump (hprof binary format)
 heap dump of the target application.
-<li><a href="../samples/JStack.java">JStack.java</a> - demonstrates
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/JStack.java">JStack.java</a> - demonstrates
 <code>jstackAll()</code> built-in function to print stack traces of
 all the threads.
-<li><a href="../samples/LogTracer.java">LogTracer.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/LogTracer.java">LogTracer.java</a> -
 demonstrates trapping into an instance method (Logger.log) and 
 printing private field value (of LogRecord object) by <code>field()</code>
 and <code>objectValue()</code> built-in functions.
-<li><a href="../samples/MemAlerter.java">MemAlerter.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/MemAlerter.java">MemAlerter.java</a> -
 demonstrates tracing low memory event by @OnLowMememory annotation.
-<li><a href="../samples/Memory.java">Memory.java</a> - prints
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/Memory.java">Memory.java</a> - prints
 memory stat once every 4 seconds by a timer probe. Demonstrates
 memory stat built-in functions.
-<li><a href="../samples/MultiClass.java">MultiClass.java</a> 
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/MultiClass.java">MultiClass.java</a> 
 - demonstrates inserting trace code into multiple methods of
 multiple classes using regular expressions for <code>clazz</code>
 and <code>method</code> fields of <code>@OnMethod</code> annotation.
-<li><a href="../samples/NewComponent.java">NewComponent.java</a>
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/NewComponent.java">NewComponent.java</a>
 - tracks every <code>java.awt.Component</code> creation and increments
 a counter and prints the counter based on a timer.
-<li><a href="../samples/OnThrow.java">OnThrow.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/OnThrow.java">OnThrow.java</a> -
 prints exception stack trace every time any exception instance is
 created. In most scenarios, exceptions are thrown immediately after
 creation. So, it we get stack trace of throw points.
-<li><a href="../samples/ProbeExit.java">ProbeExit.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/ProbeExit.java">ProbeExit.java</a> -
 demonstrates <code>@OnExit</code> probe and <code>exit(int)</code>
 built-in function.
-<li><a href="../samples/Sizeof.java">Sizeof.java</a>
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/Sizeof.java">Sizeof.java</a>
 - demonstates "sizeof" built-in function that can be used to
 get (approx.) size of a given Java object. It is possible to get
 size-wise histogram etc. using this built-in.
-<li><a href="../samples/SocketTracker.java">SocketTracker.java</a>
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/SocketTracker.java">SocketTracker.java</a>
 - prints every server socker creation/bind and client socket accepts.
-<li><a href="../samples/SocketTracker1.java">SocketTracker1.java</a>
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/SocketTracker1.java">SocketTracker1.java</a>
 - similar to SocketTracker.java sample, except that this sample uses
 @OnProbe probes to avoid using Sun specific socket channel implementation
 classes in BTrace program. Instead @OnProbe probes are mapped to @OnMethod probes
 by BTrace agent.
-<li><a href="../samples/SysProp.java">SysProp.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/SysProp.java">SysProp.java</a> -
 demonstrates that it is okay to probe into System classes (like
 java.lang.System) and call BTrace built-in functions in the action
 method.
 
-<li><a href="../samples/SubtypeTracer.java">SubtypeTracer.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/SubtypeTracer.java">SubtypeTracer.java</a> -
 demonstrates that it is possible to match all subtypes of a given supertype.
 
-<li><a href="../samples/ThreadCounter.java">ThreadCounter.java</a>
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/ThreadCounter.java">ThreadCounter.java</a>
 - demonstrates use of jvmstat counters from BTrace programs.
 
-<li><a href="../samples/ThreadCounterBean.java">ThreadCounterBean.java</a>
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/ThreadCounterBean.java">ThreadCounterBean.java</a>
 - demonstrates exposing the BTrace program as a JMX bean with one
 attribute (using @Property annotation).
 
-<li><a href="../samples/ThreadBean.java">ThreadBean.java</a>
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/ThreadBean.java">ThreadBean.java</a>
 - demonstrates the use of preprocessor of BTrace [and JMX integratio].
 
-<li><a href="../samples/ThreadStart.java">ThreadStart.java</a>
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/ThreadStart.java">ThreadStart.java</a>
 - demonstrates raising DTrace probes from BTrace programs. See also
-<a href="../samples/jthread.d">jthread.d</a> - the associated D-script.
+<a href="https://github.com/btraceio/btrace/tree/master/samples/jthread.d">jthread.d</a> - the associated D-script.
 This sample raises a DTrace USDT probe whenever the traced program enters
 java.lang.Thread.start() method. The BTrace program passes JavaThread's
 name to DTrace.
-<li><a href="../samples/Timers.java">Timers.java</a> - demonstrates
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/Timers.java">Timers.java</a> - demonstrates
 multiple timer probes (<code>@OnTimer</code>) in a BTrace program.
-<li><a href="../samples/URLTracker.java">URLTracker.java</a> -
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/URLTracker.java">URLTracker.java</a> -
 prints URL every time <code>URL.openConnection</code> returns
-successfully. This program uses <a href="../samples/jurls.d">jurls.d</a>
+successfully. This program uses <a href="https://github.com/btraceio/btrace/tree/master/samples/jurls.d">jurls.d</a>
 D-script as well (to show histogram of URLs opened via DTrace). 
-<li><a href="../samples/WebServiceTracker.java">WebServiceTracker.java</a>
+<li><a href="https://github.com/btraceio/btrace/tree/master/samples/WebServiceTracker.java">WebServiceTracker.java</a>
 - demonstates tracing classes and methods by specifying class and
 method level annotations rather than class and method names.
 </ul>
