@@ -2,6 +2,41 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://nullwy.me/2016/12/mysql-5.7-json/</loc>
+    
+    <lastmod>2018-09-09T04:37:24.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nullwy.me/2016/12/mac-mysql-5.7/</loc>
+    
+    <lastmod>2018-09-09T04:36:45.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nullwy.me/2017/05/java-method-parameter/</loc>
+    
+    <lastmod>2018-09-09T04:36:18.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nullwy.me/2017/04/javac-api/</loc>
+    
+    <lastmod>2018-09-09T04:35:55.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nullwy.me/2016/12/java-8-stream-api/</loc>
+    
+    <lastmod>2018-09-09T04:34:19.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://nullwy.me/2018/06/mysql-binlog/</loc>
     
     <lastmod>2018-09-02T12:32:12.000Z</lastmod>
@@ -19,20 +54,6 @@
     <loc>http://nullwy.me/2017/01/mysql-data-types/</loc>
     
     <lastmod>2018-09-02T12:25:27.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2016/12/mac-mysql-5.7/</loc>
-    
-    <lastmod>2018-09-02T12:25:18.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2016/12/mysql-5.7-json/</loc>
-    
-    <lastmod>2018-09-02T12:25:12.000Z</lastmod>
     
   </url>
   
@@ -79,30 +100,9 @@
   </url>
   
   <url>
-    <loc>http://nullwy.me/2017/04/javac-api/</loc>
-    
-    <lastmod>2018-01-17T14:11:58.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2016/12/java-8-stream-api/</loc>
-    
-    <lastmod>2018-01-17T14:11:19.000Z</lastmod>
-    
-  </url>
-  
-  <url>
     <loc>http://nullwy.me/2016/12/mybatis-generator/</loc>
     
     <lastmod>2018-01-17T14:11:12.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2017/05/java-method-parameter/</loc>
-    
-    <lastmod>2018-01-17T14:11:04.000Z</lastmod>
     
   </url>
   
