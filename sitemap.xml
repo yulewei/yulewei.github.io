@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://nullwy.me/2018/10/java-agent/</loc>
+    
+    <lastmod>2018-10-06T18:01:40.000Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://nullwy.me/2016/12/mysql-5.7-json/</loc>
     
     <lastmod>2018-09-09T04:37:24.000Z</lastmod>
