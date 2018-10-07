@@ -385,7 +385,7 @@
       
         
           <p>Java 从 1.5 开始提供了 <code>java.lang.instrument</code>（<a href="https://docs.oracle.com/javase/8/docs/technotes/guides/instrumentation/">doc</a>）包，该包为检测（<a href="https://en.wikipedia.org/wiki/Instrumentation_%28computer_programming%29">instrument</a>） Java 程序提供 API，比如用于监控、收集性能信息、诊断问题。通过 <code>java.lang.instrument</code> 实现工具被称为 Java Agent。Java Agent 可以修改类文件的字节码，通常是，在字节码方法插入额外的字节码来完成检测。关于如何使用 <code>java.lang.instrument</code> 包，可以参考 javadoc 的包描述（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html">en</a>, <a href="http://www.cjsdn.net/doc/jdk60/java/lang/instrument/package-summary.html">zh</a>）。</p>
-<p>开发 Java Agent 的涉及的要点如下图所示 [ <a href="https://zeroturnaround.com/rebellabs/how-to-inspect-classes-in-your-jvm/">ref</a> ]<br><img width="700" alt="Java Agent" title="Java Agent" src="/media/java-agent-overview.png"></p>
+<p>开发 Java Agent 的涉及的要点如下图所示 [ <a href="https://zeroturnaround.com/rebellabs/how-to-inspect-classes-in-your-jvm/">ref</a> ]<br><img width="700" alt="Java Agent" title="Java Agent" src="http://static.nullwy.me/java-agent-overview.png"></p>
 <p>Java Agent 支持两种方式加载，启动时加载，即在 JVM 程序启动时在命令行指定一个选项来启动代理；启动后加载，这种方式使用从 JDK 1.6 开始提供的 <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/attach/index.html">Attach API</a> 来动态加载代理。</p>
           <!--noindex-->
           <div class="post-button text-center">

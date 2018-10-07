@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://nullwy.me/"/>
-  <updated>2018-10-06T18:10:21.000Z</updated>
+  <updated>2018-10-07T06:36:11.000Z</updated>
   <id>http://nullwy.me/</id>
   
   <author>
@@ -20,10 +20,10 @@
     <link href="http://nullwy.me/2018/10/java-agent/"/>
     <id>http://nullwy.me/2018/10/java-agent/</id>
     <published>2018-10-04T15:26:20.000Z</published>
-    <updated>2018-10-06T18:10:21.000Z</updated>
+    <updated>2018-10-07T06:36:11.000Z</updated>
     
     <content type="html"><![CDATA[<p>Java 从 1.5 开始提供了 <code>java.lang.instrument</code>（<a href="https://docs.oracle.com/javase/8/docs/technotes/guides/instrumentation/" target="_blank" rel="external">doc</a>）包，该包为检测（<a href="https://en.wikipedia.org/wiki/Instrumentation_%28computer_programming%29" target="_blank" rel="external">instrument</a>） Java 程序提供 API，比如用于监控、收集性能信息、诊断问题。通过 <code>java.lang.instrument</code> 实现工具被称为 Java Agent。Java Agent 可以修改类文件的字节码，通常是，在字节码方法插入额外的字节码来完成检测。关于如何使用 <code>java.lang.instrument</code> 包，可以参考 javadoc 的包描述（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html" target="_blank" rel="external">en</a>, <a href="http://www.cjsdn.net/doc/jdk60/java/lang/instrument/package-summary.html" target="_blank" rel="external">zh</a>）。</p>
-<p>开发 Java Agent 的涉及的要点如下图所示 [ <a href="https://zeroturnaround.com/rebellabs/how-to-inspect-classes-in-your-jvm/" target="_blank" rel="external">ref</a> ]<br><img width="700" alt="Java Agent" title="Java Agent" src="/media/java-agent-overview.png"></p>
+<p>开发 Java Agent 的涉及的要点如下图所示 [ <a href="https://zeroturnaround.com/rebellabs/how-to-inspect-classes-in-your-jvm/" target="_blank" rel="external">ref</a> ]<br><img width="700" alt="Java Agent" title="Java Agent" src="http://static.nullwy.me/java-agent-overview.png"></p>
 <p>Java Agent 支持两种方式加载，启动时加载，即在 JVM 程序启动时在命令行指定一个选项来启动代理；启动后加载，这种方式使用从 JDK 1.6 开始提供的 <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/attach/index.html" target="_blank" rel="external">Attach API</a> 来动态加载代理。</p>
 <a id="more"></a>
 <h1 id="启动时加载-agent"><a href="#启动时加载-agent" class="headerlink" title="启动时加载 agent"></a>启动时加载 agent</h1><h2 id="最简单的例子"><a href="#最简单的例子" class="headerlink" title="最简单的例子"></a>最简单的例子</h2><p>现在创建命名为 proj-demo 的 gradle 项目，目录布局如下：</p>
@@ -84,7 +84,7 @@
     <summary type="html">
     
       &lt;p&gt;Java 从 1.5 开始提供了 &lt;code&gt;java.lang.instrument&lt;/code&gt;（&lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/guides/instrumentation/&quot;&gt;doc&lt;/a&gt;）包，该包为检测（&lt;a href=&quot;https://en.wikipedia.org/wiki/Instrumentation_%28computer_programming%29&quot;&gt;instrument&lt;/a&gt;） Java 程序提供 API，比如用于监控、收集性能信息、诊断问题。通过 &lt;code&gt;java.lang.instrument&lt;/code&gt; 实现工具被称为 Java Agent。Java Agent 可以修改类文件的字节码，通常是，在字节码方法插入额外的字节码来完成检测。关于如何使用 &lt;code&gt;java.lang.instrument&lt;/code&gt; 包，可以参考 javadoc 的包描述（&lt;a href=&quot;https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html&quot;&gt;en&lt;/a&gt;, &lt;a href=&quot;http://www.cjsdn.net/doc/jdk60/java/lang/instrument/package-summary.html&quot;&gt;zh&lt;/a&gt;）。&lt;/p&gt;
-&lt;p&gt;开发 Java Agent 的涉及的要点如下图所示 [ &lt;a href=&quot;https://zeroturnaround.com/rebellabs/how-to-inspect-classes-in-your-jvm/&quot;&gt;ref&lt;/a&gt; ]&lt;br&gt;&lt;img width=&quot;700&quot; alt=&quot;Java Agent&quot; title=&quot;Java Agent&quot; src=&quot;/media/java-agent-overview.png&quot;&gt;&lt;/p&gt;
+&lt;p&gt;开发 Java Agent 的涉及的要点如下图所示 [ &lt;a href=&quot;https://zeroturnaround.com/rebellabs/how-to-inspect-classes-in-your-jvm/&quot;&gt;ref&lt;/a&gt; ]&lt;br&gt;&lt;img width=&quot;700&quot; alt=&quot;Java Agent&quot; title=&quot;Java Agent&quot; src=&quot;http://static.nullwy.me/java-agent-overview.png&quot;&gt;&lt;/p&gt;
 &lt;p&gt;Java Agent 支持两种方式加载，启动时加载，即在 JVM 程序启动时在命令行指定一个选项来启动代理；启动后加载，这种方式使用从 JDK 1.6 开始提供的 &lt;a href=&quot;https://docs.oracle.com/javase/8/docs/technotes/guides/attach/index.html&quot;&gt;Attach API&lt;/a&gt; 来动态加载代理。&lt;/p&gt;
     
     </summary>
