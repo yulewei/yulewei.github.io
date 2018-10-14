@@ -546,7 +546,7 @@
 
       
         
-          <p>MySQL 的 <a href="https://dev.mysql.com/doc/refman/5.7/en/binary-log.html">binlog</a> 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。ß</p>
+          <p>MySQL 的 <a href="https://dev.mysql.com/doc/refman/5.7/en/binary-log.html">binlog</a> 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。</p>
 <h1 id="STATEMENT-格式的-binlog"><a href="#STATEMENT-格式的-binlog" class="headerlink" title="STATEMENT 格式的 binlog"></a>STATEMENT 格式的 binlog</h1><p>要想开启 binlog，需要在启动 MySQL 时传入 —<a href="https://dev.mysql.com/doc/refman/5.7/en/replication-options-binary-log.html#option_mysqld_log-bin">log-bin</a> 参数。或者也可以在 MySQL 配置文件 <code>/etc/my.cnf</code>，设置 <code>log_bin</code> 开启 binlog。MySQL 5.7 开始，开启 binlog 后，<code>--server-id</code> 参数也必须指定，否则 MySQL 服务器会启动失败。</p>
           <!--noindex-->
           <div class="post-button text-center">
