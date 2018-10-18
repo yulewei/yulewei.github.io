@@ -201,7 +201,6 @@
 <h1 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h1><ul>
 <li>Building OpenJDK <a href="https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/common/doc/building.md" target="_blank" rel="external">https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/common/doc/building.md</a></li>
 <li>2018-01 自己动手，在macOS High Sierra中编译一个可debug的JDK <a href="https://juejin.im/post/5a6d7d106fb9a01ca47abd8b" target="_blank" rel="external">https://juejin.im/post/5a6d7d106fb9a01ca47abd8b</a></li>
-<li>2017-04 Compile &amp; Debug openjdk <a href="https://liuzhengyang.github.io/2017/04/28/buildopenjdk/" target="_blank" rel="external">https://liuzhengyang.github.io/2017/04/28/buildopenjdk/</a></li>
 <li>openjdk code compilation/ IDE setup <a href="https://stackoverflow.com/a/44522565" target="_blank" rel="external">https://stackoverflow.com/a/44522565</a></li>
 </ul>
 ]]></content>
@@ -214,6 +213,8 @@
         
         
         <tags>
+            
+            <tag> JVM </tag>
             
             <tag> OpenJDK </tag>
             
