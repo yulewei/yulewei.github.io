@@ -99,13 +99,13 @@
 <meta name="description" content="MySQL 的 binlog 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。 STATEMENT 格式的 binlog要想开启 binlog，需要在启动 MySQL 时传入 —log-bin 参数。或者也可以在 MySQL 配置文件 /etc/my.cnf，设置 log_bin 开启 binlog。MyS">
 <meta name="keywords" content="MySQL,数据库,binlog">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MySQL binlog 笔记">
+<meta property="og:title" content="MySQL binlog：格式、增量恢复、闪回、Java 解析">
 <meta property="og:url" content="http://nullwy.me/2018/06/mysql-binlog/index.html">
 <meta property="og:site_name" content="nullwy's blog">
 <meta property="og:description" content="MySQL 的 binlog 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。 STATEMENT 格式的 binlog要想开启 binlog，需要在启动 MySQL 时传入 —log-bin 参数。或者也可以在 MySQL 配置文件 /etc/my.cnf，设置 log_bin 开启 binlog。MyS">
-<meta property="og:updated_time" content="2018-10-14T15:13:57.000Z">
+<meta property="og:updated_time" content="2018-10-21T02:59:47.625Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MySQL binlog 笔记">
+<meta name="twitter:title" content="MySQL binlog：格式、增量恢复、闪回、Java 解析">
 <meta name="twitter:description" content="MySQL 的 binlog 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。 STATEMENT 格式的 binlog要想开启 binlog，需要在启动 MySQL 时传入 —log-bin 参数。或者也可以在 MySQL 配置文件 /etc/my.cnf，设置 log_bin 开启 binlog。MyS">
 
 
@@ -140,7 +140,7 @@
 
 
 
-  <title>MySQL binlog 笔记 | nullwy's blog</title>
+  <title>MySQL binlog：格式、增量恢复、闪回、Java 解析 | nullwy's blog</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -297,7 +297,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">MySQL binlog 笔记</h1>
+          <h1 class="post-title" itemprop="name headline">MySQL binlog：格式、增量恢复、闪回、Java 解析</h1>
         
 
         <div class="post-meta">
@@ -360,7 +360,7 @@
 
           
           
-             <span id="/2018/06/mysql-binlog/" class="leancloud_visitors" data-flag-title="MySQL binlog 笔记">
+             <span id="/2018/06/mysql-binlog/" class="leancloud_visitors" data-flag-title="MySQL binlog：格式、增量恢复、闪回、Java 解析">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -838,7 +838,7 @@
         var disqus_config = function () {
           this.page.url = 'http://nullwy.me/2018/06/mysql-binlog/';
           this.page.identifier = '2018/06/mysql-binlog/';
-          this.page.title = 'MySQL binlog 笔记';
+          this.page.title = 'MySQL binlog：格式、增量恢复、闪回、Java 解析';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://yulewei.disqus.com/embed.js';
