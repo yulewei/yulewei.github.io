@@ -103,12 +103,12 @@
 <meta property="og:url" content="http://nullwy.me/2018/01/stack-frame-calling-convention/index.html">
 <meta property="og:site_name" content="nullwy's blog">
 <meta property="og:description" content="栈与栈帧要想知道函数是怎么被调用的，需要了解栈帧和调用惯例相关知识。俞甲子2009 的“第10章 内存: 栈与堆”对相关概念有很好的介绍。本文是对相关知识的学习笔记。">
-<meta property="og:image" content="http://nullwy.me/media/stack-frame-layout-zh.png">
-<meta property="og:updated_time" content="2018-03-04T07:06:26.000Z">
+<meta property="og:image" content="http://static.nullwy.me/stack-frame-layout-zh.png">
+<meta property="og:updated_time" content="2018-10-24T13:38:36.964Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="栈帧与调用惯例">
 <meta name="twitter:description" content="栈与栈帧要想知道函数是怎么被调用的，需要了解栈帧和调用惯例相关知识。俞甲子2009 的“第10章 内存: 栈与堆”对相关概念有很好的介绍。本文是对相关知识的学习笔记。">
-<meta name="twitter:image" content="http://nullwy.me/media/stack-frame-layout-zh.png">
+<meta name="twitter:image" content="http://static.nullwy.me/stack-frame-layout-zh.png">
 
 
 
@@ -392,7 +392,7 @@
       
         <h1 id="栈与栈帧"><a href="#栈与栈帧" class="headerlink" title="栈与栈帧"></a>栈与栈帧</h1><p>要想知道函数是怎么被调用的，需要了解栈帧和调用惯例相关知识。<a href="https://book.douban.com/subject/3652388/" target="_blank" rel="external">俞甲子2009</a> 的“<strong>第10章 内存: 栈与堆</strong>”对相关概念有很好的介绍。本文是对相关知识的学习笔记。</p>
 <a id="more"></a>
-<p><img width="600" alt="栈与栈帧布局" title="栈与栈帧布局" src="/media/stack-frame-layout-zh.png"></p>
+<p><img width="600" alt="栈与栈帧布局" title="栈与栈帧布局" src="http://static.nullwy.me/stack-frame-layout-zh.png"></p>
 <p>附注，栈帧之间的划分边界，其实有两种不一样说法。在有些资料中 [ <a href="https://en.wikipedia.org/wiki/Call_stack#Structure" target="_blank" rel="external">wikipedia</a>; <a href="https://book.douban.com/subject/3652388/" target="_blank" rel="external">俞甲子2009</a> ]，callee 参数被划分在 callee 栈帧，但在 Intel 官方一些权威文档中 [ Intel ASDM, <a href="https://www.intel.cn/content/www/cn/zh/architecture-and-technology/64-ia-32-architectures-software-developer-vol-1-manual.html" target="_blank" rel="external">Vol.1</a>, Ch.6; Intel <a href="https://github.com/hjl-tools/x86-psABI/wiki/X86-psABI" target="_blank" rel="external">X86-psABI</a> ]，callee 参数被划分在 caller 栈帧。</p>
 <h1 id="调用惯例"><a href="#调用惯例" class="headerlink" title="调用惯例"></a>调用惯例</h1><p>调用惯例，规定以下内容：(1) 函数参数的传递顺序和方式；(2) 栈的清理方式；(3) 名称修饰（<a href="https://en.wikipedia.org/wiki/Name_mangling" target="_blank" rel="external">name mangling</a>）。常见的 x86 调用惯例列表有：cdecl（C 语言默认）、stdcall（Win32 API 标准）、fastcall、pascal。这些调用惯例如下下表所示（更加全面的列表参见 <a href="https://en.wikipedia.org/wiki/X86_calling_conventions#List_of_x86_calling_conventions" target="_blank" rel="external">wikipedia</a>）：</p>
 <div class="table-container">
