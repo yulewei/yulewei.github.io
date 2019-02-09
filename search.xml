@@ -3,17 +3,16 @@
   
     
     <entry>
-      <title></title>
-      <url>/2019/01/Elastic%20Stack%20%E6%97%A5%E5%BF%97%E5%88%86%E6%9E%90%E5%B9%B3%E5%8F%B0%E6%90%AD%E5%BB%BA%E7%AC%94%E8%AE%B0/</url>
-      <content type="html"><![CDATA[<h1 id="Elastic-Stack-日志分析平台搭建笔记"><a href="#Elastic-Stack-日志分析平台搭建笔记" class="headerlink" title="Elastic Stack 日志分析平台搭建笔记"></a>Elastic Stack 日志分析平台搭建笔记</h1><hr>
-<p>permalink: elastic-stack<br>title: Elastic Stack 日志分析平台搭建笔记<br>date: 2019-01-14 14:58:20<br>categories: 架构<br>tags: [ELK, Elastic, 日志]</p>
-<h2 id="toc-true"><a href="#toc-true" class="headerlink" title="toc: true"></a>toc: true</h2><p>Elastic Stack（旧称 ELK Stack)）是最受欢迎的开源日志平台 [ <a href="https://www.elastic.co/cn/solutions/logging" target="_blank" rel="external">ref</a> ]。Elastic Stack 由 Elasticsearch、Logstash、Kibana 和 Beats 四个组件组成：</p>
+      <title><![CDATA[Elastic Stack 日志分析平台搭建笔记]]></title>
+      <url>/2019/01/elastic-stack/</url>
+      <content type="html"><![CDATA[<p>Elastic Stack（旧称 ELK Stack)）是最受欢迎的开源日志平台 [ <a href="https://www.elastic.co/cn/solutions/logging" target="_blank" rel="external">ref</a> ]。Elastic Stack 由 Elasticsearch、Logstash、Kibana 和 Beats 四个组件组成：</p>
 <ul>
 <li><a href="https://www.elastic.co/cn/products/beats" target="_blank" rel="external">Beats</a>，是轻量型采集器的平台，从边缘机器向 Logstash 和 Elasticsearch 发送数据。</li>
 <li><a href="https://www.elastic.co/cn/products/logstash" target="_blank" rel="external">Logstash</a>，集中、转换和存储数据，是动态数据收集管道，拥有可扩展的插件生态系统，能够与 Elasticsearch 产生强大的协同作用。</li>
 <li><a href="https://www.elastic.co/cn/products/elasticsearch" target="_blank" rel="external">Elasticsearch</a>，搜索、分析和存储您的数据，是基于 JSON 的分布式搜索和分析引擎，专为实现水平扩展、高可靠性和管理便捷性而设计。</li>
 <li><a href="https://www.elastic.co/cn/products/kibana" target="_blank" rel="external">Kibana</a>，实现数据可视化，导览 Elastic Stack。能够以图表的形式呈现数据，并且具有可扩展的用户界面，供您全方位配置和管理 Elastic Stack。</li>
 </ul>
+<a id="more"></a>
 <p>Elastic Stack 是逐步发展而来的，一开始只有 Elasticsearch，专注做搜索引擎，2013 年 1 月 Kibana 及其作者 Rashid Khan <a href="https://www.elastic.co/blog/welcome-drew-rashid" target="_blank" rel="external">加入</a> Elasticsearch 公司，同年 8 月 Logstash 及作者 Jordan Sissel 也<a href="https://www.elastic.co/blog/welcome-jordan-logstash" target="_blank" rel="external">加入</a>，原本的非官方的 ELK Stack，正式成为官方用语。2015 年 3 月，旧金山举行的第 1 届 Elastic{ON} 大会上，Elasticsearch 公司改名为 Elastic。两个月后，Packetbeat 项目也<a href="https://www.elastic.co/blog/welcome-packetbeat-tudor-monica" target="_blank" rel="external">加入</a> Elastic，Packetbeat 和 Filebeat（之前叫做 <a href="https://github.com/elastic/logstash-forwarder" target="_blank" rel="external">Logstash-forwarder</a>，由 Logstash 作者 Jordan Sissel 开发）项目被整合改造为 Beats。加上 Beats 以后，官方不知道如何将 “B” 和 E-L-K 组合在一起（用过 ELKB 或 BELK），ELK Stack 于是改名为 Elastic Stack，并在 2016 年 10 月正式发布 Elastic Stack 5.0 [ <a href="https://www.elastic.co/cn/about/history-of-elasticsearch" target="_blank" rel="external">ref1</a>, <a href="https://www.elastic.co/elk-stack" target="_blank" rel="external">ref2</a>, <a href="https://www.elastic.co/cn/blog/elastic-stack-5-0-0-released" target="_blank" rel="external">ref3</a> ]。</p>
 <h1 id="使用-Logstash"><a href="#使用-Logstash" class="headerlink" title="使用 Logstash"></a>使用 Logstash</h1><p>Logstash（<a href="https://www.elastic.co/cn/products/logstash" target="_blank" rel="external">home</a>, <a href="https://github.com/elastic/logstash" target="_blank" rel="external">github</a>）最初是来自 Dreamhost 运维工程师 Jordan Sissel 的开源项目，是管理事件和日志的工具，能够用于采集数据，转换数据，然后将数据发送到您最喜欢的“存储库”中（比如 Elasticsearch）。Logstash 使用 JRuby 开发，2011 年 5 月发布 1.0 版本。2013 年 8 月 Jordan Sissel 带着 Logstash 加入 Elasticsearch 公司，Logstash 成为 Elastic Stack 一员。</p>
 <p>在 Ubuntu 下<a href="https://www.elastic.co/guide/en/logstash/current/installing-logstash.html" target="_blank" rel="external">安装</a>、<a href="https://www.elastic.co/guide/en/logstash/current/running-logstash.html" target="_blank" rel="external">启动</a> Logstash 可以使用下面命令：</p>
@@ -172,6 +171,22 @@
 </ul>
 ]]></content>
       
+        <categories>
+            
+            <category> 架构 </category>
+            
+        </categories>
+        
+        
+        <tags>
+            
+            <tag> ELK </tag>
+            
+            <tag> Elastic </tag>
+            
+            <tag> 日志 </tag>
+            
+        </tags>
         
     </entry>
     
