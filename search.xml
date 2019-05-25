@@ -256,7 +256,7 @@
     
     
     <entry>
-      <title>Java 编译器 javac 笔记：javac API 与注解处理 API</title>
+      <title>Java 编译器 javac 笔记：javac API、注解处理 API 与 Lombok 原理</title>
       <link href="/2017/04/javac-api/"/>
       <url>/2017/04/javac-api/</url>
       
@@ -279,6 +279,8 @@
             <tag> javac </tag>
             
             <tag> JVM </tag>
+            
+            <tag> Lombok </tag>
             
         </tags>
       
