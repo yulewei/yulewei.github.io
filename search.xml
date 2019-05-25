@@ -49,13 +49,13 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> 字节码 </tag>
             
             <tag> javaagent </tag>
             
             <tag> byte-buddy </tag>
+            
+            <tag> java </tag>
             
         </tags>
       
@@ -117,6 +117,8 @@
             
             <tag> cmake </tag>
             
+            <tag> java </tag>
+            
         </tags>
       
     </entry>
@@ -173,8 +175,6 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> JNI </tag>
             
             <tag> JNA </tag>
@@ -186,6 +186,8 @@
             <tag> Pyhon </tag>
             
             <tag> Ruby </tag>
+            
+            <tag> java </tag>
             
         </tags>
       
@@ -241,11 +243,11 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> 字节码 </tag>
             
             <tag> JVM </tag>
+            
+            <tag> java </tag>
             
         </tags>
       
@@ -270,13 +272,13 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> 编译器 </tag>
             
             <tag> javac </tag>
             
             <tag> JVM </tag>
+            
+            <tag> java </tag>
             
         </tags>
       
@@ -301,9 +303,9 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> 并发 </tag>
+            
+            <tag> java </tag>
             
         </tags>
       
@@ -382,7 +384,7 @@
       
         <tags>
             
-            <tag> Java </tag>
+            <tag> java </tag>
             
         </tags>
       
@@ -407,11 +409,11 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> 代码 </tag>
             
             <tag> 工具 </tag>
+            
+            <tag> java </tag>
             
         </tags>
       
@@ -544,9 +546,9 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> 代码 </tag>
+            
+            <tag> java </tag>
             
         </tags>
       
@@ -631,9 +633,9 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> JVM </tag>
+            
+            <tag> java </tag>
             
         </tags>
       
@@ -658,9 +660,9 @@
       
         <tags>
             
-            <tag> Java </tag>
-            
             <tag> 书籍 </tag>
+            
+            <tag> java </tag>
             
         </tags>
       
