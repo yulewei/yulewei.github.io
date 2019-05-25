@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://nullwy.me/2016/12/mybatis-generator/</loc>
+    
+    <lastmod>2019-05-25T05:19:24.731Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://nullwy.me/2017/04/javac-api/</loc>
     
     <lastmod>2019-05-25T05:18:02.291Z</lastmod>
@@ -138,13 +145,6 @@
     <loc>http://nullwy.me/2016/12/gulp-hello-world/</loc>
     
     <lastmod>2018-01-17T14:22:04.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2016/12/mybatis-generator/</loc>
-    
-    <lastmod>2018-01-17T14:11:12.000Z</lastmod>
     
   </url>
   
