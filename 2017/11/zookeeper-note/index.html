@@ -116,23 +116,23 @@
 
 
 
-  <meta name="description" content="ZooKeeper 介绍ZooKeeper（wiki，home，github，mvn） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ doc ]。">
-<meta name="keywords" content="ZooKeeper,分布式,共识,Paxos">
+  <meta name="description" content="ZooKeeper 介绍ZooKeeper（wiki，home，github） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ doc ]。">
+<meta name="keywords" content="ZooKeeper,分布式,共识,Paxos,架构">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ZooKeeper 学习笔记">
 <meta property="og:url" content="http://nullwy.me/2017/11/zookeeper-note/index.html">
 <meta property="og:site_name" content="nullwy&#39;s blog">
-<meta property="og:description" content="ZooKeeper 介绍ZooKeeper（wiki，home，github，mvn） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ doc ]。">
+<meta property="og:description" content="ZooKeeper 介绍ZooKeeper（wiki，home，github） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ doc ]。">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:image" content="http://nullwy.me/media/paxos-protocols-vs-paxos-systems.png">
 <meta property="og:image" content="http://nullwy.me/media/zookeeper-service.png">
 <meta property="og:image" content="http://nullwy.me/media/zookeeper-read-write.png">
 <meta property="og:image" content="http://nullwy.me/media/zk-data-model.jpg">
 <meta property="og:image" content="http://nullwy.me/media/ZooInspector.png">
-<meta property="og:updated_time" content="2018-01-22T06:08:20.000Z">
+<meta property="og:updated_time" content="2019-05-28T16:03:24.143Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ZooKeeper 学习笔记">
-<meta name="twitter:description" content="ZooKeeper 介绍ZooKeeper（wiki，home，github，mvn） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ doc ]。">
+<meta name="twitter:description" content="ZooKeeper 介绍ZooKeeper（wiki，home，github） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ doc ]。">
 <meta name="twitter:image" content="http://nullwy.me/media/paxos-protocols-vs-paxos-systems.png">
 
 
@@ -380,7 +380,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2018-01-22 14:08:20" itemprop="dateModified" datetime="2018-01-22T14:08:20+08:00">2018-01-22</time>
+                <time title="修改时间：2019-05-29 00:03:24" itemprop="dateModified" datetime="2019-05-29T00:03:24+08:00">2019-05-29</time>
               
             
           </span>
@@ -453,7 +453,7 @@
       
 
       
-        <h1 id="ZooKeeper-介绍"><a href="#ZooKeeper-介绍" class="headerlink" title="ZooKeeper 介绍"></a>ZooKeeper 介绍</h1><p>ZooKeeper（<a href="https://en.wikipedia.org/wiki/Apache_ZooKeeper" target="_blank" rel="noopener">wiki</a>，<a href="http://zookeeper.apache.org/" target="_blank" rel="noopener">home</a>，<a href="https://github.com/apache/zookeeper" target="_blank" rel="noopener">github</a>，<a href="http://mvnrepository.com/artifact/org.apache.zookeeper/zookeeper" target="_blank" rel="noopener">mvn</a>） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ <a href="http://zookeeper.apache.org/doc/current/zookeeperOver.html" target="_blank" rel="noopener">doc</a> ]。</p>
+        <h1 id="ZooKeeper-介绍"><a href="#ZooKeeper-介绍" class="headerlink" title="ZooKeeper 介绍"></a>ZooKeeper 介绍</h1><p>ZooKeeper（<a href="https://en.wikipedia.org/wiki/Apache_ZooKeeper" target="_blank" rel="noopener">wiki</a>，<a href="http://zookeeper.apache.org/" target="_blank" rel="noopener">home</a>，<a href="https://github.com/apache/zookeeper" target="_blank" rel="noopener">github</a>） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ <a href="http://zookeeper.apache.org/doc/current/zookeeperOver.html" target="_blank" rel="noopener">doc</a> ]。</p>
 <a id="more"></a>
 <h2 id="共识与-Paxos"><a href="#共识与-Paxos" class="headerlink" title="共识与 Paxos"></a>共识与 Paxos</h2><p>在介绍 ZooKeeper 之前，有必要了解下 Paxos 和 Chubby。2006 年 Google 在 OSDI 发表关于 <a href="https://academic.microsoft.com/#/detail/2624304035" target="_blank" rel="noopener">Bigtable</a> 和 <a href="https://academic.microsoft.com/#/detail/1992479210" target="_blank" rel="noopener">Chubby</a> 的两篇会议论文，之后再在 2007 年 PODC 会议上发表了论文“<a href="https://academic.microsoft.com/#/detail/2143149536" target="_blank" rel="noopener">Paxos Made Live</a>”，介绍 Chubby 底层实现的共识（<a href="https://en.wikipedia.org/wiki/Consensus_%28computer_science%29" target="_blank" rel="noopener">consensus</a>）协议 Multi-Paxos，该协议对 Lamport 的原始 Paxos 算法做了改进，提高了运行效率 [ <a href="https://zhuanlan.zhihu.com/p/21466932" target="_blank" rel="noopener">ref</a> ]。Chubby 作为锁服务被 Google 应用在 GFS 和 Bigtable 中。受 Chubby 的影响，来自 Yahoo 研究院的 Benjamin Reed 和 Flavio Junqueira 等人开发了被业界称为开源版的 Chubby 的 ZooKeeper（内部实现事实上稍有不同 [ <a href="https://zhuanlan.zhihu.com/p/30856272" target="_blank" rel="noopener">ref</a> ]），底层的共识协议为 ZAB。Lamport 的 Paxos 算法出了名的难懂，如何让算法更加可理解（understandable），便成了 Stanford 博士生 Diego Ongaro 的研究课题。Diego Ongaro 在 2014 年发表了介绍 <a href="https://academic.microsoft.com/#/detail/2156580773" target="_blank" rel="noopener">Raft</a> 算法的论文。Raft 是可理解版的 Paxos，很快就成为解决共识问题的流行协议之一。这些类 Paxos 协议和 Paxos 系统之间的关系，如下 [ <a href="https://academic.microsoft.com/#/detail/2414647798" target="_blank" rel="noopener">Ailijiang2016</a> ]：</p>
 <p><img width="500" alt="Paxos 协议和 Paxos 系统" title="Paxos 协议和 Paxos 系统" src="/media/paxos-protocols-vs-paxos-systems.png"></p>
@@ -677,10 +677,10 @@
 <li>ZooKeeper <a href="http://zookeeper.apache.org/doc/current/index.html" target="_blank" rel="noopener">http://zookeeper.apache.org/doc/current/index.html</a></li>
 <li>2010-11 许令波：分布式服务框架 Zookeeper <a href="https://www.ibm.com/developerworks/cn/opensource/os-cn-zookeeper/" target="_blank" rel="noopener">https://www.ibm.com/developerworks/cn/opensource/os-cn-zookeeper/</a></li>
 <li>ZooKeeper：分布式过程协同技术详解，Benjamin Reed &amp; Flavio Junqueira，2013</li>
-<li>Apache ZooKeeper Essentials, Haloi, 2015</li>
-<li>从Paxos到Zookeeper，阿里倪超，2015</li>
-<li>大数据日知录：架构与算法，张俊林，2014，第5章 分布式协调系统</li>
-<li>2010，Patrick Hunt, Mahadev Konar, Flavio Paiva Junqueira, Benjamin Reed: <strong>ZooKeeper: Wait-free Coordination for Internet-scale Systems</strong>. USENIX ATC 2010，<a href="http://dblp.org/rec/conf/usenix/HuntKJR10" target="_blank" rel="noopener">dblp</a>，<a href="https://academic.microsoft.com/#/detail/192446467" target="_blank" rel="noopener">msa</a>，<a href="https://www.usenix.org/conference/usenix-atc-10/zookeeper-wait-free-coordination-internet-scale-systems" target="_blank" rel="noopener">usenix</a></li>
+<li>Apache ZooKeeper Essentials, Haloi 2015</li>
+<li>从Paxos到Zookeeper，阿里倪超 2015</li>
+<li>大数据日知录：架构与算法，张俊林 2014，第5章 分布式协调系统</li>
+<li>2010，Patrick Hunt, Mahadev Konar, Flavio Paiva Junqueira, Benjamin Reed: <strong>ZooKeeper: Wait-free Coordination for Internet-scale Systems</strong>. USENIX ATC 2010，<a href="http://dblp.org/rec/conf/usenix/HuntKJR10" target="_blank" rel="noopener">dblp</a>，<a href="https://academic.microsoft.com/paper/192446467" target="_blank" rel="noopener">msa</a>，<a href="https://www.usenix.org/conference/usenix-atc-10/zookeeper-wait-free-coordination-internet-scale-systems" target="_blank" rel="noopener">usenix</a></li>
 </ul>
 
       
@@ -709,6 +709,8 @@
             <a href="/tags/共识/" rel="tag"># 共识</a>
           
             <a href="/tags/Paxos/" rel="tag"># Paxos</a>
+          
+            <a href="/tags/架构/" rel="tag"># 架构</a>
           
         </div>
       
@@ -933,7 +935,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">39</span>
+                      
+                    
+                    <span class="site-state-item-count">40</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>

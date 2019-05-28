@@ -2,9 +2,16 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://nullwy.me/2017/11/zookeeper-note/</loc>
+    
+    <lastmod>2019-05-28T16:03:24.143Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://nullwy.me/2016/12/mysql-5.7-json/</loc>
     
-    <lastmod>2019-05-27T14:01:38.577Z</lastmod>
+    <lastmod>2019-05-27T16:35:54.910Z</lastmod>
     
   </url>
   
@@ -131,13 +138,6 @@
     <loc>http://nullwy.me/2017/01/mysql-data-types/</loc>
     
     <lastmod>2018-09-02T12:25:27.000Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2017/11/zookeeper-note/</loc>
-    
-    <lastmod>2018-01-22T06:08:20.000Z</lastmod>
     
   </url>
   
