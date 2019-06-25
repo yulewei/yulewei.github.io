@@ -2,16 +2,23 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://nullwy.me/2017/11/zookeeper-note/</loc>
+    <loc>http://nullwy.me/2019/06/mysql-5.7-json/</loc>
     
-    <lastmod>2019-05-28T16:03:24.143Z</lastmod>
+    <lastmod>2019-06-25T15:05:02.939Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://nullwy.me/2016/12/mysql-5.7-json/</loc>
+    <loc>http://nullwy.me/2017/11/zookeeper-note/</loc>
     
-    <lastmod>2019-05-27T16:35:54.910Z</lastmod>
+    <lastmod>2019-06-18T03:39:11.200Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nullwy.me/2017/05/java-method-parameter/</loc>
+    
+    <lastmod>2019-06-13T13:46:42.238Z</lastmod>
     
   </url>
   
@@ -61,13 +68,6 @@
     <loc>http://nullwy.me/2016/11/java-official-doc/</loc>
     
     <lastmod>2019-05-25T05:40:50.869Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2017/05/java-method-parameter/</loc>
-    
-    <lastmod>2019-05-25T05:40:47.262Z</lastmod>
     
   </url>
   
