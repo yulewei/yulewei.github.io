@@ -129,7 +129,7 @@
 <meta property="og:image" content="http://static.nullwy.me/mysql-jsonb-scalar.png">
 <meta property="og:image" content="http://static.nullwy.me/mysql-jsonb-array.png">
 <meta property="og:image" content="http://static.nullwy.me/mysql-jsonb-object.png">
-<meta property="og:updated_time" content="2019-06-25T15:23:45.663Z">
+<meta property="og:updated_time" content="2019-06-25T15:28:55.321Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL 5.7 的 JSON 类型">
 <meta name="twitter:description" content="2015 年 8 月，MySQL 5.7.8 开始提供对 JSON 的原生支持 [ doc1, doc2 ]。MySQL 对 JSON 的支持可以说是千呼万唤始出来。2009 年开始 NoSQL 逐渐流行起来，相继出现了键值对数据库、文档数据库、列族数据库、图数据库等各类 NoSQL，解决经典关系型数据库无法解决的痛点。其中，对灵活存储半结构化数据的需求，使得类似 MongoDB 这类文档数据库涌">
@@ -363,7 +363,7 @@
                 
               
 
-              <time title="创建时间：2019-06-25 03:18:31 / 修改时间：23:23:45" itemprop="dateCreated datePublished" datetime="2019-06-25T03:18:31+08:00">2019-06-25</time>
+              <time title="创建时间：2019-06-25 03:18:31 / 修改时间：23:28:55" itemprop="dateCreated datePublished" datetime="2019-06-25T03:18:31+08:00">2019-06-25</time>
             
 
             
@@ -711,7 +711,7 @@
 <p>相对来说，产生式 <code>array ::= element-count size value-entry* value*</code>，是整个JSON 数组二进制表示语法的核心。<code>element-count</code>，表示元素个数。上图中，第 4、5 个字节是 <code>size</code> 字段，十进制值为 20（0x14），是完整二进制表示去掉开头 <code>type</code> 字段后的大小（文档没有明确这个字段的含义，不过通过<a href="https://github.com/mysql/mysql-server/blob/5.7/sql/json_binary.cc#L399" target="_blank" rel="noopener">源码</a>推断出来）。另外，<code>value-entry</code> 由 <code>type</code> 和 <code>offset-or-inlined-value</code> 字段组成。<code>type</code> 很好理解，不做解释。<code>offset-or-inlined-value</code> 字段，官方文档给出了含义，含义如下：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// This field holds either the offset to where the value is stored,</span></span><br><span class="line"><span class="comment">// or the value itself if it is small enough to be inlined (that is,</span></span><br><span class="line"><span class="comment">// if it is a JSON literal or a small enough [u]int).</span></span><br><span class="line">offset-<span class="keyword">or</span>-inlined-value ::=</span><br><span class="line">uint16 |   <span class="comment">// if used in small JSON object/array</span></span><br><span class="line">uint32     <span class="comment">// if used in large JSON object/array</span></span><br></pre></td></tr></table></figure>
 <p>就是说，如果实际要保存的值足够小，将直接内联在这个字段中，否则将保存偏移量（offset），也就是指向实际值的指针。在示例中，保存 <code>xy</code> 对应的 offset 值为 13（0x0d），指向的相对地址是 14。因为这里的 offset 并不是以相对地址 0 为基准地址，是以相对地址 1 为基准地址（图中箭头 B 指向的位置），所以偏移量是 13 而不是 14（这个字段的明确含义也是从<a href="https://github.com/mysql/mysql-server/blob/5.7/sql/json_binary.cc" target="_blank" rel="noopener">源码</a>推断而来）。类似的，保存 <code>abc</code> 对应的 offset 值为 16（0x10），指向的相对地址是 17。</p>
-<p>阅读文档容易发现，<code>element-count</code>、<code>size</code>、<code>offset</code> 字段占用的字节大小是固定的，小 JSON（64KB 以内）是 2 字节，大 JSON 是 4 字节。另外，<code>type</code> 字段占用总是 1 个字节。所以，若要查找 JSON 数组的第 <code>pos</code> 个元素的 <code>value-entry</code> 的偏移量，可以使用下面的式子快速定位：</p>
+<p>阅读文档容易发现，<code>element-count</code>、<code>size</code>、<code>offset</code> 字段占用的字节大小是固定的，小 JSON（64KB 以内）是 2 字节，大 JSON 是 4 字节。所以，若要查找 JSON 数组的第 <code>pos</code> 个元素的 <code>value-entry</code> 的偏移量，可以使用下面的式子快速定位：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">entry_offset = offset_size * 2 + (1 + offset_size) * pos</span><br></pre></td></tr></table></figure>
 <p>JSON 数组二进制表示的其他字段比较容易理解，文档都有解释，就不展开阐述了。</p>
 <p>现在来看下，JSON 对象 <code>{&quot;b&quot;: 42, &quot;a&quot;: &quot;xy&quot;}</code> 的二进制表示，如下图：</p>
