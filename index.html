@@ -397,7 +397,7 @@
                 
               
 
-              <time title="创建时间：2019-07-13 15:09:51 / 修改时间：15:54:44" itemprop="dateCreated datePublished" datetime="2019-07-13T15:09:51+08:00">2019-07-13</time>
+              <time title="创建时间：2019-07-13 15:09:51 / 修改时间：17:27:07" itemprop="dateCreated datePublished" datetime="2019-07-13T15:09:51+08:00">2019-07-13</time>
             
 
             
@@ -483,7 +483,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">31 分钟</span>
+                <span title="阅读时长">32 分钟</span>
               
             </div>
           
@@ -509,9 +509,11 @@
   display: none
 }
 </style>
-
 <p>作者：Martin Fowler &amp; James Lewis 译者：伍斌</p>
-<p>原文：<a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="noopener">http://martinfowler.com/articles/microservices.html</a><br>转载自：<a href="https://mp.weixin.qq.com/s/dqk7CTX1W3FNCE7GyCgbSQ" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/dqk7CTX1W3FNCE7GyCgbSQ</a><br><a href="https://mp.weixin.qq.com/s/h4p2_-RmCFJzXmusQOWbcw" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/h4p2_-RmCFJzXmusQOWbcw</a><br><a href="https://insights.thoughtworks.cn/microservices-martin-fowler/" target="_blank" rel="noopener">https://insights.thoughtworks.cn/microservices-martin-fowler/</a></p>
+<p>原文：<a href="http://martinfowler.com/articles/microservices.html" target="_blank" rel="noopener">http://martinfowler.com/articles/microservices.html</a><br>
+转载自：<a href="https://mp.weixin.qq.com/s/dqk7CTX1W3FNCE7GyCgbSQ" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/dqk7CTX1W3FNCE7GyCgbSQ</a><br>
+<a href="https://mp.weixin.qq.com/s/h4p2_-RmCFJzXmusQOWbcw" target="_blank" rel="noopener">https://mp.weixin.qq.com/s/h4p2_-RmCFJzXmusQOWbcw</a><br>
+<a href="https://insights.thoughtworks.cn/microservices-martin-fowler/" target="_blank" rel="noopener">https://insights.thoughtworks.cn/microservices-martin-fowler/</a></p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/07/martinfowler-microservices-zh-cn/#more" rel="contents">
@@ -688,7 +690,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">89k</span>
+                <span title="本文字数">88k</span>
               
 
               
@@ -702,7 +704,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">1:21</span>
+                <span title="阅读时长">1:20</span>
               
             </div>
           
@@ -912,7 +914,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">66k</span>
+                <span title="本文字数">65k</span>
               
 
               
@@ -926,7 +928,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">1:01</span>
+                <span title="阅读时长">59 分钟</span>
               
             </div>
           
@@ -1178,7 +1180,8 @@
       
         
           <p>Java 从 1.5 开始提供了 <code>java.lang.instrument</code>（<a href="https://docs.oracle.com/javase/8/docs/technotes/guides/instrumentation/" target="_blank" rel="noopener">doc</a>）包，该包为检测（<a href="https://en.wikipedia.org/wiki/Instrumentation_%28computer_programming%29" target="_blank" rel="noopener">instrument</a>） Java 程序提供 API，比如用于监控、收集性能信息、诊断问题。通过 <code>java.lang.instrument</code> 实现工具被称为 Java Agent。Java Agent 可以修改类文件的字节码，通常是，在字节码方法插入额外的字节码来完成检测。关于如何使用 <code>java.lang.instrument</code> 包，可以参考 javadoc 的包描述（<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html" target="_blank" rel="noopener">en</a>, <a href="http://www.cjsdn.net/doc/jdk60/java/lang/instrument/package-summary.html" target="_blank" rel="noopener">zh</a>）。</p>
-<p>开发 Java Agent 的涉及的要点如下图所示 [ <a href="https://zeroturnaround.com/rebellabs/how-to-inspect-classes-in-your-jvm/" target="_blank" rel="noopener">ref</a> ]<br><img width="700" alt="Java Agent" title="Java Agent" src="http://static.nullwy.me/java-agent-overview.png"></p>
+<p>开发 Java Agent 的涉及的要点如下图所示 [ <a href="https://zeroturnaround.com/rebellabs/how-to-inspect-classes-in-your-jvm/" target="_blank" rel="noopener">ref</a> ]<br>
+<img width="700" alt="Java Agent" title="Java Agent" src="http://static.nullwy.me/java-agent-overview.png"></p>
 <p>Java Agent 支持两种方式加载，启动时加载，即在 JVM 程序启动时在命令行指定一个选项来启动代理；启动后加载，这种方式使用从 JDK 1.6 开始提供的 <a href="https://docs.oracle.com/javase/8/docs/technotes/guides/attach/index.html" target="_blank" rel="noopener">Attach API</a> 来动态加载代理。</p>
           <!--noindex-->
           <div class="post-button text-center">
@@ -1404,7 +1407,8 @@
       
         
           <p>MySQL 的 <a href="https://dev.mysql.com/doc/refman/5.7/en/binary-log.html" target="_blank" rel="noopener">binlog</a> 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。</p>
-<h1 id="STATEMENT-格式的-binlog"><a href="#STATEMENT-格式的-binlog" class="headerlink" title="STATEMENT 格式的 binlog"></a>STATEMENT 格式的 binlog</h1><p>要想开启 binlog，需要在启动 MySQL 时传入 —<a href="https://dev.mysql.com/doc/refman/5.7/en/replication-options-binary-log.html#option_mysqld_log-bin" target="_blank" rel="noopener">log-bin</a> 参数。或者也可以在 MySQL 配置文件 <code>/etc/my.cnf</code>，设置 <code>log_bin</code> 开启 binlog。MySQL 5.7 开始，开启 binlog 后，<code>--server-id</code> 参数也必须指定，否则 MySQL 服务器会启动失败。</p>
+<h1 id="statement-格式的-binlog">STATEMENT 格式的 binlog</h1>
+<p>要想开启 binlog，需要在启动 MySQL 时传入 –<a href="https://dev.mysql.com/doc/refman/5.7/en/replication-options-binary-log.html#option_mysqld_log-bin" target="_blank" rel="noopener">log-bin</a> 参数。或者也可以在 MySQL 配置文件 <code>/etc/my.cnf</code>，设置 <code>log_bin</code> 开启 binlog。MySQL 5.7 开始，开启 binlog 后，<code>--server-id</code> 参数也必须指定，否则 MySQL 服务器会启动失败。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2018/06/mysql-binlog/#more" rel="contents">
@@ -1607,7 +1611,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">18 分钟</span>
+                <span title="阅读时长">17 分钟</span>
               
             </div>
           
@@ -1628,7 +1632,8 @@
 
       
         
-          <h1 id="编译-OpenJDK"><a href="#编译-OpenJDK" class="headerlink" title="编译 OpenJDK"></a>编译 OpenJDK</h1><p>关于编译 OpenJDK 官方文档有很好的介绍，<a href="http://openjdk.java.net/groups/build/" target="_blank" rel="noopener">http://openjdk.java.net/groups/build/</a>，汇总了 JDK 6, JDK 7, JDK 8, JDK 9 的 build OpenJDK 的 README 文件。编译 JDK 8 需要 Xcode 4，现在 Xcode 版本已远高于 4 了，前人尝试编译发现有很多坑 [ <a href="http://hg.openjdk.java.net/jdk8u/jdk8u/raw-file/tip/README-builds.html" target="_blank" rel="noopener">doc</a>, <a href="https://juejin.im/post/5a6d7d106fb9a01ca47abd8b" target="_blank" rel="noopener">blog</a> ]，所以本文直接开始尝试编译 OpenJDK 9。OpenJDK 9 源码根目录下的 README 文件有如下提示信息（<a href="https://github.com/dmlloyd/openjdk/tree/jdk9/jdk9" target="_blank" rel="noopener">github</a>, <a href="http://hg.openjdk.java.net/jdk9/jdk9/file/tip" target="_blank" rel="noopener">hg</a>）：</p>
+          <h1 id="编译-openjdk">编译 OpenJDK</h1>
+<p>关于编译 OpenJDK 官方文档有很好的介绍，<a href="http://openjdk.java.net/groups/build/" target="_blank" rel="noopener">http://openjdk.java.net/groups/build/</a>，汇总了 JDK 6, JDK 7, JDK 8, JDK 9 的 build OpenJDK 的 README 文件。编译 JDK 8 需要 Xcode 4，现在 Xcode 版本已远高于 4 了，前人尝试编译发现有很多坑 [ <a href="http://hg.openjdk.java.net/jdk8u/jdk8u/raw-file/tip/README-builds.html" target="_blank" rel="noopener">doc</a>, <a href="https://juejin.im/post/5a6d7d106fb9a01ca47abd8b" target="_blank" rel="noopener">blog</a> ]，所以本文直接开始尝试编译 OpenJDK 9。OpenJDK 9 源码根目录下的 README 文件有如下提示信息（<a href="https://github.com/dmlloyd/openjdk/tree/jdk9/jdk9" target="_blank" rel="noopener">github</a>, <a href="http://hg.openjdk.java.net/jdk9/jdk9/file/tip" target="_blank" rel="noopener">hg</a>）：</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2018/02/build-debug-openjdk/#more" rel="contents">
@@ -1852,7 +1857,8 @@
 
       
         
-          <h1 id="栈与栈帧"><a href="#栈与栈帧" class="headerlink" title="栈与栈帧"></a>栈与栈帧</h1><p>要想知道函数是怎么被调用的，需要了解栈帧和调用惯例相关知识。<a href="https://book.douban.com/subject/3652388/" target="_blank" rel="noopener">俞甲子2009</a> 的“<strong>第10章 内存: 栈与堆</strong>”对相关概念有很好的介绍。本文是对相关知识的学习笔记。</p>
+          <h1 id="栈与栈帧">栈与栈帧</h1>
+<p>要想知道函数是怎么被调用的，需要了解栈帧和调用惯例相关知识。<a href="https://book.douban.com/subject/3652388/" target="_blank" rel="noopener">俞甲子2009</a> 的“<strong>第10章 内存: 栈与堆</strong>”对相关概念有很好的介绍。本文是对相关知识的学习笔记。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2018/01/stack-frame-calling-convention/#more" rel="contents">
@@ -2041,7 +2047,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">41k</span>
+                <span title="本文字数">40k</span>
               
 
               
@@ -2076,7 +2082,8 @@
 
       
         
-          <h1 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h1><p>前段时间开发的时候，遇到一个问题，就是如何用 Java 实现 <code>chdir</code>？网上搜索一番，发现了 <code>JNR-POSIX</code> 项目 [ <a href="https://stackoverflow.com/q/840190" target="_blank" rel="noopener">stackoverflow</a> ]。俗话说，好记性不如烂笔头。现在将涉及到的相关知识点总结成笔记。</p>
+          <h1 id="遇到的问题">遇到的问题</h1>
+<p>前段时间开发的时候，遇到一个问题，就是如何用 Java 实现 <code>chdir</code>？网上搜索一番，发现了 <code>JNR-POSIX</code> 项目 [ <a href="https://stackoverflow.com/q/840190" target="_blank" rel="noopener">stackoverflow</a> ]。俗话说，好记性不如烂笔头。现在将涉及到的相关知识点总结成笔记。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2018/01/java-ffi/#more" rel="contents">
@@ -2265,7 +2272,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">44k</span>
+                <span title="本文字数">43k</span>
               
 
               
@@ -2279,7 +2286,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">40 分钟</span>
+                <span title="阅读时长">39 分钟</span>
               
             </div>
           
@@ -2300,7 +2307,8 @@
 
       
         
-          <h1 id="ZooKeeper-介绍"><a href="#ZooKeeper-介绍" class="headerlink" title="ZooKeeper 介绍"></a>ZooKeeper 介绍</h1><p>ZooKeeper（<a href="https://en.wikipedia.org/wiki/Apache_ZooKeeper" target="_blank" rel="noopener">wiki</a>，<a href="http://zookeeper.apache.org/" target="_blank" rel="noopener">home</a>，<a href="https://github.com/apache/zookeeper" target="_blank" rel="noopener">github</a>） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ <a href="http://zookeeper.apache.org/doc/current/zookeeperOver.html" target="_blank" rel="noopener">doc</a> ]。</p>
+          <h1 id="zookeeper-介绍">ZooKeeper 介绍</h1>
+<p>ZooKeeper（<a href="https://en.wikipedia.org/wiki/Apache_ZooKeeper" target="_blank" rel="noopener">wiki</a>，<a href="http://zookeeper.apache.org/" target="_blank" rel="noopener">home</a>，<a href="https://github.com/apache/zookeeper" target="_blank" rel="noopener">github</a>） 是用于分布式应用的开源的分布式协调服务。通过暴露简单的原语，分布式应用能在之上构建更高层的服务，如同步、配置管理和组成员管理等。在设计上易于编程开发，并且数据模型使用了熟知的文件系统目录树结构 [ <a href="http://zookeeper.apache.org/doc/current/zookeeperOver.html" target="_blank" rel="noopener">doc</a> ]。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/11/zookeeper-note/#more" rel="contents">
@@ -2525,7 +2533,8 @@
       
         
           <p>本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。</p>
-<h1 id="Java-8-的新特性"><a href="#Java-8-的新特性" class="headerlink" title="Java 8 的新特性"></a>Java 8 的新特性</h1><p>翻阅 Java 8 的<a href="http://openjdk.java.net/projects/jdk8/features" target="_blank" rel="noopener">新特性</a>，可以看到有这么一条“<a href="http://openjdk.java.net/jeps/118" target="_blank" rel="noopener">JEP 118</a>: Access to Parameter Names at Runtime”。这个特性就是为了能运行时获取参数名新加的。这个 <a href="https://en.wikipedia.org/wiki/JDK_Enhancement_Proposal" target="_blank" rel="noopener">JEP</a> 只是功能增强的提案，并没有最终实现的 JDK 相关的 API 的介绍。查看“<a href="http://docs.oracle.com/javase/8/docs/technotes/guides/reflection/enhancements.html" target="_blank" rel="noopener">Enhancements to the Reflection API</a>” 会看到如下介绍：</p>
+<h1 id="java-8-的新特性">Java 8 的新特性</h1>
+<p>翻阅 Java 8 的<a href="http://openjdk.java.net/projects/jdk8/features" target="_blank" rel="noopener">新特性</a>，可以看到有这么一条“<a href="http://openjdk.java.net/jeps/118" target="_blank" rel="noopener">JEP 118</a>: Access to Parameter Names at Runtime”。这个特性就是为了能运行时获取参数名新加的。这个 <a href="https://en.wikipedia.org/wiki/JDK_Enhancement_Proposal" target="_blank" rel="noopener">JEP</a> 只是功能增强的提案，并没有最终实现的 JDK 相关的 API 的介绍。查看“<a href="http://docs.oracle.com/javase/8/docs/technotes/guides/reflection/enhancements.html" target="_blank" rel="noopener">Enhancements to the Reflection API</a>” 会看到如下介绍：</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/05/java-method-parameter/#more" rel="contents">
@@ -2750,7 +2759,8 @@
       
         
           <p>javac 是 Java 代码的编译器 [ <a href="http://openjdk.java.net/groups/compiler/" target="_blank" rel="noopener">openjdk</a>, <a href="http://docs.oracle.com/javase/8/docs/technotes/guides/javac/" target="_blank" rel="noopener">oracle</a> ]，初学 Java 的时候就应该接触过。本笔记整理一些 javac 相关的高级用法。</p>
-<h1 id="javac-命令行"><a href="#javac-命令行" class="headerlink" title="javac 命令行"></a>javac 命令行</h1><p>javac 命令行工具，官方文档有完整的使用说明，<a href="http://docs.oracle.com/javase/8/docs/technotes/tools/unix/javac.html" target="_blank" rel="noopener">doc</a>。当然也可以，运行 <code>javac -help</code> 或 <code>man javac</code> 查看帮助信息。下面是经典的 <a href="https://en.wikipedia.org/wiki/%22Hello,_World!%22_program" target="_blank" rel="noopener">hello world</a> 代码：</p>
+<h1 id="javac-命令行">javac 命令行</h1>
+<p>javac 命令行工具，官方文档有完整的使用说明，<a href="http://docs.oracle.com/javase/8/docs/technotes/tools/unix/javac.html" target="_blank" rel="noopener">doc</a>。当然也可以，运行 <code>javac -help</code> 或 <code>man javac</code> 查看帮助信息。下面是经典的 <a href="https://en.wikipedia.org/wiki/%22Hello,_World!%22_program" target="_blank" rel="noopener">hello world</a> 代码：</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/04/javac-api/#more" rel="contents">
@@ -2939,7 +2949,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">63k</span>
+                <span title="本文字数">62k</span>
               
 
               
@@ -2953,7 +2963,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">57 分钟</span>
+                <span title="阅读时长">56 分钟</span>
               
             </div>
           
@@ -2975,7 +2985,8 @@
       
         
           <p>本文整理 Java 并发框架 Executor 的用法，并对结合 JDK 相关的实现源码作简单分析。</p>
-<h1 id="任务与线程池"><a href="#任务与线程池" class="headerlink" title="任务与线程池"></a>任务与线程池</h1><p>先来看下 Executor 框架的 javadoc 描述 [ <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/package-summary.html#package_description" target="_blank" rel="noopener">ref1</a> <a href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html#package.description" target="_blank" rel="noopener">ref2</a> ]</p>
+<h1 id="任务与线程池">任务与线程池</h1>
+<p>先来看下 Executor 框架的 javadoc 描述 [ <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/package-summary.html#package_description" target="_blank" rel="noopener">ref1</a> <a href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html#package.description" target="_blank" rel="noopener">ref2</a> ]</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/03/java-executor/#more" rel="contents">
@@ -3178,7 +3189,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">13 分钟</span>
+                <span title="阅读时长">12 分钟</span>
               
             </div>
           
@@ -3200,7 +3211,9 @@
       
         
           <p>文本整理MySQL字段类型的常见问题和用法。</p>
-<h1 id="数值类型"><a href="#数值类型" class="headerlink" title="数值类型"></a>数值类型</h1><h2 id="int和int-3"><a href="#int和int-3" class="headerlink" title="int和int(3)"></a>int和int(3)</h2><p>新手在定义整数字段时，常常想当然通过，如<code>int(3)</code>，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用<code>tinyint</code>（1个字节）、<code>smallint</code>（2个字节）、<code>mediumint</code>（3个字节）、<code>int</code>（4个字节）或<code>bigint</code>（8个字节）。MySQL的相关文档如下[<a href="http://dev.mysql.com/doc/refman/5.7/en/numeric-type-attributes.html" target="_blank" rel="noopener">doc</a>]：</p>
+<h1 id="数值类型">数值类型</h1>
+<h2 id="int和int-3">int和int(3)</h2>
+<p>新手在定义整数字段时，常常想当然通过，如<code>int(3)</code>，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用<code>tinyint</code>（1个字节）、<code>smallint</code>（2个字节）、<code>mediumint</code>（3个字节）、<code>int</code>（4个字节）或<code>bigint</code>（8个字节）。MySQL的相关文档如下[<a href="http://dev.mysql.com/doc/refman/5.7/en/numeric-type-attributes.html" target="_blank" rel="noopener">doc</a>]：</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2017/01/mysql-data-types/#more" rel="contents">
@@ -4887,8 +4900,6 @@
                     
                       
                     
-                      
-                    
                     <span class="site-state-item-count">6</span>
                     <span class="site-state-item-name">分类</span>
                   </a>
@@ -4901,14 +4912,6 @@
                 <div class="site-state-item site-state-tags">
                   <a href="/tags/index.html">
                     
-                    
-                      
-                    
-                      
-                    
-                      
-                    
-                      
                     
                       
                     
@@ -5071,7 +5074,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">NaNm</span>
+    <span title="站点总字数">230k</span>
   
 
   
@@ -5080,7 +5083,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">NaN:aN</span>
+    <span title="站点阅读时长">3:29</span>
   
 </div>
 

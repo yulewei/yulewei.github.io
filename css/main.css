@@ -1849,7 +1849,7 @@ pre .javascript .function {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #bf7e96;
+  background: #5709ff;
 }
 .links-of-blogroll {
   font-size: 13px;
@@ -2492,6 +2492,9 @@ a {
 .post-body a {
   color: #0366d6;
 }
+.post-body li p {
+  margin: 0;
+}
 hr {
   margin: 20px 0;
   height: 2px;
@@ -2677,7 +2680,7 @@ hr {
   display: none;
 }
 .posts-expand .post {
-  margin-top: 120px;
+  margin-top: 60px;
 }
 .posts-expand .post:first-child {
   margin-top: 0;
