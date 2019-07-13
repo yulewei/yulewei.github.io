@@ -132,7 +132,7 @@
 <meta property="og:image" content="https://insights.thoughtworks.cn/wp-content/uploads/2017/10/5-basic-build-pipeline.png">
 <meta property="og:image" content="https://insights.thoughtworks.cn/wp-content/uploads/2017/10/6-Module_deployment_often_differs.jpg">
 <meta property="og:image" content="https://www.oreilly.com/library/cover/9781491950340/500h/">
-<meta property="og:updated_time" content="2019-07-13T13:34:17.537Z">
+<meta property="og:updated_time" content="2019-07-13T13:41:01.077Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="（转）微服务 | Martin Fowler">
 <meta name="twitter:description" content=".nav-number {   display: none }  作者：Martin Fowler &amp;amp; James Lewis 译者：伍斌 原文：http://martinfowler.com/articles/microservices.html 转载自：https://mp.weixin.qq.com/s/dqk7CTX1W3FNCE7GyCgbSQ https://mp.weixi">
@@ -405,7 +405,7 @@
                 
               
 
-              <time title="创建时间：2019-07-13 15:09:51 / 修改时间：21:34:17" itemprop="dateCreated datePublished" datetime="2019-07-13T15:09:51+08:00">2019-07-13</time>
+              <time title="创建时间：2019-07-13 15:09:51 / 修改时间：21:41:01" itemprop="dateCreated datePublished" datetime="2019-07-13T15:09:51+08:00">2019-07-13</time>
             
 
             
@@ -536,15 +536,15 @@
 <li>
 <p><a href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E6%9E%B6%E6%9E%84%E7%9A%84%E4%B9%9D%E5%A4%A7%E7%89%B9%E6%80%A7">微服务架构的九大特性</a></p>
 <ul>
-<li><a href="#%E7%89%B9%E6%80%A7%E4%B8%80%EF%BC%9A-%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%B8%8E-%E5%A4%9A%E6%9C%8D%E5%8A%A1">特性一：“组件化”与“多服务”</a></li>
-<li><a href="#%E7%89%B9%E6%80%A7%E4%BA%8C%EF%BC%9A%E5%9B%B4%E7%BB%95-%E4%B8%9A%E5%8A%A1%E5%8A%9F%E8%83%BD-%E7%BB%84%E7%BB%87%E5%9B%A2%E9%98%9F">特性二：围绕“业务功能”组织团队</a></li>
-<li><a href="#%E7%89%B9%E6%80%A7%E4%B8%89%EF%BC%9A-%E5%81%9A%E4%BA%A7%E5%93%81-%E8%80%8C%E4%B8%8D%E6%98%AF-%E5%81%9A%E9%A1%B9%E7%9B%AE">特性三：“做产品”而不是“做项目”</a></li>
-<li><a href="#%E7%89%B9%E6%80%A7%E5%9B%9B%EF%BC%9A-%E6%99%BA%E8%83%BD%E7%AB%AF%E7%82%B9-%E4%B8%8E-%E5%82%BB%E7%93%9C%E7%AE%A1%E9%81%93">特性四：“智能端点”与“傻瓜管道”</a></li>
-<li><a href="#%E7%89%B9%E6%80%A7%E4%BA%94%EF%BC%9A-%E5%8E%BB%E4%B8%AD%E5%BF%83%E5%8C%96-%E5%9C%B0%E6%B2%BB%E7%90%86%E6%8A%80%E6%9C%AF">特性五：“去中心化”地治理技术</a></li>
-<li><a href="#%E7%89%B9%E6%80%A7%E5%85%AD%EF%BC%9A-%E5%8E%BB%E4%B8%AD%E5%BF%83%E5%8C%96-%E5%9C%B0%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE">特性六：“去中心化”地管理数据</a></li>
-<li><a href="#%E7%89%B9%E6%80%A7%E4%B8%83%EF%BC%9A-%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD-%E8%87%AA%E5%8A%A8%E5%8C%96">特性七：“基础设施”自动化</a></li>
-<li><a href="#%E7%89%B9%E6%80%A7%E5%85%AB%EF%BC%9A-%E5%AE%B9%E9%94%99-%E8%AE%BE%E8%AE%A1">特性八：“容错”设计</a></li>
-<li><a href="#%E7%89%B9%E6%80%A7%E4%B9%9D%EF%BC%9A-%E6%BC%94%E8%BF%9B%E5%BC%8F-%E8%AE%BE%E8%AE%A1">特性九：“演进式”设计</a></li>
+<li><a href="#%E7%89%B9%E6%80%A7%E4%B8%80%EF%BC%9A-%E7%BB%84%E4%BB%B6%E5%8C%96-%E4%B8%8E-%E5%A4%9A%E6%9C%8D%E5%8A%A1">特性一：“组件化”与“多服务”</a>（Componentization via Services）</li>
+<li><a href="#%E7%89%B9%E6%80%A7%E4%BA%8C%EF%BC%9A%E5%9B%B4%E7%BB%95-%E4%B8%9A%E5%8A%A1%E5%8A%9F%E8%83%BD-%E7%BB%84%E7%BB%87%E5%9B%A2%E9%98%9F">特性二：围绕“业务功能”组织团队</a>（Organized around Business Capabilities）</li>
+<li><a href="#%E7%89%B9%E6%80%A7%E4%B8%89%EF%BC%9A-%E5%81%9A%E4%BA%A7%E5%93%81-%E8%80%8C%E4%B8%8D%E6%98%AF-%E5%81%9A%E9%A1%B9%E7%9B%AE">特性三：“做产品”而不是“做项目”</a>（Products not Projects）</li>
+<li><a href="#%E7%89%B9%E6%80%A7%E5%9B%9B%EF%BC%9A-%E6%99%BA%E8%83%BD%E7%AB%AF%E7%82%B9-%E4%B8%8E-%E5%82%BB%E7%93%9C%E7%AE%A1%E9%81%93">特性四：“智能端点”与“傻瓜管道”</a>（Smart endpoints and dumb pipes）</li>
+<li><a href="#%E7%89%B9%E6%80%A7%E4%BA%94%EF%BC%9A-%E5%8E%BB%E4%B8%AD%E5%BF%83%E5%8C%96-%E5%9C%B0%E6%B2%BB%E7%90%86%E6%8A%80%E6%9C%AF">特性五：“去中心化”地治理技术</a>（Decentralized Governance）</li>
+<li><a href="#%E7%89%B9%E6%80%A7%E5%85%AD%EF%BC%9A-%E5%8E%BB%E4%B8%AD%E5%BF%83%E5%8C%96-%E5%9C%B0%E7%AE%A1%E7%90%86%E6%95%B0%E6%8D%AE">特性六：“去中心化”地管理数据</a>（Decentralized Data Management）</li>
+<li><a href="#%E7%89%B9%E6%80%A7%E4%B8%83%EF%BC%9A-%E5%9F%BA%E7%A1%80%E8%AE%BE%E6%96%BD-%E8%87%AA%E5%8A%A8%E5%8C%96">特性七：“基础设施”自动化</a>（Infrastructure Automation）</li>
+<li><a href="#%E7%89%B9%E6%80%A7%E5%85%AB%EF%BC%9A-%E5%AE%B9%E9%94%99-%E8%AE%BE%E8%AE%A1">特性八：“容错”设计</a>（Design for failure）</li>
+<li><a href="#%E7%89%B9%E6%80%A7%E4%B9%9D%EF%BC%9A-%E6%BC%94%E8%BF%9B%E5%BC%8F-%E8%AE%BE%E8%AE%A1">特性九：“演进式”设计</a>（Evolutionary Design）</li>
 </ul>
 </li>
 <li>
@@ -553,13 +553,13 @@
 <li>
 <p><em>扩展阅读</em></p>
 <ul>
-<li><a href="#%E4%B8%80%E4%B8%AA%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%BA%94%E8%AF%A5%E6%9C%89%E5%A4%9A%E5%A4%A7%EF%BC%9F">一个微服务应该有多大？</a></li>
-<li><a href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%92%8C-soa">微服务与 SOA</a></li>
-<li><a href="#%E5%A4%9A%E7%A7%8D%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80-%E5%A4%9A%E7%A7%8D%E9%80%89%E6%8B%A9%E5%8F%AF%E8%83%BD">多种编程语言，多种选择可能</a></li>
-<li><a href="#%E5%AE%9E%E6%88%98%E6%A3%80%E9%AA%8C-%E7%9A%84%E6%A0%87%E5%87%86%E4%B8%8E-%E5%BC%BA%E5%88%B6%E6%89%A7%E8%A1%8C-%E7%9A%84%E6%A0%87%E5%87%86">“实战检验”的标准与“强制执行”的标准</a></li>
-<li><a href="#%E8%AE%A9-%E6%B2%BF%E7%9D%80%E6%AD%A3%E7%A1%AE%E7%9A%84%E6%96%B9%E5%90%91%E5%81%9A%E4%BA%8B-%E6%9B%B4%E5%AE%B9%E6%98%93">让“方向正确地做事”更容易</a></li>
-<li><a href="#%E6%96%AD%E8%B7%AF%E5%99%A8-%E4%B8%8E-%E5%8F%AF%E9%9A%8F%E6%97%B6%E4%B8%8A%E7%BA%BF%E7%9A%84%E4%BB%A3%E7%A0%81">“断路器”与“可随时上线的代码”</a></li>
-<li><a href="#%E5%90%8C%E6%AD%A5%E8%B0%83%E7%94%A8-%E6%9C%89%E5%AE%B3">“同步调用”有害</a></li>
+<li><a href="#%E4%B8%80%E4%B8%AA%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%BA%94%E8%AF%A5%E6%9C%89%E5%A4%9A%E5%A4%A7%EF%BC%9F">一个微服务应该有多大？</a>（How big is a microservice?）</li>
+<li><a href="#%E5%BE%AE%E6%9C%8D%E5%8A%A1%E5%92%8C-soa">微服务与 SOA</a>（Microservices and SOA）</li>
+<li><a href="#%E5%A4%9A%E7%A7%8D%E7%BC%96%E7%A8%8B%E8%AF%AD%E8%A8%80-%E5%A4%9A%E7%A7%8D%E9%80%89%E6%8B%A9%E5%8F%AF%E8%83%BD">多种编程语言，多种选择可能</a>（Many languages, many options）</li>
+<li><a href="#%E5%AE%9E%E6%88%98%E6%A3%80%E9%AA%8C-%E7%9A%84%E6%A0%87%E5%87%86%E4%B8%8E-%E5%BC%BA%E5%88%B6%E6%89%A7%E8%A1%8C-%E7%9A%84%E6%A0%87%E5%87%86">“实战检验”的标准与“强制执行”的标准</a>（Battle-tested standards and enforced standards）</li>
+<li><a href="#%E8%AE%A9-%E6%B2%BF%E7%9D%80%E6%AD%A3%E7%A1%AE%E7%9A%84%E6%96%B9%E5%90%91%E5%81%9A%E4%BA%8B-%E6%9B%B4%E5%AE%B9%E6%98%93">让“方向正确地做事”更容易</a>（Make it easy to do the right thing）</li>
+<li><a href="#%E6%96%AD%E8%B7%AF%E5%99%A8-%E4%B8%8E-%E5%8F%AF%E9%9A%8F%E6%97%B6%E4%B8%8A%E7%BA%BF%E7%9A%84%E4%BB%A3%E7%A0%81">“断路器”与“可随时上线的代码”</a>（The circuit breaker and production ready code）</li>
+<li><a href="#%E5%90%8C%E6%AD%A5%E8%B0%83%E7%94%A8-%E6%9C%89%E5%AE%B3">“同步调用”有害</a>（Synchronous calls considered harmful）</li>
 </ul>
 </li>
 </ul>
