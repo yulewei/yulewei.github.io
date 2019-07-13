@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://nullwy.me/2019/08/debug-linux-kernel/</loc>
+    
+    <lastmod>2019-07-13T07:41:19.614Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://nullwy.me/2019/07/martinfowler-microservices-zh-cn/</loc>
     
     <lastmod>2019-07-13T07:38:40.125Z</lastmod>
