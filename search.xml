@@ -45,9 +45,9 @@
       
         <tags>
             
-            <tag> MySQL </tag>
-            
             <tag> 数据库 </tag>
+            
+            <tag> MySQL </tag>
             
         </tags>
       
@@ -132,11 +132,11 @@
       
         <tags>
             
+            <tag> 数据库 </tag>
+            
             <tag> MySQL </tag>
             
             <tag> binlog </tag>
-            
-            <tag> 数据库 </tag>
             
         </tags>
       
@@ -386,9 +386,9 @@
       
         <tags>
             
-            <tag> MySQL </tag>
-            
             <tag> 数据库 </tag>
+            
+            <tag> MySQL </tag>
             
         </tags>
       
@@ -415,9 +415,9 @@
             
             <tag> Java </tag>
             
-            <tag> 数据库 </tag>
-            
             <tag> MyBatis </tag>
+            
+            <tag> 数据库 </tag>
             
         </tags>
       
@@ -552,9 +552,9 @@
             
             <tag> 书籍 </tag>
             
-            <tag> MySQL </tag>
-            
             <tag> 数据库 </tag>
+            
+            <tag> MySQL </tag>
             
             <tag> CS </tag>
             
