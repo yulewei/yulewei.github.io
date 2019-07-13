@@ -520,13 +520,13 @@
         <h1 id="遇到的问题">遇到的问题</h1>
 <p>前段时间开发的时候，遇到一个问题，就是如何用 Java 实现 <code>chdir</code>？网上搜索一番，发现了 <code>JNR-POSIX</code> 项目 [ <a href="https://stackoverflow.com/q/840190" target="_blank" rel="noopener">stackoverflow</a> ]。俗话说，好记性不如烂笔头。现在将涉及到的相关知识点总结成笔记。</p>
 <a id="more"></a>
-<p>其实针对 Java 实现 <code>chdir</code> 问题，官方 20 多年前就存在对应的 bug，即 <a href="https://bugs.openjdk.java.net/browse/JDK-4045688" target="_blank" rel="noopener">JDK-4045688</a> ‘Add chdir or equivalent notion of changing working directory’。这个 bug 在 1997.04 创建，目前的状态是 <code>Won't Fix</code>（不予解决），理由大致是，若实现与操作系统一样的进程级别的 <code>chdir</code>，将影响 JVM 上的全部线程，这样引入了可变（mutable）的全局状态，这与 Java 的安全性优先原则冲突，现在添加全局可变的进程状态，已经太迟了，对不变性（immutability）的支持才是 Java 要实现的特性。</p>
+<p>其实针对 Java 实现 <code>chdir</code> 问题，官方 20 多年前就存在对应的 bug，即 <a href="https://bugs.openjdk.java.net/browse/JDK-4045688" target="_blank" rel="noopener">JDK-4045688</a> 'Add chdir or equivalent notion of changing working directory'。这个 bug 在 1997.04 创建，目前的状态是 <code>Won't Fix</code>（不予解决），理由大致是，若实现与操作系统一样的进程级别的 <code>chdir</code>，将影响 JVM 上的全部线程，这样引入了可变（mutable）的全局状态，这与 Java 的安全性优先原则冲突，现在添加全局可变的进程状态，已经太迟了，对不变性（immutability）的支持才是 Java 要实现的特性。</p>
 <p><code>chdir</code> 是平台相关的操作系统接口，POSIX 下对应的 <a href="https://www.mankier.com/2/chdir" target="_blank" rel="noopener">API</a> 为 <code>int chdir(const char *path);</code>，而 Windows 下对应的 <a href="https://msdn.microsoft.com/library/aa365530.aspx" target="_blank" rel="noopener">API</a> 为 <code>BOOL WINAPI SetCurrentDirectory(_In_ LPCTSTR lpPathName);</code>，另外 Windows 下也可以使用 MSVCRT 中 <a href="https://msdn.microsoft.com/library/bf7fwze1.aspx" target="_blank" rel="noopener">API</a> 的 <code>int _chdir(const char *dirname);</code>（MSVCRT 下内部实现其实就是调用 <code>SetCurrentDirectory</code> [ <a href="https://github.com/reactos/reactos/blob/releases/0.4.7/sdk/lib/crt/direct/chdir.c" target="_blank" rel="noopener">reactos</a> ] ）。</p>
-<p>Java 设计理念是跨平台，“write once, run anywhere”。很平台相关的 API，虽然各个平台都有自己的类似的实现，但存在会差异。除了多数常见功能，Java 并没有对全部操作系统接口提供完整支持，比如很多 POSIX API。除了 <code>chdir</code>，另外一个典型的例子是，在 Java 9 以前 JDK 获取进程 id 一直没有简洁的方法 [ <a href="https://stackoverflow.com/q/35842" target="_blank" rel="noopener">stackoverflow</a> ]，最新发布的 Java 9 中的 <a href="http://openjdk.java.net/jeps/102" target="_blank" rel="noopener">JEP 102</a>（Process API Updates）才增强了进程 API。获取进程 id 可以使用以下方式 [ <a href="https://docs.oracle.com/javase/9/docs/api/java/lang/ProcessHandle.html#pid--" target="_blank" rel="noopener">javadoc</a> ]：</p>
+<p>Java 设计理念是跨平台，&quot;write once, run anywhere&quot;。很平台相关的 API，虽然各个平台都有自己的类似的实现，但存在会差异。除了多数常见功能，Java 并没有对全部操作系统接口提供完整支持，比如很多 POSIX API。除了 <code>chdir</code>，另外一个典型的例子是，在 Java 9 以前 JDK 获取进程 id 一直没有简洁的方法 [ <a href="https://stackoverflow.com/q/35842" target="_blank" rel="noopener">stackoverflow</a> ]，最新发布的 Java 9 中的 <a href="http://openjdk.java.net/jeps/102" target="_blank" rel="noopener">JEP 102</a>（Process API Updates）才增强了进程 API。获取进程 id 可以使用以下方式 [ <a href="https://docs.oracle.com/javase/9/docs/api/java/lang/ProcessHandle.html#pid--" target="_blank" rel="noopener">javadoc</a> ]：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">long</span> pid = ProcessHandle.current().pid();</span><br></pre></td></tr></table></figure>
 <p>相比其他语言，Pyhon 和 Ruby，对操作系统相关的接口都有更多的原生支持。Pyhon 和 Ruby 实现的相关 API 基本上都带有 POSIX 风格。比如上文提到，<code>chdir</code> 和 <code>getpid</code>，在 Pyhon 和 Ruby 下对应的 API 为：Pyhon 的 os 模块 <a href="https://docs.python.org/3.6/library/os.html#os.chdir" target="_blank" rel="noopener">os.chdir(path)</a> 和 <a href="https://docs.python.org/3.6/library/os.html#os.getpid" target="_blank" rel="noopener">os.getpid()</a>；Ruby 的 Dir 类的 <a href="https://ruby-doc.org/core-2.2.0/Dir.html#method-c-chdir" target="_blank" rel="noopener">Dir.chdir( [ string] )</a> 类方法和 Process 类的 <a href="https://ruby-doc.org/core-2.2.0/Process.html#method-c-pid" target="_blank" rel="noopener">Process.pid</a> 类属性。Python 解释器的 <code>chdir</code> 对应源码为 <a href="https://github.com/python/cpython/blob/v3.6.0/Modules/posixmodule.c#L2611" target="_blank" rel="noopener">posixmodule.c#L2611</a>，Ruby 解释器的 <code>chdir</code> 对应源码为 <a href="https://github.com/ruby/ruby/blob/v2_2_0/dir.c#L848" target="_blank" rel="noopener">dir.c#L848</a> 和 <a href="https://github.com/ruby/ruby/blob/v2_2_0/win32/win32.c#L6741" target="_blank" rel="noopener">win32.c#L6741</a>。</p>
 <h1 id="jni-实现-getpid">JNI 实现 getpid</h1>
-<p>Java 下要想实现本地方法调用，需要通过 <a href="https://en.wikipedia.org/wiki/Java_Native_Interface" target="_blank" rel="noopener">JNI</a>。关于 JNI 的介绍，可以参阅“Java核心技术，卷II：高级特性，第9版2013”的“第12章 本地方法”，或者读当年 Sun 公司 JNI 设计者 Sheng Liang（梁胜）写的“Java Native Interface: Programmer’s Guide and Specification”。本文只给出实现 <code>getpid</code> 的一个简单示例。</p>
+<p>Java 下要想实现本地方法调用，需要通过 <a href="https://en.wikipedia.org/wiki/Java_Native_Interface" target="_blank" rel="noopener">JNI</a>。关于 JNI 的介绍，可以参阅“Java核心技术，卷II：高级特性，第9版2013”的“第12章 本地方法”，或者读当年 Sun 公司 JNI 设计者 Sheng Liang（梁胜）写的“Java Native Interface: Programmer's Guide and Specification”。本文只给出实现 <code>getpid</code> 的一个简单示例。</p>
 <p>首先使用 Maven 创建一个简单的脚手架：</p>
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mvn archetype:generate     \</span><br><span class="line">  -DgroupId=com.test       \</span><br><span class="line">  -DartifactId=jni-jnr     \</span><br><span class="line">  -DpackageName=com.test   \</span><br><span class="line">  -DinteractiveMode=<span class="literal">false</span></span><br></pre></td></tr></table></figure>
 <p>在 <code>com.test</code> 包下添加 <code>GetPidJni</code> 类：</p>
@@ -605,7 +605,7 @@
 <li>Changing the current working directory in Java? <a href="https://stackoverflow.com/q/840190" target="_blank" rel="noopener">https://stackoverflow.com/q/840190</a></li>
 <li>How can a Java program get its own process ID? <a href="http://stackoverflow.com/q/35842" target="_blank" rel="noopener">http://stackoverflow.com/q/35842</a></li>
 <li>Java核心技术，卷II：高级特性，第9版2013：第12章 本地方法，<a href="https://book.douban.com/subject/25841326/" target="_blank" rel="noopener">豆瓣</a></li>
-<li>Java Native Interface: Programmer’s Guide and Specification, <em>Sheng Liang</em> (<a href="https://en.wikipedia.org/wiki/Sheng_Liang" target="_blank" rel="noopener">wiki</a>，<a href="https://www.linkedin.com/in/shengliang/" target="_blank" rel="noopener">linkedin</a>，<a href="https://academic.microsoft.com/#/detail/2131857791" target="_blank" rel="noopener">msa</a>), 1999，<a href="https://book.douban.com/subject/3162962/" target="_blank" rel="noopener">豆瓣</a>：作者梁胜，中国科技大学少年班83级，并拥有耶鲁大学计算机博士学位（1990-1996），目前 Rancher Labs 创始人兼 CEO [ <a href="https://www.toutiao.com/a6283841554134401282/" target="_blank" rel="noopener">ref</a> ]</li>
+<li>Java Native Interface: Programmer's Guide and Specification, <em>Sheng Liang</em> (<a href="https://en.wikipedia.org/wiki/Sheng_Liang" target="_blank" rel="noopener">wiki</a>，<a href="https://www.linkedin.com/in/shengliang/" target="_blank" rel="noopener">linkedin</a>，<a href="https://academic.microsoft.com/#/detail/2131857791" target="_blank" rel="noopener">msa</a>), 1999，<a href="https://book.douban.com/subject/3162962/" target="_blank" rel="noopener">豆瓣</a>：作者梁胜，中国科技大学少年班83级，并拥有耶鲁大学计算机博士学位（1990-1996），目前 Rancher Labs 创始人兼 CEO [ <a href="https://www.toutiao.com/a6283841554134401282/" target="_blank" rel="noopener">ref</a> ]</li>
 <li>2013-07 Charles Nutter: Java Native Runtime <a href="http://www.oracle.com/technetwork/java/jvmls2013nutter-2013526.pdf" target="_blank" rel="noopener">http://www.oracle.com/technetwork/java/jvmls2013nutter-2013526.pdf</a></li>
 <li>JEP 191: Foreign Function Interface <a href="http://openjdk.java.net/jeps/191" target="_blank" rel="noopener">http://openjdk.java.net/jeps/191</a> 作者是Charles Nutter</li>
 <li>2014-03 Java 外部函数接口 <a href="http://www.infoq.com/cn/news/2014/03/java-foreign-function-interface" target="_blank" rel="noopener">http://www.infoq.com/cn/news/2014/03/java-foreign-function-interface</a></li>
@@ -965,7 +965,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">230k</span>
+    <span title="站点总字数">231k</span>
   
 
   
@@ -974,7 +974,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">3:29</span>
+    <span title="站点阅读时长">3:30</span>
   
 </div>
 

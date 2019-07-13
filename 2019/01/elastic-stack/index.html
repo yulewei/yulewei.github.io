@@ -542,7 +542,7 @@
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo /usr/share/logstash/bin/logstash -e <span class="string">'input &#123; stdin &#123; &#125; &#125; output &#123; stdout &#123;&#125; &#125;'</span></span><br></pre></td></tr></table></figure>
 <p><code>-e</code> 选项能够使 Logstash 直接在<a href="https://www.elastic.co/guide/en/logstash/current/running-logstash-command-line.html" target="_blank" rel="noopener">命令行</a>中设置管道配置。示例中 <code>input</code> 插件为 <a href="https://www.elastic.co/guide/en/logstash/current/plugins-inputs-stdin.html" target="_blank" rel="noopener">stdin</a> （标准输入），<code>output</code> 插件是 <a href="https://www.elastic.co/guide/en/logstash/current/plugins-outputs-stdout.html" target="_blank" rel="noopener">stdout</a> （标准输出）。若在控制台输入 <code>hello world</code>，相应的控制台将输出：</p>
 <figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">      "@version" =&gt; "1",</span><br><span class="line">          "host" =&gt; "ubuntu109",</span><br><span class="line">    "@timestamp" =&gt; 2019-01-12T05:52:56.291Z,</span><br><span class="line">       "message" =&gt; "hello world"</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>值得注意的是，输出内容编码格式默认为 <code>rubydebug</code>，使用 Ruby 的 “<a href="https://github.com/awesome-print/awesome_print" target="_blank" rel="noopener">awesome_print</a>” 库打印。另外，响应输出 <code>@timestamp</code> 字段的值为 <code>2019-01-12T05:52:56.291Z</code>，这是 <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank" rel="noopener">ISO 8601</a> 时间格式，时区是 0（zero），和北京时间相差 8 个小时。</p>
+<p>值得注意的是，输出内容编码格式默认为 <code>rubydebug</code>，使用 Ruby 的 &quot;<a href="https://github.com/awesome-print/awesome_print" target="_blank" rel="noopener">awesome_print</a>&quot; 库打印。另外，响应输出 <code>@timestamp</code> 字段的值为 <code>2019-01-12T05:52:56.291Z</code>，这是 <a href="https://en.wikipedia.org/wiki/ISO_8601" target="_blank" rel="noopener">ISO 8601</a> 时间格式，时区是 0（zero），和北京时间相差 8 个小时。</p>
 <p>输出内容编码格式，可以通过 <code>codec</code> 指令指定。除了默认的 <code>rubydebug</code> 外，官方还支持其他 20 多种编码格式，参见 <a href="https://www.elastic.co/guide/en/logstash/current/codec-plugins.html" target="_blank" rel="noopener">doc</a>。若把编码格式改为 <code>json</code>，即 <code>stdout { codec =&gt; json }</code>，输出结果将变成：</p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&#123;<span class="attr">"message"</span>:<span class="string">"hello world"</span>,<span class="attr">"@version"</span>:<span class="string">"1"</span>,<span class="attr">"@timestamp"</span>:<span class="string">"2019-01-12T05:52:56.291Z"</span>,<span class="attr">"host"</span>:<span class="string">"ubuntu109"</span>&#125;</span><br></pre></td></tr></table></figure>
 <p>管道配置也可以保存到文件中，以 <code>*.conf</code> 作为文件后缀，比如保存为 <code>test-stdin-stdout.conf</code>：</p>
@@ -1046,7 +1046,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">230k</span>
+    <span title="站点总字数">231k</span>
   
 
   
@@ -1055,7 +1055,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">3:29</span>
+    <span title="站点阅读时长">3:30</span>
   
 </div>
 

@@ -756,7 +756,7 @@
 </blockquote>
 <p>就是说，不能直接在 JSON 列上创建索引；替代方式是，先创建提取 JSON 纯量的生成列（generated column），然后在这个生成列上创建索引。回过头来，ERROR 3152，这个<a href="https://dev.mysql.com/doc/refman/5.7/en/server-error-reference.html#error_er_json_used_as_key" target="_blank" rel="noopener">报错提示信息</a>其实让人有点困惑，对没仔细阅读文档的人来说，可能会误以为 MySQL 不支持索引 JSON 列（Bug #<a href="https://bugs.mysql.com/bug.php?id=81364" target="_blank" rel="noopener">81364</a>）。于是，在 MySQL 8.0 错误提示信息<a href="https://dev.mysql.com/doc/refman/8.0/en/server-error-reference.html#error_er_json_used_as_key" target="_blank" rel="noopener">优化为</a>：</p>
 <blockquote>
-<p>ERROR 3152 (42000): JSON column ‘%s’ supports indexing only via generated columns on a specified JSON path.</p>
+<p>ERROR 3152 (42000): JSON column '%s' supports indexing only via generated columns on a specified JSON path.</p>
 </blockquote>
 <p>生成列以及在生成列上创建索引，是 MySQL 5.7 开始支持的新特性。但其实，在 SQL:2003 标准中，生成列就早已经被定义为可选特性，“Optional Features of SQL/Foundation:2003, T175 Generated columns”。这个特性在其他 DBMS 中很早就有支持。2007 年 9 月发布的 Oracle Database 11g 开始支持生成列，不过它们称之为称之为虚拟列（virtual column）。2008 年 8 月发布的 SQL Server 2008 开始支持计算列（computed column），实现的就是 SQL 标准中的生成列。在相近的时间点，MySQL 创建了<a href="https://web.archive.org/web/20080917094638/http://forge.mysql.com/worklog/task.php?id=411" target="_blank" rel="noopener">WL#411</a>: Computed virtual columns as MS SQL server has。之后，MySQL 的社区贡献者 Andrey Zhakov 实现了 WL#411 描述的特性，并发布了实现的代码补丁 [ <a href="https://bugs.mysql.com/bug.php?id=46491" target="_blank" rel="noopener">ref</a>, <a href="https://datacharmer.blogspot.com/2008/09/mysql-virtual-columns.html" target="_blank" rel="noopener">blog</a>, <a href="https://web.archive.org/web/20120629093123/http://forge.mysql.com/wiki/MySQL_virtual_columns_preview" target="_blank" rel="noopener">doc</a> ]。可惜的是 MySQL 官方很长一段时间都没把这个补丁合并进来，直到 2015 年的 MySQL 5.7（7年后）才官方实现 <a href="https://dev.mysql.com/worklog/task/?id=411" target="_blank" rel="noopener">WL#411</a>，同时 WL#411 的标题也被更新为符合 SQL 标准术语的 “Generated columns”。与之相对比的是，2010 年 4 月发布的 MariaDB 5.2 就开始支持<a href="https://mariadb.com/kb/en/library/generated-columns/" target="_blank" rel="noopener">虚拟列</a>，实现上同样也是基于 Andrey Zhakov 贡献的代码 [ <a href="http://openlife.cc/blogs/2010/october/what-would-you-use-virtual-columns" target="_blank" rel="noopener">ref</a> ]。关于生成列或虚拟列，<a href="https://en.wikipedia.org/wiki/Virtual_column" target="_blank" rel="noopener">wikipedia</a> 总结了各大 DBMS 的支持情况，可以参阅。总结下，标准 SQL 定义生成列的语法和 SQL Server 2008、Oracle 11g、MariaDB、MySQL 的区别 [ <a href="https://dev.mysql.com/worklog/task/?id=411" target="_blank" rel="noopener">ref1</a>, <a href="https://planet.mysql.com/entry/?id=5994068" target="_blank" rel="noopener">ref2</a> ]：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Standard             MSSQL 2008      Oracle 11g           MariaDB 10.1           MySQL 5.7               </span><br><span class="line">--------             -----------     ----------           ------------           ---------               </span><br><span class="line">column_name          column_name     column_name          column_name            column_name             </span><br><span class="line">[data type]                          [data type]          data_type              data type               </span><br><span class="line">GENERATED ALWAYS AS  AS              GENERATED ALWAYS AS  [GENERATED ALWAYS] AS  [GENERATED ALWAYS] AS   </span><br><span class="line">(expression)         (expression)    (expression)         (expression)           (expression)           </span><br><span class="line">                     [PERSISTENT]    [VIRTUAL]            [VIRTUAL | PERSISTENT] [VIRTUAL | STORED]     </span><br><span class="line">[constraints]        [constraints]   [constraints]        [constraints]          [constraints]          </span><br><span class="line">                                                          [COMMENT &apos;string&apos;]     [COMMENT &apos;string&apos;]</span><br></pre></td></tr></table></figure>
@@ -809,7 +809,7 @@
 <li>2014-10 Generated Columns in MySQL 5.7.5 <a href="https://mysqlserverteam.com/generated-columns-in-mysql-5-7-5/" target="_blank" rel="noopener">https://mysqlserverteam.com/generated-columns-in-mysql-5-7-5/</a></li>
 <li>2016-03 Indexing JSON documents via Virtual Columns <a href="https://mysqlserverteam.com/indexing-json-documents-via-virtual-columns/" target="_blank" rel="noopener">https://mysqlserverteam.com/indexing-json-documents-via-virtual-columns/</a></li>
 <li>2016-02 Generated columns in MariaDB and MySQL <a href="https://planet.mysql.com/entry/?id=5994068" target="_blank" rel="noopener">https://planet.mysql.com/entry/?id=5994068</a></li>
-<li>2017-06 What’s New in SQL:2016 <a href="https://modern-sql.com/blog/2017-06/whats-new-in-sql-2016" target="_blank" rel="noopener">https://modern-sql.com/blog/2017-06/whats-new-in-sql-2016</a></li>
+<li>2017-06 What's New in SQL:2016 <a href="https://modern-sql.com/blog/2017-06/whats-new-in-sql-2016" target="_blank" rel="noopener">https://modern-sql.com/blog/2017-06/whats-new-in-sql-2016</a></li>
 </ol>
 
       
@@ -856,8 +856,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/07/martinfowler-microservices-zh-cn/" rel="prev" title="（转）微服务 | Martin Fowler">
-                （转）微服务 | Martin Fowler <i class="fa fa-chevron-right"></i>
+              <a href="/2019/07/martinfowler-microservices-zh-cn/" rel="prev" title="[转] 微服务 | Martin Fowler">
+                [转] 微服务 | Martin Fowler <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -1155,7 +1155,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">230k</span>
+    <span title="站点总字数">231k</span>
   
 
   
@@ -1164,7 +1164,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">3:29</span>
+    <span title="站点阅读时长">3:30</span>
   
 </div>
 

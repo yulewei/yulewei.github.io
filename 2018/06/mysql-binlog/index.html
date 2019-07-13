@@ -117,18 +117,18 @@
 
 
 
-  <meta name="description" content="MySQL 的 binlog 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。 STATEMENT 格式的 binlog 要想开启 binlog，需要在启动 MySQL 时传入 –log-bin 参数。或者也可以在 MySQL 配置文件 /etc/my.cnf，设置 log_bin 开启 binlog。My">
+  <meta name="description" content="MySQL 的 binlog 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。 STATEMENT 格式的 binlog 要想开启 binlog，需要在启动 MySQL 时传入 --log-bin 参数。或者也可以在 MySQL 配置文件 /etc/my.cnf，设置 log_bin 开启 binlog。M">
 <meta name="keywords" content="数据库,MySQL,binlog">
 <meta property="og:type" content="article">
 <meta property="og:title" content="MySQL binlog：格式、增量恢复、闪回、Java 解析">
 <meta property="og:url" content="http://nullwy.me/2018/06/mysql-binlog/index.html">
 <meta property="og:site_name" content="nullwy&#39;s blog">
-<meta property="og:description" content="MySQL 的 binlog 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。 STATEMENT 格式的 binlog 要想开启 binlog，需要在启动 MySQL 时传入 –log-bin 参数。或者也可以在 MySQL 配置文件 /etc/my.cnf，设置 log_bin 开启 binlog。My">
+<meta property="og:description" content="MySQL 的 binlog 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。 STATEMENT 格式的 binlog 要想开启 binlog，需要在启动 MySQL 时传入 --log-bin 参数。或者也可以在 MySQL 配置文件 /etc/my.cnf，设置 log_bin 开启 binlog。M">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:updated_time" content="2018-10-21T02:59:47.625Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="MySQL binlog：格式、增量恢复、闪回、Java 解析">
-<meta name="twitter:description" content="MySQL 的 binlog 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。 STATEMENT 格式的 binlog 要想开启 binlog，需要在启动 MySQL 时传入 –log-bin 参数。或者也可以在 MySQL 配置文件 /etc/my.cnf，设置 log_bin 开启 binlog。My">
+<meta name="twitter:description" content="MySQL 的 binlog 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。 STATEMENT 格式的 binlog 要想开启 binlog，需要在启动 MySQL 时传入 --log-bin 参数。或者也可以在 MySQL 配置文件 /etc/my.cnf，设置 log_bin 开启 binlog。M">
 
 
 
@@ -517,7 +517,7 @@
       
         <p>MySQL 的 <a href="https://dev.mysql.com/doc/refman/5.7/en/binary-log.html" target="_blank" rel="noopener">binlog</a> 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。</p>
 <h1 id="statement-格式的-binlog">STATEMENT 格式的 binlog</h1>
-<p>要想开启 binlog，需要在启动 MySQL 时传入 –<a href="https://dev.mysql.com/doc/refman/5.7/en/replication-options-binary-log.html#option_mysqld_log-bin" target="_blank" rel="noopener">log-bin</a> 参数。或者也可以在 MySQL 配置文件 <code>/etc/my.cnf</code>，设置 <code>log_bin</code> 开启 binlog。MySQL 5.7 开始，开启 binlog 后，<code>--server-id</code> 参数也必须指定，否则 MySQL 服务器会启动失败。</p>
+<p>要想开启 binlog，需要在启动 MySQL 时传入 --<a href="https://dev.mysql.com/doc/refman/5.7/en/replication-options-binary-log.html#option_mysqld_log-bin" target="_blank" rel="noopener">log-bin</a> 参数。或者也可以在 MySQL 配置文件 <code>/etc/my.cnf</code>，设置 <code>log_bin</code> 开启 binlog。MySQL 5.7 开始，开启 binlog 后，<code>--server-id</code> 参数也必须指定，否则 MySQL 服务器会启动失败。</p>
 <a id="more"></a>
 <p><code>binlog_format</code> 支持 <code>STATEMENT</code>, <code>ROW</code>, <code>MIXED</code> 三种格式，MySQL 5.5 和 5.6 默认为 <code>STATEMENT</code>，MySQL 5.7.7 开始默认为 <code>ROW</code>。若 SQL 使用 UUID(), RAND(), VERSION() 等函数，或者使用存储过程、自定义函数，基于 STATEMENT 的主从复时，是不安全的（很多人可能会认为 NOW(), CURRENT_TIMESTAMP 这些函数也是不安全的，事实上是安全的）[ <a href="https://dev.mysql.com/doc/mysql-replication-excerpt/5.7/en/replication-sbr-rbr.html" target="_blank" rel="noopener">doc1</a>, <a href="https://mariadb.com/kb/en/library/unsafe-statements-for-statement-based-replication/" target="_blank" rel="noopener">doc2</a> ]。基于 <code>ROW</code> 的主从复制，是最安全的复制方式。</p>
 <p>现在先来看下 <code>STATEMENT</code> 格式的 binlog，<code>/etc/my.cnf</code> 文件修改的内容如下：</p>
@@ -548,9 +548,9 @@
 <p>之后执行的 SQL：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">update</span> hello <span class="keyword">set</span> <span class="keyword">name</span> = <span class="string">'David'</span> <span class="keyword">where</span> <span class="keyword">id</span> = <span class="number">3</span>;</span><br><span class="line"><span class="keyword">insert</span> hello (<span class="keyword">name</span>) <span class="keyword">values</span> (<span class="string">'Frank'</span>);</span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> hello <span class="keyword">where</span> <span class="keyword">id</span> = <span class="number">2</span>;</span><br></pre></td></tr></table></figure>
 <p>不管是使用 <code>STATEMENT</code> 还是 <code>ROW</code>，<code>mysqlbinlog</code> 命令都可以将 binlog 增量恢复到数据库 [ <a href="https://dev.mysql.com/doc/refman/5.7/en/point-in-time-recovery.html" target="_blank" rel="noopener">doc</a> ]。</p>
-<p>观察 <code>binlog</code> 可以看到，从最开始的 <code>update hello set name = 'David' where id = 3;</code> 到最终的 <code>delete from hello where id = 2;</code>，时间上从 “2018-06-17 22:54:13” 到 “2018-06-17 22:56:44”，所以基于时间点恢复，命令如下：</p>
+<p>观察 <code>binlog</code> 可以看到，从最开始的 <code>update hello set name = 'David' where id = 3;</code> 到最终的 <code>delete from hello where id = 2;</code>，时间上从 &quot;2018-06-17 22:54:13&quot; 到 &quot;2018-06-17 22:56:44&quot;，所以基于时间点恢复，命令如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mysqlbinlog --start-datetime=&quot;2018-06-17 22:54:13&quot; --stop-datetime=&quot;2018-06-17 22:56:44&quot; mysql-bin.000002 | mysql -uroot -p123456</span><br></pre></td></tr></table></figure>
-<p><code>binlog</code> 的事件位置号是从 “154” 到 “956”，但需要注意的是 用 <code>--start-position</code> 和 <code>--stop-position</code> 指定位置点范围，逻辑上对应的是 <code>start &lt;= position &lt; stop</code>，所以基于时间点恢复，命令如下：</p>
+<p><code>binlog</code> 的事件位置号是从 &quot;154&quot; 到 &quot;956&quot;，但需要注意的是 用 <code>--start-position</code> 和 <code>--stop-position</code> 指定位置点范围，逻辑上对应的是 <code>start &lt;= position &lt; stop</code>，所以基于时间点恢复，命令如下：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mysqlbinlog --start-position=154 --stop-position=957 mysql-bin.000002 | mysql -uroot -p123456</span><br></pre></td></tr></table></figure>
 <p>两种方式任意执行，都能将数据恢复到：</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from hello;</span><br><span class="line">+<span class="comment">----+-------+</span></span><br><span class="line">| id | name  |</span><br><span class="line">+<span class="comment">----+-------+</span></span><br><span class="line">|  1 | Andy  |</span><br><span class="line">|  3 | David |</span><br><span class="line">|  4 | Frank |</span><br><span class="line">+<span class="comment">----+-------+</span></span><br><span class="line">3 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
@@ -922,7 +922,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">230k</span>
+    <span title="站点总字数">231k</span>
   
 
   
@@ -931,7 +931,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">3:29</span>
+    <span title="站点阅读时长">3:30</span>
   
 </div>
 
