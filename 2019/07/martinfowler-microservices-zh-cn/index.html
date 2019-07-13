@@ -132,7 +132,7 @@
 <meta property="og:image" content="https://insights.thoughtworks.cn/wp-content/uploads/2017/10/5-basic-build-pipeline.png">
 <meta property="og:image" content="https://insights.thoughtworks.cn/wp-content/uploads/2017/10/6-Module_deployment_often_differs.jpg">
 <meta property="og:image" content="https://www.oreilly.com/library/cover/9781491950340/500h/">
-<meta property="og:updated_time" content="2019-07-13T13:18:11.898Z">
+<meta property="og:updated_time" content="2019-07-13T13:30:27.941Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="（转）微服务 | Martin Fowler">
 <meta name="twitter:description" content=".nav-number {   display: none }  作者：Martin Fowler &amp;amp; James Lewis 译者：伍斌 原文：http://martinfowler.com/articles/microservices.html 转载自：https://mp.weixin.qq.com/s/dqk7CTX1W3FNCE7GyCgbSQ https://mp.weixi">
@@ -405,7 +405,7 @@
                 
               
 
-              <time title="创建时间：2019-07-13 15:09:51 / 修改时间：21:18:11" itemprop="dateCreated datePublished" datetime="2019-07-13T15:09:51+08:00">2019-07-13</time>
+              <time title="创建时间：2019-07-13 15:09:51 / 修改时间：21:30:27" itemprop="dateCreated datePublished" datetime="2019-07-13T15:09:51+08:00">2019-07-13</time>
             
 
             
@@ -564,7 +564,7 @@
 </li>
 </ul>
 <hr>
-<p>“微服务”——这是在软件架构这条熙熙攘攘的大街上出现的又一个新词儿。我们自然会对它投过轻蔑的一瞥，但是这个小小的术语却描述了一种引人入胜的软件系统的风格。最近几年，我们已经看到许多项目使用了这种风格，而且至今其结果都是良好的，以至于对于我们许多 ThoughtWorks 的同事来说，它正在成为构建企业应用系统的缺省的风格。然而，很不幸的是，我们找不到有关它的概要信息，即什么是微服务风格，以及如何设计微服务风格的架构。</p>
+<p>“微服务”（Microservices）——这是在软件架构这条熙熙攘攘的大街上出现的又一个新词儿。我们自然会对它投过轻蔑的一瞥，但是这个小小的术语却描述了一种引人入胜的软件系统的风格。最近几年，我们已经看到许多项目使用了这种风格，而且至今其结果都是良好的，以至于对于我们许多 ThoughtWorks 的同事来说，它正在成为构建企业应用系统的缺省的风格。然而，很不幸的是，我们找不到有关它的概要信息，即什么是微服务风格，以及如何设计微服务风格的架构。</p>
 <p>简而言之，微服务架构风格<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>这种开发方法，是以开发一组小型服务的方式来开发一个独立的应用系统的。其中每个小型服务都运行在自己的进程中，并经常采用 HTTP 资源 API 这样轻量的机制来相互通信。这些服务围绕业务功能进行构建，并能通过全自动的部署机制来进行独立部署。这些微服务可以使用不同的语言来编写，并且可以使用不同的数据存储技术。对这些微服务我们仅做最低限度的集中管理。</p>
 <p>在开始介绍微服务风格之前，将其与单块（monolithic）风格进行对比还是很有用的：一个单块应用系统是以一个单个单元的方式来构建的。企业应用系统经常包含三个主要部分：客户端用户界面、数据库和服务端应用系统。客户端用户界面包括 HTML 页面和运行在用户机器的浏览器中的 JavaScript。数据库中包括许多表，这些表被插入一个公共的且通常为关系型的数据库管理系统中。这个服务端的应用系统就是一个单块应用——一个单个可执行的逻辑程序<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>。对于该系统的任何改变，都会涉及构建和部署上述服务端应用系统的一个新版本。</p>
 <blockquote>
@@ -573,7 +573,7 @@
 <p>这样的单块服务器是构建上述系统的一种自然的方式。处理用户请求的所有逻辑都运行在一个单个的进程内，从而能使用编程语言的基本特性，来把应用系统划分为类、函数和命名空间。通过精心设计，就能在开发人员的笔记本电脑上运行和测试这样的应用系统，并且使用一个部署流水线来确保变更被很好地进行了测试，并被部署到生产环境中。通过负载均衡器运行许多实例，来将这个单块应用进行横向扩展。</p>
 <p>单块应用系统可以被成功地实现，但是渐渐地，特别是随着越来越多的应用系统正被部署到云端，人们对它们开始表现出不满。软件变更受到了很大的限制，应用系统的一个很小的部分的一处变更，也需要将整个单块应用系统进行重新构建和部署。随着时间的推移，单块应用开始变得经常难以保持一个良好的模块化结构，这使得它变得越来越难以将一个模块的变更的影响控制在该模块内。当对系统进行扩展时，不得不扩展整个应用系统，而不能仅扩展该系统中需要更多资源的那些部分。</p>
 <p align="center">
-  <img src="https://insights.thoughtworks.cn/wp-content/uploads/2017/10/1-monoliths-vs-microservices-1.png" title="图1: 单块应用和微服务">
+  <img src="https://insights.thoughtworks.cn/wp-content/uploads/2017/10/1-monoliths-vs-microservices-1.png" title="图1: 单块应用和微服务（Monoliths and Microservices）">
 </p>
 <p>这些不满导致了微服务架构风格的诞生：以构建一组小型服务的方式来构建应用系统。除了这些服务能被独立地部署和扩展，每一个服务还能提供一个稳固的模块边界，甚至能允许使用不同的编程语言来编写不同的服务。这些服务也能被不同的团队来管理。</p>
 <p>我们并不认为微服务风格是一个新颖或创新的概念，它的起源至少可以追溯到 Unix 的设计原则。但是我们觉得，考虑微服务架构的人还不够多，并且如果对其加以使用，许多软件的开发工作能变得更好。</p>
@@ -760,7 +760,7 @@
 <hr class="footnotes-sep">
 <section class="footnotes">
 <ol class="footnotes-list">
-<li id="fn1" class="footnote-item"><p>2011 年 5 月在威尼斯附近的一个软件架构工作坊中，大家开始讨论“微服务”这个术语，因为这个词可以描述参会者们在架构领域进行探索时所见到的一种通用的架构风格。2012 年 5 月，这群参会者决定将“微服务”作为描述这种架构风格的最贴切的名字。在 2012 年 3 月波兰的克拉科夫市举办的“33rd Degree”技术大会上，本文作者之一 James 在其“<a href="http://2012.33degree.org/talk/show/67" target="_blank" rel="noopener">Microservices - Java, the Unix Way</a>”演讲中以案例的形式谈到了这些微服务的观点，与此同时，Fred George 也表达了同样的<a href="http://www.slideshare.net/fredgeorge/micro-service-architecure" target="_blank" rel="noopener">观点</a>。Netflix 公司的 Adrian Cockcroft 将这种方法描述为“细粒度的 SOA”，并且作为先行者和本文下面所提到的众人已经着手在 Web 领域进行了实践—— Joe Walnes, Dan North, Evan Botcher 和 Graham Tackley。 <a href="#fnref1" class="footnote-backref">↩</a></p>
+<li id="fn1" class="footnote-item"><p>2011 年 5 月在威尼斯附近的一个软件架构工作坊中，大家开始讨论“微服务”（microservice）这个术语，因为这个词可以描述参会者们在架构领域进行探索时所见到的一种通用的架构风格。2012 年 5 月，这群参会者决定将“微服务”（microservices）作为描述这种架构风格的最贴切的名字。在 2012 年 3 月波兰的克拉科夫市举办的“33rd Degree”技术大会上，本文作者之一 James 在其“<a href="http://2012.33degree.org/talk/show/67" target="_blank" rel="noopener">Microservices - Java, the Unix Way</a>”演讲中以案例的形式谈到了这些微服务的观点，与此同时，Fred George 也表达了同样的<a href="http://www.slideshare.net/fredgeorge/micro-service-architecure" target="_blank" rel="noopener">观点</a>。Netflix 公司的 Adrian Cockcroft 将这种方法描述为“细粒度的 SOA”，并且作为先行者和本文下面所提到的众人已经着手在 Web 领域进行了实践—— Joe Walnes, Dan North, Evan Botcher 和 Graham Tackley。 <a href="#fnref1" class="footnote-backref">↩</a></p>
 </li>
 <li id="fn2" class="footnote-item"><p>“单块”（monolith）这个术语已经被 Unix 社区使用一段时间了。它出现在 <a href="https://www.amazon.com/gp/product/B003U2T5BA" target="_blank" rel="noopener">The Art of Unix Programming</a> 一书中，来描述那些变得庞大的系统。 <a href="#fnref2" class="footnote-backref">↩</a></p>
 </li>
