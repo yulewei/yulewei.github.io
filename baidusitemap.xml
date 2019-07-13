@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>http://nullwy.me/2019/08/debug-linux-kernel/</loc>
-    <lastmod>2019-07-13</lastmod>
-  </url>  <url>
     <loc>http://nullwy.me/2019/07/martinfowler-microservices-zh-cn/</loc>
     <lastmod>2019-07-13</lastmod>
   </url>  <url>

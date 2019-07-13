@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://nullwy.me/"/>
-  <updated>2019-07-13T07:41:19.614Z</updated>
+  <updated>2019-07-13T07:38:40.125Z</updated>
   <id>http://nullwy.me/</id>
   
   <author>
@@ -15,37 +15,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>调试 Linux 内核：使用 QEMU 和 GDB</title>
-    <link href="http://nullwy.me/2019/08/debug-linux-kernel/"/>
-    <id>http://nullwy.me/2019/08/debug-linux-kernel/</id>
-    <published>2019-08-14T06:58:20.000Z</published>
-    <updated>2019-07-13T07:41:19.614Z</updated>
-    
-    <content type="html"><![CDATA[<p>Linux 内核（<a href="https://en.wikipedia.org/wiki/Linux_kernel" target="_blank" rel="noopener">wiki</a>，<a href="https://www.kernel.org/" target="_blank" rel="noopener">home</a>，<a href="https://github.com/torvalds/linux" target="_blank" rel="noopener">github</a>），对于想深入钻研学习计算机系统的人的来说，是必学的。目前除了个人电脑 PC 端被 Windows 统治外，其他各个领域都 Linux 主导或占据多数份额 [ <a href="https://en.wikipedia.org/wiki/Usage_share_of_operating_systems" target="_blank" rel="noopener">wiki</a> ]。相比 Windows，Linux 是开源的，全部代码都可以学习研究。言归正传，笔者最近对 Linux 内核感兴趣，开始学习 Linux 内核相关知识。本文是对如何编译和调试 Linux 内核的总结。</p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;Linux 内核（&lt;a href=&quot;https://en.wikipedia.org/wiki/Linux_kernel&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;wiki&lt;/a&gt;，&lt;a href=&quot;https://www.kernel.org/&quot; t
-      
-    
-    </summary>
-    
-      <category term="Linux" scheme="http://nullwy.me/categories/Linux/"/>
-    
-    
-      <category term="Linux" scheme="http://nullwy.me/tags/Linux/"/>
-    
-      <category term="gdb" scheme="http://nullwy.me/tags/gdb/"/>
-    
-      <category term="QEMU" scheme="http://nullwy.me/tags/QEMU/"/>
-    
-      <category term="CLion" scheme="http://nullwy.me/tags/CLion/"/>
-    
-  </entry>
   
   <entry>
     <title>（转）微服务 | Martin Fowler</title>
@@ -569,6 +538,32 @@
       <category term="MySQL" scheme="http://nullwy.me/tags/MySQL/"/>
     
       <category term="CS" scheme="http://nullwy.me/tags/CS/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>编程语言与编译器书籍资料整理</title>
+    <link href="http://nullwy.me/2016/11/lang-and-compiler-books/"/>
+    <id>http://nullwy.me/2016/11/lang-and-compiler-books/</id>
+    <published>2016-11-26T07:09:51.000Z</published>
+    <updated>2017-04-27T09:24:22.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>本文整理编程语言与编译器相关的经典书籍。</p><a id="more"></a><p><a href="https://zh.wikipedia.org/wiki/Template:%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E8%AF%AD%E8%A8%80" target="_blank" rel="noopener">https://zh.wikipedia.org/wiki/Template:程序设计语言</a><br><a href="https://en.wikipedia.org/wiki/Template:IPC" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Template:IPC</a><br><a href="https://en.wikipedia.org/wiki/Programming_language#Further_reading" target="_blank" rel="noopener">https://en.wikipedia.org/wiki/Programming_language#Further_reading</a></p><p>Language Books/Tutorials for popular languages <a href="http://stackoverflow.com/q/22873" target="_blank" rel="noopener">http://stackoverflow.com/q/22873</a></p><p><strong>编程语言、程序分析相关书籍：</strong></p><ol><li>1999、2005、2009，<a href="http://en.wikipedia.org/wiki/Michael_L._Scott" target="_blank" rel="noopener">Michael L. Scott</a>，《<strong>程序设计语言：实践之路</strong>》（Programming Language Pragmatics, <a href="http://amzn.com/1558604421" target="_blank" rel="noopener">1st</a> 1999, <a href="http://www.amazon.com/Programming-Language-Pragmatics-Third-Edition/dp/0123745144" target="_blank" rel="noopener">3rd</a> 2009），<a href="http://www.cs.rochester.edu/u/scott/pragmatics/" target="_blank" rel="noopener">home</a>，第3版<a href="http://book.douban.com/subject/10802357/" target="_blank" rel="noopener">豆瓣</a>：全书800多页，内容优于Sebesta版，有16页参考文献，涵盖程序语言、编译原理、计算机体系结构等多个子学科</li><li>1993-2012，<a href="http://cs.uccs.edu/~rsebesta/" target="_blank" rel="noopener">Robert W. Sebesta</a>，《<strong>程序设计语言概念</strong>》（Concepts of Programming Languages, <a href="http://www.amazon.com/Concepts-Programming-Languages-Robert-Sebesta/dp/0131395319" target="_blank" rel="noopener">10th</a> 2012, <a href="http://amzn.com/013394302X" target="_blank" rel="noopener">11th</a> 2015），第10版<a href="http://book.douban.com/subject/23055481/" target="_blank" rel="noopener">豆瓣</a>：全书600页左右，内容编程语言发展历史概述，以及分别介绍、比较</li><li>2002、2004，Benjamin C. Pierce，《类型和程序设计语言》（Types and Programming Languages, <a href="http://www.amazon.com/Types-Programming-Languages-Benjamin-Pierce/dp/0262162091" target="_blank" rel="noopener">amazon</a>），<a href="http://www.cis.upenn.edu/~bcpierce/tapl/" target="_blank" rel="noopener">home</a>，<a href="http://book.douban.com/subject/1318672/" target="_blank" rel="noopener">豆瓣</a></li><li>1993，Glynn Winskel，《程序设计语言的形式语义》（The Formal Semantics of Programming Languages, <a href="http://www.amazon.com/Formal-Semantics-Programming-Languages-Winskel/dp/0262731037" target="_blank" rel="noopener">amazon</a>），<a href="http://book.douban.com/subject/1144542/" target="_blank" rel="noopener">豆瓣</a></li><li>2002，<a href="http://en.wikipedia.org/wiki/John_C._Mitchell" target="_blank" rel="noopener">John Mitchell</a>，《程序设计语言概念》（Concepts in Programming Languages），<a href="http://theory.stanford.edu/~jcm/books.html" target="_blank" rel="noopener">home</a>，<a href="http://book.douban.com/subject/1699662/" target="_blank" rel="noopener">豆瓣</a>：作者来自Stanford，<a href="http://theory.stanford.edu/~jcm/books/cpl-courses.html" target="_blank" rel="noopener">courses</a>，内容主要讲Lisp及其他</li><li>1996，<a href="http://en.wikipedia.org/wiki/John_C._Mitchell" target="_blank" rel="noopener">John Mitchell</a>，《程序设计语言理论基础》（Foundations for Programming Languages），<a href="http://book.douban.com/subject/1944729/" target="_blank" rel="noopener">豆瓣</a></li><li>2004，“Concepts, Techniques, and Models of Computer Programming”，CTM，<a href="http://en.wikipedia.org/wiki/Concepts,_Techniques,_and_Models_of_Computer_Programming" target="_blank" rel="noopener">wiki</a>，<a href="http://www.info.ucl.ac.be/~pvr/book.html" target="_blank" rel="noopener">home</a></li><li>2010，Bruce Tate，《<strong>七周七语言：理解多种编程范型</strong>》（Seven Languages in Seven Weeks, <a href="http://pragprog.com/book/btlang/seven-languages-in-seven-weeks" target="_blank" rel="noopener">Pragmatic</a>），<a href="http://book.douban.com/subject/10555435/" target="_blank" rel="noopener">豆瓣</a>：书中介绍了Ruby、Io、Prolog、Scala、Erlang、Clojure和Haskell这七种语言</li><li>2010，Martin Fowler，《<strong>领域特定语言</strong>》（Domain-Specific Languages, <a href="http://www.amazon.com/Domain-Specific-Languages-Addison-Wesley-Signature-Series/dp/0321712943" target="_blank" rel="noopener">amazon</a>），<a href="http://martinfowler.com/books/dsl.html" target="_blank" rel="noopener">home</a>，<a href="http://www.infoq.com/cn/minibooks/domain-specific-languages" target="_blank" rel="noopener">infoq</a>，<a href="http://book.douban.com/subject/21964984/" target="_blank" rel="noopener">豆瓣</a></li><li>2010，《<strong>领域专用语言实战</strong>》（DSLs in Action），<a href="http://www.ituring.com.cn/book/836" target="_blank" rel="noopener">图灵2013</a>，<a href="http://book.douban.com/subject/25741352/" target="_blank" rel="noopener">豆瓣</a></li><li>2013，[日]西尾泰和，《代码之髓：编程语言核心概念》，<a href="http://www.ituring.com.cn/book/1233" target="_blank" rel="noopener">图灵2014</a>，<a href="http://book.douban.com/subject/25927585/" target="_blank" rel="noopener">豆瓣</a></li><li>2014，Neal Ford，《函数式编程思维》，<a href="https://book.douban.com/subject/26587213/" target="_blank" rel="noopener">豆瓣</a>：涉及Java、Clojure、Scala</li></ol><hr><p><strong>编译器相关书籍：</strong></p><ol><li>1986、2007，Aho &amp; Sethi &amp; Ullman，龙书《<strong>编译原理</strong>》（<a href="http://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools" target="_blank" rel="noopener">Compilers</a>: Principles, Techniques, and Tools, 1st 1986, <a href="http://www.amazon.com/Compilers-Principles-Techniques-Tools-2nd/dp/0321486811" target="_blank" rel="noopener">2nd</a> 2006），<a href="http://dragonbook.stanford.edu/" target="_blank" rel="noopener">home</a>，<a href="http://book.douban.com/subject/3296317/" target="_blank" rel="noopener">豆瓣</a>：侧重理论</li><li>1997、2002，<a href="http://en.wikipedia.org/wiki/Andrew_Appel" target="_blank" rel="noopener">Appel</a>，虎书《<strong>现代编译原理</strong>》（Modern Compiler Implementation in Java/C/ML, <a href="http://amzn.com/0521607655" target="_blank" rel="noopener">amazon</a>），<a href="http://www.cs.princeton.edu/~appel/modern/" target="_blank" rel="noopener">home</a>，C语言，<a href="http://www.ituring.com.cn/book/655" target="_blank" rel="noopener">图灵2006</a>，<a href="http://book.douban.com/subject/1806974/" target="_blank" rel="noopener">豆瓣</a>；Java语言，<a href="http://book.douban.com/subject/1218871/" target="_blank" rel="noopener">豆瓣</a>：作者TOPLAS杂志主编，介于龙书，鲸书之间，算是实践中有理论</li><li>2004、2011，<a href="http://www.cs.rice.edu/~keith/" target="_blank" rel="noopener">Cooper</a> &amp; <a href="http://www.cs.rice.edu/~linda/" target="_blank" rel="noopener">Torczon</a>，《<strong>编译器设计</strong>》（Engineering a Compiler,<a href="http://www.amazon.com/Engineering-Compiler-Second-Edition-Cooper/dp/012088478X" target="_blank" rel="noopener">2nd</a> 2011），<a href="http://book.douban.com/subject/20436488/" target="_blank" rel="noopener">豆瓣</a>，<a href="http://book.douban.com/review/5693851/" target="_blank" rel="noopener">书评</a>：两位作者均来自Rice Univ，博士导师都为Kennedy</li><li>1997，<a href="http://en.wikipedia.org/wiki/Steven_Muchnick" target="_blank" rel="noopener">Muchnick</a>，鲸书《<strong>高级编译器设计与实现</strong>》（Advanced Compiler Design and Implementation, <a href="http://amzn.com/1558603204" target="_blank" rel="noopener">amazon</a>），<a href="http://book.douban.com/subject/1400374/" target="_blank" rel="noopener">豆瓣</a>：名气次于龙书和虎书，内容侧重编译器后端优化</li><li>1988、1991、2009，《<strong>编译器构造</strong>》（Crafting a Compiler, <a href="http://dl.acm.org/citation.cfm?id=33462" target="_blank" rel="noopener">1st</a> 1988, <a href="http://www.amazon.com/Crafting-Compiler-Charles-N-Fischer/dp/0136067050" target="_blank" rel="noopener">3rd</a> 2009），<a href="http://book.douban.com/subject/10772776/" target="_blank" rel="noopener">豆瓣</a>：该书不是很出名，但<strong>相对“龙书”和“虎书”读性很高</strong></li><li>1996、2011，Richard Jones &amp; etc，《<strong>垃圾回收算法手册</strong>》（The Garbage Collection Handbook, <a href="http://www.amazon.com/dp/1420082795/ref=cm_sw_su_dp" target="_blank" rel="noopener">amazon</a>），<a href="http://gchandbook.org/" target="_blank" rel="noopener">home</a>，第2版<a href="https://book.douban.com/subject/26740958/" target="_blank" rel="noopener">豆瓣</a>：GC最佳书籍</li><li>2016，中村成洋，《<strong>垃圾回收的算法与实现</strong>》，<a href="https://book.douban.com/subject/26821357/" target="_blank" rel="noopener">豆瓣</a></li><li>2001，Allen &amp; <a href="http://en.wikipedia.org/wiki/Ken_Kennedy_%28computer_scientist%29" target="_blank" rel="noopener">Kennedy</a>，《现代体系结构的优化编译器》（Optimizing Compilers for Modern Architectures, <a href="http://amzn.com/1558602860" target="_blank" rel="noopener">amazon</a>），<a href="http://book.douban.com/subject/1171448/" target="_blank" rel="noopener">豆瓣</a>：两位作者均来自Rice Univ，其中Kennedy在1999年获得<a href="http://en.wikipedia.org/wiki/SIGPLAN#Awards" target="_blank" rel="noopener">ACM SIGPLAN成就奖</a>，该奖项的第3届得主</li></ol>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文整理编程语言与编译器相关的经典书籍。&lt;/p&gt;
+    
+    </summary>
+    
+      <category term="编程" scheme="http://nullwy.me/categories/%E7%BC%96%E7%A8%8B/"/>
+    
+    
+      <category term="书籍" scheme="http://nullwy.me/tags/%E4%B9%A6%E7%B1%8D/"/>
+    
+      <category term="CS" scheme="http://nullwy.me/tags/CS/"/>
+    
+      <category term="语言" scheme="http://nullwy.me/tags/%E8%AF%AD%E8%A8%80/"/>
     
   </entry>
   
