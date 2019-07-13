@@ -132,7 +132,7 @@
 <meta property="og:image" content="https://insights.thoughtworks.cn/wp-content/uploads/2017/10/5-basic-build-pipeline.png">
 <meta property="og:image" content="https://insights.thoughtworks.cn/wp-content/uploads/2017/10/6-Module_deployment_often_differs.jpg">
 <meta property="og:image" content="https://www.oreilly.com/library/cover/9781491950340/500h/">
-<meta property="og:updated_time" content="2019-07-13T13:30:27.941Z">
+<meta property="og:updated_time" content="2019-07-13T13:34:17.537Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="（转）微服务 | Martin Fowler">
 <meta name="twitter:description" content=".nav-number {   display: none }  作者：Martin Fowler &amp;amp; James Lewis 译者：伍斌 原文：http://martinfowler.com/articles/microservices.html 转载自：https://mp.weixin.qq.com/s/dqk7CTX1W3FNCE7GyCgbSQ https://mp.weixi">
@@ -405,7 +405,7 @@
                 
               
 
-              <time title="创建时间：2019-07-13 15:09:51 / 修改时间：21:30:27" itemprop="dateCreated datePublished" datetime="2019-07-13T15:09:51+08:00">2019-07-13</time>
+              <time title="创建时间：2019-07-13 15:09:51 / 修改时间：21:34:17" itemprop="dateCreated datePublished" datetime="2019-07-13T15:09:51+08:00">2019-07-13</time>
             
 
             
@@ -566,7 +566,7 @@
 <hr>
 <p>“微服务”（Microservices）——这是在软件架构这条熙熙攘攘的大街上出现的又一个新词儿。我们自然会对它投过轻蔑的一瞥，但是这个小小的术语却描述了一种引人入胜的软件系统的风格。最近几年，我们已经看到许多项目使用了这种风格，而且至今其结果都是良好的，以至于对于我们许多 ThoughtWorks 的同事来说，它正在成为构建企业应用系统的缺省的风格。然而，很不幸的是，我们找不到有关它的概要信息，即什么是微服务风格，以及如何设计微服务风格的架构。</p>
 <p>简而言之，微服务架构风格<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>这种开发方法，是以开发一组小型服务的方式来开发一个独立的应用系统的。其中每个小型服务都运行在自己的进程中，并经常采用 HTTP 资源 API 这样轻量的机制来相互通信。这些服务围绕业务功能进行构建，并能通过全自动的部署机制来进行独立部署。这些微服务可以使用不同的语言来编写，并且可以使用不同的数据存储技术。对这些微服务我们仅做最低限度的集中管理。</p>
-<p>在开始介绍微服务风格之前，将其与单块（monolithic）风格进行对比还是很有用的：一个单块应用系统是以一个单个单元的方式来构建的。企业应用系统经常包含三个主要部分：客户端用户界面、数据库和服务端应用系统。客户端用户界面包括 HTML 页面和运行在用户机器的浏览器中的 JavaScript。数据库中包括许多表，这些表被插入一个公共的且通常为关系型的数据库管理系统中。这个服务端的应用系统就是一个单块应用——一个单个可执行的逻辑程序<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>。对于该系统的任何改变，都会涉及构建和部署上述服务端应用系统的一个新版本。</p>
+<p>在开始介绍微服务风格之前，将其与单块（monolithic）风格进行对比还是很有用的：一个单块应用系统是以一个单个单元的方式来构建的。企业应用系统经常包含三个主要部分：客户端用户界面、数据库和服务端应用系统。客户端用户界面包括 HTML 页面和运行在用户机器的浏览器中的 JavaScript。数据库中包括许多表，这些表被插入一个公共的且通常为关系型的数据库管理系统中。这个服务端的应用系统就是一个单块应用（monolith）——一个单个可执行的逻辑程序<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>。对于该系统的任何改变，都会涉及构建和部署上述服务端应用系统的一个新版本。</p>
 <blockquote>
 <p>在我的“<a href="https://martinfowler.com/microservices/" target="_blank" rel="noopener">微服务资源指南</a>”中能找到有关微服务最好的文章、视频、图书和播客媒体。</p>
 </blockquote>
