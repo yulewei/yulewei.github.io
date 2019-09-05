@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://nullwy.me/2017/05/java-method-parameter/</loc>
+    
+    <lastmod>2019-09-05T15:41:49.001Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://nullwy.me/about/index.html</loc>
     
     <lastmod>2019-07-18T03:28:21.196Z</lastmod>
@@ -19,13 +26,6 @@
     <loc>http://nullwy.me/2017/11/zookeeper-note/</loc>
     
     <lastmod>2019-06-18T03:39:11.200Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2017/05/java-method-parameter/</loc>
-    
-    <lastmod>2019-06-13T13:46:42.238Z</lastmod>
     
   </url>
   
