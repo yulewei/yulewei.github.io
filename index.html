@@ -351,12 +351,445 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://nullwy.me/2019/12/mysql-innodb-locking/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/mysql-innodb-locking/" itemprop="url">
+                  MySQL 的 InnoDB 锁
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2019-12-02 15:09:51" itemprop="dateCreated datePublished" datetime="2019-12-02T15:09:51+08:00">2019-12-02</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">更新于</span>
+                
+                <time title="修改时间：2019-12-15 14:03:35" itemprop="dateModified" datetime="2019-12-15T14:03:35+08:00">2019-12-15</time>
+              
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a></span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/mysql-innodb-locking/#comments" itemprop="discussionUrl">
+                
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/mysql-innodb-locking/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/12/mysql-innodb-locking/" class="leancloud_visitors" data-flag-title="MySQL 的 InnoDB 锁">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数</span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+            <div class="post-symbolscount">
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">本文字数：</span>
+                
+                <span title="本文字数">25k</span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">23 分钟</span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>如果不存在，就插入数据？</p>
+<p>mysql的innodb锁 <a href="http://www.heartthinkdo.com/?p=2179" target="_blank" rel="noopener">http://www.heartthinkdo.com/?p=2179</a><br>
+How do I lock on an InnoDB row that doesn't exist yet? <a href="https://stackoverflow.com/q/17068686" target="_blank" rel="noopener">https://stackoverflow.com/q/17068686</a><br>
+SELECT ... FOR UPDATE doesn't do exclusive lock when table is empty <a href="https://bugs.mysql.com/bug.php?id=48911" target="_blank" rel="noopener">https://bugs.mysql.com/bug.php?id=48911</a><br>
+Add predicate locking to avoid deadlocks due to locking non-existent rows <a href="https://bugs.mysql.com/bug.php?id=25847" target="_blank" rel="noopener">https://bugs.mysql.com/bug.php?id=25847</a></p>
+<hr>
+<p>创建 <code>tbl</code> 表，并添加数据：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; create table tbl (</span><br><span class="line">    -&gt;   id   int auto_increment primary key,</span><br><span class="line">    -&gt;   name varchar(20) null,</span><br><span class="line">    -&gt;   age  int         null</span><br><span class="line">    -&gt; );</span><br><span class="line">Query OK, 0 rows affected (0.04 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; insert into tbl</span><br><span class="line">    -&gt;   values (2, 'Tom2', 22), (3, 'Tom3', 23), (4, 'Tom4', 24);</span><br><span class="line">Query OK, 3 rows affected (0.02 sec)</span><br><span class="line">Records: 3  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line">mysql&gt; select * from tbl;</span><br><span class="line">+<span class="comment">----+------+------+</span></span><br><span class="line">| id | name | age  |</span><br><span class="line">+<span class="comment">----+------+------+</span></span><br><span class="line">|  2 | Tom2 |   22 |</span><br><span class="line">|  3 | Tom3 |   23 |</span><br><span class="line">|  4 | Tom4 |   24 |</span><br><span class="line">+<span class="comment">----+------+------+</span></span><br><span class="line">3 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p><a href="https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_transaction_isolation" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_transaction_isolation</a></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 事务隔离级别为，可重复读（Repeatable Read）</span></span><br><span class="line">mysql&gt; select @@global.transaction_isolation, @@transaction_isolation;</span><br><span class="line">+<span class="comment">--------------------------------+-------------------------+</span></span><br><span class="line">| @@global.transaction_isolation | @@transaction_isolation |</span><br><span class="line">+<span class="comment">--------------------------------+-------------------------+</span></span><br><span class="line">| REPEATABLE-READ                | REPEATABLE-READ         |</span><br><span class="line">+<span class="comment">--------------------------------+-------------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_lock_wait_timeout" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_lock_wait_timeout</a></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 默认锁等待超时时间为 50 秒</span></span><br><span class="line">mysql&gt; select @@global.innodb_lock_wait_timeout, @@innodb_lock_wait_timeout;</span><br><span class="line">+<span class="comment">-----------------------------------+----------------------------+</span></span><br><span class="line">| @@global.innodb_lock_wait_timeout | @@innodb_lock_wait_timeout |</span><br><span class="line">+<span class="comment">-----------------------------------+----------------------------+</span></span><br><span class="line">|                                50 |                         50 |</span><br><span class="line">+<span class="comment">-----------------------------------+----------------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<hr>
+<style>
+td pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0px;
+}
+</style>
+<h1 id="排他锁">排他锁</h1>
+<table>
+<tr>
+<th>session1</th>
+<th>session2</th>
+</tr>
+<tr>
+  <td>
+  <pre lang="sql">
+mysql> set autocommit = 0;
+Query OK, 0 rows affected (0.00 sec)
+<p>-- 在 id = 3 的记录上添加排他锁<br>
+mysql&gt; update tbl set age = 100 where id = 3;<br>
+Query OK, 1 row affected (0.00 sec)<br>
+Rows matched: 1  Changed: 1  Warnings: 0</p>
+</pre>
+  </td>
+  <td> </td>
+</tr>
+<tr>
+  <td> </td>
+  <td>
+  <pre lang="sql">
+mysql> set autocommit = 0;
+Query OK, 0 rows affected (0.00 sec)
+<p>-- 锁等待超时时间修改为 5 秒<br>
+mysql&gt; set @@innodb_lock_wait_timeout = 5;<br>
+Query OK, 0 rows affected (0.00 sec)</p>
+<p>-- 其他 session 可以查询 id = 3 的记录，但是不能获取该记录的排他锁<br>
+mysql&gt; select * from tbl where id = 3;<br>
++----+------+------+<br>
+| id | name | age  |<br>
++----+------+------+<br>
+|  3 | Tom3 |   23 |<br>
++----+------+------+<br>
+1 row in set (0.00 sec)</p>
+<p>-- 等待 5 秒<br>
+mysql&gt; update tbl set age = 100 where id = 3;<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+<p>-- 可以获得其他记录的排他锁<br>
+mysql&gt; update tbl set age = 100 where id = 2;<br>
+Query OK, 1 row affected (0.00 sec)<br>
+Rows matched: 1  Changed: 1  Warnings: 0</p>
+<p>-- 等待 5 秒<br>
+mysql&gt; update tbl set age = 100 where id &gt;= 2;<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+</pre>
+  </td>
+</tr>
+<tr>
+  <td>
+  <pre lang="sql">
+mysql> rollback;
+Query OK, 0 rows affected (0.00 sec)</pre>
+  </td>
+  <td> </td>
+</tr>
+<tr>
+  <td> </td>
+  <td>
+  <pre lang="sql">
+mysql> rollback;
+Query OK, 0 rows affected (0.00 sec)</pre>
+  </td>
+</tr>
+</table>
+<h2 id="select-for-update">select for update</h2>
+<table>
+<tr>
+<th>session1</th>
+<th>session2</th>
+</tr>
+<tr>
+  <td>
+  <pre lang="sql">
+mysql> set autocommit = 0;
+Query OK, 0 rows affected (0.00 sec)
+<p>-- 在 id = 3 的记录上添加排他锁<br>
+mysql&gt; select * from tbl where id = 3 for update;<br>
++----+------+------+<br>
+| id | name | age  |<br>
++----+------+------+<br>
+|  3 | Tom3 |   23 |<br>
++----+------+------+<br>
+1 row in set (0.01 sec)</p>
+</pre>
+  </td>
+  <td> </td>
+</tr>
+<tr>
+  <td> </td>
+  <td>
+  <pre lang="sql">
+mysql> set autocommit = 0;
+Query OK, 0 rows affected (0.00 sec)
+<p>-- 其他 session 可以查询 id = 3 的记录，但是不能获取该记录的排他锁<br>
+mysql&gt; select * from tbl where id = 3;<br>
++----+------+------+<br>
+| id | name | age  |<br>
++----+------+------+<br>
+|  3 | Tom3 |   23 |<br>
++----+------+------+<br>
+1 row in set (0.00 sec)</p>
+<p>-- 等待<br>
+mysql&gt; select * from tbl where id = 3 for update;<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+<p>-- 可以获得其他记录的排他锁<br>
+mysql&gt; select * from tbl where id = 2 for update;<br>
++----+------+------+<br>
+| id | name | age  |<br>
++----+------+------+<br>
+|  2 | Tom3 |   22 |<br>
++----+------+------+<br>
+1 row in set (0.00 sec)</p>
+<p>-- 等待<br>
+mysql&gt; delete from tbl where id = 3;<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+<p>-- 等待<br>
+mysql&gt; delete from tbl where id &gt;= 2;<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+</pre>
+  </td>
+</tr>
+<tr>
+  <td>
+  <pre lang="sql">
+mysql> rollback;
+Query OK, 0 rows affected (0.00 sec)</pre>
+  </td>
+  <td> </td>
+</tr>
+<tr>
+  <td> </td>
+  <td>
+  <pre lang="sql">
+mysql> rollback;
+Query OK, 0 rows affected (0.00 sec)</pre>
+  </td>
+</tr>
+</table>
+<h1 id="next-key-锁">Next-Key 锁</h1>
+<hr>
+<h1 id="记录不存在问题">记录不存在问题</h1>
+<p>insert into tbl values (5, 'Tom5', 25);<br>
+insert into tbl values (6, 'Tom6', 26);<br>
+insert into tbl values (1, 'Tom1', 21);</p>
+<p>会话1<br>
+mysql&gt; set autocommit = 0;<br>
+Query OK, 0 rows affected (0.00 sec)</p>
+<p>mysql&gt; select * from tbl where id &gt; 1 for update;<br>
++----+------+------+<br>
+| id | name | age  |<br>
++----+------+------+<br>
+|  2 | Tom2 |   22 |<br>
+|  3 | Tom3 |   23 |<br>
+|  4 | Tom4 |   24 |<br>
++----+------+------+<br>
+3 rows in set (0.00 sec)</p>
+<p>mysql&gt; set autocommit = 0;<br>
+Query OK, 0 rows affected (0.00 sec)</p>
+<p>mysql&gt; select * from tbl where id = 5 for update;<br>
+Empty set (0.00 sec)</p>
+<hr>
+<p>会话2<br>
+mysql&gt; set autocommit = 0;<br>
+Query OK, 0 rows affected (0.00 sec)</p>
+<p>mysql&gt; select * from tbl where id = 5 for update;<br>
+Empty set (0.00 sec)</p>
+<p>mysql&gt; insert into tbl values (1, 'Tom1', 21);<br>
+Query OK, 1 row affected (0.00 sec)</p>
+<p>mysql&gt; insert into tbl values (5, 'Tom5', 25);<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+<p>mysql&gt; insert into tbl values (6, 'Tom6', 26);<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+<hr>
+<p>若在锁等待期间查看 <a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-trx-table.html" target="_blank" rel="noopener">innodb_trx</a>、<a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-table.html" target="_blank" rel="noopener">innodb_locks</a>、<a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-lock-waits-table.html" target="_blank" rel="noopener">innodb_lock_waits</a> 表，会有如下结果（在没有发生锁等待时， innodb_locks 表和 innodb_lock_waits 表都没有数据）：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from information_schema.innodb_trx \G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">                    trx_id: 162861</span><br><span class="line">                 trx_state: <span class="keyword">LOCK</span> <span class="keyword">WAIT</span></span><br><span class="line">               trx_started: <span class="number">2019</span><span class="number">-12</span><span class="number">-09</span> <span class="number">00</span>:<span class="number">31</span>:<span class="number">03</span></span><br><span class="line">     trx_requested_lock_id: <span class="number">162861</span>:<span class="number">562</span>:<span class="number">3</span>:<span class="number">8</span></span><br><span class="line">          trx_wait_started: <span class="number">2019</span><span class="number">-12</span><span class="number">-09</span> <span class="number">00</span>:<span class="number">32</span>:<span class="number">35</span></span><br><span class="line">                trx_weight: <span class="number">2</span></span><br><span class="line">       trx_mysql_thread_id: <span class="number">2</span></span><br><span class="line">                 trx_query: <span class="keyword">update</span> tbl <span class="keyword">set</span> age = <span class="number">100</span> <span class="keyword">where</span> <span class="keyword">id</span> = <span class="number">3</span></span><br><span class="line">       trx_operation_state: <span class="keyword">starting</span> <span class="keyword">index</span> <span class="keyword">read</span></span><br><span class="line">         trx_tables_in_use: <span class="number">1</span></span><br><span class="line">         trx_tables_locked: <span class="number">1</span></span><br><span class="line">          trx_lock_structs: <span class="number">2</span></span><br><span class="line">     trx_lock_memory_bytes: <span class="number">1136</span></span><br><span class="line">           trx_rows_locked: <span class="number">2</span></span><br><span class="line">         trx_rows_modified: <span class="number">0</span></span><br><span class="line">   trx_concurrency_tickets: <span class="number">0</span></span><br><span class="line">       trx_isolation_level: REPEATABLE <span class="keyword">READ</span></span><br><span class="line">         trx_unique_checks: <span class="number">1</span></span><br><span class="line">    trx_foreign_key_checks: <span class="number">1</span></span><br><span class="line">trx_last_foreign_key_error: <span class="literal">NULL</span></span><br><span class="line"> trx_adaptive_hash_latched: <span class="number">0</span></span><br><span class="line"> trx_adaptive_hash_timeout: <span class="number">0</span></span><br><span class="line">          trx_is_read_only: <span class="number">0</span></span><br><span class="line">trx_autocommit_non_locking: <span class="number">0</span></span><br><span class="line">*************************** <span class="number">2.</span> <span class="keyword">row</span> ***************************</span><br><span class="line">                    trx_id: <span class="number">162860</span></span><br><span class="line">                 trx_state: RUNNING</span><br><span class="line">               trx_started: <span class="number">2019</span><span class="number">-12</span><span class="number">-09</span> <span class="number">00</span>:<span class="number">30</span>:<span class="number">29</span></span><br><span class="line">     trx_requested_lock_id: <span class="literal">NULL</span></span><br><span class="line">          trx_wait_started: <span class="literal">NULL</span></span><br><span class="line">                trx_weight: <span class="number">3</span></span><br><span class="line">       trx_mysql_thread_id: <span class="number">4</span></span><br><span class="line">                 trx_query: <span class="keyword">select</span> * <span class="keyword">from</span> information_schema.innodb_trx</span><br><span class="line">       trx_operation_state: <span class="literal">NULL</span></span><br><span class="line">         trx_tables_in_use: <span class="number">0</span></span><br><span class="line">         trx_tables_locked: <span class="number">1</span></span><br><span class="line">          trx_lock_structs: <span class="number">2</span></span><br><span class="line">     trx_lock_memory_bytes: <span class="number">1136</span></span><br><span class="line">           trx_rows_locked: <span class="number">1</span></span><br><span class="line">         trx_rows_modified: <span class="number">1</span></span><br><span class="line">   trx_concurrency_tickets: <span class="number">0</span></span><br><span class="line">       trx_isolation_level: REPEATABLE <span class="keyword">READ</span></span><br><span class="line">         trx_unique_checks: <span class="number">1</span></span><br><span class="line">    trx_foreign_key_checks: <span class="number">1</span></span><br><span class="line">trx_last_foreign_key_error: <span class="literal">NULL</span></span><br><span class="line"> trx_adaptive_hash_latched: <span class="number">0</span></span><br><span class="line"> trx_adaptive_hash_timeout: <span class="number">0</span></span><br><span class="line">          trx_is_read_only: <span class="number">0</span></span><br><span class="line">trx_autocommit_non_locking: <span class="number">0</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> * <span class="keyword">from</span> information_schema.innodb_locks \G</span><br><span class="line">*************************** <span class="number">1.</span> <span class="keyword">row</span> ***************************</span><br><span class="line">    lock_id: <span class="number">162861</span>:<span class="number">562</span>:<span class="number">3</span>:<span class="number">8</span></span><br><span class="line">lock_trx_id: <span class="number">162861</span></span><br><span class="line">  lock_mode: X</span><br><span class="line">  lock_type: <span class="built_in">RECORD</span></span><br><span class="line"> lock_table: <span class="string">`testdb`</span>.<span class="string">`tbl`</span></span><br><span class="line"> lock_index: PRIMARY</span><br><span class="line"> lock_space: <span class="number">562</span></span><br><span class="line">  lock_page: <span class="number">3</span></span><br><span class="line">   lock_rec: <span class="number">8</span></span><br><span class="line">  lock_data: <span class="number">3</span></span><br><span class="line">*************************** <span class="number">2.</span> <span class="keyword">row</span> ***************************</span><br><span class="line">    lock_id: <span class="number">162860</span>:<span class="number">562</span>:<span class="number">3</span>:<span class="number">8</span></span><br><span class="line">lock_trx_id: <span class="number">162860</span></span><br><span class="line">  lock_mode: X</span><br><span class="line">  lock_type: <span class="built_in">RECORD</span></span><br><span class="line"> lock_table: <span class="string">`testdb`</span>.<span class="string">`tbl`</span></span><br><span class="line"> lock_index: PRIMARY</span><br><span class="line"> lock_space: <span class="number">562</span></span><br><span class="line">  lock_page: <span class="number">3</span></span><br><span class="line">   lock_rec: <span class="number">8</span></span><br><span class="line">  lock_data: <span class="number">3</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> <span class="keyword">warning</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> * <span class="keyword">from</span> information_schema.innodb_lock_waits \G</span><br><span class="line">*************************** <span class="number">1.</span> <span class="keyword">row</span> ***************************</span><br><span class="line">requesting_trx_id: <span class="number">162861</span></span><br><span class="line">requested_lock_id: <span class="number">162861</span>:<span class="number">562</span>:<span class="number">3</span>:<span class="number">8</span></span><br><span class="line">  blocking_trx_id: <span class="number">162860</span></span><br><span class="line"> blocking_lock_id: <span class="number">162860</span>:<span class="number">562</span>:<span class="number">3</span>:<span class="number">8</span></span><br><span class="line"><span class="number">1</span> <span class="keyword">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> <span class="keyword">warning</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<h1 id="参考资料">参考资料</h1>
+<ul>
+<li>MySQL 5.7 Reference Manual:
+<ul>
+<li>14.7 InnoDB Locking and Transaction Model <a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locking-transaction-model.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/innodb-locking-transaction-model.html</a></li>
+<li>14.7.1 InnoDB Locking <a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locking.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/innodb-locking.html</a></li>
+<li>14.7.3 Locks Set by Different SQL Statements in InnoDB <a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html</a></li>
+</ul>
+</li>
+<li>mysql的innodb锁 <a href="http://www.heartthinkdo.com/?p=2179" target="_blank" rel="noopener">http://www.heartthinkdo.com/?p=2179</a></li>
+<li>MySQL 5.5 InnoDB 锁等待 <a href="https://dbarobin.com/2015/01/27/innodb-lock-wait-under-mysql-5.5/#%E4%B8%89-innodb-%E9%94%81%E7%AD%89%E5%BE%85%E6%A8%A1%E6%8B%9F" target="_blank" rel="noopener">https://dbarobin.com/2015/01/27/innodb-lock-wait-under-mysql-5.5/#三-innodb-锁等待模拟</a></li>
+<li>2013-12 何登成：MySQL 加锁处理分析 <a href="https://web.archive.org/web/20190902131100/http://hedengcheng.com/?p=771" target="_blank" rel="noopener">https://web.archive.org/web/20190902131100/http://hedengcheng.com/?p=771</a></li>
+<li>2015-10 InnoDB Locking Explained with Stick Figures <a href="https://www.slideshare.net/billkarwin/innodb-locking-explained-with-stick-figures" target="_blank" rel="noopener">https://www.slideshare.net/billkarwin/innodb-locking-explained-with-stick-figures</a></li>
+<li>2015-04 Understanding innodb locks and deadlocks <a href="https://www.slideshare.net/valeriikravchuk1/understanding-innodb-locks-and-deadlocks" target="_blank" rel="noopener">https://www.slideshare.net/valeriikravchuk1/understanding-innodb-locks-and-deadlocks</a></li>
+<li>MySQL InnoDB 锁 <a href="https://www.yuque.com/yinjianwei/vyrvkf/ei0mep" target="_blank" rel="noopener">https://www.yuque.com/yinjianwei/vyrvkf/ei0mep</a></li>
+<li>Innodb存储引擎中锁的简析 <a href="https://juejin.im/entry/59b69d266fb9a00a4551536c" target="_blank" rel="noopener">https://juejin.im/entry/59b69d266fb9a00a4551536c</a></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://nullwy.me/2019/06/mysql-5.7-json/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -568,7 +1001,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -798,7 +1231,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -1025,7 +1458,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -1251,7 +1684,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -1476,7 +1909,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -1701,7 +2134,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -1926,7 +2359,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -2151,7 +2584,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -2377,7 +2810,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -2603,7 +3036,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -2829,7 +3262,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -3056,7 +3489,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -3280,7 +3713,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -3504,7 +3937,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -3728,7 +4161,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -3952,7 +4385,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -4177,7 +4610,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -4401,7 +4834,7 @@
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
       <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
     </span>
 
     <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
@@ -4605,230 +5038,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://nullwy.me/2016/11/java-official-doc/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="nullwy">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="http://static.nullwy.me/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="nullwy's blog">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2016/11/java-official-doc/" itemprop="url">
-                  Java 官方文档整理
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-
-              
-                
-              
-
-              <time title="创建时间：2016-11-20 03:21:32" itemprop="dateCreated datePublished" datetime="2016-11-20T03:21:32+08:00">2016-11-20</time>
-            
-
-            
-              
-
-              
-                
-                <span class="post-meta-divider">|</span>
-                
-
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">更新于</span>
-                
-                <time title="修改时间：2019-05-25 13:40:50" itemprop="dateModified" datetime="2019-05-25T13:40:50+08:00">2019-05-25</time>
-              
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing"><a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a></span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2016/11/java-official-doc/#comments" itemprop="discussionUrl">
-                
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2016/11/java-official-doc/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2016/11/java-official-doc/" class="leancloud_visitors" data-flag-title="Java 官方文档整理">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数</span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-            <div class="post-symbolscount">
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">本文字数：</span>
-                
-                <span title="本文字数">11k</span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">10 分钟</span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <p>本文整理一些学习Java需要翻阅或必须的官方文档资料。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2016/11/java-official-doc/#more" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -4865,7 +5074,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
             
-              <img class="site-author-image" itemprop="image" src="http://static.nullwy.me/avatar.png" alt="nullwy">
+              <img class="site-author-image" itemprop="image" src="https://static.nullwy.me/avatar.png" alt="nullwy">
             
               <p class="site-author-name" itemprop="name">nullwy</p>
               <p class="site-description motion-element" itemprop="description"></p>
@@ -4878,7 +5087,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">21</span>
+                    <span class="site-state-item-count">22</span>
                     <span class="site-state-item-name">日志</span>
                   </a>
                 </div>
@@ -4994,7 +5203,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">39</span>
+                      
+                    
+                    <span class="site-state-item-count">40</span>
                     <span class="site-state-item-name">标签</span>
                   </a>
                 </div>
@@ -5065,7 +5276,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2020</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
@@ -5077,7 +5288,7 @@
       <i class="fa fa-area-chart"></i>
     </span>
     
-    <span title="站点总字数">211k</span>
+    <span title="站点总字数">220k</span>
   
 
   
@@ -5086,7 +5297,7 @@
       <i class="fa fa-coffee"></i>
     </span>
     
-    <span title="站点阅读时长">3:12</span>
+    <span title="站点阅读时长">3:20</span>
   
 </div>
 

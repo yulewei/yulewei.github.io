@@ -117,18 +117,18 @@
 
 
 
-  <meta name="description" content="MyBatis是流行的持久化框架，通过抽象底层的JDBC代码，在类对象和数据库列之间自动映射SQL的参数和结果，以SQL为映射的间接层，实现SQL映射器。MyBatis Generator (MBG) 是一个Mybatis的代码生成器，内省数据库的表，然后自动生成映射表的实体类，并生成CRUD（插入，查询，更新，删除）操作的样板代码。MyBatis，之前所在的公司在用，生成器也在用。虽然生成器大大">
-<meta name="keywords" content="Java,MyBatis,数据库">
+  <meta name="description" content="如果不存在，就插入数据？ mysql的innodb锁 http://www.heartthinkdo.com/?p=2179 How do I lock on an InnoDB row that doesn&apos;t exist yet? https://stackoverflow.com/q/17068686 SELECT ... FOR UPDATE doesn&apos;t do exclusive lo">
+<meta name="keywords" content="MySQL,InnoDB">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MyBatis 生成器的表注释">
-<meta property="og:url" content="http://nullwy.me/2016/12/mybatis-generator/index.html">
+<meta property="og:title" content="MySQL 的 InnoDB 锁">
+<meta property="og:url" content="http://nullwy.me/2019/12/mysql-innodb-locking/index.html">
 <meta property="og:site_name" content="nullwy&#39;s blog">
-<meta property="og:description" content="MyBatis是流行的持久化框架，通过抽象底层的JDBC代码，在类对象和数据库列之间自动映射SQL的参数和结果，以SQL为映射的间接层，实现SQL映射器。MyBatis Generator (MBG) 是一个Mybatis的代码生成器，内省数据库的表，然后自动生成映射表的实体类，并生成CRUD（插入，查询，更新，删除）操作的样板代码。MyBatis，之前所在的公司在用，生成器也在用。虽然生成器大大">
+<meta property="og:description" content="如果不存在，就插入数据？ mysql的innodb锁 http://www.heartthinkdo.com/?p=2179 How do I lock on an InnoDB row that doesn&apos;t exist yet? https://stackoverflow.com/q/17068686 SELECT ... FOR UPDATE doesn&apos;t do exclusive lo">
 <meta property="og:locale" content="zh-CN">
-<meta property="og:updated_time" content="2019-05-25T05:40:57.197Z">
+<meta property="og:updated_time" content="2019-12-15T06:03:35.665Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MyBatis 生成器的表注释">
-<meta name="twitter:description" content="MyBatis是流行的持久化框架，通过抽象底层的JDBC代码，在类对象和数据库列之间自动映射SQL的参数和结果，以SQL为映射的间接层，实现SQL映射器。MyBatis Generator (MBG) 是一个Mybatis的代码生成器，内省数据库的表，然后自动生成映射表的实体类，并生成CRUD（插入，查询，更新，删除）操作的样板代码。MyBatis，之前所在的公司在用，生成器也在用。虽然生成器大大">
+<meta name="twitter:title" content="MySQL 的 InnoDB 锁">
+<meta name="twitter:description" content="如果不存在，就插入数据？ mysql的innodb锁 http://www.heartthinkdo.com/?p=2179 How do I lock on an InnoDB row that doesn&apos;t exist yet? https://stackoverflow.com/q/17068686 SELECT ... FOR UPDATE doesn&apos;t do exclusive lo">
 
 
 
@@ -137,7 +137,7 @@
 
 
 
-  <link rel="canonical" href="http://nullwy.me/2016/12/mybatis-generator/">
+  <link rel="canonical" href="http://nullwy.me/2019/12/mysql-innodb-locking/">
 
 
 
@@ -147,7 +147,7 @@
   };
 </script>
 
-  <title>MyBatis 生成器的表注释 | nullwy's blog</title>
+  <title>MySQL 的 InnoDB 锁 | nullwy's blog</title>
   
 
 
@@ -355,7 +355,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://nullwy.me/2016/12/mybatis-generator/">
+    <link itemprop="mainEntityOfPage" href="http://nullwy.me/2019/12/mysql-innodb-locking/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
@@ -372,7 +372,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">MyBatis 生成器的表注释
+          <h1 class="post-title" itemprop="name headline">MySQL 的 InnoDB 锁
               
             
           </h1>
@@ -397,7 +397,7 @@
                 
               
 
-              <time title="创建时间：2016-12-25 21:47:02" itemprop="dateCreated datePublished" datetime="2016-12-25T21:47:02+08:00">2016-12-25</time>
+              <time title="创建时间：2019-12-02 15:09:51" itemprop="dateCreated datePublished" datetime="2019-12-02T15:09:51+08:00">2019-12-02</time>
             
 
             
@@ -414,7 +414,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2019-05-25 13:40:57" itemprop="dateModified" datetime="2019-05-25T13:40:57+08:00">2019-05-25</time>
+                <time title="修改时间：2019-12-15 14:03:35" itemprop="dateModified" datetime="2019-12-15T14:03:35+08:00">2019-12-15</time>
               
             
           </span>
@@ -446,9 +446,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2016/12/mybatis-generator/#comments" itemprop="discussionUrl">
+                <a href="/2019/12/mysql-innodb-locking/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2016/12/mybatis-generator/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/12/mysql-innodb-locking/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -456,7 +456,7 @@
 
           
           
-             <span id="/2016/12/mybatis-generator/" class="leancloud_visitors" data-flag-title="MyBatis 生成器的表注释">
+             <span id="/2019/12/mysql-innodb-locking/" class="leancloud_visitors" data-flag-title="MySQL 的 InnoDB 锁">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -481,7 +481,7 @@
                 
                   <span class="post-meta-item-text">本文字数：</span>
                 
-                <span title="本文字数">22k</span>
+                <span title="本文字数">25k</span>
               
 
               
@@ -495,7 +495,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">20 分钟</span>
+                <span title="阅读时长">23 分钟</span>
               
             </div>
           
@@ -515,30 +515,220 @@
       
 
       
-        <p><a href="https://en.wikipedia.org/wiki/MyBatis" target="_blank" rel="noopener">MyBatis</a>是流行的持久化框架，通过抽象底层的JDBC代码，在类对象和数据库列之间自动映射SQL的参数和结果，以SQL为映射的间接层，实现SQL映射器。<a href="http://www.mybatis.org/generator/" target="_blank" rel="noopener">MyBatis Generator</a> (MBG) 是一个Mybatis的代码生成器，内省数据库的表，然后自动生成映射表的实体类，并生成CRUD（插入，查询，更新，删除）操作的样板代码。MyBatis，之前所在的公司在用，生成器也在用。虽然生成器大大提供了开发效率，但生成的代码可读性比较低，尤其是自动生成的实体类，如下：</p>
-<a id="more"></a>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* This field was generated by MyBatis Generator. This field corresponds to the database column author.book_id</span></span><br><span class="line"><span class="comment">* <span class="doctag">@mbggenerated</span>  Tue Jan 19 13:37:24 CST 2016</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">private</span> Integer bookId;</span><br></pre></td></tr></table></figure>
-<p>这些自动生成注释，没有实质性信息，其实真正有用的是，设计表时，该字段的用途，即表字段的注释。</p>
-<h1 id="addremarkcomments选项">addRemarkComments选项</h1>
-<p>庆幸的是，MyBatis生成器在版本1.3.3中添加了，<code>addRemarkComments</code>选项 [<a href="https://github.com/mybatis/generator/issues/23" target="_blank" rel="noopener">github</a>]，可以在生成的实体类中附带表字段的注释。<code>addRemarkComments</code>官方文档的介绍 [<a href="http://www.mybatis.org/generator/configreference/commentGenerator.html" target="_blank" rel="noopener">doc</a>]：</p>
-<blockquote>
-<p>This property is used to specify whether MBG will include table and column remarks from db table in the generated comments. The property supports these values:</p>
+        <p>如果不存在，就插入数据？</p>
+<p>mysql的innodb锁 <a href="http://www.heartthinkdo.com/?p=2179" target="_blank" rel="noopener">http://www.heartthinkdo.com/?p=2179</a><br>
+How do I lock on an InnoDB row that doesn't exist yet? <a href="https://stackoverflow.com/q/17068686" target="_blank" rel="noopener">https://stackoverflow.com/q/17068686</a><br>
+SELECT ... FOR UPDATE doesn't do exclusive lock when table is empty <a href="https://bugs.mysql.com/bug.php?id=48911" target="_blank" rel="noopener">https://bugs.mysql.com/bug.php?id=48911</a><br>
+Add predicate locking to avoid deadlocks due to locking non-existent rows <a href="https://bugs.mysql.com/bug.php?id=25847" target="_blank" rel="noopener">https://bugs.mysql.com/bug.php?id=25847</a></p>
+<hr>
+<p>创建 <code>tbl</code> 表，并添加数据：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; create table tbl (</span><br><span class="line">    -&gt;   id   int auto_increment primary key,</span><br><span class="line">    -&gt;   name varchar(20) null,</span><br><span class="line">    -&gt;   age  int         null</span><br><span class="line">    -&gt; );</span><br><span class="line">Query OK, 0 rows affected (0.04 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; insert into tbl</span><br><span class="line">    -&gt;   values (2, 'Tom2', 22), (3, 'Tom3', 23), (4, 'Tom4', 24);</span><br><span class="line">Query OK, 3 rows affected (0.02 sec)</span><br><span class="line">Records: 3  Duplicates: 0  Warnings: 0</span><br><span class="line"></span><br><span class="line">mysql&gt; select * from tbl;</span><br><span class="line">+<span class="comment">----+------+------+</span></span><br><span class="line">| id | name | age  |</span><br><span class="line">+<span class="comment">----+------+------+</span></span><br><span class="line">|  2 | Tom2 |   22 |</span><br><span class="line">|  3 | Tom3 |   23 |</span><br><span class="line">|  4 | Tom4 |   24 |</span><br><span class="line">+<span class="comment">----+------+------+</span></span><br><span class="line">3 rows in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p><a href="https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_transaction_isolation" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/server-system-variables.html#sysvar_transaction_isolation</a></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 事务隔离级别为，可重复读（Repeatable Read）</span></span><br><span class="line">mysql&gt; select @@global.transaction_isolation, @@transaction_isolation;</span><br><span class="line">+<span class="comment">--------------------------------+-------------------------+</span></span><br><span class="line">| @@global.transaction_isolation | @@transaction_isolation |</span><br><span class="line">+<span class="comment">--------------------------------+-------------------------+</span></span><br><span class="line">| REPEATABLE-READ                | REPEATABLE-READ         |</span><br><span class="line">+<span class="comment">--------------------------------+-------------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p><a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_lock_wait_timeout" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/innodb-parameters.html#sysvar_innodb_lock_wait_timeout</a></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 默认锁等待超时时间为 50 秒</span></span><br><span class="line">mysql&gt; select @@global.innodb_lock_wait_timeout, @@innodb_lock_wait_timeout;</span><br><span class="line">+<span class="comment">-----------------------------------+----------------------------+</span></span><br><span class="line">| @@global.innodb_lock_wait_timeout | @@innodb_lock_wait_timeout |</span><br><span class="line">+<span class="comment">-----------------------------------+----------------------------+</span></span><br><span class="line">|                                50 |                         50 |</span><br><span class="line">+<span class="comment">-----------------------------------+----------------------------+</span></span><br><span class="line">1 row in <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<hr>
+<style>
+td pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0px;
+}
+</style>
+<h1 id="排他锁">排他锁</h1>
+<table>
+<tr>
+<th>session1</th>
+<th>session2</th>
+</tr>
+<tr>
+  <td>
+  <pre lang="sql">
+mysql> set autocommit = 0;
+Query OK, 0 rows affected (0.00 sec)
+<p>-- 在 id = 3 的记录上添加排他锁<br>
+mysql&gt; update tbl set age = 100 where id = 3;<br>
+Query OK, 1 row affected (0.00 sec)<br>
+Rows matched: 1  Changed: 1  Warnings: 0</p>
+</pre>
+  </td>
+  <td> </td>
+</tr>
+<tr>
+  <td> </td>
+  <td>
+  <pre lang="sql">
+mysql> set autocommit = 0;
+Query OK, 0 rows affected (0.00 sec)
+<p>-- 锁等待超时时间修改为 5 秒<br>
+mysql&gt; set @@innodb_lock_wait_timeout = 5;<br>
+Query OK, 0 rows affected (0.00 sec)</p>
+<p>-- 其他 session 可以查询 id = 3 的记录，但是不能获取该记录的排他锁<br>
+mysql&gt; select * from tbl where id = 3;<br>
++----+------+------+<br>
+| id | name | age  |<br>
++----+------+------+<br>
+|  3 | Tom3 |   23 |<br>
++----+------+------+<br>
+1 row in set (0.00 sec)</p>
+<p>-- 等待 5 秒<br>
+mysql&gt; update tbl set age = 100 where id = 3;<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+<p>-- 可以获得其他记录的排他锁<br>
+mysql&gt; update tbl set age = 100 where id = 2;<br>
+Query OK, 1 row affected (0.00 sec)<br>
+Rows matched: 1  Changed: 1  Warnings: 0</p>
+<p>-- 等待 5 秒<br>
+mysql&gt; update tbl set age = 100 where id &gt;= 2;<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+</pre>
+  </td>
+</tr>
+<tr>
+  <td>
+  <pre lang="sql">
+mysql> rollback;
+Query OK, 0 rows affected (0.00 sec)</pre>
+  </td>
+  <td> </td>
+</tr>
+<tr>
+  <td> </td>
+  <td>
+  <pre lang="sql">
+mysql> rollback;
+Query OK, 0 rows affected (0.00 sec)</pre>
+  </td>
+</tr>
+</table>
+<h2 id="select-for-update">select for update</h2>
+<table>
+<tr>
+<th>session1</th>
+<th>session2</th>
+</tr>
+<tr>
+  <td>
+  <pre lang="sql">
+mysql> set autocommit = 0;
+Query OK, 0 rows affected (0.00 sec)
+<p>-- 在 id = 3 的记录上添加排他锁<br>
+mysql&gt; select * from tbl where id = 3 for update;<br>
++----+------+------+<br>
+| id | name | age  |<br>
++----+------+------+<br>
+|  3 | Tom3 |   23 |<br>
++----+------+------+<br>
+1 row in set (0.01 sec)</p>
+</pre>
+  </td>
+  <td> </td>
+</tr>
+<tr>
+  <td> </td>
+  <td>
+  <pre lang="sql">
+mysql> set autocommit = 0;
+Query OK, 0 rows affected (0.00 sec)
+<p>-- 其他 session 可以查询 id = 3 的记录，但是不能获取该记录的排他锁<br>
+mysql&gt; select * from tbl where id = 3;<br>
++----+------+------+<br>
+| id | name | age  |<br>
++----+------+------+<br>
+|  3 | Tom3 |   23 |<br>
++----+------+------+<br>
+1 row in set (0.00 sec)</p>
+<p>-- 等待<br>
+mysql&gt; select * from tbl where id = 3 for update;<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+<p>-- 可以获得其他记录的排他锁<br>
+mysql&gt; select * from tbl where id = 2 for update;<br>
++----+------+------+<br>
+| id | name | age  |<br>
++----+------+------+<br>
+|  2 | Tom3 |   22 |<br>
++----+------+------+<br>
+1 row in set (0.00 sec)</p>
+<p>-- 等待<br>
+mysql&gt; delete from tbl where id = 3;<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+<p>-- 等待<br>
+mysql&gt; delete from tbl where id &gt;= 2;<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+</pre>
+  </td>
+</tr>
+<tr>
+  <td>
+  <pre lang="sql">
+mysql> rollback;
+Query OK, 0 rows affected (0.00 sec)</pre>
+  </td>
+  <td> </td>
+</tr>
+<tr>
+  <td> </td>
+  <td>
+  <pre lang="sql">
+mysql> rollback;
+Query OK, 0 rows affected (0.00 sec)</pre>
+  </td>
+</tr>
+</table>
+<h1 id="next-key-锁">Next-Key 锁</h1>
+<hr>
+<h1 id="记录不存在问题">记录不存在问题</h1>
+<p>insert into tbl values (5, 'Tom5', 25);<br>
+insert into tbl values (6, 'Tom6', 26);<br>
+insert into tbl values (1, 'Tom1', 21);</p>
+<p>会话1<br>
+mysql&gt; set autocommit = 0;<br>
+Query OK, 0 rows affected (0.00 sec)</p>
+<p>mysql&gt; select * from tbl where id &gt; 1 for update;<br>
++----+------+------+<br>
+| id | name | age  |<br>
++----+------+------+<br>
+|  2 | Tom2 |   22 |<br>
+|  3 | Tom3 |   23 |<br>
+|  4 | Tom4 |   24 |<br>
++----+------+------+<br>
+3 rows in set (0.00 sec)</p>
+<p>mysql&gt; set autocommit = 0;<br>
+Query OK, 0 rows affected (0.00 sec)</p>
+<p>mysql&gt; select * from tbl where id = 5 for update;<br>
+Empty set (0.00 sec)</p>
+<hr>
+<p>会话2<br>
+mysql&gt; set autocommit = 0;<br>
+Query OK, 0 rows affected (0.00 sec)</p>
+<p>mysql&gt; select * from tbl where id = 5 for update;<br>
+Empty set (0.00 sec)</p>
+<p>mysql&gt; insert into tbl values (1, 'Tom1', 21);<br>
+Query OK, 1 row affected (0.00 sec)</p>
+<p>mysql&gt; insert into tbl values (5, 'Tom5', 25);<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+<p>mysql&gt; insert into tbl values (6, 'Tom6', 26);<br>
+ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction</p>
+<hr>
+<p>若在锁等待期间查看 <a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-trx-table.html" target="_blank" rel="noopener">innodb_trx</a>、<a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-table.html" target="_blank" rel="noopener">innodb_locks</a>、<a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-lock-waits-table.html" target="_blank" rel="noopener">innodb_lock_waits</a> 表，会有如下结果（在没有发生锁等待时， innodb_locks 表和 innodb_lock_waits 表都没有数据）：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; select * from information_schema.innodb_trx \G</span><br><span class="line">*************************** 1. row ***************************</span><br><span class="line">                    trx_id: 162861</span><br><span class="line">                 trx_state: <span class="keyword">LOCK</span> <span class="keyword">WAIT</span></span><br><span class="line">               trx_started: <span class="number">2019</span><span class="number">-12</span><span class="number">-09</span> <span class="number">00</span>:<span class="number">31</span>:<span class="number">03</span></span><br><span class="line">     trx_requested_lock_id: <span class="number">162861</span>:<span class="number">562</span>:<span class="number">3</span>:<span class="number">8</span></span><br><span class="line">          trx_wait_started: <span class="number">2019</span><span class="number">-12</span><span class="number">-09</span> <span class="number">00</span>:<span class="number">32</span>:<span class="number">35</span></span><br><span class="line">                trx_weight: <span class="number">2</span></span><br><span class="line">       trx_mysql_thread_id: <span class="number">2</span></span><br><span class="line">                 trx_query: <span class="keyword">update</span> tbl <span class="keyword">set</span> age = <span class="number">100</span> <span class="keyword">where</span> <span class="keyword">id</span> = <span class="number">3</span></span><br><span class="line">       trx_operation_state: <span class="keyword">starting</span> <span class="keyword">index</span> <span class="keyword">read</span></span><br><span class="line">         trx_tables_in_use: <span class="number">1</span></span><br><span class="line">         trx_tables_locked: <span class="number">1</span></span><br><span class="line">          trx_lock_structs: <span class="number">2</span></span><br><span class="line">     trx_lock_memory_bytes: <span class="number">1136</span></span><br><span class="line">           trx_rows_locked: <span class="number">2</span></span><br><span class="line">         trx_rows_modified: <span class="number">0</span></span><br><span class="line">   trx_concurrency_tickets: <span class="number">0</span></span><br><span class="line">       trx_isolation_level: REPEATABLE <span class="keyword">READ</span></span><br><span class="line">         trx_unique_checks: <span class="number">1</span></span><br><span class="line">    trx_foreign_key_checks: <span class="number">1</span></span><br><span class="line">trx_last_foreign_key_error: <span class="literal">NULL</span></span><br><span class="line"> trx_adaptive_hash_latched: <span class="number">0</span></span><br><span class="line"> trx_adaptive_hash_timeout: <span class="number">0</span></span><br><span class="line">          trx_is_read_only: <span class="number">0</span></span><br><span class="line">trx_autocommit_non_locking: <span class="number">0</span></span><br><span class="line">*************************** <span class="number">2.</span> <span class="keyword">row</span> ***************************</span><br><span class="line">                    trx_id: <span class="number">162860</span></span><br><span class="line">                 trx_state: RUNNING</span><br><span class="line">               trx_started: <span class="number">2019</span><span class="number">-12</span><span class="number">-09</span> <span class="number">00</span>:<span class="number">30</span>:<span class="number">29</span></span><br><span class="line">     trx_requested_lock_id: <span class="literal">NULL</span></span><br><span class="line">          trx_wait_started: <span class="literal">NULL</span></span><br><span class="line">                trx_weight: <span class="number">3</span></span><br><span class="line">       trx_mysql_thread_id: <span class="number">4</span></span><br><span class="line">                 trx_query: <span class="keyword">select</span> * <span class="keyword">from</span> information_schema.innodb_trx</span><br><span class="line">       trx_operation_state: <span class="literal">NULL</span></span><br><span class="line">         trx_tables_in_use: <span class="number">0</span></span><br><span class="line">         trx_tables_locked: <span class="number">1</span></span><br><span class="line">          trx_lock_structs: <span class="number">2</span></span><br><span class="line">     trx_lock_memory_bytes: <span class="number">1136</span></span><br><span class="line">           trx_rows_locked: <span class="number">1</span></span><br><span class="line">         trx_rows_modified: <span class="number">1</span></span><br><span class="line">   trx_concurrency_tickets: <span class="number">0</span></span><br><span class="line">       trx_isolation_level: REPEATABLE <span class="keyword">READ</span></span><br><span class="line">         trx_unique_checks: <span class="number">1</span></span><br><span class="line">    trx_foreign_key_checks: <span class="number">1</span></span><br><span class="line">trx_last_foreign_key_error: <span class="literal">NULL</span></span><br><span class="line"> trx_adaptive_hash_latched: <span class="number">0</span></span><br><span class="line"> trx_adaptive_hash_timeout: <span class="number">0</span></span><br><span class="line">          trx_is_read_only: <span class="number">0</span></span><br><span class="line">trx_autocommit_non_locking: <span class="number">0</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> * <span class="keyword">from</span> information_schema.innodb_locks \G</span><br><span class="line">*************************** <span class="number">1.</span> <span class="keyword">row</span> ***************************</span><br><span class="line">    lock_id: <span class="number">162861</span>:<span class="number">562</span>:<span class="number">3</span>:<span class="number">8</span></span><br><span class="line">lock_trx_id: <span class="number">162861</span></span><br><span class="line">  lock_mode: X</span><br><span class="line">  lock_type: <span class="built_in">RECORD</span></span><br><span class="line"> lock_table: <span class="string">`testdb`</span>.<span class="string">`tbl`</span></span><br><span class="line"> lock_index: PRIMARY</span><br><span class="line"> lock_space: <span class="number">562</span></span><br><span class="line">  lock_page: <span class="number">3</span></span><br><span class="line">   lock_rec: <span class="number">8</span></span><br><span class="line">  lock_data: <span class="number">3</span></span><br><span class="line">*************************** <span class="number">2.</span> <span class="keyword">row</span> ***************************</span><br><span class="line">    lock_id: <span class="number">162860</span>:<span class="number">562</span>:<span class="number">3</span>:<span class="number">8</span></span><br><span class="line">lock_trx_id: <span class="number">162860</span></span><br><span class="line">  lock_mode: X</span><br><span class="line">  lock_type: <span class="built_in">RECORD</span></span><br><span class="line"> lock_table: <span class="string">`testdb`</span>.<span class="string">`tbl`</span></span><br><span class="line"> lock_index: PRIMARY</span><br><span class="line"> lock_space: <span class="number">562</span></span><br><span class="line">  lock_page: <span class="number">3</span></span><br><span class="line">   lock_rec: <span class="number">8</span></span><br><span class="line">  lock_data: <span class="number">3</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> <span class="keyword">warning</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; <span class="keyword">select</span> * <span class="keyword">from</span> information_schema.innodb_lock_waits \G</span><br><span class="line">*************************** <span class="number">1.</span> <span class="keyword">row</span> ***************************</span><br><span class="line">requesting_trx_id: <span class="number">162861</span></span><br><span class="line">requested_lock_id: <span class="number">162861</span>:<span class="number">562</span>:<span class="number">3</span>:<span class="number">8</span></span><br><span class="line">  blocking_trx_id: <span class="number">162860</span></span><br><span class="line"> blocking_lock_id: <span class="number">162860</span>:<span class="number">562</span>:<span class="number">3</span>:<span class="number">8</span></span><br><span class="line"><span class="number">1</span> <span class="keyword">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> <span class="keyword">warning</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<h1 id="参考资料">参考资料</h1>
 <ul>
-<li><strong>false</strong>: <em>This is the default value</em> When the property is false or unspecified, all generated comments will <strong>not</strong> include table and column remarks from db table when the element was generated.</li>
-<li><strong>true</strong>: When the property is true, table and columns remarks from db table will be added to the generated comments.</li>
+<li>MySQL 5.7 Reference Manual:
+<ul>
+<li>14.7 InnoDB Locking and Transaction Model <a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locking-transaction-model.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/innodb-locking-transaction-model.html</a></li>
+<li>14.7.1 InnoDB Locking <a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locking.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/innodb-locking.html</a></li>
+<li>14.7.3 Locks Set by Different SQL Statements in InnoDB <a href="https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html" target="_blank" rel="noopener">https://dev.mysql.com/doc/refman/5.7/en/innodb-locks-set.html</a></li>
 </ul>
-<p><strong>Warning:</strong> If suppressAllComments option is true, this option will be ignored.</p>
-</blockquote>
-<p>使用方法很简单，只需将MyBatis生成器的配置文件中的<code>commentGenerator</code>节点修改为：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">commentGenerator</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span> <span class="attr">name</span>=<span class="string">"addRemarkComments"</span> <span class="attr">value</span>=<span class="string">"true"</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">commentGenerator</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<h1 id="自定义注释生成器类">自定义注释生成器类</h1>
-<p>通过<code>addRemarkComments</code>选项生成的实体类的注释不够精简。于是笔者参考MyBatis的默认的注释生成器<code>DefaultCommentGenerator</code>[<a href="https://github.com/mybatis/generator/blob/master/core/mybatis-generator-core/src/main/java/org/mybatis/generator/internal/DefaultCommentGenerator.java" target="_blank" rel="noopener">github</a>]，对其进行改造成如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.test.mbg;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> java.util.Date;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> org.apache.commons.lang3.time.DateFormatUtils;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.api.IntrospectedColumn;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.api.IntrospectedTable;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.api.dom.java.Field;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.api.dom.java.JavaElement;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.api.dom.java.Method;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.api.dom.java.TopLevelClass;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.config.MergeConstants;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.internal.DefaultCommentGenerator;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.internal.util.StringUtility;</span><br><span class="line"> </span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 官方类似的功能见，在版本1.3.3中添加的 addRemarkComments &lt;br&gt;</span></span><br><span class="line"><span class="comment"> * http://www.mybatis.org/generator/configreference/commentGenerator.html &lt;br&gt;</span></span><br><span class="line"><span class="comment"> * https://github.com/mybatis/generator/issues/23</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@see</span> DefaultCommentGenerator#addRemarkComments</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RemarksCommentGenerator</span> <span class="keyword">extends</span> <span class="title">DefaultCommentGenerator</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addModelClassComment</span><span class="params">(TopLevelClass topLevelClass, IntrospectedTable introspectedTable)</span> </span>&#123;</span><br><span class="line">        topLevelClass.addJavaDocLine(<span class="string">"/**"</span>);</span><br><span class="line"> </span><br><span class="line">        String remarks = introspectedTable.getRemarks();</span><br><span class="line">        <span class="keyword">if</span> (StringUtility.stringHasValue(remarks)) &#123;</span><br><span class="line">            String[] remarkLines = remarks.split(System.getProperty(<span class="string">"line.separator"</span>));</span><br><span class="line">            <span class="keyword">for</span> (String remarkLine : remarkLines) &#123;</span><br><span class="line">                topLevelClass.addJavaDocLine(<span class="string">" * "</span> + remarkLine);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        topLevelClass.addJavaDocLine(<span class="string">" * "</span>);</span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        sb.append(<span class="string">" * "</span>);</span><br><span class="line">        sb.append(introspectedTable.getFullyQualifiedTable());</span><br><span class="line">        topLevelClass.addJavaDocLine(sb.toString());</span><br><span class="line">        topLevelClass.addJavaDocLine(<span class="string">" *"</span>);</span><br><span class="line">        addJavadocTag(topLevelClass, <span class="keyword">false</span>);</span><br><span class="line">        topLevelClass.addJavaDocLine(<span class="string">" */"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addFieldComment</span><span class="params">(Field field, IntrospectedTable introspectedTable, IntrospectedColumn introspectedColumn)</span> </span>&#123;</span><br><span class="line">        field.addJavaDocLine(<span class="string">"/**"</span>);</span><br><span class="line"> </span><br><span class="line">        String remarks = introspectedColumn.getRemarks();</span><br><span class="line">        <span class="keyword">if</span> (StringUtility.stringHasValue(remarks)) &#123;</span><br><span class="line">            String[] remarkLines = remarks.split(System.getProperty(<span class="string">"line.separator"</span>)); </span><br><span class="line">            <span class="keyword">for</span> (String remarkLine : remarkLines) &#123;</span><br><span class="line">                field.addJavaDocLine(<span class="string">" * "</span> + remarkLine);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        field.addJavaDocLine(<span class="string">" *"</span>);</span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        sb.append(<span class="string">" * "</span>);</span><br><span class="line">        sb.append(introspectedTable.getFullyQualifiedTable());</span><br><span class="line">        sb.append(<span class="string">'.'</span>);</span><br><span class="line">        sb.append(introspectedColumn.getActualColumnName());</span><br><span class="line">        field.addJavaDocLine(sb.toString());</span><br><span class="line">        field.addJavaDocLine(<span class="string">" *"</span>);</span><br><span class="line">        addJavadocTag(field, <span class="keyword">false</span>);</span><br><span class="line">        field.addJavaDocLine(<span class="string">" */"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addFieldComment</span><span class="params">(Field field, IntrospectedTable introspectedTable)</span> </span>&#123;</span><br><span class="line">        field.addJavaDocLine(<span class="string">"/**"</span>);</span><br><span class="line">        addJavadocTag(field, <span class="keyword">false</span>);</span><br><span class="line">        field.addJavaDocLine(<span class="string">" */"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addGetterComment</span><span class="params">(Method method, IntrospectedTable introspectedTable, IntrospectedColumn introspectedColumn)</span> </span>&#123;</span><br><span class="line">        method.addJavaDocLine(<span class="string">"/**"</span>);</span><br><span class="line">        addJavadocTag(method, <span class="keyword">false</span>);</span><br><span class="line">        method.addJavaDocLine(<span class="string">" */"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addSetterComment</span><span class="params">(Method method, IntrospectedTable introspectedTable, IntrospectedColumn introspectedColumn)</span> </span>&#123;</span><br><span class="line">        method.addJavaDocLine(<span class="string">"/**"</span>);</span><br><span class="line">        addJavadocTag(method, <span class="keyword">false</span>);</span><br><span class="line">        method.addJavaDocLine(<span class="string">" */"</span>);</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">addJavadocTag</span><span class="params">(JavaElement javaElement, <span class="keyword">boolean</span> markAsDoNotDelete)</span> </span>&#123;</span><br><span class="line">        StringBuilder sb = <span class="keyword">new</span> StringBuilder();</span><br><span class="line">        sb.append(<span class="string">" * "</span>);</span><br><span class="line">        sb.append(MergeConstants.NEW_ELEMENT_TAG);</span><br><span class="line">        <span class="keyword">if</span> (markAsDoNotDelete) &#123;</span><br><span class="line">            sb.append(<span class="string">" do_not_delete_during_merge"</span>); <span class="comment">//$NON-NLS-1$</span></span><br><span class="line">        &#125;</span><br><span class="line">        String s = getDateString();</span><br><span class="line">        <span class="keyword">if</span> (s != <span class="keyword">null</span>) &#123;</span><br><span class="line">            sb.append(<span class="string">' '</span>);</span><br><span class="line">            sb.append(s);</span><br><span class="line">        &#125;</span><br><span class="line">        javaElement.addJavaDocLine(sb.toString());</span><br><span class="line">    &#125;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">protected</span> String <span class="title">getDateString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> DateFormatUtils.format(<span class="keyword">new</span> Date(), <span class="string">"yyyy-MM-dd HH:mm:ss"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>MyBatis的配置文件修改为：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">commentGenerator</span> <span class="attr">type</span>=<span class="string">"com.test.mbg.RemarksCommentGenerator"</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">commentGenerator</span>&gt;</span></span><br></pre></td></tr></table></figure>
-<h1 id="运行mybatis生成器">运行MyBatis生成器</h1>
-<p>改用自定义的<code>RemarksCommentGenerator</code>后，运行MyBatis插件可能会报错。需要使用Java来运行MyBatis生成器，代码如下 [<a href="http://www.mybatis.org/generator/running/runningWithJava.html" target="_blank" rel="noopener">doc</a>]：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.test.mbg;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> java.io.File;</span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"> </span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.api.MyBatisGenerator;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.config.Configuration;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.config.xml.ConfigurationParser;</span><br><span class="line"><span class="keyword">import</span> org.mybatis.generator.internal.DefaultShellCallback;</span><br><span class="line"> </span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *  使用Java运行 MyBatis Generator</span></span><br><span class="line"><span class="comment"> * http://www.mybatis.org/generator/running/runningWithJava.html</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyBatisGen</span> </span>&#123;</span><br><span class="line"> </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">        String fileName = <span class="string">"F:/code/mybatis-generator.xml"</span>;</span><br><span class="line">        File configFile = <span class="keyword">new</span> File(fileName);</span><br><span class="line">        List&lt;String&gt; warnings = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">        <span class="keyword">boolean</span> overwrite = <span class="keyword">true</span>;</span><br><span class="line">        ConfigurationParser cp = <span class="keyword">new</span> ConfigurationParser(warnings);</span><br><span class="line">        Configuration config = cp.parseConfiguration(configFile);</span><br><span class="line">        DefaultShellCallback callback = <span class="keyword">new</span> DefaultShellCallback(overwrite);</span><br><span class="line">        MyBatisGenerator myBatisGenerator = <span class="keyword">new</span> MyBatisGenerator(config, callback, warnings);</span><br><span class="line">        myBatisGenerator.generate(<span class="keyword">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li>mysql的innodb锁 <a href="http://www.heartthinkdo.com/?p=2179" target="_blank" rel="noopener">http://www.heartthinkdo.com/?p=2179</a></li>
+<li>MySQL 5.5 InnoDB 锁等待 <a href="https://dbarobin.com/2015/01/27/innodb-lock-wait-under-mysql-5.5/#%E4%B8%89-innodb-%E9%94%81%E7%AD%89%E5%BE%85%E6%A8%A1%E6%8B%9F" target="_blank" rel="noopener">https://dbarobin.com/2015/01/27/innodb-lock-wait-under-mysql-5.5/#三-innodb-锁等待模拟</a></li>
+<li>2013-12 何登成：MySQL 加锁处理分析 <a href="https://web.archive.org/web/20190902131100/http://hedengcheng.com/?p=771" target="_blank" rel="noopener">https://web.archive.org/web/20190902131100/http://hedengcheng.com/?p=771</a></li>
+<li>2015-10 InnoDB Locking Explained with Stick Figures <a href="https://www.slideshare.net/billkarwin/innodb-locking-explained-with-stick-figures" target="_blank" rel="noopener">https://www.slideshare.net/billkarwin/innodb-locking-explained-with-stick-figures</a></li>
+<li>2015-04 Understanding innodb locks and deadlocks <a href="https://www.slideshare.net/valeriikravchuk1/understanding-innodb-locks-and-deadlocks" target="_blank" rel="noopener">https://www.slideshare.net/valeriikravchuk1/understanding-innodb-locks-and-deadlocks</a></li>
+<li>MySQL InnoDB 锁 <a href="https://www.yuque.com/yinjianwei/vyrvkf/ei0mep" target="_blank" rel="noopener">https://www.yuque.com/yinjianwei/vyrvkf/ei0mep</a></li>
+<li>Innodb存储引擎中锁的简析 <a href="https://juejin.im/entry/59b69d266fb9a00a4551536c" target="_blank" rel="noopener">https://juejin.im/entry/59b69d266fb9a00a4551536c</a></li>
+</ul>
 
       
     </div>
@@ -559,11 +749,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/Java/" rel="tag"># Java</a>
+            <a href="/tags/MySQL/" rel="tag"># MySQL</a>
           
-            <a href="/tags/MyBatis/" rel="tag"># MyBatis</a>
-          
-            <a href="/tags/数据库/" rel="tag"># 数据库</a>
+            <a href="/tags/InnoDB/" rel="tag"># InnoDB</a>
           
         </div>
       
@@ -576,8 +764,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/12/java-8-stream-api/" rel="next" title="Java 8 的 Stream API 笔记">
-                <i class="fa fa-chevron-left"></i> Java 8 的 Stream API 笔记
+              <a href="/2019/06/mysql-5.7-json/" rel="next" title="MySQL 5.7 的 JSON 类型">
+                <i class="fa fa-chevron-left"></i> MySQL 5.7 的 JSON 类型
               </a>
             
           </div>
@@ -585,10 +773,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/01/mysql-data-types/" rel="prev" title="MySQL数据库字段类型杂记">
-                MySQL数据库字段类型杂记 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -855,7 +1039,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#addremarkcomments选项"><span class="nav-number">1.</span> <span class="nav-text">addRemarkComments选项</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#自定义注释生成器类"><span class="nav-number">2.</span> <span class="nav-text">自定义注释生成器类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#运行mybatis生成器"><span class="nav-number">3.</span> <span class="nav-text">运行MyBatis生成器</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#排他锁"><span class="nav-number">1.</span> <span class="nav-text">排他锁</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#select-for-update"><span class="nav-number">1.1.</span> <span class="nav-text">select for update</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#next-key-锁"><span class="nav-number">2.</span> <span class="nav-text">Next-Key 锁</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#记录不存在问题"><span class="nav-number">3.</span> <span class="nav-text">记录不存在问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考资料"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
             
 
           </div>
@@ -1053,9 +1237,9 @@
   
     <script type="text/javascript">
       var disqus_config = function () {
-        this.page.url = 'http://nullwy.me/2016/12/mybatis-generator/';
-        this.page.identifier = '2016/12/mybatis-generator/';
-        this.page.title = 'MyBatis 生成器的表注释';
+        this.page.url = 'http://nullwy.me/2019/12/mysql-innodb-locking/';
+        this.page.identifier = '2019/12/mysql-innodb-locking/';
+        this.page.title = 'MySQL 的 InnoDB 锁';
         };
       function loadComments () {
         var d = document, s = d.createElement('script');

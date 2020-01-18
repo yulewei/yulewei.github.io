@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://nullwy.me/2019/12/mysql-innodb-locking/</loc>
+    <lastmod>2019-12-15</lastmod>
+  </url>  <url>
     <loc>http://nullwy.me/2017/05/java-method-parameter/</loc>
     <lastmod>2019-09-05</lastmod>
   </url>  <url>
