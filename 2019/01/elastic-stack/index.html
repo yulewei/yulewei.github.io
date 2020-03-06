@@ -121,7 +121,7 @@
 <meta property="og:image" content="https://static.nullwy.me/logstash-kibana.png">
 <meta property="og:image" content="https://static.nullwy.me/filebeat-and-logstash.png">
 <meta property="og:image" content="https://static.nullwy.me/filebeat-kibana.png">
-<meta property="og:updated_time" content="2020-02-29T07:03:35.927Z">
+<meta property="og:updated_time" content="2020-03-06T06:25:53.193Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Elastic Stack 日志分析平台搭建笔记">
 <meta name="twitter:description" content="Elastic Stack（旧称 ELK Stack)）是最受欢迎的开源日志平台 [ ref ]。Elastic Stack 由 Elasticsearch、Logstash、Kibana 和 Beats 四个组件组成：  Beats，是轻量型采集器的平台，从边缘机器向 Logstash 和 Elasticsearch 发送数据。 Logstash，集中、转换和存储数据，是动态数据收集管道，拥有可">
@@ -348,7 +348,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2020-02-29 15:03:35" itemprop="dateModified" datetime="2020-02-29T15:03:35+08:00">2020-02-29</time>
+                <time title="修改时间：2020-03-06 14:25:53" itemprop="dateModified" datetime="2020-03-06T14:25:53+08:00">2020-03-06</time>
               
             
           </span>
@@ -589,6 +589,8 @@
 <figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ curl http://192.168.2.109:9200/_cat/indices/filebeat-*</span><br><span class="line">yellow open filebeat-test1-2019.01.13 NLVfFJl5TQ-7I1r9KoVLaQ 5 1 5 0 31.8kb 31.8kb</span><br><span class="line">yellow open filebeat-test2-2019.01.13 NnsBp3P9Q3-mLc8chE-Tiw 5 1 3 0 24.1kb 24.1kb</span><br></pre></td></tr></table></figure>
 <p>在 kibana 上查看收集的日志：</p>
 <img width="800" alt="Kibana" title="Kibana" src="https://static.nullwy.me/filebeat-kibana.png">
+<hr>
+<p>附注：本文中提到的配置文件，可以在 github 上访问得到，<a href="https://github.com/yulewei/elastic-stack-conf" target="_blank" rel="noopener">elastic-stack-conf</a>。</p>
 <h1 id="参考资料">参考资料</h1>
 <ul>
 <li>发展历程| Elastic <a href="https://www.elastic.co/cn/about/history-of-elasticsearch" target="_blank" rel="noopener">https://www.elastic.co/cn/about/history-of-elasticsearch</a></li>
