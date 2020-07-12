@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://nullwy.me/2020/05/kong-gateway/</loc>
+    <lastmod>2020-07-12</lastmod>
+  </url>  <url>
     <loc>http://nullwy.me/2019/01/elastic-stack/</loc>
     <lastmod>2020-07-05</lastmod>
-  </url>  <url>
-    <loc>http://nullwy.me/2020/05/kong-gateway/</loc>
-    <lastmod>2020-06-09</lastmod>
   </url>  <url>
     <loc>http://nullwy.me/2018/10/java-agent/</loc>
     <lastmod>2020-03-06</lastmod>
