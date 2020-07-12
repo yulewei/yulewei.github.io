@@ -8,13 +8,13 @@
         <category>架构</category>
       </categories>
       <tags>
-        <tag>架构</tag>
         <tag>Kong</tag>
         <tag>API</tag>
         <tag>微服务</tag>
         <tag>Nginx</tag>
         <tag>OpenResty</tag>
         <tag>网关</tag>
+        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
@@ -124,11 +124,11 @@
         <category>分布式</category>
       </categories>
       <tags>
+        <tag>架构</tag>
         <tag>ZooKeeper</tag>
         <tag>分布式</tag>
         <tag>共识</tag>
         <tag>Paxos</tag>
-        <tag>架构</tag>
       </tags>
   </entry>
   <entry>
