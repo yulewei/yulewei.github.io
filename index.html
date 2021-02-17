@@ -1509,7 +1509,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://nullwy.me/2018/02/build-debug-openjdk/">
+    <link itemprop="mainEntityOfPage" href="http://nullwy.me/2018/02/build-debug-openjdk9/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="nullwy">
@@ -1528,8 +1528,8 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/02/build-debug-openjdk/" itemprop="url">
-                  macOS 下编译与调试 OpenJDK
+                <a class="post-title-link" href="/2018/02/build-debug-openjdk9/" itemprop="url">
+                  macOS 下编译与调试 OpenJDK 9
                 </a>
               
             
@@ -1572,7 +1572,7 @@
                 
                   <span class="post-meta-item-text">更新于</span>
                 
-                <time title="修改时间：2021-02-17 14:20:31" itemprop="dateModified" datetime="2021-02-17T14:20:31+08:00">2021-02-17</time>
+                <time title="修改时间：2021-02-17 21:07:23" itemprop="dateModified" datetime="2021-02-17T21:07:23+08:00">2021-02-17</time>
               
             
           </span>
@@ -1604,9 +1604,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/02/build-debug-openjdk/#comments" itemprop="discussionUrl">
+                <a href="/2018/02/build-debug-openjdk9/#comments" itemprop="discussionUrl">
                 
-                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/02/build-debug-openjdk/" itemprop="commentCount"></span>
+                  <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/02/build-debug-openjdk9/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1614,7 +1614,7 @@
 
           
           
-             <span id="/2018/02/build-debug-openjdk/" class="leancloud_visitors" data-flag-title="macOS 下编译与调试 OpenJDK">
+             <span id="/2018/02/build-debug-openjdk9/" class="leancloud_visitors" data-flag-title="macOS 下编译与调试 OpenJDK 9">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1653,7 +1653,7 @@
                 
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
-                <span title="阅读时长">18 分钟</span>
+                <span title="阅读时长">17 分钟</span>
               
             </div>
           
@@ -1674,10 +1674,11 @@
 
       
         
-          <h1 id="编译-OpenJDK"><a href="#编译-OpenJDK" class="headerlink" title="编译 OpenJDK"></a>编译 OpenJDK</h1><p>关于编译 OpenJDK 官方文档有很好的介绍，<a href="http://openjdk.java.net/groups/build/" target="_blank" rel="noopener">http://openjdk.java.net/groups/build/</a>，汇总了 JDK 6, JDK 7, JDK 8, JDK 9 的 build OpenJDK 的 README 文件。编译 JDK 8 需要 Xcode 4，现在 Xcode 版本已远高于 4 了，前人尝试编译发现有很多坑 [ <a href="http://hg.openjdk.java.net/jdk8u/jdk8u/raw-file/tip/README-builds.html" target="_blank" rel="noopener">doc</a>, <a href="https://juejin.im/post/5a6d7d106fb9a01ca47abd8b" target="_blank" rel="noopener">blog</a> ]，所以本文直接开始尝试编译 OpenJDK 9。OpenJDK 9 源码根目录下的 README 文件有如下提示信息（<a href="https://github.com/dmlloyd/openjdk/tree/jdk9/jdk9" target="_blank" rel="noopener">github</a>, <a href="http://hg.openjdk.java.net/jdk9/jdk9/file/tip" target="_blank" rel="noopener">hg</a>）：</p>
+          <h1 id="编译-openjdk">编译 OpenJDK</h1>
+<p>关于编译 OpenJDK 官方文档有很好的介绍，<a href="http://openjdk.java.net/groups/build/" target="_blank" rel="noopener">http://openjdk.java.net/groups/build/</a>，汇总了 JDK 6, JDK 7, JDK 8, JDK 9 的 build OpenJDK 的 README 文件。编译 JDK 8 需要 Xcode 4，现在 Xcode 版本已远高于 4 了，前人尝试编译发现有很多坑 [ <a href="http://hg.openjdk.java.net/jdk8u/jdk8u/raw-file/tip/README-builds.html" target="_blank" rel="noopener">doc</a>, <a href="https://juejin.im/post/5a6d7d106fb9a01ca47abd8b" target="_blank" rel="noopener">blog</a> ]，所以本文直接开始尝试编译 OpenJDK 9。OpenJDK 9 源码根目录下的 README 文件有如下提示信息（<a href="https://github.com/openjdk/jdk9" target="_blank" rel="noopener">github</a>, <a href="http://hg.openjdk.java.net/jdk9/jdk9/file/tip" target="_blank" rel="noopener">hg</a>）：</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2018/02/build-debug-openjdk/#more" rel="contents">
+            <a class="btn" href="/2018/02/build-debug-openjdk9/#more" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
