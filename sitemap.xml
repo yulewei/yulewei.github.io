@@ -2,6 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://nullwy.me/2018/02/build-debug-openjdk/</loc>
+    
+    <lastmod>2021-02-17T06:20:31.431Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://nullwy.me/2019/06/mysql-5.7-json/</loc>
+    
+    <lastmod>2020-11-29T08:16:26.264Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://nullwy.me/2017/11/zookeeper-note/</loc>
     
     <lastmod>2020-07-12T10:46:10.902Z</lastmod>
@@ -40,13 +54,6 @@
     <loc>http://nullwy.me/2016/12/java-8-stream-api/</loc>
     
     <lastmod>2020-01-18T06:15:31.331Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2019/06/mysql-5.7-json/</loc>
-    
-    <lastmod>2020-01-18T06:14:35.598Z</lastmod>
     
   </url>
   
@@ -117,13 +124,6 @@
     <loc>http://nullwy.me/2017/03/java-executor/</loc>
     
     <lastmod>2019-05-25T05:40:44.776Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://nullwy.me/2018/02/build-debug-openjdk/</loc>
-    
-    <lastmod>2019-05-25T05:40:37.843Z</lastmod>
     
   </url>
   
