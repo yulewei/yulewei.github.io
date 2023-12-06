@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本文整理一些学习Java需要翻阅或必须的官方文档资料。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 官方文档整理">
+<meta property="og:url" content="https://nullwy.me/2016/11/java-official-doc/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="本文整理一些学习Java需要翻阅或必须的官方文档资料。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-11-19T19:21:32.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:15:03.673Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://nullwy.me/2016/11/java-official-doc/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 官方文档整理 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2016/11/java-official-doc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 官方文档整理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-20 03:21:32" itemprop="dateCreated datePublished" datetime="2016-11-20T03:21:32+08:00">2016-11-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2016/11/java-official-doc/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2016/11/java-official-doc/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文整理一些学习Java需要翻阅或必须的官方文档资料。</p>
+<span id="more"></span>
+<h1 id="Java-SE文档">Java SE文档</h1>
+<p>Java SE Technologies at a Glance <a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/tech/index.html">http://www.oracle.com/technetwork/java/javase/tech/index.html</a></p>
+<p><a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/">http://docs.oracle.com/javase/8/</a><br>
+<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/index.html">http://docs.oracle.com/javase/8/docs/index.html</a> Platform Overview平台概览图<br>
+<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/javase-books.htm">http://docs.oracle.com/javase/8/javase-books.htm</a></p>
+<p>Java Platform Overview (docs/technotes/<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/">guides</a>)</p>
+<ol>
+<li>Java Programming Language (guides/<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/language/index.html">language</a>)</li>
+<li>Java Virtual Machine Technology (guides/<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/vm/index.html">vm</a>)</li>
+<li>JDK Tools and Utilities (technotes/<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/tools/index.html">tools</a>)</li>
+</ol>
+<p>Java SE API：</p>
+<ol>
+<li>Base Libraries (guides/<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/#base">#base</a>):</li>
+</ol>
+<ul>
+<li>Lang and Util Packages: <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/lang/index.html">lang and util</a> (java.lang &amp; java.util), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/math/index.html">Math</a> (java.lang.Math), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/collections/index.html">Collections</a> (java.util), Reference Objects, Regular Expressions (java.util.regex), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/logging/index.html">Logging</a> (java.util.logging), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/management/index.html">Management</a> (java.lang.management), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/instrumentation/index.html">Instrumentation</a> (java.lang.instrument), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/concurrency/index.html">Concurrency Utilities</a> (java.lang.Thread, java.util.concurrent), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/reflection/index.html">Reflection</a> (java.lang.reflect), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/versioning/index.html">Package Versioning</a>, <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/preferences/index.html">Preferences API</a> (java.util.prefs), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/jar/index.html">JAR</a> (java.util.jar), Zip (java.util.zip)</li>
+<li>Other Base Packages: <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/beans/index.html">Beans</a> (java.beans), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/security/index.html">Security</a> (java.security &amp; javax.crypto), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/serialization/index.html">Serialization</a> (<a target="_blank" rel="noopener" href="http://java.io">java.io</a>), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/extensions/index.html">Extension Mechanism</a>, <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/jmx/index.html">JMX</a>, <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/xml/index.html">XML JAXP</a>, <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/net/index.html">Networking</a> (<a target="_blank" rel="noopener" href="http://java.net">java.net</a> &amp; <a target="_blank" rel="noopener" href="http://javax.net">javax.net</a>), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/standards/index.html">Override Mechanism</a>, <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/jni/index.html">JNI</a>, <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/datetime/index.html">Date and Time</a> (java.time), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/io/index.html">Input/Output</a> (<a target="_blank" rel="noopener" href="http://java.io">java.io</a> &amp; java.nio), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/intl/index.html">Internationalization</a></li>
+</ul>
+<ol start="2">
+<li>Integration Libraries (guides/<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/#integration">#integration</a>): <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/idl/index.html">IDL</a> (CORBA, org.omg.*), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/jdbc/index.html">JDBC</a> (java.sql &amp; javax.sql), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/rmi/index.html">RMI</a> (java.rmi), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/rmi-iiop/index.html">RMI-IIOP</a> (org.omg.*) <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/jndi/index.html">JNDI</a> (javax.naming), <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/scripting/index.html">Scripting</a> (javax.script)</li>
+<li>User Interface Libraries (guides/<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/#userinterface">#userinterface</a>): Swing, Java 2D, AWT, Accessibility, Drag and Drop, Input Methods, Image I/O, Print Service, Sound</li>
+</ol>
+<p><a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/scripting/">http://docs.oracle.com/javase/8/docs/technotes/guides/scripting/</a></p>
+<p><strong>中文API文档：</strong><br>
+<a target="_blank" rel="noopener" href="http://download.oracle.com/technetwork/java/javase/6/docs/zh/api/">http://download.oracle.com/technetwork/java/javase/6/docs/zh/api/</a><br>
+<a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/">http://www.cjsdn.net/Doc/JDK60/</a></p>
+<hr>
+<h1 id="Java虚拟机">Java虚拟机</h1>
+<p><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Template:Java_Virtual_Machine">https://en.wikipedia.org/wiki/Template:Java_Virtual_Machine</a><br>
+<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Java_performance">https://en.wikipedia.org/wiki/Java_performance</a></p>
+<p><strong>JDK源码</strong>：<br>
+<a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk">https://github.com/dmlloyd/openjdk</a><br>
+<a target="_blank" rel="noopener" href="https://github.com/openjdk-mirror/jdk7u-jdk">https://github.com/openjdk-mirror/jdk7u-jdk</a><br>
+<a target="_blank" rel="noopener" href="https://github.com/openjdk-mirror/jdk7u-hotspot">https://github.com/openjdk-mirror/jdk7u-hotspot</a></p>
+<p><strong>虚拟机与性能</strong><br>
+<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Template:Java_%28software_platform%29">http://en.wikipedia.org/wiki/Template:Java_%28software_platform%29</a><br>
+<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Template:Java_Virtual_Machine">http://en.wikipedia.org/wiki/Template:Java_Virtual_Machine</a><br>
+<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Java_performance">http://en.wikipedia.org/wiki/Java_performance</a><br>
+<a target="_blank" rel="noopener" href="http://openjdk.java.net/groups/hotspot/">http://openjdk.java.net/groups/hotspot/</a></p>
+<p><strong>Java SE HotSpot at a Glance</strong>，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/tech/index-jsp-136373.html">link</a></p>
+<ol>
+<li>HotSpot Engine Architecture，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/whitepaper-135217.html">link</a></li>
+<li>HotSpot Thread Implementation (Solaris)，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/threads-140302.html">link</a></li>
+<li>HotSpot Garbage Collection，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/tech/index-jsp-140228.html">link</a></li>
+</ol>
+<ul>
+<li><strong>Memory Management Whitepaper[pdf]</strong>，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/tech/memorymanagement-whitepaper-1-150020.pdf">link</a>：最权威、最完整文档</li>
+<li>Garbage Collector Ergonomics，<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/1.5.0/docs/guide/vm/gc-ergonomics.html">link</a></li>
+<li>Garbage Collection Tuning，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/gc-tuning-6-140523.html">link</a></li>
+<li>Garbage First (&quot;G1&quot;) Garbage Collector，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/tech/g1-intro-jsp-135488.html">link</a></li>
+</ul>
+<ol start="4">
+<li>HotSpot Ergonomics，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/ergo5-140223.html">link</a></li>
+<li>HotSpot Performance and Tuning，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/performance-138178.html">link</a></li>
+</ol>
+<ul>
+<li>2007.10, Java SE 6.0 Performance White Paper，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/6-performance-137236.html">link</a></li>
+<li>2005.03, J2SE 5.0 Performance White Paper，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/5-136747.html">link</a></li>
+</ul>
+<ol start="8">
+<li>HotSpot Publications，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/tech/publications-140132.html">link</a></li>
+</ol>
+<p><strong>Troubleshooting Java SE 8，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/index-138283.html">link</a> 资料汇总</strong></p>
+<ol>
+<li>Java Troubleshooting Guide Java SE 8，<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/guides/troubleshoot/toc.html">link</a></li>
+<li>Troubleshooting Guide for Java SE 6 with HotSpot VM，<a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/javase/memleaks-137499.html">link</a></li>
+<li>Troubleshooting Guide for HotSpot VM (JDK 7)，<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/7/docs/webnotes/tsg/TSG-VM/html/%0A">link</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2016/11/java-official-doc/" title="Java 官方文档整理">https://nullwy.me/2016/11/java-official-doc/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/JVM/" rel="tag"># JVM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/11/java-books/" rel="prev" title="Java书籍资料整理">
+      <i class="fa fa-chevron-left"></i> Java书籍资料整理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/11/lang-and-compiler-books/" rel="next" title="编程语言与编译器书籍资料整理">
+      编程语言与编译器书籍资料整理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-SE%E6%96%87%E6%A1%A3"><span class="nav-number">1.</span> <span class="nav-text">Java SE文档</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java%E8%99%9A%E6%8B%9F%E6%9C%BA"><span class="nav-number">2.</span> <span class="nav-text">Java虚拟机</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2016/11/java-official-doc/";
+    this.page.identifier = "2016/11/java-official-doc/";
+    this.page.title = "Java 官方文档整理";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

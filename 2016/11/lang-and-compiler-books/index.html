@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本文整理编程语言与编译器相关的经典书籍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="编程语言与编译器书籍资料整理">
+<meta property="og:url" content="https://nullwy.me/2016/11/lang-and-compiler-books/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="本文整理编程语言与编译器相关的经典书籍。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-11-26T07:09:51.000Z">
+<meta property="article:modified_time" content="2023-12-04T15:16:20.089Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="书籍">
+<meta property="article:tag" content="CS">
+<meta property="article:tag" content="语言">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://nullwy.me/2016/11/lang-and-compiler-books/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>编程语言与编译器书籍资料整理 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2016/11/lang-and-compiler-books/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          编程语言与编译器书籍资料整理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-26 15:09:51" itemprop="dateCreated datePublished" datetime="2016-11-26T15:09:51+08:00">2016-11-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%BC%96%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">编程</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2016/11/lang-and-compiler-books/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2016/11/lang-and-compiler-books/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文整理编程语言与编译器相关的经典书籍。</p>
+<span id="more"></span>
+<p><a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Template:%E7%A8%8B%E5%BA%8F%E8%AE%BE%E8%AE%A1%E8%AF%AD%E8%A8%80">https://zh.wikipedia.org/wiki/Template:程序设计语言</a><br>
+<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Template:IPC">https://en.wikipedia.org/wiki/Template:IPC</a><br>
+<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Programming_language#Further_reading">https://en.wikipedia.org/wiki/Programming_language#Further_reading</a></p>
+<p>Language Books/Tutorials for popular languages <a target="_blank" rel="noopener" href="http://stackoverflow.com/q/22873">http://stackoverflow.com/q/22873</a></p>
+<p><strong>编程语言、程序分析相关书籍：</strong></p>
+<ol>
+<li>1999、2005、2009，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Michael_L._Scott">Michael L. Scott</a>，《<strong>程序设计语言：实践之路</strong>》（Programming Language Pragmatics, <a target="_blank" rel="noopener" href="http://amzn.com/1558604421">1st</a> 1999, <a target="_blank" rel="noopener" href="http://www.amazon.com/Programming-Language-Pragmatics-Third-Edition/dp/0123745144">3rd</a> 2009），<a target="_blank" rel="noopener" href="http://www.cs.rochester.edu/u/scott/pragmatics/">home</a>，第3版<a target="_blank" rel="noopener" href="http://book.douban.com/subject/10802357/">豆瓣</a>：全书800多页，内容优于Sebesta版，有16页参考文献，涵盖程序语言、编译原理、计算机体系结构等多个子学科</li>
+<li>1993-2012，<a target="_blank" rel="noopener" href="http://cs.uccs.edu/~rsebesta/">Robert W. Sebesta</a>，《<strong>程序设计语言概念</strong>》（Concepts of Programming Languages, <a target="_blank" rel="noopener" href="http://www.amazon.com/Concepts-Programming-Languages-Robert-Sebesta/dp/0131395319">10th</a> 2012, <a target="_blank" rel="noopener" href="http://amzn.com/013394302X">11th</a> 2015），第10版<a target="_blank" rel="noopener" href="http://book.douban.com/subject/23055481/">豆瓣</a>：全书600页左右，内容编程语言发展历史概述，以及分别介绍、比较</li>
+<li>2002、2004，Benjamin C. Pierce，《类型和程序设计语言》（Types and Programming Languages, <a target="_blank" rel="noopener" href="http://www.amazon.com/Types-Programming-Languages-Benjamin-Pierce/dp/0262162091">amazon</a>），<a target="_blank" rel="noopener" href="http://www.cis.upenn.edu/~bcpierce/tapl/">home</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/1318672/">豆瓣</a></li>
+<li>1993，Glynn Winskel，《程序设计语言的形式语义》（The Formal Semantics of Programming Languages, <a target="_blank" rel="noopener" href="http://www.amazon.com/Formal-Semantics-Programming-Languages-Winskel/dp/0262731037">amazon</a>），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/1144542/">豆瓣</a></li>
+<li>2002，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/John_C._Mitchell">John Mitchell</a>，《程序设计语言概念》（Concepts in Programming Languages），<a target="_blank" rel="noopener" href="http://theory.stanford.edu/~jcm/books.html">home</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/1699662/">豆瓣</a>：作者来自Stanford，<a target="_blank" rel="noopener" href="http://theory.stanford.edu/~jcm/books/cpl-courses.html">courses</a>，内容主要讲Lisp及其他</li>
+<li>1996，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/John_C._Mitchell">John Mitchell</a>，《程序设计语言理论基础》（Foundations for Programming Languages），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/1944729/">豆瓣</a></li>
+<li>2004，“Concepts, Techniques, and Models of Computer Programming”，CTM，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Concepts,_Techniques,_and_Models_of_Computer_Programming">wiki</a>，<a target="_blank" rel="noopener" href="http://www.info.ucl.ac.be/~pvr/book.html">home</a></li>
+<li>2010，Bruce Tate，《<strong>七周七语言：理解多种编程范型</strong>》（Seven Languages in Seven Weeks, <a target="_blank" rel="noopener" href="http://pragprog.com/book/btlang/seven-languages-in-seven-weeks">Pragmatic</a>），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/10555435/">豆瓣</a>：书中介绍了Ruby、Io、Prolog、Scala、Erlang、Clojure和Haskell这七种语言</li>
+<li>2010，Martin Fowler，《<strong>领域特定语言</strong>》（Domain-Specific Languages, <a target="_blank" rel="noopener" href="http://www.amazon.com/Domain-Specific-Languages-Addison-Wesley-Signature-Series/dp/0321712943">amazon</a>），<a target="_blank" rel="noopener" href="http://martinfowler.com/books/dsl.html">home</a>，<a target="_blank" rel="noopener" href="http://www.infoq.com/cn/minibooks/domain-specific-languages">infoq</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/21964984/">豆瓣</a></li>
+<li>2010，《<strong>领域专用语言实战</strong>》（DSLs in Action），<a target="_blank" rel="noopener" href="http://www.ituring.com.cn/book/836">图灵2013</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/25741352/">豆瓣</a></li>
+<li>2013，[日]西尾泰和，《代码之髓：编程语言核心概念》，<a target="_blank" rel="noopener" href="http://www.ituring.com.cn/book/1233">图灵2014</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/25927585/">豆瓣</a></li>
+<li>2014，Neal Ford，《函数式编程思维》，<a target="_blank" rel="noopener" href="https://book.douban.com/subject/26587213/">豆瓣</a>：涉及Java、Clojure、Scala</li>
+</ol>
+<hr>
+<p><strong>编译器相关书籍：</strong></p>
+<ol>
+<li>1986、2007，Aho &amp; Sethi &amp; Ullman，龙书《<strong>编译原理</strong>》（<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Compilers:_Principles,_Techniques,_and_Tools">Compilers</a>: Principles, Techniques, and Tools, 1st 1986, <a target="_blank" rel="noopener" href="http://www.amazon.com/Compilers-Principles-Techniques-Tools-2nd/dp/0321486811">2nd</a> 2006），<a target="_blank" rel="noopener" href="http://dragonbook.stanford.edu/">home</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/3296317/">豆瓣</a>：侧重理论</li>
+<li>1997、2002，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Andrew_Appel">Appel</a>，虎书《<strong>现代编译原理</strong>》（Modern Compiler Implementation in Java/C/ML, <a target="_blank" rel="noopener" href="http://amzn.com/0521607655">amazon</a>），<a target="_blank" rel="noopener" href="http://www.cs.princeton.edu/~appel/modern/">home</a>，C语言，<a target="_blank" rel="noopener" href="http://www.ituring.com.cn/book/655">图灵2006</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/1806974/">豆瓣</a>；Java语言，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/1218871/">豆瓣</a>：作者TOPLAS杂志主编，介于龙书，鲸书之间，算是实践中有理论</li>
+<li>2004、2011，<a target="_blank" rel="noopener" href="http://www.cs.rice.edu/~keith/">Cooper</a> &amp; <a target="_blank" rel="noopener" href="http://www.cs.rice.edu/~linda/">Torczon</a>，《<strong>编译器设计</strong>》（Engineering a Compiler,<a target="_blank" rel="noopener" href="http://www.amazon.com/Engineering-Compiler-Second-Edition-Cooper/dp/012088478X">2nd</a> 2011），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/20436488/">豆瓣</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/review/5693851/">书评</a>：两位作者均来自Rice Univ，博士导师都为Kennedy</li>
+<li>1997，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Steven_Muchnick">Muchnick</a>，鲸书《<strong>高级编译器设计与实现</strong>》（Advanced Compiler Design and Implementation, <a target="_blank" rel="noopener" href="http://amzn.com/1558603204">amazon</a>），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/1400374/">豆瓣</a>：名气次于龙书和虎书，内容侧重编译器后端优化</li>
+<li>1988、1991、2009，《<strong>编译器构造</strong>》（Crafting a Compiler, <a target="_blank" rel="noopener" href="http://dl.acm.org/citation.cfm?id=33462">1st</a> 1988, <a target="_blank" rel="noopener" href="http://www.amazon.com/Crafting-Compiler-Charles-N-Fischer/dp/0136067050">3rd</a> 2009），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/10772776/">豆瓣</a>：该书不是很出名，但<strong>相对“龙书”和“虎书”读性很高</strong></li>
+<li>1996、2011，Richard Jones &amp; etc，《<strong>垃圾回收算法手册</strong>》（The Garbage Collection Handbook, <a target="_blank" rel="noopener" href="http://www.amazon.com/dp/1420082795/ref=cm_sw_su_dp">amazon</a>），<a target="_blank" rel="noopener" href="http://gchandbook.org/">home</a>，第2版<a target="_blank" rel="noopener" href="https://book.douban.com/subject/26740958/">豆瓣</a>：GC最佳书籍</li>
+<li>2016，中村成洋，《<strong>垃圾回收的算法与实现</strong>》，<a target="_blank" rel="noopener" href="https://book.douban.com/subject/26821357/">豆瓣</a></li>
+<li>2001，Allen &amp; <a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Ken_Kennedy_%28computer_scientist%29">Kennedy</a>，《现代体系结构的优化编译器》（Optimizing Compilers for Modern Architectures, <a target="_blank" rel="noopener" href="http://amzn.com/1558602860">amazon</a>），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/1171448/">豆瓣</a>：两位作者均来自Rice Univ，其中Kennedy在1999年获得<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/SIGPLAN#Awards">ACM SIGPLAN成就奖</a>，该奖项的第3届得主</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2016/11/lang-and-compiler-books/" title="编程语言与编译器书籍资料整理">https://nullwy.me/2016/11/lang-and-compiler-books/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E4%B9%A6%E7%B1%8D/" rel="tag"># 书籍</a>
+              <a href="/tags/CS/" rel="tag"># CS</a>
+              <a href="/tags/%E8%AF%AD%E8%A8%80/" rel="tag"># 语言</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/11/java-official-doc/" rel="prev" title="Java 官方文档整理">
+      <i class="fa fa-chevron-left"></i> Java 官方文档整理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/11/database-books/" rel="next" title="数据库书籍资料整理">
+      数据库书籍资料整理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2016/11/lang-and-compiler-books/";
+    this.page.identifier = "2016/11/lang-and-compiler-books/";
+    this.page.title = "编程语言与编译器书籍资料整理";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本文整理一些经典的数据库教材以及MySQL相关书籍。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库书籍资料整理">
+<meta property="og:url" content="https://nullwy.me/2016/11/database-books/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="本文整理一些经典的数据库教材以及MySQL相关书籍。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-11-26T07:56:02.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:14:01.699Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="书籍">
+<meta property="article:tag" content="CS">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://nullwy.me/2016/11/database-books/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>数据库书籍资料整理 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2016/11/database-books/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          数据库书籍资料整理
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-26 15:56:02" itemprop="dateCreated datePublished" datetime="2016-11-26T15:56:02+08:00">2016-11-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">计算机系统</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2016/11/database-books/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2016/11/database-books/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文整理一些经典的数据库教材以及MySQL相关书籍。</p>
+<span id="more"></span>
+<p><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Database">http://en.wikipedia.org/wiki/Database</a><br>
+<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Template:Databases">http://en.wikipedia.org/wiki/Template:Databases</a><br>
+<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Template:SQL">http://en.wikipedia.org/wiki/Template:SQL</a></p>
+<p>Ask HN: Help me find a good databases textbook <a target="_blank" rel="noopener" href="https://news.ycombinator.com/item?id=377669">https://news.ycombinator.com/item?id=377669</a><br>
+Database Internals - Where to Begin? <a target="_blank" rel="noopener" href="http://stackoverflow.com/q/770273">http://stackoverflow.com/q/770273</a><br>
+Ask HN: good book or resources to get my SQL skills to the next level <a target="_blank" rel="noopener" href="https://news.ycombinator.com/item?id=1370721">https://news.ycombinator.com/item?id=1370721</a><br>
+Ask HN: Is there a K&amp;R for SQL? <a target="_blank" rel="noopener" href="https://news.ycombinator.com/item?id=5087439">https://news.ycombinator.com/item?id=5087439</a><br>
+Tips for getting started with SQL? <a target="_blank" rel="noopener" href="http://stackoverflow.com/q/110124">http://stackoverflow.com/q/110124</a></p>
+<h1 id="教材原理类书籍">教材原理类书籍</h1>
+<ol>
+<li>1986-2010，Silberschatz，《<strong>数据库系统概念</strong>》（Database System Concepts, 1st 1986, <a target="_blank" rel="noopener" href="http://www.amazon.com/Database-System-Concepts-Abraham-Silberschatz/dp/0073523321">6th</a> 2010），<a target="_blank" rel="noopener" href="http://codex.cs.yale.edu/avi/db-book/">home</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/10548379/">豆瓣</a>：对数据库<strong>理论、概念</strong>有很清晰地介绍</li>
+<li>1996、1999、2002，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Raghu_Ramakrishnan">Ramakrishnan</a> &amp; <a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Johannes_Gehrke">Gehrke</a>，《<strong>数据库管理系统：原理与设计</strong> Cow Book》（Database Management Systems, <a target="_blank" rel="noopener" href="http://www.amazon.com/Database-Management-Systems-3rd-Edition/dp/0072465638">3rd</a> 2002），<a target="_blank" rel="noopener" href="http://pages.cs.wisc.edu/%7Edbbook/">home</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/1155934/">豆瓣</a>：第1作者2006年-2012年为Yahoo首席科学家，2012年跳槽到微软，该书为伯克利CS186、MIT、CMU教材</li>
+<li>2006、2010，Elmasri &amp; Navathe，《<strong>数据库系统基础</strong>》（Fundamentals of Database Systems, 6th <a target="_blank" rel="noopener" href="http://www.amazon.com/Fundamentals-Database-Systems-6th-Edition/dp/0136086209">2010</a>），<a target="_blank" rel="noopener" href="http://www.ituring.com.cn/book/556">图灵2007</a>，第6版<a target="_blank" rel="noopener" href="http://book.douban.com/subject/6938465/">豆瓣</a></li>
+<li>2005，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Joseph_M._Hellerstein">Hellerstein</a> &amp; <a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Michael_Stonebraker">Stonebraker</a>，&quot;<strong>Readings in Database Systems</strong>&quot;, 3th 1998, 4th 2005，<a target="_blank" rel="noopener" href="http://mitpress.mit.edu/books/readings-database-systems">MITpress</a>，<a target="_blank" rel="noopener" href="http://redbook.cs.berkeley.edu/">home</a>：被称为“Red Book”，经典论文收录集，第1作者是<strong>Berkeley</strong> Database Group的leader，第2作者是Ingres之父，Hellerstein的博士导师之一</li>
+<li>1975-2003，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Christopher_J._Date">C. J. Date</a><br>
+，《<strong>数据库系统导论</strong>》（An Introduction to Database Systems, 2nd 1977, 8th<br>
+<a target="_blank" rel="noopener" href="http://www.amazon.com/Introduction-Database-Systems-8th-Edition/dp/0321197844">2003</a>），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/2179813/">豆瓣</a>：作者曾在IBM工作，该书是<strong>最早</strong>的数据库教材</li>
+<li>1999、2008，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/H%C3%A9ctor_Garc%C3%ADa-Molina">Garcia-Molina</a> &amp; <a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Jeffrey_Ullman">Ullman</a> &amp; <a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Jennifer_Widom">Widom</a>，《数据库系统全书 DSCB》（Database Systems: The Complete Book, 2nd 2008），<a target="_blank" rel="noopener" href="http://infolab.stanford.edu/%7Eullman/dscb.html">home</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/1137262/">豆瓣</a>：内容偏向介绍数据库的底层实现原理，三位作者来自Stanford，并且均获得Codd奖，获奖年份依次为1999年、2006年、2007年</li>
+<li>1992，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Jim_Gray_%28computer_scientist%29">Jim Gray</a>，《<strong>事务处理：概念与技术</strong>》（Transaction Processing: Concepts and Techniques, <a target="_blank" rel="noopener" href="http://amzn.com/1558601902">amazon</a>）：介绍事务经典之作，不过略微过时。作者1998年图灵奖，1993年第2届Codd奖得主</li>
+<li>1997、2009，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Phil_Bernstein">Bernstein</a> &amp; Newcomer，《<strong>事务处理原理</strong>》（Principles of Transaction Processing, <a target="_blank" rel="noopener" href="http://www.amazon.com/Principles-Transaction-Processing-Kaufmann-Management/dp/1558606238">2nd</a> 2009），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/5412835/">豆瓣</a>：目前最新、全面的书籍。作者来自Microsoft研究院，1994年第3届Codd奖得主</li>
+<li>1999、2011，<a target="_blank" rel="noopener" href="https://cs.uwaterloo.ca/%7Etozsu/">M. Tamer Ozsu</a>，《<strong>分布式数据库系统原理</strong>》（Principles of Distributed Database Systems, <a target="_blank" rel="noopener" href="http://www.amazon.com/Principles-Distributed-Database-Systems-Tamer/dp/1441988335">3rd</a> 2011），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/1099408/">豆瓣</a></li>
+</ol>
+<h1 id="SQL相关书籍">SQL相关书籍</h1>
+<ol>
+<li>2010，《SQL反模式》（SQL Antipatterns），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/6800774/">豆瓣</a></li>
+<li>2009，《SQL学习指南》（Learning SQL），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/4872454/">豆瓣</a></li>
+<li>1999-2008，《<strong>SQL技术手册</strong>》（SQL in a Nutshell, 2nd 2004, <a target="_blank" rel="noopener" href="http://www.amazon.com/SQL-Nutshell-In-OReilly/dp/B00CVDS62S">3rd</a> 2008），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/4115916/">豆瓣</a>：根据SQL2003 ANSI标准，同时涵盖MySQL、Oracle、PostgreSQL及SQL Server</li>
+<li>1995-2010，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Joe_Celko">Joe Celko</a>，《<strong>SQL权威指南</strong>》（Joe Celko's SQL for Smarties: Advanced SQL Programming, <a target="_blank" rel="noopener" href="http://amzn.com/1558603239">1st</a> 1995, <a target="_blank" rel="noopener" href="http://amzn.com/0123820227">4th</a> 2010），<a target="_blank" rel="noopener" href="http://www.ituring.com.cn/book/969">图灵2012</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/20395440/">豆瓣</a>：全书652页，作者曾担任ANSl SQL标准委员会成员达10年之久，参与了SQL-89和SQL-92标准的制定</li>
+<li>2005，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Joe_Celko">Joe Celko</a>，《SQL编程风格》（Joe Celko's SQL Programming Style, <a target="_blank" rel="noopener" href="http://amzn.com/0120887975">amazon</a>）<a target="_blank" rel="noopener" href="http://www.ituring.com.cn/book/434">，图灵2008</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/3208673/">豆瓣</a></li>
+<li>1996、2002，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Joe_Celko">Joe Celko</a>，《SQL解惑》（Joe Celko's SQL Puzzles and Answers, <a target="_blank" rel="noopener" href="http://amzn.com/0123735963">2nd</a> 2002），<a target="_blank" rel="noopener" href="http://www.ituring.com.cn/book/489">图灵2008</a></li>
+<li>2005，Ben Forta，《MySQL必知必会》（MySQL Crash Course），<a target="_blank" rel="noopener" href="http://www.forta.com/books/0672327120/">home</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/3354490/">豆瓣</a></li>
+</ol>
+<h1 id="MySQL书籍">MySQL书籍</h1>
+<p><a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Template:MySQL">http://en.wikipedia.org/wiki/Template:MySQL</a><br>
+<a target="_blank" rel="noopener" href="https://github.com/shlomi-noach/awesome-mysql">https://github.com/shlomi-noach/awesome-mysql</a><br>
+<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Database_engine">http://en.wikipedia.org/wiki/Database_engine</a><br>
+2014-01 Any recommended MySQL books for more advanced stuff? (self.mysql) <a target="_blank" rel="noopener" href="http://redd.it/292u19">http://redd.it/292u19</a><br>
+What resources exist for Database performance-tuning? <a target="_blank" rel="noopener" href="http://stackoverflow.com/q/761204">http://stackoverflow.com/q/761204</a><br>
+2010-12 12 Best MySQL Database Books for Your Library <a target="_blank" rel="noopener" href="http://www.thegeekstuff.com/2010/12/12-best-mysql-books/">http://www.thegeekstuff.com/2010/12/12-best-mysql-books/</a></p>
+<h2 id="MySQL管理">MySQL管理</h2>
+<ol>
+<li>2008、2013，《深入浅出MySQL数据库：开发优化与管理维护》，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/25817684/">豆瓣</a>：作者来自网易DBA小组</li>
+<li>2005、2008，《MySQL核心技术手册》（MySQL in a Nutshell, <a target="_blank" rel="noopener" href="http://www.amazon.com/MYSQL-Nutshell-In-OReilly/dp/B00CVDWK70">2nd</a> 2008），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/4116793/">豆瓣</a>：作者MySQL公司知识库编辑</li>
+<li>1999-2013，<a target="_blank" rel="noopener" href="http://www.oreilly.com/pub/au/330">Paul DuBois</a>，《MySQL技术内幕》（MySQL: Developer's Library, <a target="_blank" rel="noopener" href="http://www.amazon.com/MySQL-Developers-Library-Paul-DuBois/dp/0735712123">2nd</a> 2003, <a target="_blank" rel="noopener" href="http://amzn.com/0321833872">5th</a> 2013），第4版2008<a target="_blank" rel="noopener" href="http://book.douban.com/subject/6524185/">豆瓣</a>，第5版<a target="_blank" rel="noopener" href="http://book.douban.com/subject/26436525/">豆瓣</a>：全书886页，作者是“MySQL参考手册”（MySQL Reference Manual）的主要贡献者之一，其他书“MySQL Cookbook”（<a target="_blank" rel="noopener" href="http://book.douban.com/subject/3045359/">豆瓣</a>）</li>
+<li>2002、2007、2014，<a target="_blank" rel="noopener" href="http://www.oreilly.com/pub/au/330">Paul DuBois</a>，《MySQL Cookbook 中文版》，<a target="_blank" rel="noopener" href="http://amzn.com/1449374026">3rd</a> 2014，第2版<a target="_blank" rel="noopener" href="http://book.douban.com/subject/3045359/">豆瓣</a>：全书948页</li>
+</ol>
+<h2 id="MySQL调优">MySQL调优</h2>
+<ol>
+<li>2011，《<strong>Effective MySQL之SQL语句最优化</strong>》（Effective MySQL Optimizing SQL Statements, <a target="_blank" rel="noopener" href="http://www.amazon.com/Effective-MySQL-Optimizing-Statements-Oracle/dp/0071782796">amazon</a>），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/20438822/">豆瓣</a></li>
+<li>2009，简朝阳，《<strong>MySQL性能调优与架构设计</strong>》，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/3729677/">豆瓣</a>：作者目前就职于阿里巴巴</li>
+<li>2012，Sevta Smirnova，《MySQL排错指南》（MySQL Troubleshooting），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/26591051/">豆瓣</a>：Oracle公司MySQL部门bug分析支持团队的首席技术支持工程师</li>
+<li>2014，李海翔，《<strong>数据库查询优化器的艺术</strong>》，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/25815707/">豆瓣</a>：作者现任职于Oracle公司MySQL全球开发团队，从事查询优化技术的研究和MySQL查询优化器的开发工作</li>
+<li>2014，贺春旸，《Mysql管理之道：性能调优、高可用与监控》，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/25801248/">豆瓣</a></li>
+<li>2004、2008、2012，<a target="_blank" rel="noopener" href="http://en.wikipedia.org/wiki/Baron_Schwartz">Schwartz</a> &amp; <a target="_blank" rel="noopener" href="http://www.mysqlperformanceblog.com/author/admin/">Zaitsev</a> &amp; Tkachenko，《<strong>高性能MySQL：优化，备份，复制</strong>》（High Performance MySQL, <a target="_blank" rel="noopener" href="http://amzn.com/1449314287">3rd</a> 2012），<a target="_blank" rel="noopener" href="http://www.highperfmysql.com/">home</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/23008813/">豆瓣</a>：深入MySQL类top1书籍，第2作者和第3作者来自MySQL AB公司高性能开发组，2006年创办Percona公司</li>
+<li>2010，Charles Bell &amp; Kindahl &amp; Thalmann，《<strong>高可用MySQL：构建健壮的数据中心</strong>》（MySQL High Availability, <a target="_blank" rel="noopener" href="http://amzn.com/0596807309">amazon</a>），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/6847455/">豆瓣</a>，第2版<a target="_blank" rel="noopener" href="http://book.douban.com/subject/26630834/">豆瓣</a>：3位作者全部来自MySQL复制和备份小组，是复制、备份方面的开发人员及专家</li>
+</ol>
+<h2 id="MySQL源码架构">MySQL源码架构</h2>
+<ol>
+<li>2010、2013，<a target="_blank" rel="noopener" href="http://www.innomysql.net/about">姜承尧</a>，《MySQL技术内幕：InnoDB》，第2版<a target="_blank" rel="noopener" href="http://book.douban.com/subject/24708143/">豆瓣</a>：2011至今，网易杭州研究院，数据库技术组 技术经理</li>
+<li>2007、2012，<a target="_blank" rel="noopener" href="https://www.apress.com/index.php/author/author/view/id/3873">Charles Bell</a>，《<strong>深入理解MySQL</strong>》（Expert MySQL, <a target="_blank" rel="noopener" href="http://www.amazon.com/Expert-MySQL-Experts-Voice-Source/dp/1590597419">2nd</a> 2012），<a target="_blank" rel="noopener" href="http://www.ituring.com.cn/book/224">图灵2009</a>，<a target="_blank" rel="noopener" href="http://book.douban.com/subject/4188364/">豆瓣</a>：全书466页，MySQL源代码分析，作者是MySQL核心开发人员</li>
+<li>2007，<a target="_blank" rel="noopener" href="http://www.oreilly.com/pub/au/2761">Sasha Pachev</a>，《<strong>深入理解MySQL核心技术</strong>》（Understanding MySQL Internals, <a target="_blank" rel="noopener" href="http://www.amazon.com/Understanding-MySQL-Internals-Sasha-Pachev/dp/0596009577">amazon</a>），<a target="_blank" rel="noopener" href="http://book.douban.com/subject/4022870/">豆瓣</a>：全书246页，纯粹的MySQL源代码分析，作者是前MysQL开发团队成员</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2016/11/database-books/" title="数据库书籍资料整理">https://nullwy.me/2016/11/database-books/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+              <a href="/tags/%E4%B9%A6%E7%B1%8D/" rel="tag"># 书籍</a>
+              <a href="/tags/CS/" rel="tag"># CS</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/11/lang-and-compiler-books/" rel="prev" title="编程语言与编译器书籍资料整理">
+      <i class="fa fa-chevron-left"></i> 编程语言与编译器书籍资料整理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/12/software-dev-books/" rel="next" title="软件开发书籍资料整理">
+      软件开发书籍资料整理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%99%E6%9D%90%E5%8E%9F%E7%90%86%E7%B1%BB%E4%B9%A6%E7%B1%8D"><span class="nav-number">1.</span> <span class="nav-text">教材原理类书籍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#SQL%E7%9B%B8%E5%85%B3%E4%B9%A6%E7%B1%8D"><span class="nav-number">2.</span> <span class="nav-text">SQL相关书籍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MySQL%E4%B9%A6%E7%B1%8D"><span class="nav-number">3.</span> <span class="nav-text">MySQL书籍</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL%E7%AE%A1%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">MySQL管理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL%E8%B0%83%E4%BC%98"><span class="nav-number">3.2.</span> <span class="nav-text">MySQL调优</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MySQL%E6%BA%90%E7%A0%81%E6%9E%B6%E6%9E%84"><span class="nav-number">3.3.</span> <span class="nav-text">MySQL源码架构</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2016/11/database-books/";
+    this.page.identifier = "2016/11/database-books/";
+    this.page.title = "数据库书籍资料整理";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

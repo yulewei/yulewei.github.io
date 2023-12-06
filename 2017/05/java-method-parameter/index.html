@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。 Java 8 的新特性 翻阅 Java 8 的新特性，可以看到有这么一条“JEP 118: Access to Parameter Names at Runtime”。这个特性就是为了能运行时获取参数名新加的。这个 JEP 只是功能增强的提案，并没有最终实现的 JDK 相关的 API 的介">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 运行时获取方法参数名">
+<meta property="og:url" content="https://nullwy.me/2017/05/java-method-parameter/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。 Java 8 的新特性 翻阅 Java 8 的新特性，可以看到有这么一条“JEP 118: Access to Parameter Names at Runtime”。这个特性就是为了能运行时获取参数名新加的。这个 JEP 只是功能增强的提案，并没有最终实现的 JDK 相关的 API 的介">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.nullwy.me/2017-05-06-Jietu20170506-174601.png">
+<meta property="article:published_time" content="2017-05-02T07:09:51.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:14:57.880Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="字节码">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.nullwy.me/2017-05-06-Jietu20170506-174601.png">
+
+<link rel="canonical" href="https://nullwy.me/2017/05/java-method-parameter/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 运行时获取方法参数名 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2017/05/java-method-parameter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 运行时获取方法参数名
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-05-02 15:09:51" itemprop="dateCreated datePublished" datetime="2017-05-02T15:09:51+08:00">2017-05-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2017/05/java-method-parameter/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2017/05/java-method-parameter/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>11k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文整理 Java 运行时获取方法参数名的两种方法，Java 8 的最新的方法和 Java 8 之前的方法。</p>
+<h1 id="Java-8-的新特性">Java 8 的新特性</h1>
+<p>翻阅 Java 8 的<a target="_blank" rel="noopener" href="http://openjdk.java.net/projects/jdk8/features">新特性</a>，可以看到有这么一条“<a target="_blank" rel="noopener" href="http://openjdk.java.net/jeps/118">JEP 118</a>: Access to Parameter Names at Runtime”。这个特性就是为了能运行时获取参数名新加的。这个 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/JDK_Enhancement_Proposal">JEP</a> 只是功能增强的提案，并没有最终实现的 JDK 相关的 API 的介绍。查看“<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/reflection/enhancements.html">Enhancements to the Reflection API</a>” 会看到如下介绍：</p>
+<span id="more"></span>
+<blockquote>
+<p><strong>Enhancements in Java SE 8</strong><br>
+Method Parameter Reflection: You can obtain the names of the formal parameters of any method or constructor with the method <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/java/lang/reflect/Executable.html#getParameters--">java.lang.reflect.Executable.getParameters</a>. However, <code>.class</code> files do not store formal parameter names by default. To store formal parameter names in a particular <code>.class</code> file, and thus enable the Reflection API to retrieve formal parameter names, compile the source file with the <code>-parameters</code> option of the <code>javac</code> compiler.</p>
+</blockquote>
+<style>
+blockquote {
+    font-size: 12px
+    font-family: Monaco,Menlo,Consolas,monospace;
+}
+</style>
+<p><code>javac</code> 文档中关于 <code>-parameters</code> 的介绍如下 [ <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/tools/unix/javadoc.html">doc</a> <a target="_blank" rel="noopener" href="https://www.mankier.com/1/javac">man</a> ]：</p>
+<blockquote>
+<p><strong>-parameters</strong><br>
+Stores formal parameter names of constructors and methods in the generated class file so that the method <code>java.lang.reflect.Executable.getParameters</code> from the Reflection API can retrieve them.</p>
+</blockquote>
+<p>现在试验下这个特性。有如下两个文件：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TestClass</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">sum</span><span class="params">(<span class="type">int</span> num1, <span class="type">int</span> num2)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> num1 + num2;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.test;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Method;</span><br><span class="line"><span class="keyword">import</span> java.lang.reflect.Parameter;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Java8Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> NoSuchMethodException &#123;</span><br><span class="line">        <span class="type">Method</span> <span class="variable">method</span> <span class="operator">=</span> TestClass.class.getDeclaredMethod(<span class="string">&quot;sum&quot;</span>, <span class="type">int</span>.class, <span class="type">int</span>.class);</span><br><span class="line">        Parameter[] parameters = method.getParameters();</span><br><span class="line">        <span class="keyword">for</span> (Parameter parameter : parameters) &#123;</span><br><span class="line">            System.out.println(parameter.getType().getName() + <span class="string">&quot; &quot;</span> + parameter.getName());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>先试试 <code>javac</code> 不加 <code>-parameters</code> 编译，结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">javac -d <span class="string">&quot;target/classes&quot;</span> src/main/java/com/test/*.java</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">java -<span class="built_in">cp</span> <span class="string">&quot;target/classes&quot;</span> com.test.Java8Main</span></span><br><span class="line">int arg0</span><br><span class="line">int arg1</span><br></pre></td></tr></table></figure>
+<p>加上 <code>-parameters</code> 后，运行结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">javac -d <span class="string">&quot;target/classes&quot;</span> -parameters src/main/java/com/test/*.java</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">java -<span class="built_in">cp</span> <span class="string">&quot;target/classes&quot;</span> com.test.Java8Main</span></span><br><span class="line">int num1</span><br><span class="line">int num2</span><br></pre></td></tr></table></figure>
+<p>可以看到，加上 <code>-parameters</code> 后，正确获得了参数名。实际开发中，很少直接用命令行编译 Java 代码，项目一般都会用 maven 管理。在 maven 下，只需修改 pom 文件的 <code>maven-compiler-plugin</code> 插件配置即可，就是加上了 <code>compilerArgs</code> 节点 [ <a target="_blank" rel="noopener" href="https://maven.apache.org/plugins/maven-compiler-plugin/examples/pass-compiler-arguments.html">doc</a> ]，如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-compiler-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">source</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">source</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">target</span>&gt;</span>1.8<span class="tag">&lt;/<span class="name">target</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">compilerArgs</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">arg</span>&gt;</span>-parameters<span class="tag">&lt;/<span class="name">arg</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">compilerArgs</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h2 id="实现原理">实现原理</h2>
+<p>“Enhancements in Java SE 8”提到，参数名信息回存储在 class 文件中。现在试试用 <code>javap</code>（<a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/tools/unix/javap.html"> doc </a> <a target="_blank" rel="noopener" href="https://www.mankier.com/1/javap">man</a>）命令反编译生成的 class 文件。反编译 class 文件：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">javap -v -<span class="built_in">cp</span> <span class="string">&quot;target/classes&quot;</span> com.test.TestClass</span></span><br><span class="line">Classfile /Users/yulewei/IdeaProjects/hellojava/target/classes/com/test/TestClass.class</span><br><span class="line">  Last modified 2017-5-2; size 305 bytes</span><br><span class="line">  MD5 checksum 24b99fec7f3062f5de1c3ca4270a1d36</span><br><span class="line">  Compiled from &quot;TestClass.java&quot;</span><br><span class="line">public class com.test.TestClass</span><br><span class="line">  minor version: 0</span><br><span class="line">  major version: 52</span><br><span class="line">  flags: ACC_PUBLIC, ACC_SUPER</span><br><span class="line">Constant pool:</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">1 = Methodref          <span class="comment">#3.#15         // java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span></span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">2 = Class              <span class="comment">#16            // com/test/TestClass</span></span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">3 = Class              <span class="comment">#17            // java/lang/Object</span></span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">4 = Utf8               &lt;init&gt;</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">5 = Utf8               ()V</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">6 = Utf8               Code</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">7 = Utf8               LineNumberTable</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">8 = Utf8               <span class="built_in">sum</span></span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">9 = Utf8               (II)I</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">10 = Utf8               MethodParameters</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">11 = Utf8               num1</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">12 = Utf8               num2</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">13 = Utf8               SourceFile</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">14 = Utf8               TestClass.java</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">15 = NameAndType        <span class="comment">#4:#5          // &quot;&lt;init&gt;&quot;:()V</span></span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">16 = Utf8               com/test/TestClass</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">17 = Utf8               java/lang/Object</span></span><br><span class="line">&#123;</span><br><span class="line">  public com.test.TestClass();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=1, args_size=1</span><br><span class="line">         0: aload_0</span><br><span class="line">         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         4: return</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 3: 0</span><br><span class="line"></span><br><span class="line">  public int sum(int, int);</span><br><span class="line">    descriptor: (II)I</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=3, args_size=3</span><br><span class="line">         0: iload_1</span><br><span class="line">         1: iload_2</span><br><span class="line">         2: iadd</span><br><span class="line">         3: ireturn</span><br><span class="line">      LineNumberTable:</span><br><span class="line">        line 6: 0</span><br><span class="line">    MethodParameters:</span><br><span class="line">      Name                           Flags</span><br><span class="line">      num1</span><br><span class="line">      num2</span><br><span class="line">&#125;</span><br><span class="line">SourceFile: &quot;TestClass.java&quot;</span><br></pre></td></tr></table></figure>
+<p>在结尾的 <code>MethodParameters</code> 属性就是，实现运行时获取方法参数的核心。这个属性是 Java 8 的 class 文件新加的，具体介绍可以参考官方“Java 虚拟机官方”文档的介绍，“4.7.24. The MethodParameters Attribute”，<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jvms/se8/html/jvms-4.html#jvms-4.7.24">doc</a>。</p>
+<h1 id="class-文件中的调试信息">class 文件中的调试信息</h1>
+<p>上文介绍了 Java 8 通过新增的反射 API 运行时获取方法参数名。那么在 Java 8 之前，有没有办法呢？或者在编译时没有开启 <code>-parameters</code> 参数，又如何动态获取方法参数名呢？其实 class 文件中保存的调试信息就可以包含方法参数名。</p>
+<p><code>javac</code> 的 <code>-g</code> 选项可以在 class 文件中生成调试信息，官方文档介绍如下 [ <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/tools/unix/javac.html#BHCDIFEE">doc</a> <a target="_blank" rel="noopener" href="https://www.mankier.com/1/javac#-g">man</a> ]：</p>
+<blockquote>
+<p><strong>-g</strong><br>
+Generates all debugging information, including local variables. By default, only line number and source file information is generated.<br>
+<strong>-g:none</strong><br>
+Does not generate any debugging information.<br>
+<strong>-g:[keyword list]</strong><br>
+Generates only some kinds of debugging information, specified by a comma separated list of keywords. Valid keywords are:<br>
+   <strong>source</strong><br>
+     Source file debugging information.<br>
+   <strong>lines</strong><br>
+     Line number debugging information.<br>
+   <strong>vars</strong><br>
+     Local variable debugging information.</p>
+</blockquote>
+<p>可以看到默认是包含源代码信息和行号信息的。现在试验下不生成调试信息的情况：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">javac -d <span class="string">&quot;target/classes&quot;</span> src/main/java/com/test/*.java -g:none</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">javap -v -<span class="built_in">cp</span> <span class="string">&quot;target/classes&quot;</span> com.test.TestClass</span></span><br><span class="line">Classfile /Users/yulewei/IdeaProjects/hellojava/target/classes/com/test/TestClass.class</span><br><span class="line">  Last modified 2017-5-2; size 177 bytes</span><br><span class="line">  MD5 checksum 559f5448154e4d7dd089f8155d8d0f55</span><br><span class="line">public class com.test.TestClass</span><br><span class="line">  minor version: 0</span><br><span class="line">  major version: 52</span><br><span class="line">  flags: ACC_PUBLIC, ACC_SUPER</span><br><span class="line">Constant pool:</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">1 = Methodref          <span class="comment">#3.#9          // java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span></span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">2 = Class              <span class="comment">#10            // com/test/TestClass</span></span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">3 = Class              <span class="comment">#11            // java/lang/Object</span></span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">4 = Utf8               &lt;init&gt;</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">5 = Utf8               ()V</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">6 = Utf8               Code</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">7 = Utf8               <span class="built_in">sum</span></span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">8 = Utf8               (II)I</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">9 = NameAndType        <span class="comment">#4:#5          // &quot;&lt;init&gt;&quot;:()V</span></span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">10 = Utf8               com/test/TestClass</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">11 = Utf8               java/lang/Object</span></span><br><span class="line">&#123;</span><br><span class="line">  public com.test.TestClass();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=1, args_size=1</span><br><span class="line">         0: aload_0</span><br><span class="line">         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         4: return</span><br><span class="line"></span><br><span class="line">  public int sum(int, int);</span><br><span class="line">    descriptor: (II)I</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=3, args_size=3</span><br><span class="line">         0: iload_1</span><br><span class="line">         1: iload_2</span><br><span class="line">         2: iadd</span><br><span class="line">         3: ireturn</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对比上文的反编译结果，可以看到，输出结果中的 <code>Compiled from &quot;TestClass.java&quot;</code> 没了，<code>Constant pool</code> 中也不再有 <code>LineNumberTable</code> 和 <code>SourceFile</code>，<code>code</code> 属性里的 <code>LocalVariableTable</code> 属性也没了（当然，因为编译时没加 <code>-parameters</code> 参数，<code>MethodParameters</code> 属性自然也没了）。若选择不生成这两个属性，对程序运行产生的最主要的影响就是，当抛出异常时，堆栈中将不会显示出错代码所属的文件名和出错的行号，并且在调试程序的时候，也无法按照源码行来设置断点。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">javac -d <span class="string">&quot;target/classes&quot;</span> src/main/java/com/test/*.java -g:vars</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">javap -v -<span class="built_in">cp</span> <span class="string">&quot;target/classes&quot;</span> com.test.TestClass</span></span><br><span class="line">Classfile /Users/yulewei/IdeaProjects/hellojava/target/classes/com/test/TestClass.class</span><br><span class="line">  Last modified 2017-5-2; size 302 bytes</span><br><span class="line">  MD5 checksum d430f817e0e2cfafc9095279c67aaa72</span><br><span class="line">public class com.test.TestClass</span><br><span class="line">  minor version: 0</span><br><span class="line">  major version: 52</span><br><span class="line">  flags: ACC_PUBLIC, ACC_SUPER</span><br><span class="line">Constant pool:</span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">1 = Methodref          <span class="comment">#3.#15         // java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span></span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">2 = Class              <span class="comment">#16            // com/test/TestClass</span></span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">3 = Class              <span class="comment">#17            // java/lang/Object</span></span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">4 = Utf8               &lt;init&gt;</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">5 = Utf8               ()V</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">6 = Utf8               Code</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">7 = Utf8               LocalVariableTable</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">8 = Utf8               this</span></span><br><span class="line"><span class="meta prompt_">   #</span><span class="language-bash">9 = Utf8               Lcom/test/TestClass;</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">10 = Utf8               <span class="built_in">sum</span></span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">11 = Utf8               (II)I</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">12 = Utf8               num1</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">13 = Utf8               I</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">14 = Utf8               num2</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">15 = NameAndType        <span class="comment">#4:#5          // &quot;&lt;init&gt;&quot;:()V</span></span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">16 = Utf8               com/test/TestClass</span></span><br><span class="line"><span class="meta prompt_">  #</span><span class="language-bash">17 = Utf8               java/lang/Object</span></span><br><span class="line">&#123;</span><br><span class="line">  public com.test.TestClass();</span><br><span class="line">    descriptor: ()V</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=1, locals=1, args_size=1</span><br><span class="line">         0: aload_0</span><br><span class="line">         1: invokespecial #1                  // Method java/lang/Object.&quot;&lt;init&gt;&quot;:()V</span><br><span class="line">         4: return</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">            0       5     0  this   Lcom/test/TestClass;</span><br><span class="line"></span><br><span class="line">  public int sum(int, int);</span><br><span class="line">    descriptor: (II)I</span><br><span class="line">    flags: ACC_PUBLIC</span><br><span class="line">    Code:</span><br><span class="line">      stack=2, locals=3, args_size=3</span><br><span class="line">         0: iload_1</span><br><span class="line">         1: iload_2</span><br><span class="line">         2: iadd</span><br><span class="line">         3: ireturn</span><br><span class="line">      LocalVariableTable:</span><br><span class="line">        Start  Length  Slot  Name   Signature</span><br><span class="line">            0       4     0  this   Lcom/test/TestClass;</span><br><span class="line">            0       4     1  num1   I</span><br><span class="line">            0       4     2  num2   I</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，<code>code</code> 属性里的出现了 <code>LocalVariableTable</code> 属性，这个属性保存的就是方法参数和方法内的本地变量。在演示代码的 <code>sum</code> 方法中没有定义本地变量，若存在的话，也将会保存在 <code>LocalVariableTable</code> 中。</p>
+<p><code>javap</code> 的 <code>-v</code> 选项会输出全部反编译信息，若只想看行号和本地变量信息，改用 <code>-l</code> 即可。输出结果如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">javap -l -<span class="built_in">cp</span> <span class="string">&quot;target/classes&quot;</span> com.test.TestClass</span></span><br><span class="line">public class com.test.TestClass &#123;</span><br><span class="line">  public com.test.TestClass();</span><br><span class="line">    LocalVariableTable:</span><br><span class="line">      Start  Length  Slot  Name   Signature</span><br><span class="line">          0       5     0  this   Lcom/test/TestClass;</span><br><span class="line"></span><br><span class="line">  public int sum(int, int);</span><br><span class="line">    LocalVariableTable:</span><br><span class="line">      Start  Length  Slot  Name   Signature</span><br><span class="line">          0       4     0  this   Lcom/test/TestClass;</span><br><span class="line">          0       4     1  num1   I</span><br><span class="line">          0       4     2  num2   I</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>若要全部生成全部提示信息，编译参数需要改为 <code>-g:source,lines,vars</code>。一般在 IDE 下调试代码都需要调试信息，所以这三个参数默认都会开启。IDEA 下的 javac 默认参数设置，如图：</p>
+<p><img src="https://static.nullwy.me/2017-05-06-Jietu20170506-174601.png" alt="IDEA 默认的 javac 设置"></p>
+<p>若使用 maven，maven 的默认的编译插件 <code>maven-compiler-plugin</code> 也会<strong>默认开启</strong>这三个参数 [<a target="_blank" rel="noopener" href="https://maven.apache.org/plugins/maven-compiler-plugin/compile-mojo.html#debug">doc</a>]，经实际验证也包括了<code>LocalVariableTable</code>。</p>
+<p>同样的，gradle <strong>默认也会包含</strong>调试信息 [ <a target="_blank" rel="noopener" href="https://docs.gradle.org/current/dsl/org.gradle.api.tasks.compile.CompileOptions.html#org.gradle.api.tasks.compile.CompileOptions:debug">doc</a> ]。</p>
+<h1 id="代码如何实现">代码如何实现</h1>
+<p>上文中讲了 class 文件中的调试信息中 <code>LocalVariableTable</code> 属性里就包含方法名参数，这就是运行时获取方法参数名的方法。读取这个属性，JDK 并没有提供 API，只能借助第三方库解析 class 文件实现。</p>
+<p>要解析 class 文件典型的工具库有 ObjectWeb 的 ASM（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/ObjectWeb_ASM">wiki</a>，<a target="_blank" rel="noopener" href="http://asm.ow2.org/">home</a>，<a target="_blank" rel="noopener" href="http://mvnrepository.com/artifact/org.ow2.asm/asm">mvn</a>，<a target="_blank" rel="noopener" href="https://javadoc.io/doc/org.ow2.asm/asm">javadoc</a>）、Apache 的 Commons BCEL（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Byte_Code_Engineering_Library">wiki</a>，<a target="_blank" rel="noopener" href="http://commons.apache.org/proper/commons-bcel/">home</a>，<a target="_blank" rel="noopener" href="http://mvnrepository.com/artifact/org.apache.bcel/bcel">mvn</a>，<a target="_blank" rel="noopener" href="http://commons.apache.org/proper/commons-bcel/apidocs/">javadoc</a>）、 日本教授开发的 Javassist（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Javassist">wiki</a>，<a target="_blank" rel="noopener" href="https://github.com/jboss-javassist/javassist">github</a>，<a target="_blank" rel="noopener" href="http://mvnrepository.com/artifact/org.javassist/javassist">mvn</a>，<a target="_blank" rel="noopener" href="https://javadoc.io/doc/org.javassist/javassist">javadoc</a>）等。其中 ASM 使用最广，使用 ASM 的知名开源项目有，AspectJ, CGLIB, Clojure, Groovy, JRuby, Jython, TopLink等等 [ <a target="_blank" rel="noopener" href="http://asm.ow2.org/users.html">ref</a> ]。当然使用 BCEL 的项目也很多 [ <a target="_blank" rel="noopener" href="http://commons.apache.org/proper/commons-bcel/projects.html">ref</a> ]。ASM 相对其他库的 jar 更小，运行速度更快 [ <a target="_blank" rel="noopener" href="https://static.javadoc.io/org.ow2.asm/asm/5.2/org/objectweb/asm/package-summary.html#package.description">javadoc</a> ]。目前 asm-5.0.1.jar 文件大小 53 KB，BCEL 5.2 版本文件大小 520 KB，javassist-3.20.0-GA.jar 文件大小 751 KB。jar 包文件小，自然意味着代码量更少，提供的功能自然也少了。</p>
+<h2 id="BCEL">BCEL</h2>
+<p>先来看看用 BCEL 获取方法参数名的写法，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.test;</span><br><span class="line"><span class="keyword">import</span> org.apache.bcel.Repository;</span><br><span class="line"><span class="keyword">import</span> org.apache.bcel.classfile.JavaClass;</span><br><span class="line"><span class="keyword">import</span> org.apache.bcel.classfile.LocalVariable;</span><br><span class="line"><span class="keyword">import</span> org.apache.bcel.classfile.LocalVariableTable;</span><br><span class="line"><span class="keyword">import</span> org.apache.bcel.classfile.Method;</span><br><span class="line"><span class="keyword">import</span> org.apache.bcel.generic.Type;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">BcelMain</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> ClassNotFoundException, NoSuchMethodException &#123;</span><br><span class="line">        java.lang.reflect.<span class="type">Method</span> <span class="variable">m</span> <span class="operator">=</span> TestClass.class.getDeclaredMethod(<span class="string">&quot;sum&quot;</span>, <span class="type">int</span>.class, <span class="type">int</span>.class);</span><br><span class="line">        <span class="type">JavaClass</span> <span class="variable">clazz</span> <span class="operator">=</span> Repository.lookupClass(<span class="string">&quot;com.test.TestClass&quot;</span>);</span><br><span class="line">        <span class="type">Method</span> <span class="variable">bcelMethod</span> <span class="operator">=</span> clazz.getMethod(m);</span><br><span class="line">        <span class="type">LocalVariableTable</span> <span class="variable">lvt</span> <span class="operator">=</span> bcelMethod.getLocalVariableTable();</span><br><span class="line">        <span class="keyword">for</span> (LocalVariable lv : lvt.getLocalVariableTable()) &#123;</span><br><span class="line">            System.out.println(lv.getName() + <span class="string">&quot;  &quot;</span> + lv.getSignature() + <span class="string">&quot;  &quot;</span> + Type.getReturnType(lv.getSignature()));</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">this  Lcom/test/TestClass;  com.test.TestClass</span><br><span class="line">num1  I  int</span><br><span class="line">num2  I  int</span><br></pre></td></tr></table></figure>
+<h2 id="ASM">ASM</h2>
+<p>ASM 的写法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.test;</span><br><span class="line"><span class="keyword">import</span> org.objectweb.asm.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AsmMain</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ClassReader</span> <span class="variable">classReader</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ClassReader</span>(<span class="string">&quot;com.test.TestClass&quot;</span>);</span><br><span class="line">        classReader.accept(<span class="keyword">new</span> <span class="title class_">ParameterNameDiscoveringVisitor</span>(<span class="string">&quot;sum&quot;</span>, <span class="string">&quot;(II)I&quot;</span>), <span class="number">0</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">ParameterNameDiscoveringVisitor</span> <span class="keyword">extends</span> <span class="title class_">ClassVisitor</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> String methodName;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> String methodDesc;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">ParameterNameDiscoveringVisitor</span><span class="params">(String name, String desc)</span> &#123;</span><br><span class="line">            <span class="built_in">super</span>(Opcodes.ASM5);</span><br><span class="line">            <span class="built_in">this</span>.methodName = name;</span><br><span class="line">            <span class="built_in">this</span>.methodDesc = desc;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> MethodVisitor <span class="title function_">visitMethod</span><span class="params">(<span class="type">int</span> access, String name, String desc, String signature, String[] exceptions)</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (name.equals(<span class="built_in">this</span>.methodName) &amp;&amp; desc.equals(methodDesc))</span><br><span class="line">                <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">LocalVariableTableVisitor</span>();</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">LocalVariableTableVisitor</span> <span class="keyword">extends</span> <span class="title class_">MethodVisitor</span> &#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">LocalVariableTableVisitor</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="built_in">super</span>(Opcodes.ASM5);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">visitLocalVariable</span><span class="params">(String name, String description, String signature, Label start, Label end, <span class="type">int</span> index)</span> &#123;</span><br><span class="line">            System.out.println(name + <span class="string">&quot;  &quot;</span> + description);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Spring-框架">Spring 框架</h2>
+<p>若使用 Spring 框架，对于运行时获取参数名，Spring 提供了内建支持，对应的实现类为 <code>DefaultParameterNameDiscoverer</code> （<a target="_blank" rel="noopener" href="http://docs.spring.io/spring/docs/4.3.x/javadoc-api/org/springframework/core/DefaultParameterNameDiscoverer.html">javadoc</a>）。该类先尝试用 Java 8 新的反射 API 获取方法参数名，若无法获取，则使用 ASM 库读取 class 文件的 <code>LocalVariableTable</code>，对应的代码分别为 <a target="_blank" rel="noopener" href="https://github.com/spring-projects/spring-framework/blob/4.3.x/spring-core/src/main/java/org/springframework/core/StandardReflectionParameterNameDiscoverer.java">StandardReflectionParameterNameDiscoverer</a> 和 <a target="_blank" rel="noopener" href="https://github.com/spring-projects/spring-framework/blob/4.3.x/spring-core/src/main/java/org/springframework/core/LocalVariableTableParameterNameDiscoverer.java">LocalVariableTableParameterNameDiscoverer</a>。</p>
+<h1 id="参考资料">参考资料</h1>
+<ul>
+<li>2014-10 Java 8 Named Method Parameters <a target="_blank" rel="noopener" href="https://www.beyondjava.net/blog/reading-java-8-method-parameter-named-reflection/">https://www.beyondjava.net/blog/reading-java-8-method-parameter-named-reflection/</a></li>
+<li>JEP 118: Access to Parameter Names at Runtime <a target="_blank" rel="noopener" href="http://openjdk.java.net/jeps/118">http://openjdk.java.net/jeps/118</a></li>
+<li>Enhancements to the Reflection API <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/technotes/guides/reflection/enhancements.html">http://docs.oracle.com/javase/8/docs/technotes/guides/reflection/enhancements.html</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2017/05/java-method-parameter/" title="Java 运行时获取方法参数名">https://nullwy.me/2017/05/java-method-parameter/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E5%AD%97%E8%8A%82%E7%A0%81/" rel="tag"># 字节码</a>
+              <a href="/tags/JVM/" rel="tag"># JVM</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/04/javac-api/" rel="prev" title="Java 编译器 javac 及 Lombok 实现原理解析">
+      <i class="fa fa-chevron-left"></i> Java 编译器 javac 及 Lombok 实现原理解析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/11/zookeeper-note/" rel="next" title="ZooKeeper 学习笔记">
+      ZooKeeper 学习笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-8-%E7%9A%84%E6%96%B0%E7%89%B9%E6%80%A7"><span class="nav-number">1.</span> <span class="nav-text">Java 8 的新特性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">1.1.</span> <span class="nav-text">实现原理</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#class-%E6%96%87%E4%BB%B6%E4%B8%AD%E7%9A%84%E8%B0%83%E8%AF%95%E4%BF%A1%E6%81%AF"><span class="nav-number">2.</span> <span class="nav-text">class 文件中的调试信息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0"><span class="nav-number">3.</span> <span class="nav-text">代码如何实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#BCEL"><span class="nav-number">3.1.</span> <span class="nav-text">BCEL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ASM"><span class="nav-number">3.2.</span> <span class="nav-text">ASM</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Spring-%E6%A1%86%E6%9E%B6"><span class="nav-number">3.3.</span> <span class="nav-text">Spring 框架</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2017/05/java-method-parameter/";
+    this.page.identifier = "2017/05/java-method-parameter/";
+    this.page.title = "Java 运行时获取方法参数名";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

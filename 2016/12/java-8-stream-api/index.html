@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Java 8增加了函数式编程的能力，通过流（Stream）API来支持对集合的filter&#x2F;map&#x2F;reduce操作。流是Java 8中处理集合的关键抽象概念，实现声明式的集合处理方式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 8 的 Stream API 笔记">
+<meta property="og:url" content="https://nullwy.me/2016/12/java-8-stream-api/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="Java 8增加了函数式编程的能力，通过流（Stream）API来支持对集合的filter&#x2F;map&#x2F;reduce操作。流是Java 8中处理集合的关键抽象概念，实现声明式的集合处理方式。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.nullwy.me/2017-04-25-%E6%B5%81%E6%B0%B4%E7%BA%BF.png">
+<meta property="article:published_time" content="2016-12-25T13:10:34.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:14:28.425Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.nullwy.me/2017-04-25-%E6%B5%81%E6%B0%B4%E7%BA%BF.png">
+
+<link rel="canonical" href="https://nullwy.me/2016/12/java-8-stream-api/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 8 的 Stream API 笔记 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2016/12/java-8-stream-api/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 8 的 Stream API 笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-12-25 21:10:34" itemprop="dateCreated datePublished" datetime="2016-12-25T21:10:34+08:00">2016-12-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2016/12/java-8-stream-api/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2016/12/java-8-stream-api/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Java 8增加了函数式编程的能力，通过流（Stream）API来支持对集合的<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Filter_%28higher-order_function%29">filter</a>/<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Map_%28higher-order_function%29">map</a>/<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Fold_%28higher-order_function%29">reduce</a>操作。流是Java 8中处理集合的关键抽象概念，实现声明式的集合处理方式。</p>
+<span id="more"></span>
+<h1 id="Java-8流API示例">Java 8流API示例</h1>
+<p>对集合的filter、map和reduce操作，示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 计算偶数个数</span></span><br><span class="line">List&lt;Integer&gt; list = Arrays.asList(<span class="number">3</span>, <span class="number">2</span>, <span class="number">12</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">11</span>, <span class="number">13</span>);</span><br><span class="line"><span class="type">long</span> <span class="variable">count</span> <span class="operator">=</span> list.stream()</span><br><span class="line">        .filter(x -&gt; x % <span class="number">2</span> == <span class="number">0</span>).count();</span><br><span class="line">System.out.println(count);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 筛选出偶数列表</span></span><br><span class="line">List&lt;Integer&gt; evenList = list.stream()</span><br><span class="line">        .filter(x -&gt; x % <span class="number">2</span> == <span class="number">0</span>).collect(Collectors.toList());</span><br><span class="line">System.out.println(evenList);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 筛选出偶数列表, 然后全部元素加1</span></span><br><span class="line">List&lt;Integer&gt; plusList = list.stream()</span><br><span class="line">        .filter(x -&gt; x % <span class="number">2</span> == <span class="number">0</span>)</span><br><span class="line">        .map(x -&gt; x + <span class="number">1</span>).collect(Collectors.toList());</span><br><span class="line">System.out.println(plusList); </span><br><span class="line"></span><br><span class="line"><span class="comment">// 全部偶数求和</span></span><br><span class="line"><span class="type">int</span> <span class="variable">sum</span> <span class="operator">=</span> list.stream()</span><br><span class="line">        .filter(x -&gt; x % <span class="number">2</span> == <span class="number">0</span>)</span><br><span class="line">        .mapToInt(Integer::intValue).sum();</span><br><span class="line">System.out.println(sum);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 全部偶数求和</span></span><br><span class="line">sum = list.stream()</span><br><span class="line">        .filter(x -&gt; x % <span class="number">2</span> == <span class="number">0</span>)</span><br><span class="line">        .reduce(<span class="number">0</span>, (x, y) -&gt; x + y);</span><br><span class="line">System.out.println(sum);</span><br></pre></td></tr></table></figure>
+<h1 id="流与集合的区别">流与集合的区别</h1>
+<p>流（Stream）和集合（collection）有以下区别 [<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html#package.description">doc</a>]：</p>
+<ul>
+<li><strong>无存储</strong>（no storage）。流并不是存储元素的数据结构。流，通过计算的操作流水线来传输数据源。数据源，比如数据结构、数组、生成器函数或I/O通道。</li>
+<li><strong>原生函数式</strong>（functional in nature）。对流进行操作会产生结果，但并不会修改数据源。比如，筛选流，是生成一个不包含被筛选掉的元素新流，而不是从原集合中删除元素。</li>
+<li><strong>惰性读取</strong>（laziness-seeking）。很多对流的操作，比如筛选（filtering）、映射（mapping）或去重（duplicate removal），能够被惰性实现，以便于性能的优化。比如，“找出第一个由三个连续单词组成的String”，并不需要检测全部的输入字符串。流操作被划分为<em>中间操作</em>（用于生成流）和<em>终止操作</em>（用于生成值或副作用）。中间操作总是惰性的。</li>
+<li><strong>可能是无界的</strong>（possibly unbounded）。集合的大小是必须确定的，但流并不是。像limit(n) 或 findFirst()这样的逻辑短路操作，允许在有限时间内完成对无限流的计算。</li>
+<li><strong>可消耗的</strong>（consumable）。流的元素在流的生命周期中只能被访问一次。类似于 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Iterator.html">Iterator</a>，要想重新访问同一个元素，必须生成新的流。</li>
+</ul>
+<h1 id="流操作与流水线">流操作与流水线</h1>
+<p>当使用Stream时，会通过三个阶段来建立一个操作流水线 [<a target="_blank" rel="noopener" href="https://book.douban.com/subject/26274206/">ref</a>]。</p>
+<ol>
+<li>创建一个Stream。</li>
+<li>在一个或多个步骤中，指定将初始Stream转换为另一个Stream的<code>中间操作</code>。</li>
+<li>使用一个<code>终止操作</code>来产生一个结果。该操作会强制它之前的<em><strong>延迟</strong></em>操作立即执行。在这之后，该Stream就不会再被使用了。</li>
+</ol>
+<p>整个流操作流水线，如图所示 [<a target="_blank" rel="noopener" href="http://www.logicbig.com/tutorials/core-java-tutorial/java-util-stream/stream-api-intro/">ref</a>]：</p>
+<p><img src="https://static.nullwy.me/2017-04-25-%E6%B5%81%E6%B0%B4%E7%BA%BF.png" alt="流操作流水线"></p>
+<p>Java 8的流创建、中间操作和终止操作的API汇总表，如下 [<a target="_blank" rel="noopener" href="http://www.logicbig.com/tutorials/core-java-tutorial/java-util-stream/stream-cheat-sheet/">ref</a>]</p>
+<style>
+  td,th { border: 1px solid; } 
+  td { vertical-align: top; }
+</style>
+<table>
+<thead>
+<tr>
+<th>创建流</th>
+<th>中间操作</th>
+<th>终止操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Collection.html">Collection</a></strong> <br> stream() <br> parallelStream() <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html">Stream</a></strong>, <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html">IntStream</a></strong>, <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/LongStream.html">LongStream</a>, <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/DoubleStream.html">DoubleStream</a></strong> <br> static generate() <em>无序</em> <br> static of(..) <br> static empty() <br> static iterate(..) <br> static concat(..) <br> static builder() <br> <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html">IntStream</a></strong>, <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/LongStream.html">LongStream</a></strong> <br> static range(..) <br> static rangeClosed(..) <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Arrays.html">Arrays</a></strong> <br> static stream(..) <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/io/BufferedReader.html">BufferedReader</a></strong> <br> lines(..) <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/nio/file/Files.html">Files</a></strong> <br> static list(..) <br> static walk(..) <br> static find(..) <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/jar/JarFile.html">JarFile</a></strong> <br> stream() <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/zip/ZipFile.html">ZipFile</a></strong> <br> stream() <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html">Pattern</a></strong> <br> splitAsStream(..) <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/SplittableRandom.html">SplittableRandom</a></strong> <br> ints(..) <em>无序</em> <br> longs(..) <em>无序</em> <br> doubles(..) <em>无序</em> <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/Random.html">Random</a></strong> <br> ints(..) <br> longs(..) <br> doubles(..) <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadLocalRandom.html">ThreadLocalRandom</a></strong> <br> ints() <br> longs(..) <br> doubles(..) <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/BitSet.html">BitSet</a></strong> <br> stream() <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/lang/CharSequence.html">CharSequence</a> (String)</strong> <br> IntStream chars() <br> IntStream codePoints() <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/StreamSupport.html">StreamSupport</a> (low level)</strong> <br> static doubleStream(..) <br> static intStream(..) <br> static longStream(..) <br> static stream(..) <p></td>
+<td><strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/BaseStream.html">BaseStream</a></strong> <br> sequential() <br> parallel() <br> unordered() <br> onClose(..) <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html">Stream</a></strong> <br> filter(..) <br> map(..) <br> mapToInt(..) <br> mapToLong(..) <br> mapToDouble(..) <br> flatMap(..) <br> flatMapToInt(..) <br> flatMapToLong(..) <br> flatMapToDouble(..) <br> distinct() <em>有状态</em> <br> sorted(..) <em>有状态</em> <br> peek(..) <br> limit(..) <em>有状态, 逻辑短路</em> <br> skip(..) <em>有状态</em> <p> IntStream、LongStream和DoubleStream方法与Stream类似, 其中<em>额外的</em>方法如下：<p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html">IntStream</a></strong> <br> mapToObj(..) <br> asLongStream() <br> asDoubleStream() <br> boxed() <br> <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/LongStream.html">LongStream</a></strong> <br> mapToObj(..) <br> asDoubleStream() <br> boxed() <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/DoubleStream.html">DoubleStream</a></strong> <br> mapToObj(..) <br> boxed()</td>
+<td><p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/BaseStream.html">BaseStream</a></strong> <br> iterator() <br> spliterator() <p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html">Stream</a></strong> <br> forEach(..) <br> forEachOrdered(..) <br> toArray(..) <br> reduce(..) <br> collect(..) <br> min(..) <br> max(..) <br> count() <br> anyMatch(..) <em>逻辑短路</em> <br> allMatch(..) <em>逻辑短路</em> <br> noneMatch(..) <em>逻辑短路</em> <br> findFirst() <em>逻辑短路</em> <br> findAny() <em>逻辑短路</em>*, 不确定* <br> <p> IntStream、LongStream和DoubleStream方法与Stream类似, 其中<em>额外的</em>方法如下：<p> <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html">IntStream</a>, <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/LongStream.html">LongStream</a></strong>, <strong><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/DoubleStream.html">DoubleStream</a></strong> <br> sum() <br> average()﻿﻿﻿﻿﻿ <br> summaryStatistics()</td>
+</tr>
+</tbody>
+</table>
+<h1 id="筛选与映射操作">筛选与映射操作</h1>
+<p>筛选与映射操作，即上文所说的中间操作。相关的API如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;T&gt; <span class="title function_">filter</span><span class="params">(Predicate&lt;? <span class="built_in">super</span> T&gt; predicate)</span></span><br><span class="line">&lt;R&gt; Stream&lt;R&gt; <span class="title function_">map</span><span class="params">(Function&lt;? <span class="built_in">super</span> T,? extends R&gt; mapper)</span></span><br><span class="line">&lt;R&gt; Stream&lt;R&gt; <span class="title function_">flatMap</span><span class="params">(Function&lt;? <span class="built_in">super</span> T,? extends Stream&lt;? extends R&gt;&gt; mapper)</span></span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#filter-java.util.function.Predicate-">filter(..)</a>，筛选出元素符合某个条件的新流。<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#map-java.util.function.Function-">map(..)</a>，用于对元素作某种形式的转换。<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#flatMap-java.util.function.Function-">flatMap(..)</a>，用于将多个子流合并为一个新流。</p>
+<p>其他的中间操作有，提取子流，<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#limit-long-">limit(..)</a>（提取前n个）和<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#skip-long-">skip(..)</a>（丢弃前n个）；有状态的转换，<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#distinct--">distinct()</a>（过滤重复元素）和<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#sorted-java.util.Comparator-">sorted(..)</a>（排序），以及主要用于日志调试的<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#peek-java.util.function.Consumer-">peek(..)</a>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Stream&lt;T&gt; <span class="title function_">limit</span><span class="params">(<span class="type">long</span> maxSize)</span></span><br><span class="line">Stream&lt;T&gt; <span class="title function_">skip</span><span class="params">(<span class="type">long</span> n)</span></span><br><span class="line">Stream&lt;T&gt; <span class="title function_">distinct</span><span class="params">()</span></span><br><span class="line">Stream&lt;T&gt; <span class="title function_">sorted</span><span class="params">(Comparator&lt;? <span class="built_in">super</span> T&gt; comparator)</span></span><br><span class="line">Stream&lt;T&gt; <span class="title function_">peek</span><span class="params">(Consumer&lt;? <span class="built_in">super</span> T&gt; action)</span></span><br></pre></td></tr></table></figure>
+<h1 id="归约操作与收集器">归约操作与收集器</h1>
+<p>流有多种形式的通用的归约操作，<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#reduce-T-java.util.function.BinaryOperator-">reduce(..)</a>和<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#collect-java.util.stream.Collector-">collect(..)</a>，同时也有多种特化的归约形式，比如 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html#sum--">sum()</a>、<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#min-java.util.Comparator-">min(..)</a>、<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#max-java.util.Comparator-">max(..)</a>或<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#count--">count()</a>等。<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#reduce-T-java.util.function.BinaryOperator-">reduce(..)</a>和<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#collect-java.util.stream.Collector-">collect(..)</a>的方法签名如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;T&gt; <span class="title function_">reduce</span><span class="params">(BinaryOperator&lt;T&gt; accumulator)</span></span><br><span class="line">T <span class="title function_">reduce</span><span class="params">(T identity, BinaryOperator&lt;T&gt; accumulator)</span></span><br><span class="line">&lt;U&gt; U <span class="title function_">reduce</span><span class="params">(U identity, BiFunction&lt;U,? <span class="built_in">super</span> T,U&gt; accumulator,</span></span><br><span class="line"><span class="params">             BinaryOperator&lt;U&gt; combiner)</span></span><br><span class="line">&lt;R,A&gt; R <span class="title function_">collect</span><span class="params">(Collector&lt;? <span class="built_in">super</span> T,A,R&gt; collector)</span></span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/IntStream.html#sum--">sum()</a>、<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#min-java.util.Comparator-">min(..)</a>、<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#max-java.util.Comparator-">max(..)</a>或<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#count--">count()</a>等特化的归约操作，是<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#reduce-T-java.util.function.BinaryOperator-">reduce(..)</a>归约操作的特殊化，内部实现依赖<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#reduce-T-java.util.function.BinaryOperator-">reduce(..)</a>，相应JDK的实现源码可以作为印证。</p>
+<p>IntStream的sum(..)的JDK现实源码为 [<a target="_blank" rel="noopener" href="https://github.com/stain/jdk8u/blob/master/src/share/classes/java/util/stream/IntPipeline.java#L412">github</a>]：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="type">int</span> <span class="title function_">sum</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> reduce(<span class="number">0</span>, Integer::sum);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>IntStream的min(..)的JDK现实源码为 [<a target="_blank" rel="noopener" href="https://github.com/stain/jdk8u/blob/master/src/share/classes/java/util/stream/IntPipeline.java#L417">github</a>]：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> OptionalInt <span class="title function_">min</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> reduce(Math::min);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Stream的count()的JDK现实源码为 [<a target="_blank" rel="noopener" href="https://github.com/stain/jdk8u/blob/master/src/share/classes/java/util/stream/ReferencePipeline.java#L524">github</a>]：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="type">long</span> <span class="title function_">count</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> mapToLong(e -&gt; <span class="number">1L</span>).sum();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果不想将流归约为单个值，而只要查看集合被流操作后的结果，需要使用收集器（collector）。上文已经见到，将流收集为List：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; evenList = list.stream()</span><br><span class="line">        .filter(..).collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html">Collectors</a>是收集器工具类，提供获取预定义收集器（实现接口<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html">Collector</a>）的静态方法。<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html">Collectors</a>类，除了将流收集为List，还可以是Map、Set、String，或者也能进行统计操作，如求和、计算平均值、最大值、最小值。<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collectors.html">Collectors</a>的全部静态方法列表如下：</p>
+<ul>
+<li>averaging[Double|Int|Long]</li>
+<li>collectingAndThen</li>
+<li>counting</li>
+<li>groupingBy</li>
+<li>groupingByConcurrent</li>
+<li>joining</li>
+<li>mapping</li>
+<li>maxBy</li>
+<li>minBy</li>
+<li>partitioningBy</li>
+<li>reducing</li>
+<li>summarizing[Double|Int|Long]</li>
+<li>summing[Double|Int|Long]</li>
+<li>toCollection</li>
+<li>toConcurrentMap</li>
+<li>toList</li>
+<li>toMap</li>
+<li>toSet</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2016/12/java-8-stream-api/" title="Java 8 的 Stream API 笔记">https://nullwy.me/2016/12/java-8-stream-api/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/12/itext-pdf/" rel="prev" title="iText处理pdf书签和标注代码乱记">
+      <i class="fa fa-chevron-left"></i> iText处理pdf书签和标注代码乱记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/12/mybatis-generator/" rel="next" title="MyBatis 生成器的表注释">
+      MyBatis 生成器的表注释 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-8%E6%B5%81API%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.</span> <span class="nav-text">Java 8流API示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%81%E4%B8%8E%E9%9B%86%E5%90%88%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">2.</span> <span class="nav-text">流与集合的区别</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%B5%81%E6%93%8D%E4%BD%9C%E4%B8%8E%E6%B5%81%E6%B0%B4%E7%BA%BF"><span class="nav-number">3.</span> <span class="nav-text">流操作与流水线</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%AD%9B%E9%80%89%E4%B8%8E%E6%98%A0%E5%B0%84%E6%93%8D%E4%BD%9C"><span class="nav-number">4.</span> <span class="nav-text">筛选与映射操作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BD%92%E7%BA%A6%E6%93%8D%E4%BD%9C%E4%B8%8E%E6%94%B6%E9%9B%86%E5%99%A8"><span class="nav-number">5.</span> <span class="nav-text">归约操作与收集器</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2016/12/java-8-stream-api/";
+    this.page.identifier = "2016/12/java-8-stream-api/";
+    this.page.title = "Java 8 的 Stream API 笔记";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

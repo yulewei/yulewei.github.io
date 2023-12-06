@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Elastic Stack（旧称 ELK Stack）是最受欢迎的开源日志平台 [ ref ]。Elastic Stack 由 Elasticsearch、Logstash、Kibana 和 Beats 四个组件组成：  Beats，是轻量型采集器的平台，从边缘机器向 Logstash 和 Elasticsearch 发送数据。 Logstash，集中、转换和存储数据，是动态数据收集管道，拥有可扩">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elastic Stack 日志分析平台搭建笔记">
+<meta property="og:url" content="https://nullwy.me/2019/01/elastic-stack/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="Elastic Stack（旧称 ELK Stack）是最受欢迎的开源日志平台 [ ref ]。Elastic Stack 由 Elasticsearch、Logstash、Kibana 和 Beats 四个组件组成：  Beats，是轻量型采集器的平台，从边缘机器向 Logstash 和 Elasticsearch 发送数据。 Logstash，集中、转换和存储数据，是动态数据收集管道，拥有可扩">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.nullwy.me/basic_logstash_pipeline.png">
+<meta property="og:image" content="https://static.nullwy.me/kibana-grokdebugger.png">
+<meta property="og:image" content="https://static.nullwy.me/logstash-kibana.png">
+<meta property="og:image" content="https://static.nullwy.me/filebeat-and-logstash.png">
+<meta property="og:image" content="https://static.nullwy.me/filebeat-kibana.png">
+<meta property="og:image" content="https://static.nullwy.me/logstash-deploy2.png">
+<meta property="article:published_time" content="2019-01-14T06:58:20.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:14:06.883Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="架构">
+<meta property="article:tag" content="ELK">
+<meta property="article:tag" content="Elastic">
+<meta property="article:tag" content="日志">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.nullwy.me/basic_logstash_pipeline.png">
+
+<link rel="canonical" href="https://nullwy.me/2019/01/elastic-stack/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Elastic Stack 日志分析平台搭建笔记 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2019/01/elastic-stack/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Elastic Stack 日志分析平台搭建笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-01-14 14:58:20" itemprop="dateCreated datePublished" datetime="2019-01-14T14:58:20+08:00">2019-01-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2019/01/elastic-stack/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/01/elastic-stack/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>21k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>19 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Elastic Stack（旧称 ELK Stack）是最受欢迎的开源日志平台 [ <a target="_blank" rel="noopener" href="https://www.elastic.co/cn/solutions/logging">ref</a> ]。Elastic Stack 由 Elasticsearch、Logstash、Kibana 和 Beats 四个组件组成：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/cn/products/beats">Beats</a>，是轻量型采集器的平台，从边缘机器向 Logstash 和 Elasticsearch 发送数据。</li>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/cn/products/logstash">Logstash</a>，集中、转换和存储数据，是动态数据收集管道，拥有可扩展的插件生态系统，能够与 Elasticsearch 产生强大的协同作用。</li>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/cn/products/elasticsearch">Elasticsearch</a>，搜索、分析和存储您的数据，是基于 JSON 的分布式搜索和分析引擎，专为实现水平扩展、高可靠性和管理便捷性而设计。</li>
+<li><a target="_blank" rel="noopener" href="https://www.elastic.co/cn/products/kibana">Kibana</a>，实现数据可视化，导览 Elastic Stack。能够以图表的形式呈现数据，并且具有可扩展的用户界面，供您全方位配置和管理 Elastic Stack。</li>
+</ul>
+<span id="more"></span>
+<p>Elastic Stack 是逐步发展而来的，一开始只有 Elasticsearch，专注做搜索引擎，2013 年 1 月 Kibana 及其作者 Rashid Khan <a target="_blank" rel="noopener" href="https://www.elastic.co/blog/welcome-drew-rashid">加入</a> Elasticsearch 公司，同年 8 月 Logstash 及作者 Jordan Sissel 也<a target="_blank" rel="noopener" href="https://www.elastic.co/blog/welcome-jordan-logstash">加入</a>，原本的非官方的 ELK Stack，正式成为官方用语。2015 年 3 月，旧金山举行的第 1 届 Elastic{ON} 大会上，Elasticsearch 公司改名为 Elastic。两个月后，Packetbeat 项目也<a target="_blank" rel="noopener" href="https://www.elastic.co/blog/welcome-packetbeat-tudor-monica">加入</a> Elastic，Packetbeat 和 Filebeat（之前叫做 <a target="_blank" rel="noopener" href="https://github.com/elastic/logstash-forwarder">Logstash-forwarder</a>，由 Logstash 作者 Jordan Sissel 开发）项目被整合改造为 Beats。加上 Beats 以后，官方不知道如何将 “B” 和 E-L-K 组合在一起（用过 ELKB 或 BELK），ELK Stack 于是改名为 Elastic Stack，并在 2016 年 10 月正式发布 Elastic Stack 5.0 [ <a target="_blank" rel="noopener" href="https://www.elastic.co/cn/about/history-of-elasticsearch">ref1</a>, <a target="_blank" rel="noopener" href="https://www.elastic.co/elk-stack">ref2</a>, <a target="_blank" rel="noopener" href="https://www.elastic.co/cn/blog/elastic-stack-5-0-0-released">ref3</a> ]。</p>
+<h1 id="使用-Logstash">使用 Logstash</h1>
+<p>Logstash（<a target="_blank" rel="noopener" href="https://www.elastic.co/cn/products/logstash">home</a>, <a target="_blank" rel="noopener" href="https://github.com/elastic/logstash">github</a>）最初是来自 Dreamhost 运维工程师 Jordan Sissel 的开源项目，是管理事件和日志的工具，能够用于采集数据，转换数据，然后将数据发送到您最喜欢的“存储库”中（比如 Elasticsearch）。Logstash 使用 JRuby 开发，2011 年 5 月发布 1.0 版本。2013 年 8 月 Jordan Sissel 带着 Logstash 加入 Elasticsearch 公司，Logstash 成为 Elastic Stack 一员。</p>
+<p>在 Ubuntu 下<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/installing-logstash.html">安装</a>、<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/running-logstash.html">启动</a> Logstash 可以使用下面命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get install logstash                <span class="comment"># 安装 logstash</span></span><br><span class="line">$ sudo systemctl start logstash.service        <span class="comment"># 系统服务方式启动 logstash</span></span><br><span class="line">$ /usr/share/logstash/bin/logstash --version   <span class="comment"># 查看 logstash 版本</span></span><br><span class="line">logstash 6.5.4</span><br><span class="line">$ sudo vim /etc/logstash/logstash.yml          <span class="comment"># 查看默认 logstash.yml</span></span><br><span class="line">$ sudo vim /etc/logstash/logstash-sample.conf  <span class="comment"># 查看示例 logstash-sample.conf</span></span><br></pre></td></tr></table></figure>
+<p>安装完成后，二进制文件在 <code>/usr/share/logstash/bin</code> 目录下，配置文件位于 <code>/etc/logstash</code> 目录，日志输出位于 <code>/var/log/logstash</code> 目录，其他详细的目录位置的分布情况，可以阅读<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/dir-layout.html">官方文档</a>。</p>
+<h2 id="最简单的示例">最简单的示例</h2>
+<p>Logstash 管道（pipeline）由 <code>input</code>、<code>filter</code> 和 <code>output</code> 三个元素组成，其中 <code>input</code> 和 <code>output</code> 必须设置，而 <code>filter</code> 可选。<code>input</code> 插件从数据源中消费数据，<code>filter</code> 插件按指定方式修改数据，<code>output</code> 插件将数据写入特定目标中 [ <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/first-event.html">doc</a> ]。</p>
+<img width="600" alt="Logstash 管道" title="Logstash 管道" src="https://static.nullwy.me/basic_logstash_pipeline.png">
+<p>现在来试试 Logstash 下 Hello Wolrd 级别的示例，运行下面命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo /usr/share/logstash/bin/logstash -e <span class="string">&#x27;input &#123; stdin &#123; &#125; &#125; output &#123; stdout &#123;&#125; &#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+<p><code>-e</code> 选项能够使 Logstash 直接在<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/running-logstash-command-line.html">命令行</a>中设置管道配置。示例中 <code>input</code> 插件为 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/plugins-inputs-stdin.html">stdin</a> （标准输入），<code>output</code> 插件是 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/plugins-outputs-stdout.html">stdout</a> （标准输出）。若在控制台输入 <code>hello world</code>，相应的控制台将输出：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">      <span class="string">&quot;@version&quot;</span> =&gt; <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;host&quot;</span> =&gt; <span class="string">&quot;ubuntu109&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;@timestamp&quot;</span> =&gt; <span class="number">2019</span><span class="number">-01</span><span class="number">-12</span>T05<span class="punctuation">:</span><span class="number">52</span><span class="punctuation">:</span><span class="number">56.291</span>Z<span class="punctuation">,</span></span><br><span class="line">       <span class="string">&quot;message&quot;</span> =&gt; <span class="string">&quot;hello world&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>值得注意的是，输出内容编码格式默认为 <code>rubydebug</code>，使用 Ruby 的 &quot;<a target="_blank" rel="noopener" href="https://github.com/awesome-print/awesome_print">awesome_print</a>&quot; 库打印。另外，响应输出 <code>@timestamp</code> 字段的值为 <code>2019-01-12T05:52:56.291Z</code>，这是 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> 时间格式，时区是 0（zero），和北京时间相差 8 个小时。</p>
+<p>输出内容编码格式，可以通过 <code>codec</code> 指令指定。除了默认的 <code>rubydebug</code> 外，官方还支持其他 20 多种编码格式，参见 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/codec-plugins.html">doc</a>。若把编码格式改为 <code>json</code>，即 <code>stdout &#123; codec =&gt; json &#125;</code>，输出结果将变成：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;message&quot;</span><span class="punctuation">:</span><span class="string">&quot;hello world&quot;</span><span class="punctuation">,</span><span class="attr">&quot;@version&quot;</span><span class="punctuation">:</span><span class="string">&quot;1&quot;</span><span class="punctuation">,</span><span class="attr">&quot;@timestamp&quot;</span><span class="punctuation">:</span><span class="string">&quot;2019-01-12T05:52:56.291Z&quot;</span><span class="punctuation">,</span><span class="attr">&quot;host&quot;</span><span class="punctuation">:</span><span class="string">&quot;ubuntu109&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>管道配置也可以保存到文件中，以 <code>*.conf</code> 作为文件后缀，比如保存为 <code>test-stdin-stdout.conf</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">input &#123;</span><br><span class="line">  stdin &#123; &#125;</span><br><span class="line">&#125;</span><br><span class="line">output &#123;</span><br><span class="line">  stdout &#123; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>启动 logstash 时，<code>-f</code> 选项用于指定管道配置文件的路径：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo /usr/share/logstash/bin/logstash -f ~/test-stdin-stdout.conf</span><br></pre></td></tr></table></figure>
+<p>默认情况下，在启动 logstash 后，若再修改管道配置文件，新的修改需要重启 logstash 才能加载生效。在开发调试时，不太方便。解决这个问题，可以使用 <code>-r</code> 命令行<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/running-logstash-command-line.html">选项</a>。开启这个选项后，只要确定配置文件已经发生变更，便会自动重新加载配置文件。</p>
+<h2 id="file-输入插件">file 输入插件</h2>
+<p>上文日志是控制台输入的，但真实情况日志在日志文件中，要想使用 Logstash 读取日志文件，官方提供了 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/plugins-inputs-file.html">file</a> 输入插件。管道配置文件示例 <code>test-file-stdout.conf</code>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">input &#123;</span><br><span class="line"> file &#123;</span><br><span class="line">   path =&gt; [&quot;/home/yulewei/test.log&quot;]</span><br><span class="line">   sincedb_path =&gt; &quot;/dev/null&quot;</span><br><span class="line">   start_position =&gt; &quot;beginning&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">filter &#123;</span><br><span class="line">&#125;</span><br><span class="line">output &#123;</span><br><span class="line">  stdout &#123;</span><br><span class="line">    codec =&gt; rubydebug</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>启动 Logstash：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo /usr/share/logstash/bin/logstash -r -f ~/test-file-stdout.conf</span><br></pre></td></tr></table></figure>
+<p>配置文件中的 <code>path</code> 指令用于指定日志文件的路径。<code>start_position</code> 指令设置 Logstash 启动时读取日志文件的位置，可以设置为 <code>beginning</code> 或者 <code>end</code>，默认是 <code>end</code>，即文件末尾。</p>
+<p>为了跟踪每个输入文件中已处理了哪些数据，Logstash 文件输入插件会使用名为 sincedb 的文件来记录现有位置。由于我们的配置用于开发，所以我们希望能够重复读取文件，并进而希望禁用 sincedb 文件。在 Linux 系统上，将 <code>sincedb_path</code> 指令设置为 “/dev/null” 即可禁用。若没有禁用，默认保存的 sincedb 文件将在 <code>/usr/share/logstash/data/plugins/inputs/file/</code> 目录下。</p>
+<h2 id="grok-过滤插件">grok 过滤插件</h2>
+<p>上文的例子，做的核心事情就是把日志行转换到 <code>message</code> 字段，并附加某些元数据，如 <code>@timestamp</code>。如果要想解析自己的日志，把非结构化日志转换结构换日志，有两个过滤器特别常用：<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/plugins-filters-dissect.html">dissect</a> 会根据分界符来解析日志，而 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/plugins-filters-grok.html">grok</a> 则会根据正则表达式匹配来运行。</p>
+<p>如果数据结构定义非常完善，dissect 过滤插件的运行效果非常好，而且运行速度非常快捷高效。同时，其也更加容易上手，对于不熟悉正则表达式的用户而言，更是如此。通常而言，grok 的功能更加强大，而且可以处理各种各样的数据。然而，正则表达式匹配会耗费更多资源，而且速度也会慢一些，如果未能正确进行优化的话，尤为如此。</p>
+<p>现在先来看下 grok 过滤插件。grok 模式的基本语法是 <code>%&#123;SYNTAX:SEMANTIC&#125;</code>，<code>SYNTAX</code> 是用于匹配数据的模式（或正则表达式）名称，<code>SEMANTIC</code> 是标识符或字段名称。Logstash 提供了超过 120 种默认的 grok 模式，全部预定义的模式可以在 <a target="_blank" rel="noopener" href="https://github.com/logstash-plugins/logstash-patterns-core/tree/master/patterns">github</a> 上找到。典型的预定义模式（非完整列表）[ <a target="_blank" rel="noopener" href="https://github.com/logstash-plugins/logstash-patterns-core/blob/v4.1.2/patterns/grok-patterns">github</a> ]：</p>
+<ul>
+<li>WORD - 匹配单个词汇的模式</li>
+<li>NUMBER - 匹配整数或浮点数（正值或负值均可）的模式</li>
+<li>POSINT - 匹配正整数的模式</li>
+<li>EMAILADDRESS - 邮箱地址</li>
+<li>IP - 匹配 IPv4 或 IPv6 IP 地址的模式</li>
+<li>URI - URI 地址</li>
+<li>TIMESTAMP_ISO8601 - <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/ISO_8601">ISO8601</a> 格式的时间</li>
+<li>NOTSPACE - 匹配非空格的任何内容的格式</li>
+<li>SPACE - 匹配任何数量的连续空格的模式</li>
+<li>DATA - 匹配任何数据类型的限定数量的模式</li>
+<li>GREEDYDATA - 匹配剩余所有数据的格式</li>
+</ul>
+<p>比如，<code>3.44</code> 可以使用 <code>NUMBER</code> 模式进行匹配，<code>192.168.2.104</code> 可以使用 <code>IP</code> 模式。<code>%&#123;NUMBER:num&#125; %&#123;IP:client&#125;</code> 模式，将会用 <code>NUMBER</code> 模式把 <code>3.44</code> 识别为 <code>num</code> 字段，用 <code>IP</code> 模式把 <code>192.168.2.104</code> 识别为 <code>client</code> 字段。默认情况识别获得的字段值是字符串类型，grok 插件支持把类型转换为 <code>int</code> 或 <code>float</code>。要想把 <code>3.44</code> 转换为浮点数，可以使用 <code>%&#123;NUMBER:num:float&#125;</code>。</p>
+<p>假设有如下日志内容：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Will, yulewei@gmail.com, 42, 1024, 3.14</span><br></pre></td></tr></table></figure>
+<p>grok 匹配表达式可以写成这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%&#123;WORD:name&#125;, %&#123;EMAILADDRESS:email&#125;, %&#123;NUMBER:num1&#125;, %&#123;NUMBER:num2:int&#125;, %&#123;NUMBER:pi:float&#125;</span><br></pre></td></tr></table></figure>
+<p>即，在这一行日志中依次提取出，<code>name</code>、<code>email</code>、<code>num1</code>、<code>num2</code> 和 <code>pi</code> 字段。完整的 <code>filter</code> 过滤器配置的写法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">filter &#123;</span><br><span class="line">  grok &#123;</span><br><span class="line">    match =&gt; &#123; &quot;message&quot; =&gt; &quot;%&#123;WORD:name&#125;, %&#123;EMAILADDRESS:email&#125;, %&#123;NUMBER:num1&#125;, %&#123;NUMBER:num2:int&#125;, %&#123;NUMBER:pi:float&#125;&quot; &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>启动 logstash：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo /usr/share/logstash/bin/logstash -r -f ~/test-file-grok-stdout.conf</span><br></pre></td></tr></table></figure>
+<p>控制台将输出：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">      <span class="string">&quot;@version&quot;</span> =&gt; <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">       <span class="string">&quot;message&quot;</span> =&gt; <span class="string">&quot;Will, yulewei@gmail.com, 42, 1024, 3.14&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;num1&quot;</span> =&gt; <span class="string">&quot;42&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;pi&quot;</span> =&gt; <span class="number">3.14</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;@timestamp&quot;</span> =&gt; <span class="number">2019</span><span class="number">-01</span><span class="number">-12</span>T08<span class="punctuation">:</span><span class="number">12</span><span class="punctuation">:</span><span class="number">49.581</span>Z<span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;path&quot;</span> =&gt; <span class="string">&quot;/home/yulewei/test-grok.log&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;host&quot;</span> =&gt; <span class="string">&quot;ubuntu109&quot;</span><span class="punctuation">,</span></span><br><span class="line">         <span class="string">&quot;email&quot;</span> =&gt; <span class="string">&quot;yulewei@gmail.com&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;name&quot;</span> =&gt; <span class="string">&quot;Will&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;num2&quot;</span> =&gt; <span class="number">1024</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>Logstash 提供了超过 120 种默认的 grok 模式，基本上满足大多数使用场景。若没有符合要求的预定义的模式，可以使用 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/plugins-filters-grok.html#_regular_expressions">Oniguruma</a> 语法指定正则表达式：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(?&lt;field_name&gt;the pattern here)</span><br></pre></td></tr></table></figure>
+<p>上文中的 <code>%&#123;WORD:name&#125;</code> 和 <code>%&#123;EMAILADDRESS:email&#125;</code>，等价的正则表达式的写法如下 [ <a target="_blank" rel="noopener" href="https://github.com/logstash-plugins/logstash-patterns-core/blob/v4.1.2/patterns/grok-patterns">ref1</a>, <a target="_blank" rel="noopener" href="https://stackoverflow.com/a/8829363">ref2</a> ]：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(?&lt;name&gt;\w+)</span><br><span class="line">(?&lt;email&gt;[a-zA-Z][a-zA-Z0-9_.+-=:]+@[0-9A-Za-z][0-9A-Za-z-]&#123;0,62&#125;\.[0-9A-Za-z][0-9A-Za-z-]&#123;0,62&#125;)</span><br></pre></td></tr></table></figure>
+<p>调试 grok 匹配表达式容易出错，官方提供可视化的 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/kibana/6.5/grokdebugger-getting-started.html">Grok Debugger</a> 工具，提高调试效率。</p>
+<img width="800" alt="Grok Debugger" title="Grok Debugger" src="https://static.nullwy.me/kibana-grokdebugger.png">
+<h3 id="解析-http-服务器日志">解析 http 服务器日志</h3>
+<p>现在来看下，真实的日志解析案例，使用 grok 过滤插件解析 http 服务器日志。通用日志格式（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Common_Log_Format">Common Log Format</a>），是 http 服务器的标准的日志格式。对通用日志格式扩展，加上额外的 referer 和 user-agent 字段，称为组合日志格式（Combined Log Format）。两种日志格式包含的字段如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 通用日志格式</span><br><span class="line">%remote-host %ident %authuser %timestamp &quot;%request&quot; %status %bytes</span><br><span class="line"># 组合日志格式</span><br><span class="line">%remote-host %ident %authuser %timestamp &quot;%request&quot; %status %bytes &quot;%referer&quot; &quot;%user-agent&quot;</span><br></pre></td></tr></table></figure>
+<p><a target="_blank" rel="noopener" href="https://httpd.apache.org/docs/2.4/logs.html#accesslog">Apache</a> 和 <a target="_blank" rel="noopener" href="https://nginx.org/en/docs/http/ngx_http_log_module.html#log_format">Nginx</a> 服务器默认的日志格式，采用的就是通用日志格式或者组合日志格式。解析这两种日志格式，Logstash 提供预定义模式 <a target="_blank" rel="noopener" href="https://github.com/logstash-plugins/logstash-patterns-core/blob/v4.1.2/patterns/httpd#L14">COMMONAPACHELOG</a> 和 <a target="_blank" rel="noopener" href="https://github.com/logstash-plugins/logstash-patterns-core/blob/v4.1.2/patterns/httpd#L15">COMBINEDAPACHELOG</a>。</p>
+<p>典型的 nginx 日志例子：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.2.104 - - [13/Jan/2019:02:01:15 +0800] &quot;GET /images/avatar.png HTTP/1.1&quot; 200 266975 &quot;-&quot; &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:64.0) Gecko/20100101 Firefox/64.0&quot;</span><br></pre></td></tr></table></figure>
+<p>管道配置文件示例 <code>test-file-grokhttp-stdout.conf</code>，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">input &#123;</span><br><span class="line">  file &#123;</span><br><span class="line">    path =&gt; [&quot;/var/log/nginx/access.log&quot;]</span><br><span class="line">    sincedb_path =&gt; &quot;/dev/null&quot;</span><br><span class="line">    start_position =&gt; &quot;beginning&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">filter &#123;</span><br><span class="line">  grok &#123;</span><br><span class="line">    match =&gt; &#123; &quot;message&quot; =&gt; &quot;%&#123;COMBINEDAPACHELOG&#125;&quot; &#125;</span><br><span class="line">    remove_field =&gt; [&quot;message&quot;]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">output &#123;</span><br><span class="line">  stdout &#123; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>示例中使用了 grok 的预定义模式 <a target="_blank" rel="noopener" href="https://github.com/logstash-plugins/logstash-patterns-core/blob/v4.1.2/patterns/httpd#L15">COMBINEDAPACHELOG</a>。另外，<code>remove_field</code> <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/plugins-filters-grok.html#plugins-filters-grok-remove_field">指令</a>用于把输出事件中某字段删除，示例中是 <code>message</code> 字段。</p>
+<p>启动 logstash：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo /usr/share/logstash/bin/logstash -r -f ~/test-file-grokhttp-stdout.conf</span><br></pre></td></tr></table></figure>
+<p>解析获得的结构化数据，如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">           <span class="string">&quot;auth&quot;</span> =&gt; <span class="string">&quot;-&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="string">&quot;host&quot;</span> =&gt; <span class="string">&quot;ubuntu109&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="string">&quot;verb&quot;</span> =&gt; <span class="string">&quot;GET&quot;</span><span class="punctuation">,</span></span><br><span class="line">       <span class="string">&quot;clientip&quot;</span> =&gt; <span class="string">&quot;192.168.2.104&quot;</span><span class="punctuation">,</span></span><br><span class="line">       <span class="string">&quot;@version&quot;</span> =&gt; <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;httpversion&quot;</span> =&gt; <span class="string">&quot;1.1&quot;</span><span class="punctuation">,</span></span><br><span class="line">     <span class="string">&quot;@timestamp&quot;</span> =&gt; <span class="number">2019</span><span class="number">-01</span><span class="number">-13</span>T13<span class="punctuation">:</span><span class="number">35</span><span class="punctuation">:</span><span class="number">52.983</span>Z<span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;bytes&quot;</span> =&gt; <span class="string">&quot;266975&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;timestamp&quot;</span> =&gt; <span class="string">&quot;13/Jan/2019:02:01:15 +0800&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;request&quot;</span> =&gt; <span class="string">&quot;/images/avatar.png&quot;</span><span class="punctuation">,</span></span><br><span class="line">       <span class="string">&quot;response&quot;</span> =&gt; <span class="string">&quot;200&quot;</span><span class="punctuation">,</span></span><br><span class="line">       <span class="string">&quot;referrer&quot;</span> =&gt; <span class="string">&quot;\&quot;-\&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">           <span class="string">&quot;path&quot;</span> =&gt; <span class="string">&quot;/var/log/nginx/access.log&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;agent&quot;</span> =&gt; <span class="string">&quot;\&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10.13; rv:64.0) Gecko/20100101 Firefox/64.0\&quot;&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;ident&quot;</span> =&gt; <span class="string">&quot;-&quot;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h2 id="dissect-过滤插件">dissect 过滤插件</h2>
+<p>和 grok 过滤插件使用正则表达式提取字段不同，dissect 过滤插件使用分界符切割来提取字段。由于没有使用正则表达式，运行速度相对 grok 快很多。使用 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/plugins-filters-dissect.html">dissect</a> 过滤插件时，需要指明提取字段的顺序，还要指明这些字段之间的分界符。过滤插件会对数据进行单次传输，并匹配模式中的分界符。同时，过滤插件还会将分界符之间的数据分配至指定字段。过滤插件不会对所提取数据的格式进行验证。</p>
+<p>现在看下示例，<code>test-dissect.log</code> 文件内容如下：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Will, yulewei@gmail.com, 42, 1024, 3.14</span><br></pre></td></tr></table></figure>
+<p>dissect 匹配规则可以写成这样：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">%&#123;name&#125;, %&#123;email&#125;, %&#123;num1&#125;, %&#123;num2&#125;, %&#123;num3&#125;</span><br></pre></td></tr></table></figure>
+<p>完整的配置文件，<code>test-file-dissect-stdout.conf</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">input &#123;</span><br><span class="line"> file &#123;</span><br><span class="line">   path =&gt; [&quot;/home/yulewei/test-dissect.log&quot;]</span><br><span class="line">   sincedb_path =&gt; &quot;/dev/null&quot;</span><br><span class="line">   start_position =&gt; &quot;beginning&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">filter &#123;</span><br><span class="line">  dissect &#123;</span><br><span class="line">    mapping =&gt; &#123;</span><br><span class="line">      &quot;message&quot; =&gt; &quot;%&#123;name&#125;, %&#123;email&#125;, %&#123;num1&#125;, %&#123;num2&#125;, %&#123;num3&#125;&quot;</span><br><span class="line">    &#125;</span><br><span class="line">    convert_datatype =&gt; &#123;</span><br><span class="line">      &quot;num2&quot; =&gt; &quot;int&quot;</span><br><span class="line">      &quot;num3&quot; =&gt; &quot;float&quot;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">output &#123;</span><br><span class="line">  stdout &#123; &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>和 grok 插件一样，默认提取的字段是字符串类型。配置文件中的 <code>convert_datatype</code> 指令用于将类型转为 <code>int</code> 或 <code>float</code>。</p>
+<p>启动 logstash：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo /usr/share/logstash/bin/logstash -r -f ~/test-file-dissect-stdout.conf</span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">          <span class="string">&quot;host&quot;</span> =&gt; <span class="string">&quot;ubuntu109&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;num1&quot;</span> =&gt; <span class="string">&quot;42&quot;</span><span class="punctuation">,</span></span><br><span class="line">       <span class="string">&quot;message&quot;</span> =&gt; <span class="string">&quot;Will, yulewei@gmail.com, 42, 1024, 3.14&quot;</span><span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;@version&quot;</span> =&gt; <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;name&quot;</span> =&gt; <span class="string">&quot;Will&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;num2&quot;</span> =&gt; <span class="number">1024</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;@timestamp&quot;</span> =&gt; <span class="number">2019</span><span class="number">-01</span><span class="number">-13</span>T13<span class="punctuation">:</span><span class="number">32</span><span class="punctuation">:</span><span class="number">10.900</span>Z<span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;path&quot;</span> =&gt; <span class="string">&quot;/home/yulewei/test-dissect.log&quot;</span><span class="punctuation">,</span></span><br><span class="line">         <span class="string">&quot;email&quot;</span> =&gt; <span class="string">&quot;yulewei@gmail.com&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;num3&quot;</span> =&gt; <span class="number">3.14</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h1 id="输出到-Elasticsearch">输出到 Elasticsearch</h1>
+<p>上文举的例子全部都是，输出控制台，使用 <code>stdout</code> 输出插件，没有实用价值。Elastic Stack 的核心其实是 Elasticsearch，使用Elasticsearch 搜索和分析日志。想要将数据发送到 Elasticsearch，可以使用 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/plugins-outputs-elasticsearch.html">elasticsearch</a> 输出插件。</p>
+<h2 id="安装-Elasticsearch">安装 Elasticsearch</h2>
+<p>如果没有安装 Elasticsearch，参考<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/6.5/deb.html">官方文档</a>按步骤安装。唯一要注意的是，在执行 <code>apt install</code> 命令前，必须先添加 elastic 的软件源地址，否则无法正常启动。核心命令如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get install elasticsearch           <span class="comment"># 安装 elasticsearch</span></span><br><span class="line">$ sudo systemctl start elasticsearch.service   <span class="comment"># 系统服务方式启动 elasticsearch</span></span><br><span class="line">$ curl http://localhost:9200/                  <span class="comment"># 用 rest 接口查看 elasticsearch</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;name&quot;</span> : <span class="string">&quot;1t9JXt5&quot;</span>,</span><br><span class="line">  <span class="string">&quot;cluster_name&quot;</span> : <span class="string">&quot;elasticsearch&quot;</span>,</span><br><span class="line">  <span class="string">&quot;cluster_uuid&quot;</span> : <span class="string">&quot;yQgVsvupSqGCGQbwqnanIg&quot;</span>,</span><br><span class="line">  <span class="string">&quot;version&quot;</span> : &#123;</span><br><span class="line">    <span class="string">&quot;number&quot;</span> : <span class="string">&quot;6.5.4&quot;</span>,</span><br><span class="line">    <span class="string">&quot;build_flavor&quot;</span> : <span class="string">&quot;default&quot;</span>,</span><br><span class="line">    <span class="string">&quot;build_type&quot;</span> : <span class="string">&quot;deb&quot;</span>,</span><br><span class="line">    <span class="string">&quot;build_hash&quot;</span> : <span class="string">&quot;d2ef93d&quot;</span>,</span><br><span class="line">    <span class="string">&quot;build_date&quot;</span> : <span class="string">&quot;2018-12-17T21:17:40.758843Z&quot;</span>,</span><br><span class="line">    <span class="string">&quot;build_snapshot&quot;</span> : <span class="literal">false</span>,</span><br><span class="line">    <span class="string">&quot;lucene_version&quot;</span> : <span class="string">&quot;7.5.0&quot;</span>,</span><br><span class="line">    <span class="string">&quot;minimum_wire_compatibility_version&quot;</span> : <span class="string">&quot;5.6.0&quot;</span>,</span><br><span class="line">    <span class="string">&quot;minimum_index_compatibility_version&quot;</span> : <span class="string">&quot;5.0.0&quot;</span></span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">&quot;tagline&quot;</span> : <span class="string">&quot;You Know, for Search&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>默认情况下 elasticsearch 服务器绑定的 ip 地址是回环地址 <code>127.0.0.1</code>，若想绑定特定 ip 地址，可以修改 <code>/etc/elasticsearch/elasticsearch.yml</code> 配置文件中的 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/6.5/network.host.html">network.host</a> 选项：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">network.host:</span> <span class="number">192.168</span><span class="number">.2</span><span class="number">.109</span></span><br></pre></td></tr></table></figure>
+<p>修改完成并重启后，elasticsearch 服务器访问地址从 <code>http://localhost:9200/</code> 变成 <code>http://192.168.2.109:9200/</code>。</p>
+<h2 id="输出到-Elasticsearch-v2">输出到 Elasticsearch</h2>
+<p>现在来看下 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/plugins-outputs-elasticsearch.html">elasticsearch</a> 输出插件。示例，<code>test-file-elasticsearch.conf</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">input &#123;</span><br><span class="line"> file &#123;</span><br><span class="line">   path =&gt; [&quot;/home/yulewei/test.log&quot;]</span><br><span class="line">   sincedb_path =&gt; &quot;/dev/null&quot;</span><br><span class="line">   start_position =&gt; &quot;beginning&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">output &#123;</span><br><span class="line">  elasticsearch &#123;</span><br><span class="line">    hosts =&gt; [&quot;http://192.168.2.109:9200&quot;]</span><br><span class="line">    index =&gt; &quot;logstash-%&#123;+YYYY.MM.dd&#125;&quot;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>示例的 <code>elasticsearch</code> 输出插件使用了 <code>hosts</code> 和 <code>index</code> 指令。<code>hosts</code> 指令，用于指定 elasticsearch 服务器的地址。而 <code>index</code> 指令，用于指定 elasticsearch 索引的名称模式，该指令默认值为 <code>logstash-%&#123;+YYYY.MM.dd&#125;</code>。在字符串内部的 <code>%&#123;...&#125;</code>，是 Logstash 字符串插值语法，官方称之为 <code>sprintf format</code> [ <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/event-dependent-configuration.html">doc</a> ]。<code>+YYYY.MM.dd</code>，用于指定 <code>@timestamp</code> 的格式化的格式。<code>logstash-%&#123;+YYYY.MM.dd&#125;</code>，格式化后最终生成的值可能将是 <code>logstash-2019.01.13</code>。</p>
+<p>启动 logstash：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo /usr/share/logstash/bin/logstash -r -f ~/test-file-elasticsearch.conf</span><br></pre></td></tr></table></figure>
+<p>查看在 elasticsearch 上新创建的 <code>logstash-*</code> 索引以及从 logstash 同步过来的日志数据：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line">$ curl http://192.168.2.109:9200/_cat/indices</span><br><span class="line">yellow open logstash-2019.01.13       tFjc5xL_QYeNw4oqe4odeg 5 1     3 0 15.5kb 15.5kb</span><br><span class="line">$ curl <span class="string">&#x27;http://192.168.2.109:9200/logstash-*/_search?pretty&#x27;</span> -H <span class="string">&#x27;Content-Type: application/json&#x27;</span> -d<span class="string">&#x27;&#123;&quot;size&quot;: 1&#125;&#x27;</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;took&quot;</span> : 0,</span><br><span class="line">  <span class="string">&quot;timed_out&quot;</span> : <span class="literal">false</span>,</span><br><span class="line">  <span class="string">&quot;_shards&quot;</span> : &#123;</span><br><span class="line">    <span class="string">&quot;total&quot;</span> : 5,</span><br><span class="line">    <span class="string">&quot;successful&quot;</span> : 5,</span><br><span class="line">    <span class="string">&quot;skipped&quot;</span> : 0,</span><br><span class="line">    <span class="string">&quot;failed&quot;</span> : 0</span><br><span class="line">  &#125;,</span><br><span class="line">  <span class="string">&quot;hits&quot;</span> : &#123;</span><br><span class="line">    <span class="string">&quot;total&quot;</span> : 3,</span><br><span class="line">    <span class="string">&quot;max_score&quot;</span> : 1.0,</span><br><span class="line">    <span class="string">&quot;hits&quot;</span> : [</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="string">&quot;_index&quot;</span> : <span class="string">&quot;logstash-2019.01.13&quot;</span>,</span><br><span class="line">        <span class="string">&quot;_type&quot;</span> : <span class="string">&quot;doc&quot;</span>,</span><br><span class="line">        <span class="string">&quot;_id&quot;</span> : <span class="string">&quot;RUHNRWgBLIBntI4FV8Rf&quot;</span>,</span><br><span class="line">        <span class="string">&quot;_score&quot;</span> : 1.0,</span><br><span class="line">        <span class="string">&quot;_source&quot;</span> : &#123;</span><br><span class="line">          <span class="string">&quot;path&quot;</span> : <span class="string">&quot;/home/yulewei/test.log&quot;</span>,</span><br><span class="line">          <span class="string">&quot;@timestamp&quot;</span> : <span class="string">&quot;2019-01-13T06:01:51.303Z&quot;</span>,</span><br><span class="line">          <span class="string">&quot;@version&quot;</span> : <span class="string">&quot;1&quot;</span>,</span><br><span class="line">          <span class="string">&quot;host&quot;</span> : <span class="string">&quot;ubuntu109&quot;</span>,</span><br><span class="line">          <span class="string">&quot;message&quot;</span> : <span class="string">&quot;hello world&quot;</span></span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，新的索引名为 <code>logstash-2019.01.13</code>。同步过来的日志记录全部有 5 条，第 1 条日志的 <code>message</code> 内容是 <code>hello world</code>。</p>
+<h2 id="使用-Kibana">使用 Kibana</h2>
+<p>Kibana，能够对 Elasticsearch 中的数据进行可视化，是 Elastic Stack 的窗口。在 Ubuntu 下<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/kibana/6.5/deb.html">安装</a> Kibana 可以使用下面命令：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get install kibana          <span class="comment"># 安装 kibana，当前最新版为 6.5.4</span></span><br><span class="line">$ sudo systemctl start kibana.service  <span class="comment"># 系统服务方式启动 kibana</span></span><br></pre></td></tr></table></figure>
+<p>默认配置下，kibana 服务访问地址是 <code>http://localhost:5601/</code>，连接的 elasticsearch 地址是 <code>http://localhost:9200</code>，这两个配置分别由 <code>server.host</code> 和 <code>elasticsearch.url</code> 控制 [ <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/kibana/6.5/settings.html">doc</a> ]。上文尝试过把 elasticsearch 服务 ip 地址绑定到 <code>192.168.2.109</code>。现在来试下绑定 ip 地址到 kibana，编辑配置文件 <code>/etc/kibana/kibana.yml</code>，修改为：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">server.host:</span> <span class="string">&quot;192.168.2.109&quot;</span></span><br><span class="line"><span class="attr">elasticsearch.url:</span> <span class="string">&quot;http://192.168.2.109:9200&quot;</span></span><br></pre></td></tr></table></figure>
+<p>使用 <code>sudo systemctl restart kibana.service</code> 重启后，kibana 服务访问地址变成 <code>http://192.168.2.109:5601/</code>。</p>
+<p>elasticsearch 服务器上存在索引 <code>logstash-2019.01.13</code>，要想把这个索引导入到 kibana，参考官方<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/kibana/6.5/tutorial-define-index.html">教程</a>即可。点击 <code>Management</code> 菜单，然后创建索引模式（index pattern）。索引模式可以直接为 <code>logstash-2019.01.13</code>，这样匹配单个索引。若要匹配多个时间的 logstash 索引，可以使用通配符 <code>*</code>，比如 <code>logstash-*</code>。如果要匹配全部 2019 年 01 月的索引，可以写成 <code>logstash-2019.01*</code>。完成索引模式定义后，便可以在 <code>Discover</code> 菜单下查看索引，如图：</p>
+<img width="800" alt="Kibana" title="Kibana" src="https://static.nullwy.me/logstash-kibana.png">
+<h1 id="使用-Filebeat">使用 Filebeat</h1>
+<p>Filebeat，轻量型日志采集器 [ <a target="_blank" rel="noopener" href="https://www.elastic.co/cn/products/beats/filebeat">home</a> ]。其前身是由 Logstash 作者 Jordan Sissel 开发的 <a target="_blank" rel="noopener" href="https://github.com/elastic/logstash-forwarder">Logstash Forwarder</a>。Logstash Forwarder 项目因为和收购过来的 Packetbeat 项目功能相近，并且都是 Go 语言开发，就一起被整合改造为 Beats [ <a target="_blank" rel="noopener" href="https://www.elastic.co/blog/beats-1-0-0">ref</a> ]。</p>
+<p>我们知道，Logstash 使用 JRuby 开发，运行依赖 JVM，会消耗较多的系统资源。为了减少系统资源（CPU、内存和网络）的使用，Logstash Forwarder 改用 Go 语言开发。另外，在功能上也做了精简，只做单一的数据传输，不像 Logstash 有数据过滤能力。Logstash 类似于功能多样的“瑞士军刀”，能提供从多个数据源加载数据的功能，使用各种强大的插件来处理日志，并提供将多个来源的输出数据进行存储的功能。简而言之，Logstash 提供数据 ETL（数据的提取、变换和加载）的功能；而 Beats 是轻量级的数据传输工具，能将数据传输到 Logstash 或 Elasticsearch 中，其间没有对数据进行任何转换 [ <a target="_blank" rel="noopener" href="https://book.douban.com/subject/30326542/">Gupta2017</a> ]。Filebeat 和 Logstash 的关系如下图所示 [ <a target="_blank" rel="noopener" href="https://logz.io/blog/filebeat-vs-logstash/">logz.io</a> ]：</p>
+<img width="600" alt="Filebeat 和 Logstash 的关系" title="Filebeat 和 Logstash 的关系" src="https://static.nullwy.me/filebeat-and-logstash.png">
+<p>安装 filebeat 很简单，参考<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/beats/filebeat/6.5/setup-repositories.html">官方文档</a>即可，核心命令如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ sudo apt-get install filebeat           <span class="comment"># 安装 filebeat</span></span><br><span class="line">$ filebeat version                        <span class="comment"># 查看 filebeat 版本</span></span><br><span class="line">filebeat version 6.5.4 (amd64), libbeat 6.5.4 [bd8922f1c7e93d12b07e0b3f7d349e17107f7826 built 2018-12-17 20:22:29 +0000 UTC]</span><br><span class="line">$ sudo systemctl start filebeat.service   <span class="comment"># 系统服务方式启动 filebeat</span></span><br></pre></td></tr></table></figure>
+<h2 id="输出到-Elasticsearch-v3">输出到 Elasticsearch</h2>
+<p>修改 filebeat 配置文件 /etc/filebeat/<a target="_blank" rel="noopener" href="https://github.com/elastic/beats/blob/6.5/filebeat/filebeat.yml">filebeat.yml</a>，示例如下：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">filebeat.inputs:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">log</span></span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/home/yulewei/test.log</span></span><br><span class="line"></span><br><span class="line"><span class="attr">output.elasticsearch:</span></span><br><span class="line">  <span class="attr">hosts:</span> [<span class="string">&quot;192.168.2.109:9200&quot;</span>]</span><br></pre></td></tr></table></figure>
+<p><code>filebeat.inputs</code> 选项用于配置日志的<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/beats/filebeat/6.5/configuration-filebeat-options.html">输入方式</a>。子选项 <code>type</code> <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/beats/filebeat/6.5/configuration-filebeat-options.html#filebeat-input-types">支持</a> <code>log</code>、<code>stdin</code>、<code>redis</code>、<code>udp</code>、<code>tcp</code> 等，示例中使用了 <code>log</code>，表明从日志文件输入。</p>
+<p><code>output</code> 选项用于配置日志的<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/beats/filebeat/6.5/configuring-output.html">输出方式</a>，配置支持 elasticsearch、logstash、kafka、redis、file、console 等，一次只能选择配置其中某一个。示例配置了 <code>output.elasticsearch.hosts</code>，指定日志输出目标 elasticsearch 的主机地址。<code>output.elasticsearch.index</code> 可以用来指定索引 index 名称模式，默认是 <code>filebeat-%&#123;[beat.version]&#125;-%&#123;+yyyy.MM.dd&#125;</code>（比如 <code>filebeat-6.5.4-2019.01.12</code>）[ <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/beats/filebeat/6.5/elasticsearch-output.html#index-option-es">doc</a> ]。</p>
+<p>完成 <code>filebeat.yml</code> 修改后，重启 filebeat，将可以看到，在 elasticsearch 上新创建的 <code>filebeat-*</code> 索引：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ curl http://192.168.2.109:9200/_cat/indices</span><br><span class="line">yellow open filebeat-6.5.4-2019.01.12 B4JbQDnZQuK5XvsQ77uedA 3 1 11043 0  1.7mb  1.7mb</span><br></pre></td></tr></table></figure>
+<h2 id="输出到-Logstash">输出到 Logstash</h2>
+<p>上文的示例直接把 Filebeat 采集的日志传输到 Elasticsearch，日志数据并没有被解析或者转换。若想解析和转换日志，需要在Filebeat 和 Elasticsearch 中间引入 Logstash。现在看下把日志输出到 Logstash 的示例配置文件，<code>filebeat.yml</code> 示例：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">filebeat.inputs:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">log</span></span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/home/yulewei/test.log</span></span><br><span class="line"></span><br><span class="line"><span class="attr">output.logstash:</span></span><br><span class="line">  <span class="attr">hosts:</span> [<span class="string">&quot;localhost:5044&quot;</span>]</span><br></pre></td></tr></table></figure>
+<p><code>filebeat.inputs</code> 和上文的示例一样。不同的是，把 <code>output.elasticsearch.hosts</code> 改成了 <code>output.logstash.hosts</code>，指定日志输出目标 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/beats/filebeat/6.5/logstash-output.html">Logstash</a> 的主机地址。<code>5044</code> 这个端口是 Logstash 用于监听 Filebeat 的端口。</p>
+<p>现在来看下 Logstash 的管道配置文件，示例 <code>test-beats-stdout.conf</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">input &#123;</span><br><span class="line">  beats &#123;</span><br><span class="line">    port =&gt; 5044</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">output &#123;</span><br><span class="line">  stdout &#123;</span><br><span class="line">    codec =&gt; rubydebug</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>示例中，使用了 <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/plugins-inputs-beats.html">beats</a> 输入插件，配置的端口就 <code>filebeat.yml</code> 中指定的 <code>5044</code>。输出插件为 <code>stdout</code>，即把 Logstash 采集到日志输出到控制台。</p>
+<p>重启 filebeat 和 logstash：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cat</span> test.log                              <span class="comment"># 查看日志文件内容</span></span><br><span class="line">hello world</span><br><span class="line">$ sudo systemctl restart filebeat.service   <span class="comment"># 重启 filebeat</span></span><br><span class="line">$ sudo /usr/share/logstash/bin/logstash -r -f ~/test-beats-stdout.conf</span><br></pre></td></tr></table></figure>
+<p>控制台输出：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">          <span class="string">&quot;tags&quot;</span> =&gt; <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">[</span><span class="number">0</span><span class="punctuation">]</span> <span class="string">&quot;beats_input_codec_plain_applied&quot;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;source&quot;</span> =&gt; <span class="string">&quot;/home/yulewei/test.log&quot;</span><span class="punctuation">,</span></span><br><span class="line">         <span class="string">&quot;input&quot;</span> =&gt; <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="string">&quot;type&quot;</span> =&gt; <span class="string">&quot;log&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">       <span class="string">&quot;message&quot;</span> =&gt; <span class="string">&quot;hello world&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;@timestamp&quot;</span> =&gt; <span class="number">2019</span><span class="number">-01</span><span class="number">-12</span>T13<span class="punctuation">:</span><span class="number">32</span><span class="punctuation">:</span><span class="number">05.131</span>Z<span class="punctuation">,</span></span><br><span class="line">      <span class="string">&quot;@version&quot;</span> =&gt; <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;prospector&quot;</span> =&gt; <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="string">&quot;type&quot;</span> =&gt; <span class="string">&quot;log&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;beat&quot;</span> =&gt; <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="string">&quot;hostname&quot;</span> =&gt; <span class="string">&quot;ubuntu109&quot;</span><span class="punctuation">,</span></span><br><span class="line">         <span class="string">&quot;version&quot;</span> =&gt; <span class="string">&quot;6.5.4&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;name&quot;</span> =&gt; <span class="string">&quot;ubuntu109&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;offset&quot;</span> =&gt; <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;host&quot;</span> =&gt; <span class="punctuation">&#123;</span></span><br><span class="line">                   <span class="string">&quot;os&quot;</span> =&gt; <span class="punctuation">&#123;</span></span><br><span class="line">             <span class="string">&quot;version&quot;</span> =&gt; <span class="string">&quot;16.04.4 LTS (Xenial Xerus)&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;platform&quot;</span> =&gt; <span class="string">&quot;ubuntu&quot;</span><span class="punctuation">,</span></span><br><span class="line">            <span class="string">&quot;codename&quot;</span> =&gt; <span class="string">&quot;xenial&quot;</span><span class="punctuation">,</span></span><br><span class="line">              <span class="string">&quot;family&quot;</span> =&gt; <span class="string">&quot;debian&quot;</span></span><br><span class="line">        <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">         <span class="string">&quot;architecture&quot;</span> =&gt; <span class="string">&quot;x86_64&quot;</span><span class="punctuation">,</span></span><br><span class="line">                   <span class="string">&quot;id&quot;</span> =&gt; <span class="string">&quot;29b1bf39547d4ca9ae26c3b7656ff9e3&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;containerized&quot;</span> =&gt; <span class="literal"><span class="keyword">false</span></span><span class="punctuation">,</span></span><br><span class="line">                 <span class="string">&quot;name&quot;</span> =&gt; <span class="string">&quot;ubuntu109&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<h1 id="集成-Filebeat-Logstash-Elasticsearch-Kibana">集成 Filebeat, Logstash, Elasticsearch, Kibana</h1>
+<p>真实场景下，日志文件可能分布在多台服务器上，同一台服务器上也可能分布着不同来源类型的日志。现在我们来尝试下，使用 Filebeat 把两个日志文件各自采集到两个不同的 Elasticsearch 索引中，并用 Kibana 可视化。有两个日志文件 <code>test-beats1.log</code> 和 <code>test-beats2.log</code>，内容如下：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cat</span> test-beats1.log</span><br><span class="line">hello world1</span><br><span class="line">hello world1</span><br><span class="line">$ <span class="built_in">cat</span> test-beats2.log</span><br><span class="line">hello world2</span><br></pre></td></tr></table></figure>
+<p><code>filebeat.yml</code> 配置示例：</p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">filebeat.inputs:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">log</span></span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/home/yulewei/test-beats1.log</span></span><br><span class="line">  <span class="attr">fields:</span></span><br><span class="line">    <span class="attr">log_type:</span> <span class="string">test1</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">type:</span> <span class="string">log</span> </span><br><span class="line">  <span class="attr">paths:</span></span><br><span class="line">    <span class="bullet">-</span> <span class="string">/home/yulewei/test-beats2.log</span></span><br><span class="line">  <span class="attr">fields:</span></span><br><span class="line">    <span class="attr">log_type:</span> <span class="string">test2</span></span><br><span class="line"></span><br><span class="line"><span class="attr">output.logstash:</span></span><br><span class="line">  <span class="attr">hosts:</span> [<span class="string">&quot;localhost:5044&quot;</span>]</span><br></pre></td></tr></table></figure>
+<p>示例配置文件使用了 <code>filebeat.inputs.fields</code> 选项，<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/beats/filebeat/6.5/filebeat-input-log.html#filebeat-input-log-fields">fields</a> 选项用于在日志事件输出中添加字段。添加的字段名可以任意指定，示例中名为 <code>log_type</code>。因为现在在 filebeat 配置中同时导入两个日志文件，输出到同一个 logstash 中。使用这个额外字段是为了区分日志是来自 <code>test-beats1.log</code> 还是 <code>test-beats2.log</code>。示例中，第 1 个日志事件输出的 <code>log_type</code> 字段值配置为 <code>test1</code>， 第 2 个日志配置为 <code>test2</code>。</p>
+<p>管道配置文件示例，<code>test-beats-elasticsearch.conf</code>：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">input &#123;</span><br><span class="line">  beats &#123;</span><br><span class="line">    port =&gt; 5044</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">output &#123;</span><br><span class="line">  elasticsearch &#123;</span><br><span class="line">    hosts =&gt; [&quot;http://192.168.2.109:9200&quot;]</span><br><span class="line">    index =&gt; &quot;filebeat-%&#123;[fields][log_type]&#125;-%&#123;+YYYY.MM.dd&#125;&quot;</span><br><span class="line">  &#125;</span><br><span class="line">  stdout &#123;</span><br><span class="line">    codec =&gt; rubydebug</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出插件同时使用了 <code>elasticsearch</code> 和 <code>stdout</code>。配置文件中的 <code>elasticsearch</code> 输出插件的 <code>index</code> 指令被设置为 <code>filebeat-%&#123;[fields][log_type]&#125;-%&#123;+YYYY.MM.dd&#125;</code>。<code>[fields][log_type]</code> 引用的是在 <code>filebeat.yml</code> 的 <code>filebeat.inputs.fields</code> 选项添加的 <code>log_type</code> 字段（关于在配置文件引用字段的语法，可以参考<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/event-dependent-configuration.html#logstash-config-field-references">官方文档</a>）。根据 <code>log_type</code> 字段不同，把日志将输出到不同的索引中。因为 <code>filebeat.yml</code> 配置文件中设置的 <code>log_type</code> 字段是 <code>test1</code> 或者 <code>test2</code>，所以最终生成的索引名是 <code>filebeat-test1-*</code> 或者 <code>filebeat-test1-*</code>。<code>filebeat-test1-*</code> 索引中全部日志数据来自 <code>test-beats1.log</code> 日志文件，<code>filebeat-test2-*</code> 索引数据来自 <code>test-beats2.log</code>。</p>
+<p>启动 filebeat 和 logstash：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo systemctl restart filebeat.service</span><br><span class="line">$ sudo /usr/share/logstash/bin/logstash -r -f ~/test-beats-elasticsearch.conf</span><br></pre></td></tr></table></figure>
+<p>控制台输出：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="punctuation">&#123;</span></span><br><span class="line">      <span class="string">&quot;@version&quot;</span> =&gt; <span class="string">&quot;1&quot;</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;host&quot;</span> =&gt; <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="string">&quot;name&quot;</span> =&gt; <span class="string">&quot;ubuntu109&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">       <span class="string">&quot;message&quot;</span> =&gt; <span class="string">&quot;hello world2&quot;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;prospector&quot;</span> =&gt; <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="string">&quot;type&quot;</span> =&gt; <span class="string">&quot;log&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;fields&quot;</span> =&gt; <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="string">&quot;log_type&quot;</span> =&gt; <span class="string">&quot;test2&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;offset&quot;</span> =&gt; <span class="number">0</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;tags&quot;</span> =&gt; <span class="punctuation">[</span></span><br><span class="line">        <span class="punctuation">[</span><span class="number">0</span><span class="punctuation">]</span> <span class="string">&quot;beats_input_codec_plain_applied&quot;</span></span><br><span class="line">    <span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">          <span class="string">&quot;beat&quot;</span> =&gt; <span class="punctuation">&#123;</span></span><br><span class="line">            <span class="string">&quot;name&quot;</span> =&gt; <span class="string">&quot;ubuntu109&quot;</span><span class="punctuation">,</span></span><br><span class="line">         <span class="string">&quot;version&quot;</span> =&gt; <span class="string">&quot;6.5.4&quot;</span><span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;hostname&quot;</span> =&gt; <span class="string">&quot;ubuntu109&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span><span class="punctuation">,</span></span><br><span class="line">    <span class="string">&quot;@timestamp&quot;</span> =&gt; <span class="number">2019</span><span class="number">-01</span><span class="number">-13</span>T09<span class="punctuation">:</span><span class="number">32</span><span class="punctuation">:</span><span class="number">11.845</span>Z<span class="punctuation">,</span></span><br><span class="line">        <span class="string">&quot;source&quot;</span> =&gt; <span class="string">&quot;/home/yulewei/test-beats2.log&quot;</span><span class="punctuation">,</span></span><br><span class="line">         <span class="string">&quot;input&quot;</span> =&gt; <span class="punctuation">&#123;</span></span><br><span class="line">        <span class="string">&quot;type&quot;</span> =&gt; <span class="string">&quot;log&quot;</span></span><br><span class="line">    <span class="punctuation">&#125;</span></span><br><span class="line"><span class="punctuation">&#125;</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>查看在 elasticsearch 上新创建的 <code>filebeat-test1-*</code> 和 <code>filebeat-test1-*</code> 索引：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ curl http://192.168.2.109:9200/_cat/indices/filebeat-*</span><br><span class="line">yellow open filebeat-test1-2019.01.13 NLVfFJl5TQ-7I1r9KoVLaQ 5 1 5 0 31.8kb 31.8kb</span><br><span class="line">yellow open filebeat-test2-2019.01.13 NnsBp3P9Q3-mLc8chE-Tiw 5 1 3 0 24.1kb 24.1kb</span><br></pre></td></tr></table></figure>
+<p>在 kibana 上查看收集的日志：</p>
+<img width="800" alt="Kibana" title="Kibana" src="https://static.nullwy.me/filebeat-kibana.png">
+<p>整体架构上，如下图所示 [ <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.8/deploying-and-scaling.html">doc</a> ]：</p>
+<img width="800" alt="Deploying Logstash" title="Deploying Logstash" src="https://static.nullwy.me/logstash-deploy2.png">
+<hr>
+<p><strong>附注</strong>：本文中提到的配置文件，可以在 github 上访问得到，<a target="_blank" rel="noopener" href="https://github.com/yulewei/elastic-stack-conf">elastic-stack-conf</a>。</p>
+<h1 id="参考资料">参考资料</h1>
+<ul>
+<li>发展历程| Elastic <a target="_blank" rel="noopener" href="https://www.elastic.co/cn/about/history-of-elasticsearch">https://www.elastic.co/cn/about/history-of-elasticsearch</a></li>
+<li>2013-01 Welcome Drew &amp; Rashid (Kibana) <a target="_blank" rel="noopener" href="https://www.elastic.co/blog/welcome-drew-rashid">https://www.elastic.co/blog/welcome-drew-rashid</a></li>
+<li>2013-08 Welcome Jordan &amp; Logstash <a target="_blank" rel="noopener" href="https://www.elastic.co/blog/welcome-jordan-logstash">https://www.elastic.co/blog/welcome-jordan-logstash</a></li>
+<li>2015-05 Welcome Packetbeat, Tudor &amp; Monica <a target="_blank" rel="noopener" href="https://www.elastic.co/blog/welcome-packetbeat-tudor-monica">https://www.elastic.co/blog/welcome-packetbeat-tudor-monica</a></li>
+<li>2015-11 The Beats 1.0.0 <a target="_blank" rel="noopener" href="https://www.elastic.co/blog/beats-1-0-0">https://www.elastic.co/blog/beats-1-0-0</a></li>
+<li>2016-02 Heya, Elastic Stack and X-Pack <a target="_blank" rel="noopener" href="https://www.elastic.co/blog/heya-elastic-stack-and-x-pack">https://www.elastic.co/blog/heya-elastic-stack-and-x-pack</a></li>
+<li>2016-10 Elastic Stack 5.0 正式发布 <a target="_blank" rel="noopener" href="https://www.elastic.co/cn/blog/elastic-stack-5-0-0-released">https://www.elastic.co/cn/blog/elastic-stack-5-0-0-released</a></li>
+<li>2018-05 官方：Logstash 实用介绍 <a target="_blank" rel="noopener" href="https://www.elastic.co/cn/blog/a-practical-introduction-to-logstash">https://www.elastic.co/cn/blog/a-practical-introduction-to-logstash</a></li>
+<li>Filebeat vs. Logstash — The Evolution of a Log Shipper <a target="_blank" rel="noopener" href="https://logz.io/blog/filebeat-vs-logstash/">https://logz.io/blog/filebeat-vs-logstash/</a></li>
+<li>精通Elastic Stack，Gupta，2017 <a target="_blank" rel="noopener" href="https://book.douban.com/subject/30326542/">https://book.douban.com/subject/30326542/</a></li>
+<li>logstash - open source log management <a target="_blank" rel="noopener" href="https://web.archive.org/web/20150512135526/http://logstash.net/">https://web.archive.org/web/20150512135526/http://logstash.net/</a></li>
+<li>Logstash Config Language <a target="_blank" rel="noopener" href="https://web.archive.org/web/20150907161920/http://logstash.net/docs/1.4.2/configuration">https://web.archive.org/web/20150907161920/http://logstash.net/docs/1.4.2/configuration</a></li>
+<li>Accessing Event Data and Fields in the Configuration <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/event-dependent-configuration.html">https://www.elastic.co/guide/en/logstash/6.5/event-dependent-configuration.html</a></li>
+<li>Logstash Configuration Examples <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.5/config-examples.html">https://www.elastic.co/guide/en/logstash/6.5/config-examples.html</a></li>
+<li>Logstash Reference: Deploying and Scaling Logstash <a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/logstash/6.8/deploying-and-scaling.html">https://www.elastic.co/guide/en/logstash/6.8/deploying-and-scaling.html</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2019/01/elastic-stack/" title="Elastic Stack 日志分析平台搭建笔记">https://nullwy.me/2019/01/elastic-stack/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/ELK/" rel="tag"># ELK</a>
+              <a href="/tags/Elastic/" rel="tag"># Elastic</a>
+              <a href="/tags/%E6%97%A5%E5%BF%97/" rel="tag"># 日志</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/10/java-agent/" rel="prev" title="Java Agent 学习笔记">
+      <i class="fa fa-chevron-left"></i> Java Agent 学习笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/06/mysql-5.7-json/" rel="next" title="MySQL 5.7 的 JSON 类型">
+      MySQL 5.7 的 JSON 类型 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Logstash"><span class="nav-number">1.</span> <span class="nav-text">使用 Logstash</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E7%A4%BA%E4%BE%8B"><span class="nav-number">1.1.</span> <span class="nav-text">最简单的示例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#file-%E8%BE%93%E5%85%A5%E6%8F%92%E4%BB%B6"><span class="nav-number">1.2.</span> <span class="nav-text">file 输入插件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#grok-%E8%BF%87%E6%BB%A4%E6%8F%92%E4%BB%B6"><span class="nav-number">1.3.</span> <span class="nav-text">grok 过滤插件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%A7%A3%E6%9E%90-http-%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%97%A5%E5%BF%97"><span class="nav-number">1.3.1.</span> <span class="nav-text">解析 http 服务器日志</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dissect-%E8%BF%87%E6%BB%A4%E6%8F%92%E4%BB%B6"><span class="nav-number">1.4.</span> <span class="nav-text">dissect 过滤插件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E5%88%B0-Elasticsearch"><span class="nav-number">2.</span> <span class="nav-text">输出到 Elasticsearch</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-Elasticsearch"><span class="nav-number">2.1.</span> <span class="nav-text">安装 Elasticsearch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E5%88%B0-Elasticsearch-v2"><span class="nav-number">2.2.</span> <span class="nav-text">输出到 Elasticsearch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Kibana"><span class="nav-number">2.3.</span> <span class="nav-text">使用 Kibana</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Filebeat"><span class="nav-number">3.</span> <span class="nav-text">使用 Filebeat</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E5%88%B0-Elasticsearch-v3"><span class="nav-number">3.1.</span> <span class="nav-text">输出到 Elasticsearch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%93%E5%87%BA%E5%88%B0-Logstash"><span class="nav-number">3.2.</span> <span class="nav-text">输出到 Logstash</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9B%86%E6%88%90-Filebeat-Logstash-Elasticsearch-Kibana"><span class="nav-number">4.</span> <span class="nav-text">集成 Filebeat, Logstash, Elasticsearch, Kibana</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2019/01/elastic-stack/";
+    this.page.identifier = "2019/01/elastic-stack/";
+    this.page.title = "Elastic Stack 日志分析平台搭建笔记";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

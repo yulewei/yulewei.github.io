@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Java 从 1.5 开始提供了 java.lang.instrument（doc）包，该包为检测（instrument） Java 程序提供 API，比如用于监控、收集性能信息、诊断问题。通过 java.lang.instrument 实现工具被称为 Java Agent。Java Agent 可以修改类文件的字节码，通常是，在字节码方法插入额外的字节码来完成检测。关于如何使用 java.lan">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java Agent 学习笔记">
+<meta property="og:url" content="https://nullwy.me/2018/10/java-agent/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="Java 从 1.5 开始提供了 java.lang.instrument（doc）包，该包为检测（instrument） Java 程序提供 API，比如用于监控、收集性能信息、诊断问题。通过 java.lang.instrument 实现工具被称为 Java Agent。Java Agent 可以修改类文件的字节码，通常是，在字节码方法插入额外的字节码来完成检测。关于如何使用 java.lan">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.nullwy.me/java-agent-overview.png">
+<meta property="og:image" content="https://static.nullwy.me/byte-buddy-delegation-vs-advice.png">
+<meta property="article:published_time" content="2018-10-04T15:26:20.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:14:35.160Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="字节码">
+<meta property="article:tag" content="javaagent">
+<meta property="article:tag" content="byte-buddy">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.nullwy.me/java-agent-overview.png">
+
+<link rel="canonical" href="https://nullwy.me/2018/10/java-agent/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java Agent 学习笔记 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2018/10/java-agent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java Agent 学习笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-10-04 23:26:20" itemprop="dateCreated datePublished" datetime="2018-10-04T23:26:20+08:00">2018-10-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2018/10/java-agent/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/10/java-agent/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>13k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>12 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Java 从 1.5 开始提供了 <code>java.lang.instrument</code>（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/guides/instrumentation/">doc</a>）包，该包为检测（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Instrumentation_%28computer_programming%29">instrument</a>） Java 程序提供 API，比如用于监控、收集性能信息、诊断问题。通过 <code>java.lang.instrument</code> 实现工具被称为 Java Agent。Java Agent 可以修改类文件的字节码，通常是，在字节码方法插入额外的字节码来完成检测。关于如何使用 <code>java.lang.instrument</code> 包，可以参考 javadoc 的包描述（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/lang/instrument/package-summary.html">en</a>, <a target="_blank" rel="noopener" href="http://www.cjsdn.net/doc/jdk60/java/lang/instrument/package-summary.html">zh</a>）。</p>
+<span id="more"></span>
+<p>开发 Java Agent 的涉及的要点如下图所示 [ <a target="_blank" rel="noopener" href="https://zeroturnaround.com/rebellabs/how-to-inspect-classes-in-your-jvm/">ref</a> ]<br>
+<img width="700" alt="Java Agent" title="Java Agent" src="https://static.nullwy.me/java-agent-overview.png"></p>
+<p>Java Agent 支持两种方式加载，启动时加载，即在 JVM 程序启动时在命令行指定一个选项来启动代理；启动后加载，这种方式使用从 JDK 1.6 开始提供的 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/guides/attach/index.html">Attach API</a> 来动态加载代理。</p>
+<h1 id="启动时加载-agent">启动时加载 agent</h1>
+<h2 id="最简单的例子">最简单的例子</h2>
+<p>现在创建命名为 proj-demo 的 gradle 项目，目录布局如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ tree proj-demo</span><br><span class="line">proj-demo</span><br><span class="line">├── build.gradle</span><br><span class="line">└── src</span><br><span class="line">    ├── main</span><br><span class="line">    │   └── java</span><br><span class="line">    │       └── com</span><br><span class="line">    │           └── demo</span><br><span class="line">    │               └── App.java</span><br><span class="line">    └── test</span><br><span class="line">        └── java</span><br><span class="line"></span><br><span class="line">7 directories, 2 files</span><br></pre></td></tr></table></figure>
+<p><code>com.demo.App</code> 类的实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">App</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            System.out.println(getGreeting());</span><br><span class="line">            Thread.sleep(<span class="number">1000L</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getGreeting</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;hello world&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行 <code>com.demo.App</code>，每隔 1 秒输出 <code>hello world</code>：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ gradle build</span><br><span class="line">$ java -<span class="built_in">cp</span> <span class="string">&quot;target/classes/java/main&quot;</span> com.demo.App</span><br><span class="line">hello world</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+<p>现在创建名称为 proj-premain 的 gradle 项目，<code>com.demo.MyPremain</code> 类实现 <code>premain</code> 方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.demo;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyPremain</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span> &#123;</span><br><span class="line">        System.out.println(agentArgs);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>META-INF/MANIFEST.MF</code> 文件指定 <code>Premain-Class</code> 属性：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">jar &#123;</span><br><span class="line">    manifest &#123;</span><br><span class="line">        attributes <span class="string">&#x27;Premain-Class&#x27;</span>: <span class="string">&#x27;com.demo.MyPremain&#x27;</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">from</span> &#123;</span><br><span class="line">        <span class="keyword">configurations</span>.<span class="keyword">compile</span>.<span class="keyword">collect</span> &#123; it.isDirectory() ? it : zipTree(it) &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>打包生成 <code>proj-premain.jar</code>，这个 jar 包就是 javaagent 代理。现在来试试运行 <code>com.demo.App</code> 时，启动这个 javaagent 代理。根据 javadoc 的描述，可以将以下选项添加到命令行来启动代理：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-javaagent:jarpath[=options] </span><br></pre></td></tr></table></figure>
+<p>指定 <code>-javaagent:&quot;proj-premain.jar=hello agent&quot;</code>，传入的 <code>agentArgs</code> 为 <code>hello agent</code>，再次运行 <code>com.demo.App</code>：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ java -javaagent:<span class="string">&quot;proj-premain.jar=hello agent&quot;</span> -<span class="built_in">cp</span> <span class="string">&quot;target/classes/java/main&quot;</span> com.demo.App</span><br><span class="line">hello agent</span><br><span class="line">hello world</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+<p>可以看到，在运行 <code>main</code> 之前，运行了 <code>premain</code> 方法，即先输出 <code>hello agent</code>，每隔 1 秒输出 <code>hello world</code>。</p>
+<h2 id="修改字节码">修改字节码</h2>
+<p>在实现 <code>premain</code> 时，除了能获取 <code>agentArgs</code> 参数，还能获取 <code>Instrumentation</code> 实例。<code>Instrumentation</code> 类提供 <code> addTransformer</code> 方法，用于注册提供的转换器 <code>ClassFileTransformer</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册提供的转换器</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">addTransformer</span><span class="params">(ClassFileTransformer transformer)</span></span><br></pre></td></tr></table></figure>
+<p><code>ClassFileTransformer</code> 是抽象接口，唯一需要实现的是 <code>transform</code> 方法。在转换器使用 <code>addTransformer</code> 注册之后，每次定义新类时（调用 <code>ClassLoader.defineClass</code>）都将调用该转换器的 <code>transform</code> 方法。该方法签名如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 此方法的实现可以转换提供的类文件，并返回一个新的替换类文件</span></span><br><span class="line"><span class="type">byte</span>[] transform(ClassLoader loader,</span><br><span class="line">                 String className,</span><br><span class="line">                 Class&lt;?&gt; classBeingRedefined,</span><br><span class="line">                 ProtectionDomain protectionDomain,</span><br><span class="line">                 <span class="type">byte</span>[] classfileBuffer)</span><br><span class="line">                 <span class="keyword">throws</span> IllegalClassFormatException</span><br></pre></td></tr></table></figure>
+<p>操作字节码可以使用 ASM、Apache BCEL、Javassist、cglib、Byte Buddy 等库。下面示例代码，使用 <a target="_blank" rel="noopener" href="https://commons.apache.org/proper/commons-bcel/">BCEL</a> 库实现名为 <code>GreetingTransformer</code> 转换器。该转换器实现的逻辑就是，将 <code>com.demo.App.getGreeting()</code> 方法输出的 <code>hello world</code>，替换为输出 <code>premain</code> 方法的传入的参数 <code>agentArgs</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyPremain</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span> &#123;</span><br><span class="line">        inst.addTransformer(<span class="keyword">new</span> <span class="title class_">GreetingTransformer</span>(agentArgs));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.bcel.*;</span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.ClassFileTransformer;</span><br><span class="line"><span class="keyword">import</span> java.lang.instrument.Instrumentation;</span><br><span class="line"><span class="keyword">import</span> java.security.ProtectionDomain;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GreetingTransformer</span> <span class="keyword">implements</span> <span class="title class_">ClassFileTransformer</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> String agentArgs;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">GreetingTransformer</span><span class="params">(String agentArgs)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.agentArgs = agentArgs;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="type">byte</span>[] transform(ClassLoader loader, String className, Class&lt;?&gt; classBeingRedefined,</span><br><span class="line">                            ProtectionDomain protectionDomain, <span class="type">byte</span>[] classfileBuffer) &#123;</span><br><span class="line">        <span class="keyword">if</span> (!className.equals(<span class="string">&quot;com/demo/App&quot;</span>)) &#123;</span><br><span class="line">            <span class="keyword">return</span> classfileBuffer;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">JavaClass</span> <span class="variable">clazz</span> <span class="operator">=</span> Repository.lookupClass(className);</span><br><span class="line">            <span class="type">ClassGen</span> <span class="variable">cg</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ClassGen</span>(clazz);</span><br><span class="line">            <span class="type">ConstantPoolGen</span> <span class="variable">cp</span> <span class="operator">=</span> cg.getConstantPool();</span><br><span class="line">            <span class="keyword">for</span> (Method method : clazz.getMethods()) &#123;</span><br><span class="line">                <span class="keyword">if</span> (method.getName().equals(<span class="string">&quot;getGreeting&quot;</span>)) &#123;</span><br><span class="line">                    <span class="type">MethodGen</span> <span class="variable">mg</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MethodGen</span>(method, cg.getClassName(), cp);</span><br><span class="line">                    <span class="type">InstructionList</span> <span class="variable">il</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InstructionList</span>();</span><br><span class="line">                    il.append(<span class="keyword">new</span> <span class="title class_">PUSH</span>(cp, <span class="built_in">this</span>.agentArgs));</span><br><span class="line">                    il.append(InstructionFactory.createReturn(Type.STRING));</span><br><span class="line">                    mg.setInstructionList(il);</span><br><span class="line">                    mg.setMaxStack();</span><br><span class="line">                    mg.setMaxLocals();</span><br><span class="line">                    cg.replaceMethod(method, mg.getMethod());</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> cg.getJavaClass().getBytes();</span><br><span class="line">        &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="启动后加载-agent">启动后加载 agent</h1>
+<p>最早 JDK 1.5发布 <code>java.lang.instrument</code> 包时，agent 是必须在 JVM 启动时，通过命令行选项附着（attach）上去。但在 JVM 正常运行时，加载 agent 没有意义，只有出现问题，需要诊断才需要附着 agent。JDK 1.6 实现了 attach-on-demand（按需附着）[ JDK-<a target="_blank" rel="noopener" href="https://bugs.openjdk.java.net/browse/JDK-4882798">4882798</a> ]，可以使用 Attach API 动态加载 agent [ <a target="_blank" rel="noopener" href="https://blogs.oracle.com/corejavatechtips/the-attach-api">oracle blog</a>, <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/guides/attach/index.html">javadoc</a> ]。这个 Attach API 在 <code>tools.jar</code> 中。JVM 启动时默认不加载这个 jar 包，需要在 classpath 中额外指定。使用 Attach API 动态加载 agent 的示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.tools.attach.VirtualMachine;</span><br><span class="line"><span class="keyword">import</span> com.sun.tools.attach.VirtualMachineDescriptor;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AgentLoader</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="keyword">if</span> (args.length &lt; <span class="number">2</span>) &#123;</span><br><span class="line">            System.err.println(<span class="string">&quot;Usage: java -cp .:$JAVA_HOME/lib/tools.jar&quot;</span></span><br><span class="line">                    + <span class="string">&quot; com.demo.AgentLoader &lt;pid/name&gt; &lt;agent&gt; [options]&quot;</span>);</span><br><span class="line">            System.exit(<span class="number">0</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">String</span> <span class="variable">jvmPid</span> <span class="operator">=</span> args[<span class="number">0</span>];</span><br><span class="line">        <span class="type">String</span> <span class="variable">agentJar</span> <span class="operator">=</span> args[<span class="number">1</span>];</span><br><span class="line">        <span class="type">String</span> <span class="variable">options</span> <span class="operator">=</span> args.length &gt; <span class="number">2</span> ? args[<span class="number">2</span>] : <span class="literal">null</span>;</span><br><span class="line">        <span class="keyword">for</span> (VirtualMachineDescriptor jvm : VirtualMachine.list()) &#123;</span><br><span class="line">            <span class="keyword">if</span> (jvm.displayName().contains(args[<span class="number">0</span>])) &#123;</span><br><span class="line">                jvmPid = jvm.id();</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="type">VirtualMachine</span> <span class="variable">jvm</span> <span class="operator">=</span> VirtualMachine.attach(jvmPid);</span><br><span class="line">        jvm.loadAgent(agentJar, options);</span><br><span class="line">        jvm.detach();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>启动时加载 agent，<code>-javaagent</code> 传入的 jar 包需要在 <code>MANIFEST.MF</code> 中包含 <code>Premain-Class</code> 属性，此属性的值是 <em>代理类</em> 的名称，并且这个 <em>代理类</em> 要实现 <code>premain</code> 静态方法。启动后加载 agent 也是类似，通过 <code>Agent-Class</code> 属性指定 <em>代理类</em>，<em>代理类</em> 要实现 <code>agentemain</code> 静态方法。agent 被加载后，JVM 将尝试调用 <code>agentmain</code> 方法。</p>
+<p>上文提到每次定义新类（调用 <code>ClassLoader.defineClass</code>）时，都将调用该转换器的 <code>transform</code> 方法。对于已经定义加载的类，需要使用重定义类（调用 <code>Instrumentation.redefineClass</code>）或重转换类（调用 <code>Instrumentation.retransformClass</code>）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册提供的转换器。如果 canRetransform 为 true，那么重转换类时也将调用该转换器</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">addTransformer</span><span class="params">(ClassFileTransformer transformer, <span class="type">boolean</span> canRetransform)</span></span><br><span class="line"><span class="comment">// 使用提供的类文件重定义提供的类集。新的类文件字节，通过 ClassDefinition 传入</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">redefineClasses</span><span class="params">(ClassDefinition... definitions)</span></span><br><span class="line">                     <span class="keyword">throws</span> ClassNotFoundException, UnmodifiableClassException</span><br><span class="line"><span class="comment">// 重转换提供的类集。对于每个添加时 canRetransform 设为 true 的转换器，在这些转换器中调用 transform 方法 </span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">retransformClasses</span><span class="params">(Class&lt;?&gt;... classes)</span></span><br><span class="line">                        <span class="keyword">throws</span> UnmodifiableClassException</span><br></pre></td></tr></table></figure>
+<p>重定义类（redefineClass）从 JDK 1.5 开始支持，而重转换类（retransformClass）是 JDK 1.6 引入。相对来说，重转换类能力更强，当存在多个转换器时，重转换将由 transform 调用链组成，而重定义类无法组成调用链。重定义类能实现的逻辑，重转换类同样能完成，所以保留重定义类方法（<code>Instrumentation.redefineClass</code>）可能只是为了向后兼容 [ <a target="_blank" rel="noopener" href="https://stackoverflow.com/q/19009583">stackoverflow</a> ]。</p>
+<p>实现 agentmain 的示例代码如下，其中 <code>GreetingTransformer</code> 转换器的类定义和上文一样。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">MyAgentMain</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">agentmain</span><span class="params">(String agentArgs, Instrumentation inst)</span> &#123;</span><br><span class="line">        inst.addTransformer(<span class="keyword">new</span> <span class="title class_">GreetingTransformer</span>(agentArgs), <span class="literal">true</span>);</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="type">Class</span> <span class="variable">clazz</span> <span class="operator">=</span> Class.forName(<span class="string">&quot;com.demo.App&quot;</span>);</span><br><span class="line">            <span class="keyword">if</span> (inst.isModifiableClass(clazz)) &#123;</span><br><span class="line">                inst.retransformClasses(clazz);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>MANIFEST.MF</code> 文件配置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">jar &#123;</span><br><span class="line">    manifest &#123;</span><br><span class="line">        attributes &#x27;Agent-Class&#x27;: &#x27;com.demo.MyAgentMain&#x27;</span><br><span class="line">        attributes &#x27;Can-Redefine-Classes&#x27; : true</span><br><span class="line">        attributes &#x27;Can-Retransform-Classes&#x27; : true</span><br><span class="line">    &#125;</span><br><span class="line">    from &#123;</span><br><span class="line">        configurations.compile.collect &#123; it.isDirectory() ? it : zipTree(it) &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>需要注意的是，和定义新类不同，重定义类和重转换类，可能会更改方法体、常量池和属性，但不得添加、移除、重命名字段或方法；不得更改方法签名、继承关系 [ <a target="_blank" rel="noopener" href="http://www.cjsdn.net/doc/jdk60/java/lang/instrument/Instrumentation.html">javadoc</a> ]。这个限制将来可能会通过 “JEP 159: Enhanced Class Redefinition” 移除 [ <a target="_blank" rel="noopener" href="http://openjdk.java.net/jeps/159">ref</a> ]。</p>
+<h1 id="使用-Byte-Buddy">使用 Byte Buddy</h1>
+<p>Byte Buddy（<a target="_blank" rel="noopener" href="http://bytebuddy.net/">home</a>, <a target="_blank" rel="noopener" href="https://github.com/raphw/byte-buddy">github</a>, <a target="_blank" rel="noopener" href="http://bytebuddy.net/javadoc/1.8.0/">javadoc</a>），运行时的代码生成和操作库，2015 年获得 Oracle 官方 Duke's Choice award，提供高级别的创建和修改 Java 类文件的 API，使用这个库时，不需要了解字节码。另外，对 Java Agent 的开发 Byte Buddy 也有很好的支持，可以参考 Byte Buddy 作者 Rafael Winterhalter 写的介绍文章 [ <a target="_blank" rel="noopener" href="http://www.infoq.com/cn/articles/easily-create-java-agents-with-bytebuddy">ref1</a>, <a target="_blank" rel="noopener" href="https://www.sitepoint.com/fixing-bugs-in-running-java-code-with-dynamic-attach/">ref2</a> ]。</p>
+<p>上文使用 BCEL 实现的 <code>GreetingTransformer</code>，现在改用 Byte Buddy，会变得非常简单。实现 <code>premain</code> 示例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span> &#123;</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">AgentBuilder</span>.Default()</span><br><span class="line">            .type(ElementMatchers.named(<span class="string">&quot;com.demo.App&quot;</span>))</span><br><span class="line">            .transform(<span class="keyword">new</span> <span class="title class_">AgentBuilder</span>.Transformer() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="keyword">public</span> DynamicType.Builder&lt;?&gt; transform(DynamicType.Builder&lt;?&gt; builder,</span><br><span class="line">                                                        TypeDescription typeDescription,</span><br><span class="line">                                                        ClassLoader classLoader,</span><br><span class="line">                                                        JavaModule <span class="keyword">module</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> builder.method(ElementMatchers.named(<span class="string">&quot;getGreeting&quot;</span>))</span><br><span class="line">                            .intercept(FixedValue.value(agentArgs));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;).installOn(inst);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>实现 <code>agentmain</code>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">agentmain</span><span class="params">(String agentArgs, Instrumentation inst)</span> &#123;</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">AgentBuilder</span>.Default()</span><br><span class="line">            .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)</span><br><span class="line">            .disableClassFormatChanges()</span><br><span class="line">            .type(ElementMatchers.named(<span class="string">&quot;com.demo.App&quot;</span>))</span><br><span class="line">            .transform(<span class="keyword">new</span> <span class="title class_">AgentBuilder</span>.Transformer() &#123;</span><br><span class="line">                <span class="meta">@Override</span></span><br><span class="line">                <span class="keyword">public</span> DynamicType.Builder&lt;?&gt; transform(DynamicType.Builder&lt;?&gt; builder,</span><br><span class="line">                                                        TypeDescription typeDescription,</span><br><span class="line">                                                        ClassLoader classLoader,</span><br><span class="line">                                                        JavaModule <span class="keyword">module</span>) &#123;</span><br><span class="line">                    <span class="keyword">return</span> builder.method(ElementMatchers.named(<span class="string">&quot;getGreeting&quot;</span>))</span><br><span class="line">                            .intercept(FixedValue.value(agentArgs));</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;).installOn(inst);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>另外，Byte Buddy 对 Attach API 作了封装，屏蔽了对 <code>tools.jar</code> 的加载，可以直接使用 <code>ByteBuddyAgent</code> 类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ByteBuddyAgent.attach(<span class="keyword">new</span> <span class="title class_">File</span>(agentJar), jvmPid, options);</span><br></pre></td></tr></table></figure>
+<p>上文中的 <code>AgentLoader</code>，可以使用这个 API 简化，实现的完整示例参见 <a target="_blank" rel="noopener" href="https://github.com/yulewei/javaagent-demo/blob/master/proj-demo/src/main/java/com/demo/AgentLoader2.java">AgentLoader2</a>。</p>
+<h1 id="实现性能计时器">实现性能计时器</h1>
+<p>Byte Buddy 的 github 的 <a target="_blank" rel="noopener" href="https://github.com/raphw/byte-buddy#changing-existing-classes">README</a> 文档提供了一个性能计时拦截器的代码示例，能对某个方法的运行耗时做统计。现在我们来看下是如何实现的。假设 <code>com.demo.App2</code> 类如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">App2</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            System.out.println(getGreeting());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getGreeting</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            Thread.sleep((<span class="type">long</span>) (<span class="number">1000</span> * Math.random()));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;hello world&quot;</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用 Byte Buddy 实现计时拦截器的 agent，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TimerAgent</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">premain</span><span class="params">(String agentArgs, Instrumentation inst)</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">AgentBuilder</span>.Default()</span><br><span class="line">                .type(ElementMatchers.any())</span><br><span class="line">                .transform((builder, type, classLoader, <span class="keyword">module</span>) -&gt;</span><br><span class="line">                        builder.method(ElementMatchers.nameMatches(agentArgs))</span><br><span class="line">                                .intercept(MethodDelegation.to(TimingInterceptor.class)))</span><br><span class="line">                .installOn(inst);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TimingInterceptor</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@RuntimeType</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title function_">intercept</span><span class="params">(<span class="meta">@Origin</span> Method method, <span class="meta">@SuperCall</span> Callable&lt;?&gt; callable)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">long</span> <span class="variable">start</span> <span class="operator">=</span> System.currentTimeMillis();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> callable.call();</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            System.out.println(method + <span class="string">&quot; took &quot;</span> + (System.currentTimeMillis() - start) + <span class="string">&quot;ms&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对 <code>getGreeting</code> 方法进行性能剖析，运行结果如下：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ java -javaagent:&quot;proj-byte-buddy.jar=get.*&quot; -cp &quot;target/classes/java/main&quot; com.demo.App2</span><br><span class="line">public static java.lang.String com.demo.App2.getGreeting() took 694ms</span><br><span class="line">hello world</span><br><span class="line">public static java.lang.String com.demo.App2.getGreeting() took 507ms</span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+<p>示例代码中的 <code>premain</code> 参数 <code>agentArgs</code> 用于指定需要剖析性能的方法名，支持正则表达式。当实际参数传入 <code>get.*</code> 时，匹配到 <code>getGreeting</code> 方法。上面的示例，使用的是 Byte Buddy 的方法委托 Method Delegation API [ <a target="_blank" rel="noopener" href="http://bytebuddy.net/javadoc/1.9.12/net/bytebuddy/implementation/MethodDelegation.html">javadoc</a> ]。Delegation API 实现原理就是，将被拦截的方法委托到另一个办法上，如下左图所示（图片来自 Rafael Winterhalter 的 <a target="_blank" rel="noopener" href="https://www.slideshare.net/RafaelWinterhalter/runtime-code-generation-for-the-jvm">slides</a>）。这种写法会修改被代理类的类定义格式，只能用在启动时加载 agent，即 <code>premain</code> 方式代理。</p>
+<p>若要通过 Byte Buddy 实现启动后动态加载 agent，官方提供了 Advice API [ <a target="_blank" rel="noopener" href="http://bytebuddy.net/javadoc/1.9.12/net/bytebuddy/asm/Advice.html">javadoc</a> ]。Advice API 实现原理上是，在被拦截方法内部的开始和结尾添加代码，如下右图所示。这样只更改了方法体，不更改方法签名，也没添加额外的方法，符合重定义类（redefineClass）和重转换类（retransformClass）的限制。</p>
+<img width="400" alt="delegation vs. advice" title="delegation vs. advice" src="https://static.nullwy.me/byte-buddy-delegation-vs-advice.png">
+<p>现在来看下使用 Advice API 实现性能定时器的代码示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">TimingAdvice</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Advice</span>.OnMethodEnter</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">long</span> <span class="title function_">enter</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> System.currentTimeMillis();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Advice</span>.OnMethodExit</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">exit</span><span class="params">(<span class="meta">@Advice</span>.Origin Method method, <span class="meta">@Advice</span>.Enter <span class="type">long</span> start)</span> &#123;</span><br><span class="line">        <span class="type">long</span> <span class="variable">duration</span> <span class="operator">=</span> System.currentTimeMillis() - start;</span><br><span class="line">        System.out.println(method + <span class="string">&quot; took &quot;</span> + duration + <span class="string">&quot;ms&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">agentmain</span><span class="params">(String agentArgs, Instrumentation inst)</span> &#123;</span><br><span class="line">    <span class="keyword">new</span> <span class="title class_">AgentBuilder</span>.Default()</span><br><span class="line">            .disableClassFormatChanges()</span><br><span class="line">            .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)</span><br><span class="line"><span class="comment">//          .with(AgentBuilder.Listener.StreamWriting.toSystemOut())</span></span><br><span class="line">            .type(ElementMatchers.any())</span><br><span class="line">            .transform((builder, type, classLoader, <span class="keyword">module</span>) -&gt;</span><br><span class="line">                    builder.visit(Advice.to(TimingAdvice.class)</span><br><span class="line">                            .on(ElementMatchers.nameMatches(agentArgs))))</span><br><span class="line">            .installOn(inst);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>若对 <code>com.demo.App</code> 类，动态加载这个 Advice API 实现的 agent，<code>getGreeting()</code> 方法将会被重定义为（真正的实现可能稍有不同，但原理一致）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title function_">getGreeting</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="type">long</span> <span class="variable">$start</span> <span class="operator">=</span> System.nanoTime();</span><br><span class="line">    <span class="type">String</span> <span class="variable">$result</span> <span class="operator">=</span> <span class="string">&quot;hello world&quot;</span>;</span><br><span class="line">    <span class="type">long</span> <span class="variable">$duration</span> <span class="operator">=</span> System.nanoTime() – $start;</span><br><span class="line">    System.out.println(<span class="string">&quot;App.getGreeting()&quot;</span> + <span class="string">&quot; took &quot;</span> + $duration + <span class="string">&quot;ms&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> $result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="实际应用案例">实际应用案例</h1>
+<p>Java Agent 的实际应用案例很多，举些笔者实际工作中使用到的开源软件的应用案例。</p>
+<p>微服务是目前流行的互联网架构，实施微服务架构其中用于观察分布式服务的 APM （应用性能管理）系统是必不可缺的一环。典型的 APM 系统，如 <a target="_blank" rel="noopener" href="https://naver.github.io/pinpoint/">Pinpoint</a>、<a target="_blank" rel="noopener" href="https://skywalking.apache.org/">SkyWalking</a>，为了减少的 Java 服务应用代码的入侵，底层实现上都采用 Java Agent 技术，在 Java 服务应用启动时加载 agent，进行字节码增强技术，实现分布式追踪、服务性能监控等特性。具体可参见 Pinpoint <a target="_blank" rel="noopener" href="https://naver.github.io/pinpoint/1.8.5/installation.html#5-pinpoint-agent">文档</a>和 SkyWalking <a target="_blank" rel="noopener" href="https://github.com/apache/skywalking/blob/master/docs/en/setup/service-agent/java-agent/README.md">文档</a>。</p>
+<p>Alibaba Java 诊断利器 <a target="_blank" rel="noopener" href="https://github.com/alibaba/arthas">Arthas</a>，实现上使用了动态 Attach API，相关源代码参见 <a target="_blank" rel="noopener" href="https://github.com/alibaba/arthas/blob/4.0.x/core/src/main/java/com/taobao/arthas/core/Arthas.java">github</a>。Arthas 4.0 开始支持 <code>premain</code> 方式启动时加载 agent，参见 issue <a target="_blank" rel="noopener" href="https://github.com/alibaba/arthas/issues/550">#550</a>。</p>
+<hr>
+<p>**附注：**本文中提到的代码，可以在 github 上访问得到，<a target="_blank" rel="noopener" href="https://github.com/yulewei/javaagent-demo">javaagent-demo</a>。</p>
+<h1 id="参考资料">参考资料</h1>
+<ul>
+<li>2016-08 Java 5 特性 Instrumentation 实践 <a target="_blank" rel="noopener" href="https://www.ibm.com/developerworks/cn/java/j-lo-instrumentation/">https://www.ibm.com/developerworks/cn/java/j-lo-instrumentation/</a></li>
+<li>2007-05 Java SE 6 新特性：Instrumentation 新功能 <a target="_blank" rel="noopener" href="https://www.ibm.com/developerworks/cn/java/j-lo-jse61/index.html">https://www.ibm.com/developerworks/cn/java/j-lo-jse61/index.html</a></li>
+<li>2017-08 The Attach API <a target="_blank" rel="noopener" href="https://blogs.oracle.com/corejavatechtips/the-attach-api">https://blogs.oracle.com/corejavatechtips/the-attach-api</a></li>
+<li>JPLIS: Java programming language agents need instrumentation support (JSR-163) <a target="_blank" rel="noopener" href="https://bugs.openjdk.java.net/browse/JDK-4882798">https://bugs.openjdk.java.net/browse/JDK-4882798</a></li>
+<li>need an attach mechanism <a target="_blank" rel="noopener" href="https://bugs.openjdk.java.net/browse/JDK-6173612">https://bugs.openjdk.java.net/browse/JDK-6173612</a></li>
+<li>Difference between redefine and retransform in javaagent <a target="_blank" rel="noopener" href="https://stackoverflow.com/q/19009583">https://stackoverflow.com/q/19009583</a></li>
+<li>2015-09 JVM源码分析之javaagent原理完全解读 <a target="_blank" rel="noopener" href="http://www.infoq.com/cn/articles/javaagent-illustrated">http://www.infoq.com/cn/articles/javaagent-illustrated</a></li>
+<li>2016-02 Rafael Winterhalter：通过使用Byte Buddy，便捷地创建Java Agent <a target="_blank" rel="noopener" href="http://www.infoq.com/cn/articles/easily-create-java-agents-with-bytebuddy">http://www.infoq.com/cn/articles/easily-create-java-agents-with-bytebuddy</a></li>
+<li>2017-01 Rafael Winterhalter: Fixing Bugs in Running Java Code with Dynamic Attach <a target="_blank" rel="noopener" href="https://www.sitepoint.com/fixing-bugs-in-running-java-code-with-dynamic-attach/">https://www.sitepoint.com/fixing-bugs-in-running-java-code-with-dynamic-attach/</a></li>
+<li>2014-08 Making Java more dynamic: runtime code generation for the JVM <a target="_blank" rel="noopener" href="https://www.slideshare.net/RafaelWinterhalter/runtime-code-generation-for-the-jvm">https://www.slideshare.net/RafaelWinterhalter/runtime-code-generation-for-the-jvm</a></li>
+<li>2016-04 Implementing a profiler agen with Byte Buddy which automatically attaches #110 <a target="_blank" rel="noopener" href="https://github.com/raphw/byte-buddy/issues/110">https://github.com/raphw/byte-buddy/issues/110</a></li>
+<li>2016-08 JavaDay Lviv 2016: Making Java more dynamic (Rafael Winterhalter) <a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=jo1v8csBorw">https://www.youtube.com/watch?v=jo1v8csBorw</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2018/10/java-agent/" title="Java Agent 学习笔记">https://nullwy.me/2018/10/java-agent/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/%E5%AD%97%E8%8A%82%E7%A0%81/" rel="tag"># 字节码</a>
+              <a href="/tags/javaagent/" rel="tag"># javaagent</a>
+              <a href="/tags/byte-buddy/" rel="tag"># byte-buddy</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/06/mysql-binlog/" rel="prev" title="MySQL binlog：格式、增量恢复、闪回、Java 解析">
+      <i class="fa fa-chevron-left"></i> MySQL binlog：格式、增量恢复、闪回、Java 解析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/01/elastic-stack/" rel="next" title="Elastic Stack 日志分析平台搭建笔记">
+      Elastic Stack 日志分析平台搭建笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E6%97%B6%E5%8A%A0%E8%BD%BD-agent"><span class="nav-number">1.</span> <span class="nav-text">启动时加载 agent</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E4%BE%8B%E5%AD%90"><span class="nav-number">1.1.</span> <span class="nav-text">最简单的例子</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E5%AD%97%E8%8A%82%E7%A0%81"><span class="nav-number">1.2.</span> <span class="nav-text">修改字节码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E5%90%8E%E5%8A%A0%E8%BD%BD-agent"><span class="nav-number">2.</span> <span class="nav-text">启动后加载 agent</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-Byte-Buddy"><span class="nav-number">3.</span> <span class="nav-text">使用 Byte Buddy</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E6%80%A7%E8%83%BD%E8%AE%A1%E6%97%B6%E5%99%A8"><span class="nav-number">4.</span> <span class="nav-text">实现性能计时器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E9%99%85%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="nav-number">5.</span> <span class="nav-text">实际应用案例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2018/10/java-agent/";
+    this.page.identifier = "2018/10/java-agent/";
+    this.page.title = "Java Agent 学习笔记";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

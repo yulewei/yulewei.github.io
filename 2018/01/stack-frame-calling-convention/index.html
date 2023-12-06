@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="栈与栈帧 要想知道函数是怎么被调用的，需要了解栈帧和调用惯例相关知识。俞甲子2009 的“第10章 内存: 栈与堆”对相关概念有很好的介绍。本文是对相关知识的学习笔记。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="栈帧与调用惯例">
+<meta property="og:url" content="https://nullwy.me/2018/01/stack-frame-calling-convention/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="栈与栈帧 要想知道函数是怎么被调用的，需要了解栈帧和调用惯例相关知识。俞甲子2009 的“第10章 内存: 栈与堆”对相关概念有很好的介绍。本文是对相关知识的学习笔记。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.nullwy.me/stack-frame-layout-zh.png">
+<meta property="article:published_time" content="2018-01-29T09:09:51.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:16:34.112Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="编译器">
+<meta property="article:tag" content="OS">
+<meta property="article:tag" content="C">
+<meta property="article:tag" content="ASM">
+<meta property="article:tag" content="ABI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.nullwy.me/stack-frame-layout-zh.png">
+
+<link rel="canonical" href="https://nullwy.me/2018/01/stack-frame-calling-convention/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>栈帧与调用惯例 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2018/01/stack-frame-calling-convention/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          栈帧与调用惯例
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-01-29 17:09:51" itemprop="dateCreated datePublished" datetime="2018-01-29T17:09:51+08:00">2018-01-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/" itemprop="url" rel="index"><span itemprop="name">计算机系统</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2018/01/stack-frame-calling-convention/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/01/stack-frame-calling-convention/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="栈与栈帧">栈与栈帧</h1>
+<p>要想知道函数是怎么被调用的，需要了解栈帧和调用惯例相关知识。<a target="_blank" rel="noopener" href="https://book.douban.com/subject/3652388/">俞甲子2009</a> 的“<strong>第10章 内存: 栈与堆</strong>”对相关概念有很好的介绍。本文是对相关知识的学习笔记。</p>
+<span id="more"></span>
+<img width="600" alt="栈与栈帧布局" title="栈与栈帧布局" src="https://static.nullwy.me/stack-frame-layout-zh.png">
+<p>附注，栈帧之间的划分边界，其实有两种不一样说法。在有些资料中 [ <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Call_stack#Structure">wikipedia</a>; <a target="_blank" rel="noopener" href="https://book.douban.com/subject/3652388/">俞甲子2009</a> ]，callee 参数被划分在 callee 栈帧，但在 Intel 官方一些权威文档中 [ Intel ASDM, <a target="_blank" rel="noopener" href="https://www.intel.cn/content/www/cn/zh/architecture-and-technology/64-ia-32-architectures-software-developer-vol-1-manual.html">Vol.1</a>, Ch.6; Intel <a target="_blank" rel="noopener" href="https://github.com/hjl-tools/x86-psABI/wiki/X86-psABI">X86-psABI</a> ]，callee 参数被划分在 caller 栈帧。</p>
+<h1 id="调用惯例">调用惯例</h1>
+<p>调用惯例，规定以下内容：(1) 函数参数的传递顺序和方式；(2) 栈的清理方式；(3) 名称修饰（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Name_mangling">name mangling</a>）。常见的 x86 调用惯例列表有：cdecl（C 语言默认）、stdcall（Win32 API 标准）、fastcall、pascal。这些调用惯例如下下表所示（更加全面的列表参见 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions#List_of_x86_calling_conventions">wikipedia</a>）：</p>
+<table>
+<thead>
+<tr>
+<th>调用惯例</th>
+<th>栈帧清理</th>
+<th>参数传递</th>
+<th>名称修饰</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>cdel</td>
+<td>调用者 caller</td>
+<td>从右至左入栈 RTL</td>
+<td>下划线+函数名，如 _sum</td>
+</tr>
+<tr>
+<td>stdcall</td>
+<td>被调用者 callee</td>
+<td>从右至左入栈 RTL</td>
+<td>下划线+函数名+@+参数字节数，如 _sum@8</td>
+</tr>
+<tr>
+<td>fastcall</td>
+<td>被调用者 callee</td>
+<td>头两参数存入寄存器 ECX 和 EDX，其余参数从右至左入栈 RTL</td>
+<td>@+函数名+@+参数字节数，如 @sum@8</td>
+</tr>
+<tr>
+<td>pascal</td>
+<td>被调用者 callee</td>
+<td>从左至右入栈 LTR</td>
+<td>较为复杂，参见 pascal 文档</td>
+</tr>
+</tbody>
+</table>
+<p>下面举例说明，cdecl 和 stdcall 两种调用惯例。</p>
+<h2 id="cdecl-调用惯例">cdecl 调用惯例</h2>
+<p>cdecl，调用者负责清理堆栈（caller clean-up），参数从右至左（Right-to-Left，RTL）压入栈。举例说明 [ <a target="_blank" rel="noopener" href="https://en.wikibooks.org/wiki/X86_Disassembly/Calling_Conventions">ref1</a> <a target="_blank" rel="noopener" href="https://www.codeproject.com/Articles/1388/Calling-Conventions-Demystified">ref2</a> ]：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// cdecl 调用惯例</span></span><br><span class="line"><span class="type">int</span> __cdecl <span class="title function_">sum</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 调用</span></span><br><span class="line"><span class="type">int</span> c = sum(<span class="number">2</span>, <span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+<p>编译器生成的等价汇编代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">; 调用者清理堆栈（caller clean-up），参数 RTL 入栈</span><br><span class="line">push 3</span><br><span class="line">push 2</span><br><span class="line">call _sum      ; 将返回地址压入栈, 同时 sum 的地址装入 eip</span><br><span class="line">add  esp, 8    ; 清理堆栈, 两个参数占用 8 字节</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">; sum 函数等价汇编代码</span><br><span class="line">; // function prolog</span><br><span class="line">push ebp  </span><br><span class="line">mov  ebp, esp</span><br><span class="line">; // return a + b;</span><br><span class="line">mov  eax, [ebp + 12] </span><br><span class="line">add  eax, [ebp + 8]  ; 返回值规定保存在 eax</span><br><span class="line">; // function epilog</span><br><span class="line">mov  esp, ebp        ; 设置栈顶 esp</span><br><span class="line">pop  ebp             ; 恢复 old ebp</span><br><span class="line">ret                  ; 将栈中保存的返回地址装入 eip</span><br></pre></td></tr></table></figure>
+<h2 id="stdcall-调用惯例">stdcall 调用惯例</h2>
+<p>stdcall，被调用者负责清理堆栈（callee clean-up），参数从右至左（Right-to-Left，RTL）压入栈。举例说明：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// stdcall 调用惯例</span></span><br><span class="line"><span class="type">int</span> __stdcall <span class="title function_">sum</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 调用</span></span><br><span class="line"><span class="type">int</span> c = sum(<span class="number">2</span>, <span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+<p>编译器生成的等价汇编代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">; 被调用者清理堆栈（callee clean-up），参数 RTL 入栈</span><br><span class="line">push 3</span><br><span class="line">push 2</span><br><span class="line">call _sum@8      ; 将返回地址压入栈, 同时 sum 的地址装入 eip</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">; sum 函数等价汇编代码</span><br><span class="line">; // function prolog</span><br><span class="line">push ebp  </span><br><span class="line">mov  ebp, esp</span><br><span class="line">; // return a + b;</span><br><span class="line">mov  eax, [ebp + 12] </span><br><span class="line">add  eax, [ebp + 8]  ; 返回值规定保存在 eax</span><br><span class="line">; // function epilog</span><br><span class="line">mov  esp, ebp        ; 设置栈顶 esp</span><br><span class="line">pop  ebp             ; 恢复 old ebp</span><br><span class="line">ret  8               ; 清理堆栈，并将栈中保存的返回地址装入 eip</span><br></pre></td></tr></table></figure>
+<h1 id="gcc-汇编代码">gcc 汇编代码</h1>
+<p><code>hello1.c</code> 文件内容如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __cdecl <span class="title function_">sum</span><span class="params">(<span class="type">int</span> a, <span class="type">int</span> b)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> a + b;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    sum(<span class="number">1</span>, <span class="number">2</span>);</span><br><span class="line">    sum(<span class="number">3</span>, <span class="number">4</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>生成汇编代码：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">gcc -m32 -S -masm=intel hello1.c -o hello1.s</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">gcc -m32 hello1.s -o hello</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">./hello || <span class="built_in">echo</span> $?</span></span><br><span class="line">0</span><br></pre></td></tr></table></figure>
+<p>生成的 <code>hello1.s</code>，内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">  .section  __TEXT,__text,regular,pure_instructions</span><br><span class="line">  .macosx_version_min 10, 12</span><br><span class="line">  .intel_syntax noprefix</span><br><span class="line">  .globl  _sum</span><br><span class="line">  .p2align  4, 0x90</span><br><span class="line">_sum:                                   ## @sum</span><br><span class="line">## BB#0:</span><br><span class="line">  push  ebp</span><br><span class="line">  mov  ebp, esp</span><br><span class="line">  sub  esp, 8                       ; 预先分配 8 字节栈空间，保存 2 个布局变量</span><br><span class="line">  mov  eax, dword ptr [ebp + 12]    ; 堆栈中读取参数 2</span><br><span class="line">  mov  ecx, dword ptr [ebp + 8]     ; 堆栈中读取参数 1</span><br><span class="line">  mov  dword ptr [ebp - 4], ecx     ; 布局变量 1</span><br><span class="line">  mov  dword ptr [ebp - 8], eax     ; 布局变量 2</span><br><span class="line">  mov  eax, dword ptr [ebp - 4]</span><br><span class="line">  add  eax, dword ptr [ebp - 8]</span><br><span class="line">  add  esp, 8                       ; 清理 8 字节栈空间</span><br><span class="line">  pop  ebp</span><br><span class="line">  ret</span><br><span class="line"></span><br><span class="line">  .globl  _main</span><br><span class="line">  .p2align  4, 0x90</span><br><span class="line">_main:                                  ## @main</span><br><span class="line">## BB#0:</span><br><span class="line">  push  ebp</span><br><span class="line">  mov  ebp, esp</span><br><span class="line">  sub  esp, 40                     ; 预先分配 40 字节栈空间</span><br><span class="line">  mov  eax, 1</span><br><span class="line">  mov  ecx, 2</span><br><span class="line">  mov  dword ptr [ebp - 4], 0</span><br><span class="line">  mov  dword ptr [esp], 1</span><br><span class="line">  mov  dword ptr [esp + 4], 2</span><br><span class="line">  mov  dword ptr [ebp - 8], eax ## 4-byte Spill</span><br><span class="line">  mov  dword ptr [ebp - 12], ecx ## 4-byte Spill</span><br><span class="line">  call  _sum</span><br><span class="line">  mov  ecx, 3</span><br><span class="line">  mov  edx, 4</span><br><span class="line">  mov  dword ptr [esp], 3</span><br><span class="line">  mov  dword ptr [esp + 4], 4</span><br><span class="line">  mov  dword ptr [ebp - 16], eax ## 4-byte Spill</span><br><span class="line">  mov  dword ptr [ebp - 20], ecx ## 4-byte Spill</span><br><span class="line">  mov  dword ptr [ebp - 24], edx ## 4-byte Spill</span><br><span class="line">  call  _sum</span><br><span class="line">  xor  ecx, ecx</span><br><span class="line">  mov  dword ptr [ebp - 28], eax ## 4-byte Spill</span><br><span class="line">  mov  eax, ecx</span><br><span class="line">  add  esp, 40                  ; 清理 40 字节栈空间</span><br><span class="line">  pop  ebp</span><br><span class="line">  ret</span><br><span class="line"></span><br><span class="line">.subsections_via_symbols</span><br></pre></td></tr></table></figure>
+<p>GCC 生成的汇编代码并没有使用 <code>push</code> 而是通过 <code>sub  esp, 40</code> 直接预先分配栈空间，然后使用 <code>mov</code> 指令将参数写进栈中，清理栈使用 <code>add  esp, 40</code>。逻辑上，还是符合 cdecl 调用惯例，调用者负责清理堆栈（caller clean-up），参数从右至左（Right-to-Left，RTL）压入栈。这样做的好处是，如果同时多次调用 <code>sum</code>，清理栈空间的指令，只需要最后的时候调用一次就可以了。统一使用 <code>sub esp</code> 和 <code>add esp</code> 去操作 esp 值，避免 <code>push</code> 指令操作 esp。</p>
+<p>现在再来看看，stdcall 调用惯例下，GCC 生成的汇编代码。把 <code>sum</code> 函数改为 <code>__stdcall</code>，运行下面的命令：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">gcc -m32 -S -masm=intel hello2.c -o hello2.s</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">diff -C1 hello1.s hello2.s</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight diff"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">*** hello1.s    Thu Feb 05 22:43:59 2018</span></span><br><span class="line"><span class="comment">--- hello2.s    Thu Feb 05 22:45:24 2018</span></span><br><span class="line"><span class="comment">***************</span></span><br><span class="line"><span class="meta">*** 18,20 ****</span></span><br><span class="line">    pop  ebp</span><br><span class="line"><span class="addition">!   ret</span></span><br><span class="line">  </span><br><span class="line"><span class="meta">--- 18,20 ----</span></span><br><span class="line">    pop  ebp</span><br><span class="line"><span class="addition">!   ret  8</span></span><br><span class="line">  </span><br><span class="line"><span class="comment">***************</span></span><br><span class="line"><span class="meta">*** 35,36 ****</span></span><br><span class="line"><span class="meta">--- 35,37 ----</span></span><br><span class="line">    call  _sum</span><br><span class="line"><span class="addition">+   sub  esp, 8</span></span><br><span class="line">    mov  ecx, 3</span><br><span class="line"><span class="comment">***************</span></span><br><span class="line"><span class="meta">*** 43,44 ****</span></span><br><span class="line"><span class="meta">--- 44,46 ----</span></span><br><span class="line">    call  _sum</span><br><span class="line"><span class="addition">+   sub  esp, 8</span></span><br><span class="line">    xor  ecx, ecx</span><br></pre></td></tr></table></figure>
+<h1 id="反汇编代码">反汇编代码</h1>
+<p>反汇编 <code>objdump</code>、<code>gdb</code>/<code>lldb</code>，或者商业工具使用，IDA Pro 或者 Hopper Disassembler [ <a target="_blank" rel="noopener" href="https://en.wikibooks.org/wiki/X86_Disassembly/Disassemblers_and_Decompilers#x86_Disassemblers">wiki</a> ]</p>
+<h2 id="objdump-反汇编">objdump 反汇编</h2>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ gobjdump -d -Mintel hello1                # 使用 GNU objdump</span><br><span class="line">$ objdump -d -x86-asm-syntax=intel hello1   # 使用 llvm-objdump</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br></pre></td><td class="code"><pre><span class="line">hello1:	file format Mach-O 32-bit i386</span><br><span class="line"></span><br><span class="line">Disassembly of section __TEXT,__text:</span><br><span class="line">__text:</span><br><span class="line">    1f30:	55 	push	ebp</span><br><span class="line">    1f31:	89 e5 	mov	ebp, esp</span><br><span class="line">    1f33:	83 ec 08 	sub	esp, 8</span><br><span class="line">    1f36:	8b 45 0c 	mov	eax, dword ptr [ebp + 12]</span><br><span class="line">    1f39:	8b 4d 08 	mov	ecx, dword ptr [ebp + 8]</span><br><span class="line">    1f3c:	89 4d fc 	mov	dword ptr [ebp - 4], ecx</span><br><span class="line">    1f3f:	89 45 f8 	mov	dword ptr [ebp - 8], eax</span><br><span class="line">    1f42:	8b 45 fc 	mov	eax, dword ptr [ebp - 4]</span><br><span class="line">    1f45:	03 45 f8 	add	eax, dword ptr [ebp - 8]</span><br><span class="line">    1f48:	83 c4 08 	add	esp, 8</span><br><span class="line">    1f4b:	5d 	pop	ebp</span><br><span class="line">    1f4c:	c3 	ret</span><br><span class="line">    1f4d:	0f 1f 00 	nop	dword ptr [eax]</span><br><span class="line">    1f50:	55 	push	ebp</span><br><span class="line">    1f51:	89 e5 	mov	ebp, esp</span><br><span class="line">    1f53:	83 ec 28 	sub	esp, 40</span><br><span class="line">    1f56:	b8 01 00 00 00 	mov	eax, 1</span><br><span class="line">    1f5b:	b9 02 00 00 00 	mov	ecx, 2</span><br><span class="line">    1f60:	c7 45 fc 00 00 00 00 	mov	dword ptr [ebp - 4], 0</span><br><span class="line">    1f67:	c7 04 24 01 00 00 00 	mov	dword ptr [esp], 1</span><br><span class="line">    1f6e:	c7 44 24 04 02 00 00 00 	mov	dword ptr [esp + 4], 2</span><br><span class="line">    1f76:	89 45 f8 	mov	dword ptr [ebp - 8], eax</span><br><span class="line">    1f79:	89 4d f4 	mov	dword ptr [ebp - 12], ecx</span><br><span class="line">    1f7c:	e8 af ff ff ff 	call	-81 &lt;_sum&gt;</span><br><span class="line">    1f81:	b9 03 00 00 00 	mov	ecx, 3</span><br><span class="line">    1f86:	ba 04 00 00 00 	mov	edx, 4</span><br><span class="line">    1f8b:	c7 04 24 03 00 00 00 	mov	dword ptr [esp], 3</span><br><span class="line">    1f92:	c7 44 24 04 04 00 00 00 	mov	dword ptr [esp + 4], 4</span><br><span class="line">    1f9a:	89 45 f0 	mov	dword ptr [ebp - 16], eax</span><br><span class="line">    1f9d:	89 4d ec 	mov	dword ptr [ebp - 20], ecx</span><br><span class="line">    1fa0:	89 55 e8 	mov	dword ptr [ebp - 24], edx</span><br><span class="line">    1fa3:	e8 88 ff ff ff 	call	-120 &lt;_sum&gt;</span><br><span class="line">    1fa8:	31 c9 	xor	ecx, ecx</span><br><span class="line">    1faa:	89 45 e4 	mov	dword ptr [ebp - 28], eax</span><br><span class="line">    1fad:	89 c8 	mov	eax, ecx</span><br><span class="line">    1faf:	83 c4 28 	add	esp, 40</span><br><span class="line">    1fb2:	5d 	pop	ebp</span><br><span class="line">    1fb3:	c3 	ret</span><br><span class="line"></span><br><span class="line">_sum:</span><br><span class="line">    1f30:	55 	push	ebp</span><br><span class="line">    1f31:	89 e5 	mov	ebp, esp</span><br><span class="line">    1f33:	83 ec 08 	sub	esp, 8</span><br><span class="line">    1f36:	8b 45 0c 	mov	eax, dword ptr [ebp + 12]</span><br><span class="line">    1f39:	8b 4d 08 	mov	ecx, dword ptr [ebp + 8]</span><br><span class="line">    1f3c:	89 4d fc 	mov	dword ptr [ebp - 4], ecx</span><br><span class="line">    1f3f:	89 45 f8 	mov	dword ptr [ebp - 8], eax</span><br><span class="line">    1f42:	8b 45 fc 	mov	eax, dword ptr [ebp - 4]</span><br><span class="line">    1f45:	03 45 f8 	add	eax, dword ptr [ebp - 8]</span><br><span class="line">    1f48:	83 c4 08 	add	esp, 8</span><br><span class="line">    1f4b:	5d 	pop	ebp</span><br><span class="line">    1f4c:	c3 	ret</span><br><span class="line">    1f4d:	0f 1f 00 	nop	dword ptr [eax]</span><br><span class="line"></span><br><span class="line">_main:</span><br><span class="line">    1f50:	55 	push	ebp</span><br><span class="line">    1f51:	89 e5 	mov	ebp, esp</span><br><span class="line">    1f53:	83 ec 28 	sub	esp, 40</span><br><span class="line">    1f56:	b8 01 00 00 00 	mov	eax, 1</span><br><span class="line">    1f5b:	b9 02 00 00 00 	mov	ecx, 2</span><br><span class="line">    1f60:	c7 45 fc 00 00 00 00 	mov	dword ptr [ebp - 4], 0</span><br><span class="line">    1f67:	c7 04 24 01 00 00 00 	mov	dword ptr [esp], 1</span><br><span class="line">    1f6e:	c7 44 24 04 02 00 00 00 	mov	dword ptr [esp + 4], 2</span><br><span class="line">    1f76:	89 45 f8 	mov	dword ptr [ebp - 8], eax</span><br><span class="line">    1f79:	89 4d f4 	mov	dword ptr [ebp - 12], ecx</span><br><span class="line">    1f7c:	e8 af ff ff ff 	call	-81 &lt;_sum&gt;</span><br><span class="line">    1f81:	b9 03 00 00 00 	mov	ecx, 3</span><br><span class="line">    1f86:	ba 04 00 00 00 	mov	edx, 4</span><br><span class="line">    1f8b:	c7 04 24 03 00 00 00 	mov	dword ptr [esp], 3</span><br><span class="line">    1f92:	c7 44 24 04 04 00 00 00 	mov	dword ptr [esp + 4], 4</span><br><span class="line">    1f9a:	89 45 f0 	mov	dword ptr [ebp - 16], eax</span><br><span class="line">    1f9d:	89 4d ec 	mov	dword ptr [ebp - 20], ecx</span><br><span class="line">    1fa0:	89 55 e8 	mov	dword ptr [ebp - 24], edx</span><br><span class="line">    1fa3:	e8 88 ff ff ff 	call	-120 &lt;_sum&gt;</span><br><span class="line">    1fa8:	31 c9 	xor	ecx, ecx</span><br><span class="line">    1faa:	89 45 e4 	mov	dword ptr [ebp - 28], eax</span><br><span class="line">    1fad:	89 c8 	mov	eax, ecx</span><br><span class="line">    1faf:	83 c4 28 	add	esp, 40</span><br><span class="line">    1fb2:	5d 	pop	ebp</span><br><span class="line">    1fb3:	c3 	ret</span><br></pre></td></tr></table></figure>
+<h2 id="lldb-反汇编">lldb 反汇编</h2>
+<p>使用 lldb 反汇编：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">$ lldb hello1</span><br><span class="line">(lldb) target create &quot;hello1&quot;</span><br><span class="line">Current executable set to &#x27;hello1&#x27; (i386).</span><br><span class="line">(lldb) settings set target.x86-disassembly-flavor intel</span><br><span class="line">(lldb) disassemble --name main</span><br><span class="line">hello1`main:</span><br><span class="line">hello1[0x1f50] &lt;+0&gt;:  push   ebp</span><br><span class="line">hello1[0x1f51] &lt;+1&gt;:  mov    ebp, esp</span><br><span class="line">hello1[0x1f53] &lt;+3&gt;:  sub    esp, 0x28</span><br><span class="line">hello1[0x1f56] &lt;+6&gt;:  mov    eax, 0x1</span><br><span class="line">hello1[0x1f5b] &lt;+11&gt;: mov    ecx, 0x2</span><br><span class="line">hello1[0x1f60] &lt;+16&gt;: mov    dword ptr [ebp - 0x4], 0x0</span><br><span class="line">hello1[0x1f67] &lt;+23&gt;: mov    dword ptr [esp], 0x1</span><br><span class="line">hello1[0x1f6e] &lt;+30&gt;: mov    dword ptr [esp + 0x4], 0x2</span><br><span class="line">hello1[0x1f76] &lt;+38&gt;: mov    dword ptr [ebp - 0x8], eax</span><br><span class="line">hello1[0x1f79] &lt;+41&gt;: mov    dword ptr [ebp - 0xc], ecx</span><br><span class="line">hello1[0x1f7c] &lt;+44&gt;: call   0x1f30                    ; sum</span><br><span class="line">hello1[0x1f81] &lt;+49&gt;: mov    ecx, 0x3</span><br><span class="line">hello1[0x1f86] &lt;+54&gt;: mov    edx, 0x4</span><br><span class="line">hello1[0x1f8b] &lt;+59&gt;: mov    dword ptr [esp], 0x3</span><br><span class="line">hello1[0x1f92] &lt;+66&gt;: mov    dword ptr [esp + 0x4], 0x4</span><br><span class="line">hello1[0x1f9a] &lt;+74&gt;: mov    dword ptr [ebp - 0x10], eax</span><br><span class="line">hello1[0x1f9d] &lt;+77&gt;: mov    dword ptr [ebp - 0x14], ecx</span><br><span class="line">hello1[0x1fa0] &lt;+80&gt;: mov    dword ptr [ebp - 0x18], edx</span><br><span class="line">hello1[0x1fa3] &lt;+83&gt;: call   0x1f30                    ; sum</span><br><span class="line">hello1[0x1fa8] &lt;+88&gt;: xor    ecx, ecx</span><br><span class="line">hello1[0x1faa] &lt;+90&gt;: mov    dword ptr [ebp - 0x1c], eax</span><br><span class="line">hello1[0x1fad] &lt;+93&gt;: mov    eax, ecx</span><br><span class="line">hello1[0x1faf] &lt;+95&gt;: add    esp, 0x28</span><br><span class="line">hello1[0x1fb2] &lt;+98&gt;: pop    ebp</span><br><span class="line">hello1[0x1fb3] &lt;+99&gt;: ret</span><br><span class="line"></span><br><span class="line">(lldb) disassemble --name sum</span><br><span class="line">hello1`sum:</span><br><span class="line">hello1[0x1f30] &lt;+0&gt;:  push   ebp</span><br><span class="line">hello1[0x1f31] &lt;+1&gt;:  mov    ebp, esp</span><br><span class="line">hello1[0x1f33] &lt;+3&gt;:  sub    esp, 0x8</span><br><span class="line">hello1[0x1f36] &lt;+6&gt;:  mov    eax, dword ptr [ebp + 0xc]</span><br><span class="line">hello1[0x1f39] &lt;+9&gt;:  mov    ecx, dword ptr [ebp + 0x8]</span><br><span class="line">hello1[0x1f3c] &lt;+12&gt;: mov    dword ptr [ebp - 0x4], ecx</span><br><span class="line">hello1[0x1f3f] &lt;+15&gt;: mov    dword ptr [ebp - 0x8], eax</span><br><span class="line">hello1[0x1f42] &lt;+18&gt;: mov    eax, dword ptr [ebp - 0x4]</span><br><span class="line">hello1[0x1f45] &lt;+21&gt;: add    eax, dword ptr [ebp - 0x8]</span><br><span class="line">hello1[0x1f48] &lt;+24&gt;: add    esp, 0x8</span><br><span class="line">hello1[0x1f4b] &lt;+27&gt;: pop    ebp</span><br><span class="line">hello1[0x1f4c] &lt;+28&gt;: ret</span><br><span class="line">hello1[0x1f4d] &lt;+29&gt;: nop    dword ptr [eax]</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h1 id="参考资料">参考资料</h1>
+<ol>
+<li>链接、装载与库，俞甲子，2009：第10章 内存: 栈与堆，<a target="_blank" rel="noopener" href="https://book.douban.com/subject/3652388/">豆瓣</a></li>
+<li>IDA Pro权威指南，Eagle，第2版2011：6.2.1 调用约定，<a target="_blank" rel="noopener" href="https://book.douban.com/subject/10463039/">豆瓣</a></li>
+<li>2001-09 Calling Conventions Demystified <a target="_blank" rel="noopener" href="https://www.codeproject.com/Articles/1388/Calling-Conventions-Demystified">https://www.codeproject.com/Articles/1388/Calling-Conventions-Demystified</a></li>
+<li>Calling Conventions <a target="_blank" rel="noopener" href="https://en.wikibooks.org/wiki/X86_Disassembly/Calling_Conventions">https://en.wikibooks.org/wiki/X86_Disassembly/Calling_Conventions</a></li>
+<li><a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions">https://en.wikipedia.org/wiki/X86_calling_conventions</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2018/01/stack-frame-calling-convention/" title="栈帧与调用惯例">https://nullwy.me/2018/01/stack-frame-calling-convention/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E7%BC%96%E8%AF%91%E5%99%A8/" rel="tag"># 编译器</a>
+              <a href="/tags/OS/" rel="tag"># OS</a>
+              <a href="/tags/C/" rel="tag"># C</a>
+              <a href="/tags/ASM/" rel="tag"># ASM</a>
+              <a href="/tags/ABI/" rel="tag"># ABI</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/01/java-ffi/" rel="prev" title="Java 外部函数接口：JNI, JNA, JNR">
+      <i class="fa fa-chevron-left"></i> Java 外部函数接口：JNI, JNA, JNR
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/06/mysql-binlog/" rel="next" title="MySQL binlog：格式、增量恢复、闪回、Java 解析">
+      MySQL binlog：格式、增量恢复、闪回、Java 解析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%A0%88%E4%B8%8E%E6%A0%88%E5%B8%A7"><span class="nav-number">1.</span> <span class="nav-text">栈与栈帧</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E6%83%AF%E4%BE%8B"><span class="nav-number">2.</span> <span class="nav-text">调用惯例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#cdecl-%E8%B0%83%E7%94%A8%E6%83%AF%E4%BE%8B"><span class="nav-number">2.1.</span> <span class="nav-text">cdecl 调用惯例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#stdcall-%E8%B0%83%E7%94%A8%E6%83%AF%E4%BE%8B"><span class="nav-number">2.2.</span> <span class="nav-text">stdcall 调用惯例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#gcc-%E6%B1%87%E7%BC%96%E4%BB%A3%E7%A0%81"><span class="nav-number">3.</span> <span class="nav-text">gcc 汇编代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%8D%E6%B1%87%E7%BC%96%E4%BB%A3%E7%A0%81"><span class="nav-number">4.</span> <span class="nav-text">反汇编代码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#objdump-%E5%8F%8D%E6%B1%87%E7%BC%96"><span class="nav-number">4.1.</span> <span class="nav-text">objdump 反汇编</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lldb-%E5%8F%8D%E6%B1%87%E7%BC%96"><span class="nav-number">4.2.</span> <span class="nav-text">lldb 反汇编</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2018/01/stack-frame-calling-convention/";
+    this.page.identifier = "2018/01/stack-frame-calling-convention/";
+    this.page.title = "栈帧与调用惯例";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

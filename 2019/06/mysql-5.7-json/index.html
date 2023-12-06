@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="2015 年 8 月，MySQL 5.7.8 开始提供对 JSON 的原生支持[1][2]。MySQL 对 JSON 的支持可以说是千呼万唤始出来。2009 年开始 NoSQL 逐渐流行起来，相继出现了键值对数据库、文档数据库、列族数据库、图数据库等各类 NoSQL，解决经典关系型数据库无法解决的痛点。其中，对灵活存储半结构化数据的需求，使得类似 MongoDB 这类文档数据库涌现出来。各大主流关">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL 5.7 的 JSON 类型">
+<meta property="og:url" content="https://nullwy.me/2019/06/mysql-5.7-json/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="2015 年 8 月，MySQL 5.7.8 开始提供对 JSON 的原生支持[1][2]。MySQL 对 JSON 的支持可以说是千呼万唤始出来。2009 年开始 NoSQL 逐渐流行起来，相继出现了键值对数据库、文档数据库、列族数据库、图数据库等各类 NoSQL，解决经典关系型数据库无法解决的痛点。其中，对灵活存储半结构化数据的需求，使得类似 MongoDB 这类文档数据库涌现出来。各大主流关">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.nullwy.me/mysql-5.7-json-limitations.png">
+<meta property="og:image" content="https://static.nullwy.me/mysql-jsonb-syntax-tree.png">
+<meta property="og:image" content="https://static.nullwy.me/mysql-jsonb-scalar.png">
+<meta property="og:image" content="https://static.nullwy.me/mysql-jsonb-array.png">
+<meta property="og:image" content="https://static.nullwy.me/mysql-jsonb-object.png">
+<meta property="article:published_time" content="2019-06-24T19:18:31.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:15:50.678Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.nullwy.me/mysql-5.7-json-limitations.png">
+
+<link rel="canonical" href="https://nullwy.me/2019/06/mysql-5.7-json/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MySQL 5.7 的 JSON 类型 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2019/06/mysql-5.7-json/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL 5.7 的 JSON 类型
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-06-25 03:18:31" itemprop="dateCreated datePublished" datetime="2019-06-25T03:18:31+08:00">2019-06-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2019/06/mysql-5.7-json/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/06/mysql-5.7-json/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>30k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>27 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>2015 年 8 月，MySQL 5.7.8 开始提供对 JSON 的原生支持<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup><sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>。MySQL 对 JSON 的支持可以说是千呼万唤始出来。2009 年开始 NoSQL 逐渐流行起来，相继出现了键值对数据库、文档数据库、列族数据库、图数据库等各类 NoSQL，解决经典关系型数据库无法解决的痛点。其中，对灵活存储半结构化数据的需求，使得类似 MongoDB 这类文档数据库涌现出来。各大主流关系型数据库也在响应趋势，开始支持半结构化数据。早在 2012 年，PostgreSQL 9.2 就已经添加了 JSON 数据类型<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>。Oracle 也在 2014 年 7 月发布 12c Release 1 后开始支持 JSON<sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup><sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup>。Facebook 在 MySQL 5.7 没发布之前，对 5.6 版本的 MySQL 添加了存储 JSON 功能，这个特性被 Facebook 命名为 DocStore (Document Database for MySQL at Facebook)<sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup><sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup>。另外，SQL 标准组织行动也很快，在 2014 年 3 月已经完成了 SQL/JSON 标准草案（SQL/JSON Proposals）<sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup><sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup>。完整的草案在 2016 年 12 月正式被采纳为标准，即 SQL:2016。</p>
+<span id="more"></span>
+<p>浏览 SQL/JSON 标准草案可以发现，全部作者共有 9 人，这些作者来自两个公司，Oracle 和 IBM，而排前面的作者如 Jim Melton, Fred Zemke, Beda Hammerschmidt 都 Oracle 的专家（有兴趣可以看下他们的 LinkedIn）。正因为 SQL:2016 主要就是 Oracle 参与制定的，目前，Oracle 数据库对 SQL:2016 的支持也是最全的<sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup>。</p>
+<p>MySQL 对 JSON 的支持，设计文档主要是  WL#7909: Server side JSON functions<sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup>，另外还有 WL#8132: JSON datatype and binary storage format<sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup>、WL#8249: JSON comparator<sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup>、WL#8607: Inline JSON path expressions in SQL<sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup> 等。在 MySQL 开始 WL#7909 之时，SQL/JSON 标准草案已经公开，WL#7909 中也提及了这份标准，但是如果拿 MySQL 提供 JSON 的功能与 SQL:2016 比较，可以发现 MySQL 虽然融入了部分的设计，但并没有完全参考标准，定义的 JSON 函数多数有区别。</p>
+<p>回到正题，下面来看下 MySQL 5.7 的 JSON 的用法。</p>
+<h1 id="JSON-函数列表">JSON 函数列表</h1>
+<p>MySQL 官方列出 JSON 相关的函数，完整列表如下<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup>：</p>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th>函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>json 创建函数</td>
+<td>json_array()</td>
+<td>创建 json 数组</td>
+</tr>
+<tr>
+<td></td>
+<td>json_object()</td>
+<td>创建 json 对象</td>
+</tr>
+<tr>
+<td></td>
+<td>json_quote()</td>
+<td>用双引号包裹 json 文档</td>
+</tr>
+<tr>
+<td>json 查询函数</td>
+<td>json_contains()</td>
+<td>判断是否包含某个 json 值</td>
+</tr>
+<tr>
+<td></td>
+<td>json_contains_path()</td>
+<td>判断某个路径下是否包 json 值</td>
+</tr>
+<tr>
+<td></td>
+<td>json_extract()</td>
+<td>提取 json 值</td>
+</tr>
+<tr>
+<td></td>
+<td>column-&gt;path</td>
+<td>json_extract() 的简洁写法，5.7.9 开始支持</td>
+</tr>
+<tr>
+<td></td>
+<td>column-&gt;&gt;path</td>
+<td>json_unquote(json_extract()) 的简洁写法，5.7.13 开始支持</td>
+</tr>
+<tr>
+<td></td>
+<td>json_keys()</td>
+<td>把 json 对象的顶层的全部键提取为 json 数组</td>
+</tr>
+<tr>
+<td></td>
+<td>json_search()</td>
+<td>按给定字符串关键字搜索 json，返回匹配的路径</td>
+</tr>
+<tr>
+<td>json 修改函数</td>
+<td><s>json_append()</s></td>
+<td>5.7.9 废弃，改名为 json_array_append()</td>
+</tr>
+<tr>
+<td></td>
+<td>json_array_append()</td>
+<td>在 josn 文档末尾添加数组元素</td>
+</tr>
+<tr>
+<td></td>
+<td>json_array_insert()</td>
+<td>在 josn 数组中插入元素</td>
+</tr>
+<tr>
+<td></td>
+<td>json_insert()</td>
+<td>插入值（只插入新值，不替换旧值）</td>
+</tr>
+<tr>
+<td></td>
+<td><s>json_merge()</s></td>
+<td>5.7.22 废弃，与 json_merge_preserve() 同义</td>
+</tr>
+<tr>
+<td></td>
+<td>json_merge_patch()</td>
+<td>合并 json 文档，重复键的值将被替换掉</td>
+</tr>
+<tr>
+<td></td>
+<td>json_merge_preserve()</td>
+<td>合并 json 文档，保留重复键</td>
+</tr>
+<tr>
+<td></td>
+<td>json_remove()</td>
+<td>删除 json 文档中的数据</td>
+</tr>
+<tr>
+<td></td>
+<td>json_replace()</td>
+<td>替换值（只替换旧值，不插入新值）</td>
+</tr>
+<tr>
+<td></td>
+<td>json_set()</td>
+<td>设置值（替换旧值，或插入新值）</td>
+</tr>
+<tr>
+<td></td>
+<td>json_unquote()</td>
+<td>移除 json 值的双引号包裹</td>
+</tr>
+<tr>
+<td>json 属性函数</td>
+<td>json_depth()</td>
+<td>返回 json 文档的最大深度</td>
+</tr>
+<tr>
+<td></td>
+<td>json_length()</td>
+<td>返回 json 文档的长度</td>
+</tr>
+<tr>
+<td></td>
+<td>json_type()</td>
+<td>返回 json 值的类型</td>
+</tr>
+<tr>
+<td></td>
+<td>json_valid()</td>
+<td>判断是否为合法 json 文档</td>
+</tr>
+<tr>
+<td>json 工具函数</td>
+<td>json_pretty()</td>
+<td>美化输出 json 文档，5.7.22 新增</td>
+</tr>
+<tr>
+<td></td>
+<td>json_storage_size()</td>
+<td>返回 json 文档占用的存储空间，5.7.22 新增</td>
+</tr>
+</tbody>
+</table>
+<p>官方文档对全部函数都作了充分解释并提供一定的示例代码。另外，官方博客也有极佳的相关介绍文章<sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup><sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup>。下文挑选了<strong>部分函数</strong>，演示它们的使用方法。</p>
+<h1 id="创建与插入-JSON">创建与插入 JSON</h1>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 创建 tbl 表，字段 data 为 json 类型</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> tbl (data JSON);</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.17</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 插入 json 对象</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> tbl <span class="keyword">values</span> (<span class="string">&#x27;&#123;&quot;id&quot;: 1, &quot;name&quot;: &quot;Will&quot;&#125;&#x27;</span>);</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.04</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 插入 json 数组</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> tbl <span class="keyword">values</span> (<span class="string">&#x27;[1, 42, 1024]&#x27;</span>);</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.01</span> sec) </span><br><span class="line"></span><br><span class="line"><span class="comment">-- 使用 json_object() 创建 json 对象</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> tbl <span class="keyword">values</span> (<span class="built_in">json_object</span>(<span class="string">&#x27;id&#x27;</span>, <span class="number">2</span>, <span class="string">&#x27;name&#x27;</span>, <span class="string">&#x27;Joe&#x27;</span>));</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.02</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 使用 json_array() 创建 json 数组</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> tbl <span class="keyword">values</span> (<span class="built_in">json_array</span>(<span class="number">1</span>, &quot;abc&quot;, <span class="keyword">null</span>, <span class="literal">true</span>, curtime()));</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.02</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查询 tbl 表数据</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> data                                      <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">1</span>, &quot;name&quot;: &quot;Will&quot;&#125;                 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> [<span class="number">1</span>, <span class="number">42</span>, <span class="number">1024</span>]                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">2</span>, &quot;name&quot;: &quot;Andy&quot;&#125;                 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> [<span class="number">1</span>, &quot;abc&quot;, <span class="keyword">null</span>, <span class="literal">true</span>, &quot;20:27:41.000000&quot;] <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------------------+</span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>上面的 SQL 示例简单验演示了创建 JSON 列以及写入并查询 JSON 数据，比较简单，就不做解释了。</p>
+<h1 id="查询-JSON">查询 JSON</h1>
+<h2 id="json-extract-与-操作符">json_extract() 与 -&gt; 操作符</h2>
+<p>如果要查询 JSON 文档中内容，提取 JSON 中的值，可以使用 json_extract() 函数。函数定义如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">json_extract(json_doc, path[, path] ...)</span><br></pre></td></tr></table></figure>
+<p>先来看下 SQL 示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 使用 json_extract() 函数查询 json 对象</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_extract(<span class="string">&#x27;&#123;&quot;id&quot;: 1, &quot;name&quot;: &quot;Will&quot;&#125;&#x27;</span>, <span class="string">&#x27;$.name&#x27;</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_extract(<span class="string">&#x27;&#123;&quot;id&quot;: 1, &quot;name&quot;: &quot;Will&quot;&#125;&#x27;</span>, <span class="string">&#x27;$.name&#x27;</span>)   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span><span class="comment">-------------------------------------------------------|</span></span><br><span class="line"><span class="operator">|</span> &quot;Will&quot;                                                <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.01</span> sec)</span><br></pre></td></tr></table></figure>
+<p>示例中的 <code>$.name</code>，使用的是 JSON 路径语法，用来提取 JSON 文档的内容。JSON 路径语法，源自 Stefan Goessner 的  JsonPath<sup class="footnote-ref"><a href="#fn19" id="fnref19">[19]</a></sup>，不过 MySQL 作了简化。路径语法使用 $ 开头来表示整个 JSON 文档。如果要提取部分 JSON 文档，可以在路径后面添加选择符：</p>
+<ul>
+<li>在路径 <code>path</code> 后上追加对象的键名称，可以获取这个键下成员。如果加键名称后，路径表达式非法，需要对键名称用双引号包裹（比如，键名称中包含空格的情况）</li>
+<li>在路径 <code>path</code> 后加上追加 <code>[N]</code>，用于选择数组的第 N 个元素。数组索引从 0 开始。如果 <code>path</code> 下并不是数组，<code>path[0]</code> 获取结果就是 <code>path</code> 本身。</li>
+<li>路径可以包含 <code>*</code> 和 <code>**</code> 通配符：
+<ul>
+<li><code>.[*]</code> 用于获取 JSON 对象的全部成员。</li>
+<li><code>[*]</code> 用于获取 JSON 数组的全部元素。</li>
+<li><code>prefix**suffix</code> 表示全部以 <code>prefix</code> 开始，以 <code>suffix</code> 结尾的路径。</li>
+</ul>
+</li>
+<li>如果路径在 JSON 文档中不存在数据，将返回 <code>NULL</code>。</li>
+</ul>
+<p>假设 <code>$</code> 引用的是如下 JSON 数组：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">[</span><span class="number">3</span><span class="punctuation">,</span> <span class="punctuation">&#123;</span><span class="attr">&quot;a&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">5</span><span class="punctuation">,</span> <span class="number">6</span><span class="punctuation">]</span><span class="punctuation">,</span> <span class="attr">&quot;b&quot;</span><span class="punctuation">:</span> <span class="number">10</span><span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="punctuation">[</span><span class="number">99</span><span class="punctuation">,</span> <span class="number">100</span><span class="punctuation">]</span><span class="punctuation">]</span></span><br></pre></td></tr></table></figure>
+<p><code>$[0]</code> 获取到的值为 3，<code>$[1]</code> 获取到 <code>&#123;&quot;a&quot;: [5, 6], &quot;b&quot;: 10&#125;</code>，<code>$[2]</code> 获取到 <code>[99, 100]</code>，<code>$[3]</code> 获取到 <code>NULL</code>（因为不存在第 4 个元素）。</p>
+<p>因为 <code>$[1]</code> 和 <code>$[2]</code> 获取的并非纯量（nonscalar），它们可以进一步使用路径访问到内嵌的值，比如：<code>$[1].a</code> 获取到 <code>[5, 6]</code>，<code>$[1].a[1]</code> 获取到 <code>6</code>，<code>$[1].b</code> 获取到 <code>10</code>，<code>$[2][0]</code> 获取到 <code>99</code>。</p>
+<p>上文提到，如果追加键值名后，路径表达式非法，需要对键名称用双引号包裹。假设 <code>$</code> 引用的是如下 JSON 对象：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;name 1&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Will&quot;</span><span class="punctuation">,</span> <span class="attr">&quot;name 2&quot;</span><span class="punctuation">:</span> <span class="string">&quot;Andy&quot;</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>两个键都包含空格，需要加上双引号，才能使用路径表达式访问。<code>$.&quot;name 1&quot;</code> 将获取到 <code>Will</code>，而 <code>$.&quot;name 2&quot;</code> 将获取到 <code>Andy</code>。</p>
+<p>现在来看下通配符的示例，假设 JSON 对象如下：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">&#123;</span><span class="attr">&quot;a&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;b&quot;</span><span class="punctuation">:</span> <span class="number">1</span><span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="attr">&quot;c&quot;</span><span class="punctuation">:</span> <span class="punctuation">&#123;</span><span class="attr">&quot;b&quot;</span><span class="punctuation">:</span> <span class="number">2</span><span class="punctuation">&#125;</span><span class="punctuation">,</span> <span class="attr">&quot;d&quot;</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="number">3</span><span class="punctuation">,</span> <span class="number">4</span><span class="punctuation">,</span> <span class="number">5</span><span class="punctuation">]</span><span class="punctuation">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>使用 <code>$.*</code> 将获取到 <code>[&#123;&quot;b&quot;: 1&#125;, &#123;&quot;b&quot;: 2&#125;, [3, 4, 5]]</code>；<br>
+使用 <code>$.d[*]</code> 将获取到 <code>[3, 4, 5]</code>；<br>
+使用 <code>$**.b</code>（对应 <code>$.a.b</code> 和 <code>$.c.b</code>）将获取到 <code>[1, 2]</code>。</p>
+<p>MySQL 5.7.9 开始，官方支持 <code>json_extract(column, path)</code> 的简洁写法，内联 JSON 路径表达式 <code>column-&gt;path</code>（WL#8607）。示例如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 使用内联 json 路径表达式，查询 json 对象</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl <span class="keyword">where</span> data <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$.id&#x27;</span> <span class="operator">=</span> <span class="number">2</span>;  </span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------+</span></span><br><span class="line"><span class="operator">|</span> data                      <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------+</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">2</span>, &quot;name&quot;: &quot;Andy&quot;&#125; <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>本质上，这种写法是语法糖，<code>column-&gt;path</code> 等价于 <code>json_extract(column, path)</code>，内联 JSON 路径表达式会在语法解析阶段被转换为 json_extract() 调用。另外，<code>column-&gt;path</code>，存在以下限制<sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup></p>
+<p><img src="https://static.nullwy.me/mysql-5.7-json-limitations.png" alt="限制"></p>
+<p>即，1. 数据源必须是表字段，2. 路径表达式必须为字符串，3. SQL 语句中最多只支持一个。</p>
+<p>现在来试验下这个限制，如果使用内联 JSON 路径表达式查询 MySQL 变量，将会报语法错误：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">set</span> <span class="variable">@j</span> <span class="operator">=</span> <span class="string">&#x27;[&quot;a&quot;, &quot;b&quot;]&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 语法错误</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="variable">@j</span> <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$[0]&#x27;</span>;</span><br><span class="line">ERROR <span class="number">1064</span> (<span class="number">42000</span>): You have an error <span class="keyword">in</span> your <span class="keyword">SQL</span> syntax; <span class="keyword">check</span> the manual that corresponds <span class="keyword">to</span> your MySQL server version <span class="keyword">for</span> the <span class="keyword">right</span> syntax <span class="keyword">to</span> use near <span class="string">&#x27;-&gt; &#x27;</span>$[<span class="number">0</span>]<span class="string">&#x27;&#x27;</span> <span class="keyword">at</span> line <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<h2 id="json-unquote-与-操作符">json_unquote() 与 -&gt;&gt; 操作符</h2>
+<p>假设数据如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> data                                          <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">1</span>, &quot;name&quot;: &quot;Will&quot;&#125;                     <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">2</span>, &quot;name&quot;: &quot;printf(\&quot;hello world\&quot;);&quot;&#125; <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>来看下使用 <code>-&gt;</code> 提取获得 JSON 值：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> data <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$.id&#x27;</span>, data <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$.name&#x27;</span>, substr(data <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$.name&#x27;</span>, <span class="number">1</span>, <span class="number">1</span>) <span class="keyword">from</span> tbl;</span><br><span class="line"><span class="operator">+</span><span class="comment">----------------+----------------------------+--------------------------------+</span></span><br><span class="line"><span class="operator">|</span> data <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$.id&#x27;</span> <span class="operator">|</span> data <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$.name&#x27;</span>           <span class="operator">|</span> substr(data <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$.name&#x27;</span>, <span class="number">1</span>, <span class="number">1</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------+----------------------------+--------------------------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>              <span class="operator">|</span> &quot;Will&quot;                     <span class="operator">|</span> &quot;                              |</span><br><span class="line">| 2              | &quot;printf(\&quot;hello world\&quot;);&quot; | &quot;                              <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------+----------------------------+--------------------------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> tmp (id <span class="type">int</span>, name <span class="type">varchar</span>(<span class="number">50</span>));</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> tmp <span class="keyword">select</span> data <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$.id&#x27;</span>, data <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$.name&#x27;</span> <span class="keyword">from</span> tbl;</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span>, substr(name, <span class="number">1</span>, <span class="number">1</span>) <span class="keyword">from</span> tmp;</span><br><span class="line"><span class="operator">+</span><span class="comment">------+----------------------------+--------------------+</span></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span> name                       <span class="operator">|</span> substr(name, <span class="number">1</span>, <span class="number">1</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+----------------------------+--------------------+</span></span><br><span class="line"><span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span> &quot;Will&quot;                     <span class="operator">|</span> &quot;                  |</span><br><span class="line">|    2 | &quot;printf(\&quot;hello world\&quot;);&quot; | &quot;                  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+----------------------------+--------------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.01</span> sec)</span><br></pre></td></tr></table></figure>
+<p>可以看到，对于 string 类型的 JSON 值，使用 <code>json_extract()</code> 或 <code>-&gt;</code> 获取的都是被双引号包裹的字符串。MySQL 提供 json_unquote() 函数，用于去掉双引号包裹。另外，MySQL 支持 <code>column-&gt;&gt;path</code> 语法，通过 <code>-&gt;&gt;</code> 操作符获取纯量（scalar）。<code>column-&gt;&gt;path</code> 写法等价于 <code>json_unquote( json_extract(column, path) )</code> 或者 <code>json_unquote(column -&gt; path)</code>。来看下 SQL 示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> data <span class="operator">-</span><span class="operator">&gt;&gt;</span> <span class="string">&#x27;$.id&#x27;</span> <span class="keyword">as</span> id, data <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$.name&#x27;</span> <span class="keyword">as</span> name,</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span>    data <span class="operator">-</span><span class="operator">&gt;&gt;</span> <span class="string">&#x27;$.name&#x27;</span> <span class="keyword">as</span> name, json_unquote(data <span class="operator">-</span><span class="operator">&gt;</span> <span class="string">&#x27;$.name&#x27;</span>) <span class="keyword">as</span> name <span class="keyword">from</span> tbl;</span><br><span class="line"><span class="operator">+</span><span class="comment">------+----------------------------+------------------------+------------------------+</span></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span> name                       <span class="operator">|</span> name                   <span class="operator">|</span> name                   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+----------------------------+------------------------+------------------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>    <span class="operator">|</span> &quot;Will&quot;                     <span class="operator">|</span> Will                   <span class="operator">|</span> Will                   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span>    <span class="operator">|</span> &quot;printf(\&quot;hello world\&quot;);&quot; <span class="operator">|</span> printf(&quot;hello world&quot;); <span class="operator">|</span> printf(&quot;hello world&quot;); <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+----------------------------+------------------------+------------------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>MySQL 这种区分 <code>-&gt;</code> 和 <code>-&gt;&gt;</code> 的写法，怀疑是源自 Postgres。因为 Postgres 也分别提供了 <code>-&gt;</code> 和 <code>-&gt;&gt;</code> 操作符，<code>-&gt;</code> 也是保留双引号（get JSON object field by key），而 <code>-&gt;&gt;</code> 才能获取实际的字符串值（get JSON object field as text）<sup class="footnote-ref"><a href="#fn21" id="fnref21">[21]</a></sup><sup class="footnote-ref"><a href="#fn22" id="fnref22">[22]</a></sup>。</p>
+<p>在笔者看来，这种需要通过 json_unquote() 才能获取实际字符串值的写法完全没有必要，因为很难想到有需要保留双引号的使用场景，而就获取实际的字符串值才是多数情况。实际上，SQLite 的开发者也持有相同的想法。2015 年 10 月，SQLite 3.9 发布，开始支持 JSON 类型<sup class="footnote-ref"><a href="#fn23" id="fnref23">[23]</a></sup><sup class="footnote-ref"><a href="#fn24" id="fnref24">[24]</a></sup>。简单对比下，可以发现 SQLite 提供的 JSON 函数和 MySQL 极其相似，很多函数同名并且同语义。SQLite 也提供了 json_extract() 函数，与 MySQL 不同，SQLite 返回的是移除双引号后的字符串（the dequoted text for a JSON string value）。看下示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sqlite<span class="operator">&gt;</span> <span class="keyword">select</span> json_extract(<span class="string">&#x27;&#123;&quot;id&quot;: 1, &quot;name&quot;: &quot;Will&quot;&#125;&#x27;</span>, <span class="string">&#x27;$.name&#x27;</span>);</span><br><span class="line">Will</span><br><span class="line">sqlite<span class="operator">&gt;</span> <span class="keyword">select</span> json_extract(<span class="string">&#x27;&#123;&quot;code&quot;: &quot;printf(\&quot;hello world\&quot;);&quot;&#125;&#x27;</span>, <span class="string">&#x27;$.code&#x27;</span>);</span><br><span class="line">printf(&quot;hello world&quot;);</span><br></pre></td></tr></table></figure>
+<p>对于提取 JSON 文档中的纯量（scalar），SQL 标准定义了的 json_value() 函数，MySQL 没有支持，但 Oracle、MariaDB、MSSQL 都有支持。MariaDB 在兼容 MySQL 的同时也支持 SQL 标准，json_extract() 和 json_value() 在 MariaDB 下都可用。来看下 SQL 示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">MariaDB [testdb]<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> data                                          <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">1</span>, &quot;name&quot;: &quot;Will&quot;&#125;                     <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">2</span>, &quot;name&quot;: &quot;printf(\&quot;hello world\&quot;);&quot;&#125; <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 使用 json_extract() 提取 JSON 值，string 类型的值保留双引号</span></span><br><span class="line">MariaDB [testdb]<span class="operator">&gt;</span> <span class="keyword">select</span> json_extract(data, <span class="string">&#x27;$.id&#x27;</span>), json_extract(data, <span class="string">&#x27;$.name&#x27;</span>) <span class="keyword">from</span> tbl;</span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------+------------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_extract(data, <span class="string">&#x27;$.id&#x27;</span>) <span class="operator">|</span> json_extract(data, <span class="string">&#x27;$.name&#x27;</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------+------------------------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>                          <span class="operator">|</span> &quot;Will&quot;                       <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span>                          <span class="operator">|</span> &quot;printf(\&quot;hello world\&quot;);&quot;   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------+------------------------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 使用 json_value() 提取 JSON 值，string 类型的值自动移除双引号</span></span><br><span class="line">MariaDB [testdb]<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="built_in">json_value</span>(data, <span class="string">&#x27;$.id&#x27;</span>), <span class="built_in">json_value</span>(data, <span class="string">&#x27;$.name&#x27;</span>) <span class="keyword">from</span> tbl;</span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------+----------------------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="built_in">json_value</span>(data, <span class="string">&#x27;$.id&#x27;</span>) <span class="operator">|</span> <span class="built_in">json_value</span>(data, <span class="string">&#x27;$.name&#x27;</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------+----------------------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>                        <span class="operator">|</span> Will                       <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span>                        <span class="operator">|</span> printf(&quot;hello world&quot;);     <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------+----------------------------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<h2 id="其他查询函数">其他查询函数</h2>
+<p>除了上文的 json_extract() 函数，查询 JSON 文档相关的还有其他函数，如 json_contains()、json_contains_path()、json_keys()、json_search()。示例如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">set</span> <span class="variable">@j</span> <span class="operator">=</span> <span class="string">&#x27;&#123;&quot;a&quot;: 1, &quot;b&quot;: 2, &quot;c&quot;: &#123;&quot;d&quot;: 4&#125;&#125;&#x27;</span>;</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 使用 json_contains() 函数判断是否存在某 JSON 值</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_contains(<span class="variable">@j</span>, <span class="string">&#x27;&#123;&quot;a&quot;: 1&#125;&#x27;</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_contains(<span class="variable">@j</span>, <span class="string">&#x27;&#123;&quot;a&quot;: 1&#125;&#x27;</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------+</span></span><br><span class="line"><span class="operator">|</span>                            <span class="number">1</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 使用 json_contains_path() 函数判断是否存在某 JSON 路径</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_contains_path(<span class="variable">@j</span>, <span class="string">&#x27;one&#x27;</span>, <span class="string">&#x27;$.a&#x27;</span>, <span class="string">&#x27;$.e&#x27;</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_contains_path(<span class="variable">@j</span>, <span class="string">&#x27;one&#x27;</span>, <span class="string">&#x27;$.a&#x27;</span>, <span class="string">&#x27;$.e&#x27;</span>)   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span><span class="comment">-----------------------------------------------|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 使用 json_contains_path() 函数判断是否存在某 JSON 路径</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_contains_path(<span class="variable">@j</span>, <span class="string">&#x27;all&#x27;</span>, <span class="string">&#x27;$.a&#x27;</span>, <span class="string">&#x27;$.e&#x27;</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_contains_path(<span class="variable">@j</span>, <span class="string">&#x27;all&#x27;</span>, <span class="string">&#x27;$.a&#x27;</span>, <span class="string">&#x27;$.e&#x27;</span>)   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span><span class="comment">-----------------------------------------------|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">0</span>                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>函数的完整定义和用法可以参考官方文档，本文不再一一举例说明。</p>
+<h1 id="修改-JSON">修改 JSON</h1>
+<p>对于 MySQL 的 JSON 类型的数据，若要修改数据，可以使用类似如下的 SQL：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl <span class="keyword">where</span> data<span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.id&#x27;</span> <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------+</span></span><br><span class="line"><span class="operator">|</span> data                      <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------+</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">2</span>, &quot;name&quot;: &quot;Will&quot;&#125; <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 对 data 整个字段修改</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">update</span> tbl <span class="keyword">set</span> data <span class="operator">=</span> <span class="string">&#x27;&#123;&quot;id&quot;: 2, &quot;name&quot;: &quot;Andy&quot;&#125;&#x27;</span> <span class="keyword">where</span> data<span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.id&#x27;</span> <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.00</span> sec)</span><br><span class="line"><span class="keyword">Rows</span> matched: <span class="number">1</span>  Changed: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl <span class="keyword">where</span> data<span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.id&#x27;</span><span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------+</span></span><br><span class="line"><span class="operator">|</span> data                      <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------+</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">2</span>, &quot;name&quot;: &quot;Andy&quot;&#125; <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>如果要修改 JSON 内部数据，是否可以通过 JSON 路径表达式直接赋值呢？答案是，不行，MySQL 不支持。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 语法错误，不支持通过 JSON 路径表达式赋值，修改 JSON 数据</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">update</span> tbl <span class="keyword">set</span> data<span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.name&#x27;</span> <span class="operator">=</span> <span class="string">&#x27;Andy&#x27;</span> <span class="keyword">where</span> data<span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.id&#x27;</span> <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line">ERROR <span class="number">1064</span> (<span class="number">42000</span>): You have an error <span class="keyword">in</span> your <span class="keyword">SQL</span> syntax; <span class="keyword">check</span> the manual that corresponds <span class="keyword">to</span> your MySQL server version <span class="keyword">for</span> the <span class="keyword">right</span> syntax <span class="keyword">to</span> use near <span class="string">&#x27;-&gt;&#x27;</span>$.name<span class="string">&#x27; = &#x27;</span>Andy<span class="string">&#x27; where data-&gt;&#x27;</span>$.id<span class="string">&#x27; = 2&#x27;</span> <span class="keyword">at</span> line <span class="number">1</span></span><br></pre></td></tr></table></figure>
+<p>MySQL 提供了数个函数来修改 JSON 数据。我们先来看看 json_replace()、json_set() 和 json_insert() 这三个函数：</p>
+<ul>
+<li>json_replace()：替换值。替换旧值，但不插入新值</li>
+<li>json_set()：设置值。替换旧值，或插入新值</li>
+<li>json_insert()：插入值。只插入新值，不替换旧值</li>
+</ul>
+<p>json_insert() 只能插入数据， json_replace() 只能更新数据，json_set() 能更新或插入数据。</p>
+<p>替换值，json_replace() 示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 使用 json_replace() 函数</span></span><br><span class="line"><span class="comment">-- 把 &#123;&quot;id&quot;: 2, &quot;name&quot;: &quot;Will&quot;&#125; 修改为 &#123;&quot;id&quot;: 2, &quot;name&quot;: &quot;Andy&quot;&#125;</span></span><br><span class="line"><span class="comment">-- 路径 $.name 指向的值存在，旧值被替换为新值</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">update</span> tbl</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">set</span> data <span class="operator">=</span> json_replace(data, <span class="string">&#x27;$.name&#x27;</span>, <span class="string">&#x27;Andy&#x27;</span>)</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">where</span> data<span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.id&#x27;</span> <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.03</span> sec)</span><br><span class="line"><span class="keyword">Rows</span> matched: <span class="number">1</span>  Changed: <span class="number">1</span>  Warnings: <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>设置值，json_set() 示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 使用 json_set() 函数</span></span><br><span class="line"><span class="comment">-- 把 &#123;&quot;id&quot;: 2, &quot;name&quot;: &quot;Will&quot;&#125; 修改为 &#123;&quot;id&quot;: 2, &quot;city&quot;: &quot;北京&quot;, &quot;name&quot;: &quot;Bill&quot;&#125;</span></span><br><span class="line"><span class="comment">-- 路径 $.name 指向的值存在，旧值被替换为新值；路径 $.city 指向的值不存在，将插入新值</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">update</span> tbl</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">set</span> data <span class="operator">=</span> json_set(data, <span class="string">&#x27;$.name&#x27;</span>, <span class="string">&#x27;Bill&#x27;</span>, <span class="string">&#x27;$.city&#x27;</span>, <span class="string">&#x27;北京&#x27;</span>)</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">where</span> data<span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.id&#x27;</span><span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.00</span> sec)</span><br><span class="line"><span class="keyword">Rows</span> matched: <span class="number">1</span>  Changed: <span class="number">1</span>  Warnings: <span class="number">0</span></span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl <span class="keyword">where</span> data<span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.id&#x27;</span><span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> data                                        <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">2</span>, &quot;city&quot;: &quot;北京&quot;, &quot;name&quot;: &quot;Bill&quot;&#125;   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>插入值，json_insert() 示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 使用 json_set() 函数</span></span><br><span class="line"><span class="comment">-- 把 &#123;&quot;id&quot;: 2, &quot;name&quot;: &quot;Will&quot;&#125; 修改为 &#123;&quot;id&quot;: 2, &quot;address&quot;: &quot;故宫&quot;&#125;</span></span><br><span class="line"><span class="comment">-- 路径 $.name 指向的值存在，将不替换这个旧值；路径 $.address 指向的值不存在，将插入新值</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">update</span> tbl</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">set</span> data <span class="operator">=</span> json_insert(data, <span class="string">&#x27;$.name&#x27;</span>, <span class="string">&#x27;Bill&#x27;</span>, <span class="string">&#x27;$.address&#x27;</span>, <span class="string">&#x27;故宫&#x27;</span>)</span><br><span class="line">    <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">where</span> data<span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.id&#x27;</span><span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.04</span> sec)</span><br><span class="line"><span class="keyword">Rows</span> matched: <span class="number">1</span>  Changed: <span class="number">1</span>  Warnings: <span class="number">0</span></span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl <span class="keyword">where</span> data<span class="operator">-</span><span class="operator">&gt;</span><span class="string">&#x27;$.id&#x27;</span><span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> data                                                                <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">2</span>, &quot;name&quot;: &quot;Will&quot;, &quot;address&quot;: &quot;故宫&quot;&#125;        <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------------------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>现在，我们来看下修改 JSON 数组的两个函数，json_array_insert() 和 json_array_append()，函数定义如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">json_array_insert(json_doc, path, val[, path, val] ...)</span><br><span class="line">json_array_append(json_doc, path, val[, path, val] ...)</span><br></pre></td></tr></table></figure>
+<p>json_array_insert()，参数 <code>path</code> 必须指向 JSON 数组某个位置的元素，若该位置存在值，将会把 <code>val</code> 插入该位置，然后其他元素向右移动；若该位置超出数组大小范围，将会把 <code>val</code> 插入到数组末尾。SQL 示例如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">set</span> <span class="variable">@j</span> <span class="operator">=</span> <span class="string">&#x27;[&quot;a&quot;, &#123;&quot;b&quot;: [1, 2]&#125;, [3, 4]]&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 在数组的索引 1 的位置上插入值 5，原本索引 1 位置上的 &#123;&quot;b&quot;: [1, 2]&#125; 被挤到后边</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_array_insert(<span class="variable">@j</span>, <span class="string">&#x27;$[1]&#x27;</span>, <span class="number">5</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_array_insert(<span class="variable">@j</span>, <span class="string">&#x27;$[1]&#x27;</span>, <span class="number">5</span>)   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span><span class="comment">------------------------------------|</span></span><br><span class="line"><span class="operator">|</span> [&quot;a&quot;, <span class="number">5</span>, &#123;&quot;b&quot;: [<span class="number">1</span>, <span class="number">2</span>]&#125;, [<span class="number">3</span>, <span class="number">4</span>]]    <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 插入位置超出数组大小范围，将会把值插入到数组末尾</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_array_insert(<span class="variable">@j</span>, <span class="string">&#x27;$[100]&#x27;</span>, <span class="number">5</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_array_insert(<span class="variable">@j</span>, <span class="string">&#x27;$[100]&#x27;</span>, <span class="number">5</span>)   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span><span class="comment">--------------------------------------|</span></span><br><span class="line"><span class="operator">|</span> [&quot;a&quot;, &#123;&quot;b&quot;: [<span class="number">1</span>, <span class="number">2</span>]&#125;, [<span class="number">3</span>, <span class="number">4</span>], <span class="number">5</span>]      <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- path 指向不是 JSON 数组的元素，SQL 执行报错</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_array_insert(<span class="variable">@j</span>, <span class="string">&#x27;$[1].b&#x27;</span>, <span class="number">5</span>);</span><br><span class="line">(<span class="number">3165</span>, <span class="string">&#x27;A path expression is not a path to a cell in an array.&#x27;</span>)</span><br></pre></td></tr></table></figure>
+<p>json_array_append()，如果参数 <code>path</code> 指向的 JSON 是数组，将在数组末尾添加元素；如果参数 <code>path</code> 指向的 JSON 是值或对象，该值或对象将被包裹为数组，然后在这个数组末尾添加元素。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">set</span> <span class="variable">@j</span> <span class="operator">=</span> <span class="string">&#x27;[&quot;a&quot;, &#123;&quot;b&quot;: [1, 2]&#125;, [3, 4]]&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- path 指向的 JSON 是数组，将在数组末尾添加元素</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_array_append(<span class="variable">@j</span>, <span class="string">&#x27;$&#x27;</span>, <span class="number">5</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_array_append(<span class="variable">@j</span>, <span class="string">&#x27;$&#x27;</span>, <span class="number">5</span>)   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------------+</span></span><br><span class="line"><span class="operator">|</span> [&quot;a&quot;, &#123;&quot;b&quot;: [<span class="number">1</span>, <span class="number">2</span>]&#125;, [<span class="number">3</span>, <span class="number">4</span>], <span class="number">5</span>] <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- path 指向的 JSON 是值或对象，该值或对象将被包裹为数组，然后在这个数组末尾添加元素</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_array_append(<span class="variable">@j</span>, <span class="string">&#x27;$[1]&#x27;</span>, <span class="number">5</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_array_append(<span class="variable">@j</span>, <span class="string">&#x27;$[1]&#x27;</span>, <span class="number">5</span>)  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------+</span></span><br><span class="line"><span class="operator">|</span> [&quot;a&quot;, [&#123;&quot;b&quot;: [<span class="number">1</span>, <span class="number">2</span>]&#125;, <span class="number">5</span>], [<span class="number">3</span>, <span class="number">4</span>]] <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>除了上文提到的函数，还有 json_merge_patch()、json_merge_preserve()、json_remove() 这个些函数，可以参考官方文档的介绍，本文不再一一举例说明。</p>
+<h1 id="索引-JSON：生成列">索引 JSON：生成列</h1>
+<p>现在来看下根据 JSON 列查询表数据的执行计划，如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl <span class="keyword">where</span> data <span class="operator">-</span><span class="operator">&gt;</span> &quot;$.id&quot; <span class="operator">=</span> <span class="number">1</span> \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           id: <span class="number">1</span></span><br><span class="line">  select_type: SIMPLE</span><br><span class="line">        <span class="keyword">table</span>: tbl</span><br><span class="line">   partitions: <span class="keyword">NULL</span></span><br><span class="line">         type: <span class="keyword">ALL</span></span><br><span class="line">possible_keys: <span class="keyword">NULL</span></span><br><span class="line">          key: <span class="keyword">NULL</span></span><br><span class="line">      key_len: <span class="keyword">NULL</span></span><br><span class="line">          <span class="keyword">ref</span>: <span class="keyword">NULL</span></span><br><span class="line">         <span class="keyword">rows</span>: <span class="number">2</span></span><br><span class="line">     filtered: <span class="number">100.00</span></span><br><span class="line">        Extra: <span class="keyword">Using</span> <span class="keyword">where</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>可以看到，因为没有加索引，访问类型是全表扫描 <code>type: ALL</code>。来试下在 JSON 类型的 <code>data</code> 列上添加索引，会提示如下错误：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">alter</span> <span class="keyword">table</span> tbl <span class="keyword">add</span> index (data);</span><br><span class="line">ERROR <span class="number">3152</span> (<span class="number">42000</span>): JSON <span class="keyword">column</span> <span class="string">&#x27;data&#x27;</span> cannot be used <span class="keyword">in</span> key specification.</span><br></pre></td></tr></table></figure>
+<p>对于索引 JSON 类型列问题，MySQL 文档有如下阐述<sup class="footnote-ref"><a href="#fn2" id="fnref2:1">[2:1]</a></sup>：</p>
+<blockquote>
+<p>JSON columns, like columns of other binary types, are not indexed directly; instead, you can create an index on a generated column that extracts a scalar value from the JSON column. See Indexing a Generated Column to Provide a JSON Column Index, for a detailed example.</p>
+</blockquote>
+<p>就是说，不能直接在 JSON 列上创建索引；替代方式是，先创建提取 JSON 纯量的生成列（generated column），然后在这个生成列上创建索引。回过头来，ERROR 3152，这个报错提示信息其实让人有点困惑，对没仔细阅读文档的人来说，可能会误以为 MySQL 不支持索引 JSON 列（Bug #81364<sup class="footnote-ref"><a href="#fn25" id="fnref25">[25]</a></sup>）。于是，在 MySQL 8.0 错误提示信息优化为：</p>
+<blockquote>
+<p>ERROR 3152 (42000): JSON column '%s' supports indexing only via generated columns on a specified JSON path.</p>
+</blockquote>
+<p>生成列以及在生成列上创建索引，是 MySQL 5.7 开始支持的新特性。但其实，在 SQL:2003 标准中，生成列就早已经被定义为可选特性，“Optional Features of SQL/Foundation:2003, T175 Generated columns”。这个特性在其他 DBMS 中很早就有支持。2007 年 9 月发布的 Oracle Database 11g 开始支持生成列，不过它们称之为称之为虚拟列（virtual column）。2008 年 8 月发布的 SQL Server 2008 开始支持计算列（computed column），实现的就是 SQL 标准中的生成列。在相近的时间点，MySQL 创建了WL#411: Computed virtual columns as MS SQL server has<sup class="footnote-ref"><a href="#fn26" id="fnref26">[26]</a></sup>。之后，MySQL 的社区贡献者 Andrey Zhakov 实现了 WL#411 描述的特性，并发布了实现的代码补丁<sup class="footnote-ref"><a href="#fn27" id="fnref27">[27]</a></sup><sup class="footnote-ref"><a href="#fn28" id="fnref28">[28]</a></sup><sup class="footnote-ref"><a href="#fn29" id="fnref29">[29]</a></sup>。可惜的是 MySQL 官方很长一段时间都没把这个补丁合并进来，直到 2015 年的 MySQL 5.7（7年后）才官方实现 WL#411<sup class="footnote-ref"><a href="#fn30" id="fnref30">[30]</a></sup>，同时 WL#411 的标题也被更新为符合 SQL 标准术语的 “Generated columns”。与之相对比的是，2010 年 4 月发布的 MariaDB 5.2 就开始支持虚拟列<sup class="footnote-ref"><a href="#fn31" id="fnref31">[31]</a></sup>，实现上同样也是基于 Andrey Zhakov 贡献的代码。关于生成列或虚拟列，Wikipedia 的 <code>Virtual column</code> 词条<sup class="footnote-ref"><a href="#fn32" id="fnref32">[32]</a></sup>总结了各大 DBMS 的支持情况，可以参阅。总结下，标准 SQL 定义生成列的语法和 SQL Server 2008、Oracle 11g、MariaDB、MySQL 的区别<sup class="footnote-ref"><a href="#fn30" id="fnref30:1">[30:1]</a></sup><sup class="footnote-ref"><a href="#fn33" id="fnref33">[33]</a></sup>：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">Standard             MSSQL 2008      Oracle 11g           MariaDB 10.1           MySQL 5.7               </span><br><span class="line">--------             -----------     ----------           ------------           ---------               </span><br><span class="line">column_name          column_name     column_name          column_name            column_name             </span><br><span class="line">[data type]                          [data type]          data_type              data type               </span><br><span class="line">GENERATED ALWAYS AS  AS              GENERATED ALWAYS AS  [GENERATED ALWAYS] AS  [GENERATED ALWAYS] AS   </span><br><span class="line">(expression)         (expression)    (expression)         (expression)           (expression)           </span><br><span class="line">                     [PERSISTENT]    [VIRTUAL]            [VIRTUAL | PERSISTENT] [VIRTUAL | STORED]     </span><br><span class="line">[constraints]        [constraints]   [constraints]        [constraints]          [constraints]          </span><br><span class="line">                                                          [COMMENT &#x27;string&#x27;]     [COMMENT &#x27;string&#x27;]</span><br></pre></td></tr></table></figure>
+<p>回到正题，我们现在来试试 MySQL 的生成列：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 添加生成列</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">alter</span> <span class="keyword">table</span> tbl <span class="keyword">add</span> id <span class="type">int</span> <span class="keyword">as</span> (data <span class="operator">-</span><span class="operator">&gt;</span> &quot;$.id&quot;);</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.15</span> sec)</span><br><span class="line">Records: <span class="number">0</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+------+</span></span><br><span class="line"><span class="operator">|</span> data                                          <span class="operator">|</span> id   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+------+</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">1</span>, &quot;name&quot;: &quot;Will&quot;&#125;                     <span class="operator">|</span>    <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;id&quot;: <span class="number">2</span>, &quot;name&quot;: &quot;printf(\&quot;hello world\&quot;);&quot;&#125; <span class="operator">|</span>    <span class="number">2</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------------------+------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>上面的示例，创建生成列 <code>id</code>，生成列对应的表达式是 <code>data -&gt; &quot;$.id&quot;</code>。现在再试试在生成列 <code>id</code> 上，创建索引：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 在生成列上创建索引 idx_id</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> index idx_id <span class="keyword">on</span> tbl (id);</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.05</span> sec)</span><br><span class="line">Records: <span class="number">0</span>  Duplicates: <span class="number">0</span>  Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 执行计划</span></span><br><span class="line">mysql<span class="operator">&gt;</span> explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl <span class="keyword">where</span> id  <span class="operator">=</span> <span class="number">1</span> \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           id: <span class="number">1</span></span><br><span class="line">  select_type: SIMPLE</span><br><span class="line">        <span class="keyword">table</span>: tbl</span><br><span class="line">   partitions: <span class="keyword">NULL</span></span><br><span class="line">         type: <span class="keyword">ref</span></span><br><span class="line">possible_keys: idx_id</span><br><span class="line">          key: idx_id</span><br><span class="line">      key_len: <span class="number">5</span></span><br><span class="line">          <span class="keyword">ref</span>: const</span><br><span class="line">         <span class="keyword">rows</span>: <span class="number">1</span></span><br><span class="line">     filtered: <span class="number">100.00</span></span><br><span class="line">        Extra: <span class="keyword">NULL</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 执行计划</span></span><br><span class="line">mysql<span class="operator">&gt;</span> explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl  <span class="keyword">where</span> data <span class="operator">-</span><span class="operator">&gt;</span> &quot;$.id&quot; <span class="operator">=</span> <span class="number">1</span> \G</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">           id: <span class="number">1</span></span><br><span class="line">  select_type: SIMPLE</span><br><span class="line">        <span class="keyword">table</span>: tbl</span><br><span class="line">   partitions: <span class="keyword">NULL</span></span><br><span class="line">         type: <span class="keyword">ref</span></span><br><span class="line">possible_keys: idx_id</span><br><span class="line">          key: idx_id</span><br><span class="line">      key_len: <span class="number">5</span></span><br><span class="line">          <span class="keyword">ref</span>: const</span><br><span class="line">         <span class="keyword">rows</span>: <span class="number">1</span></span><br><span class="line">     filtered: <span class="number">100.00</span></span><br><span class="line">        Extra: <span class="keyword">NULL</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span>, <span class="number">1</span> warning (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>从上面的执行计划可以看到，查询条件用 <code>id</code> 或者 <code>data -&gt; &quot;$.id&quot;</code> 都能使用索引 <code>idx_id</code>。</p>
+<h1 id="JSON-二进制格式">JSON 二进制格式</h1>
+<p>内部实现上，保存到数据库的 JSON 数据并非以 JSON 文本存储，而是二进制格式，具体可以参见，WL#8132: JSON datatype and binary storage format，当然也可以直接阅读源码 json_binary.h<sup class="footnote-ref"><a href="#fn34" id="fnref34">[34]</a></sup>、json_binary.cc<sup class="footnote-ref"><a href="#fn35" id="fnref35">[35]</a></sup>或 doxygen<sup class="footnote-ref"><a href="#fn36" id="fnref36">[36]</a></sup>。</p>
+<p>MySQL 的 JSON 二进制格式，其中有一点比较值得注意，WL#8132 提到：</p>
+<blockquote>
+<p>The keys are sorted, so that lookup can use binary search to locate the key quickly.</p>
+</blockquote>
+<p>就是，为了能利用二分搜索快速定位键，存入数据库的JSON 对象的键是被排序过的。来看下下面的 SQL：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">truncate</span> tbl;</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> tbl <span class="keyword">values</span> (<span class="string">&#x27;&#123;&quot;b&quot;: &quot;c&quot;, &quot;a&quot;: &#123;&quot;y&quot;: 1, &quot;x&quot;: 2&#125;&#125;&#x27;</span>);</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.02</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl;</span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------+</span></span><br><span class="line"><span class="operator">|</span> data                              <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------+</span></span><br><span class="line"><span class="operator">|</span> &#123;&quot;a&quot;: &#123;&quot;x&quot;: <span class="number">2</span>, &quot;y&quot;: <span class="number">1</span>&#125;, &quot;b&quot;: &quot;c&quot;&#125; <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-----------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>上面的 SQL 可以看到，<code>insert</code> 写入时键并没有按次序排列，而用 <code>select</code> 将 JSON 数据反序列化读出，发现实际保存的键是有序的。排序规则是，先按字符串长度排序，若长度相同按字母排序。同样的，键关联的值，按键排序后的次序排列。对键排序，显然只能针对 JSON 对象，若要存储 JSON 数组，值按索引位置排序。</p>
+<p>MySQL 5.7.22 新增 json_storage_size() 函数，用于返回 json 文档二进制表示占用的存储空间。先来看下 SQL 示例：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_storage_size(<span class="string">&#x27;&quot;abc&quot;&#x27;</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_storage_size(<span class="string">&#x27;&quot;abc&quot;&#x27;</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------+</span></span><br><span class="line"><span class="operator">|</span>                          <span class="number">5</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_storage_size(<span class="string">&#x27;[42, &quot;xy&quot;, &quot;abc&quot;]&#x27;</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_storage_size(<span class="string">&#x27;[42, &quot;xy&quot;, &quot;abc&quot;]&#x27;</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------------------+</span></span><br><span class="line"><span class="operator">|</span>                                     <span class="number">21</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> json_storage_size(<span class="string">&#x27;&#123;&quot;b&quot;: 42, &quot;a&quot;: &quot;xy&quot;&#125;&#x27;</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> json_storage_size(<span class="string">&#x27;&#123;&quot;b&quot;: 42, &quot;a&quot;: &quot;xy&quot;&#125;&#x27;</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span>                                        <span class="number">24</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>WL#8132 给出了 JSON 二进制格式的 BNF 语法描述。参考这个语法描述，可以推算出上文示例中的 <code>&quot;abc&quot;</code>、<code>[42, &quot;xy&quot;, &quot;abc&quot;]</code>、<code>&#123;&quot;b&quot;: 42, &quot;a&quot;: &quot;xy&quot;&#125;</code> 对应的二进制表示。先来看下 <code>&quot;abc&quot;</code> 纯量，语法推导过程如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">doc</span><br><span class="line">  =&gt; type value                     <span class="comment">// 使用产生式 doc ::= type value</span></span><br><span class="line">  =&gt; <span class="number">0x0c</span> value                     <span class="comment">// 使用产生式 type ::= 0x0c (utf8mb4 string 类型)</span></span><br><span class="line">  =&gt; <span class="number">0x0c</span> <span class="built_in">string</span>                    <span class="comment">// 使用产生式 value ::= string</span></span><br><span class="line">  =&gt; <span class="number">0x0c</span> data-length utf8mb4-data  <span class="comment">// 使用产生式 string ::= data-length utf8mb4-data</span></span><br><span class="line">  =&gt; <span class="number">0x0c</span> <span class="number">0x03</span> utf8mb4-data         <span class="comment">// 使用产生式 data-length ::= uint8*</span></span><br><span class="line">  =&gt; <span class="number">0x0c</span> <span class="number">0x03</span> <span class="number">0x61</span> <span class="number">0x62</span> <span class="number">0x63</span></span><br></pre></td></tr></table></figure>
+<p>对应的二进制值，共 5 个字节，依次为 <code>0x0c 0x03 0x61 0x62 0x63</code>，其中 <code>0x61 0x62 0x63</code>，就是 16 进制表示的字符串 <code>abc</code>。占用 5个字节，与 json_storage_size() 函数返回的结果一致。相应的语法树如下：</p>
+<p><img src="https://static.nullwy.me/mysql-jsonb-syntax-tree.png" alt="mysql-jsonb-syntax-tree-w350"></p>
+<p>从二进制的角度看，纯量 <code>&quot;abc&quot;</code> 的 JSON 二进制表示如下：</p>
+<p><img src="https://static.nullwy.me/mysql-jsonb-scalar.png" alt="mysql-jsonb-scalar-w350"></p>
+<p><code>[42, &quot;xy&quot;, &quot;abc&quot;]</code> 的推导过程，如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">doc </span><br><span class="line">  =&gt; type value                          <span class="comment">// 使用产生式 doc ::= type value</span></span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="built_in">array</span>                          <span class="comment">// 使用产生式 type ::= 0x02 (small JSON array 类型)</span></span><br><span class="line">  =&gt; <span class="number">0x02</span> element-count size value-entry* value*  <span class="comment">// 使用产生式 array ::= element-count size value-entry* value*</span></span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="number">0x03</span> <span class="number">0x00</span> size value-entry* value*  <span class="comment">// 使用产生式 element-count ::= uint16 (使用 little-endian)</span></span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="number">0x03</span> <span class="number">0x00</span> <span class="number">0x14</span> <span class="number">0x00</span> value-entry* value*  <span class="comment">// 使用产生式 size ::= uint16 (使用 little-endian)</span></span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="number">0x03</span> <span class="number">0x00</span> <span class="number">0x14</span> <span class="number">0x00</span> type offset-or-inlined-value value-entry* value* <span class="comment">// 使用产生式 value-entry ::= type offset-or-inlined-value</span></span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="number">0x03</span> <span class="number">0x00</span> <span class="number">0x14</span> <span class="number">0x00</span> <span class="number">0x06</span> offset-or-inlined-value value-entry* value* <span class="comment">// 使用产生式 type ::= 0x06 (uint16 类型)</span></span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="number">0x03</span> <span class="number">0x00</span> <span class="number">0x14</span> <span class="number">0x00</span> <span class="number">0x06</span> <span class="number">0x2a</span> <span class="number">0x00</span> value-entry* value*  <span class="comment">// 使用产生式 offset-or-inlined-value ::= uint16</span></span><br><span class="line">  ... 省略</span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="number">0x03</span> <span class="number">0x00</span> <span class="number">0x14</span> <span class="number">0x00</span> <span class="number">0x06</span> <span class="number">0x2a</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x0d</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x10</span> <span class="number">0x00</span> value*</span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="number">0x03</span> <span class="number">0x00</span> <span class="number">0x14</span> <span class="number">0x00</span> <span class="number">0x06</span> <span class="number">0x2a</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x0d</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x10</span> <span class="number">0x00</span> <span class="built_in">string</span> value  <span class="comment">// 使用产生式 value ::= string</span></span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="number">0x03</span> <span class="number">0x00</span> <span class="number">0x14</span> <span class="number">0x00</span> <span class="number">0x06</span> <span class="number">0x2a</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x0d</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x10</span> <span class="number">0x00</span> data-length utf8mb4-data value  <span class="comment">// 使用产生式 string ::= data-length utf8mb4-data</span></span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="number">0x03</span> <span class="number">0x00</span> <span class="number">0x14</span> <span class="number">0x00</span> <span class="number">0x06</span> <span class="number">0x2a</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x0d</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x10</span> <span class="number">0x00</span> <span class="number">0x02</span> utf8mb4-data value <span class="comment">// 使用产生式 data-length ::= uint8*</span></span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="number">0x03</span> <span class="number">0x00</span> <span class="number">0x14</span> <span class="number">0x00</span> <span class="number">0x06</span> <span class="number">0x2a</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x0d</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x10</span> <span class="number">0x00</span> <span class="number">0x02</span> <span class="number">0x78</span> <span class="number">0x78</span> value</span><br><span class="line">  ... 省略</span><br><span class="line">  =&gt; <span class="number">0x02</span> <span class="number">0x03</span> <span class="number">0x00</span> <span class="number">0x14</span> <span class="number">0x00</span> <span class="number">0x06</span> <span class="number">0x2a</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x0d</span> <span class="number">0x00</span> <span class="number">0x0c</span> <span class="number">0x10</span> <span class="number">0x00</span> <span class="number">0x02</span> <span class="number">0x78</span> <span class="number">0x79</span> <span class="number">0x03</span> <span class="number">0x61</span> <span class="number">0x62</span> <span class="number">0x63</span></span><br></pre></td></tr></table></figure>
+<p><code>[42, &quot;xy&quot;, &quot;abc&quot;]</code> 对应的二进制表示，共 21 个字节，依次为 <code>0x02 0x03 0x00 0x14 0x00 0x06 0x2a 0x00 0x0c 0x0d 0x00 0x0c 0x10 0x00 0x02 0x78 0x79 0x03 0x61 0x62 0x63</code>。如下图：</p>
+<p><img src="https://static.nullwy.me/mysql-jsonb-array.png" alt="mysql-jsonb-array"></p>
+<p>相对来说，产生式 <code>array ::= element-count size value-entry* value*</code>，是整个JSON 数组二进制表示语法的核心。<code>element-count</code>，表示元素个数。上图中，第 4、5 个字节是 <code>size</code> 字段，十进制值为 20（0x14），是完整二进制表示去掉开头 <code>type</code> 字段后的大小（文档没有明确这个字段的含义，不过通过源码推断出来）。另外，<code>value-entry</code> 由 <code>type</code> 和 <code>offset-or-inlined-value</code> 字段组成。<code>type</code> 很好理解，不做解释。<code>offset-or-inlined-value</code> 字段，官方文档给出了含义，含义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// This field holds either the offset to where the value is stored,</span></span><br><span class="line"><span class="comment">// or the value itself if it is small enough to be inlined (that is,</span></span><br><span class="line"><span class="comment">// if it is a JSON literal or a small enough [u]int).</span></span><br><span class="line">offset-or-inlined-value ::=</span><br><span class="line">uint16 |   <span class="comment">// if used in small JSON object/array</span></span><br><span class="line">uint32     <span class="comment">// if used in large JSON object/array</span></span><br></pre></td></tr></table></figure>
+<p>就是说，如果实际要保存的值足够小，将直接内联在这个字段中，否则将保存偏移量（offset），也就是指向实际值的指针。在示例中，保存 <code>xy</code> 对应的 offset 值为 13（0x0d），指向的相对地址是 14。因为这里的 offset 并不是以相对地址 0 为基准地址，是以相对地址 1 为基准地址（图中箭头 B 指向的位置），所以偏移量是 13 而不是 14（这个字段的明确含义也是从源码推断而来）。类似的，保存 <code>abc</code> 对应的 offset 值为 16（0x10），指向的相对地址是 17。</p>
+<p>阅读文档容易发现，<code>element-count</code>、<code>size</code>、<code>offset</code> 字段占用的字节大小是固定的，小 JSON（64KB 以内）是 2 字节，大 JSON 是 4 字节。所以，若要查找 JSON 数组的第 <code>pos</code> 个元素的 <code>value-entry</code> 的偏移量，可以使用下面的式子快速定位：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">entry_offset = offset_size * 2 + (1 + offset_size) * pos</span><br></pre></td></tr></table></figure>
+<p>JSON 数组二进制表示的其他字段比较容易理解，文档都有解释，就不展开阐述了。</p>
+<p>现在来看下，JSON 对象 <code>&#123;&quot;b&quot;: 42, &quot;a&quot;: &quot;xy&quot;&#125;</code> 的二进制表示，如下图：</p>
+<p><img src="https://static.nullwy.me/mysql-jsonb-object.png" alt="mysql-jsonb-object"></p>
+<p>对于 JSON 对象二进制表示的语法，核心的产生式是 <code>object ::= element-count size key-entry* value-entry* key* value*</code>。<code>element-count</code>、<code>size</code> 和 <code>value-entry</code> 字段，在 JSON 数组中也有，不再赘述。而 <code>key-entry</code> 字段，类似于 <code>value-entry</code>。<code>key-entry</code> 中的 <code>key-offset</code> 保存的是偏移量，是指向键的指针。另外，正如上文提到的 MySQL 会对 JSON 键排序，所以上图示例的第 20 和 21 个字节值分别是 <code>0x61</code>和 <code>0x62</code>，即 <code>a</code> 和 <code>b</code>，而非 <code>b</code> 和 <code>a</code>。同样的，键关联的值，按键排序后的次序排列，依次是 <code>&quot;xy&quot;</code> 和 <code>42</code>。</p>
+<h1 id="参考资料">参考资料</h1>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>MySQL 5.7 Reference Manual, What Is New in MySQL 5.7 <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/mysql-nutshell.html">https://dev.mysql.com/doc/refman/5.7/en/mysql-nutshell.html</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p>MySQL 5.7 Reference Manual, 12 Data Types, 12.6 The JSON Data Type <a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/json.html">http://dev.mysql.com/doc/refman/5.7/en/json.html</a> <a href="#fnref2" class="footnote-backref">↩︎</a> <a href="#fnref2:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p>2012-09 PostgreSQL 9.2 released <a target="_blank" rel="noopener" href="https://www.postgresql.org/about/news/postgresql-92-released-1415/">https://www.postgresql.org/about/news/postgresql-92-released-1415/</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p>JSON Support in Oracle Database 12c Release 1 (12.1.0.2) <a target="_blank" rel="noopener" href="https://oracle-base.com/articles/12c/json-support-in-oracle-database-12cr1">https://oracle-base.com/articles/12c/json-support-in-oracle-database-12cr1</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p>Oracle Database 12c Release 1 (12.1.0.2) New Features, 1.9 JSON Support <a target="_blank" rel="noopener" href="https://docs.oracle.com/database/121/NEWFT/chapter12102.htm#NEWFT505">https://docs.oracle.com/database/121/NEWFT/chapter12102.htm#NEWFT505</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn6" class="footnote-item"><p>Facebook DocStore: Document column type [Deprecated] <a target="_blank" rel="noopener" href="https://github.com/facebook/mysql-5.6/wiki/Document-column-type-%5BDeprecated%5D">https://github.com/facebook/mysql-5.6/wiki/Document-column-type-[Deprecated]</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn7" class="footnote-item"><p>2015-04 DocStore: Document Database for MySQL at Facebook (slides) <a target="_blank" rel="noopener" href="https://web.archive.org/web/20161022061349/https://www.percona.com/live/mysql-conference-2015/sites/default/files/slides/Facebook%20DocStore%20Percona%202015.pdf">https://web.archive.org/web/20161022061349/https://www.percona.com/live/mysql-conference-2015/sites/default/files/slides/Facebook DocStore Percona 2015.pdf</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn8" class="footnote-item"><p>2014-03 SQL/JSON Proposals, Part 1 <a target="_blank" rel="noopener" href="https://www.wiscorp.com/pub/DM32.2-2014-00024R1_JSON-SQL-Proposal-1.pdf">https://www.wiscorp.com/pub/DM32.2-2014-00024R1_JSON-SQL-Proposal-1.pdf</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn9" class="footnote-item"><p>2014-03 SQL/JSON Proposals, Part 2 <a target="_blank" rel="noopener" href="https://www.wiscorp.com/pub/DM32.2-2014-00025r1-sql-json-part-2.pdf">https://www.wiscorp.com/pub/DM32.2-2014-00025r1-sql-json-part-2.pdf</a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn10" class="footnote-item"><p>2014-03 SQL Support for JSON (slides) <a target="_blank" rel="noopener" href="https://web.archive.org/web/20150919002536/http://jtc1bigdatasg.nist.gov/_workshop/08_SQL_Support_for_JSON_abstract.pdf">https://web.archive.org/web/20150919002536/http://jtc1bigdatasg.nist.gov/_workshop/08_SQL_Support_for_JSON_abstract.pdf</a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn11" class="footnote-item"><p>2017-06 What’s New in SQL:2016 <a target="_blank" rel="noopener" href="https://modern-sql.com/blog/2017-06/whats-new-in-sql-2016">https://modern-sql.com/blog/2017-06/whats-new-in-sql-2016</a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn12" class="footnote-item"><p>WL#7909: Server side JSON functions <a target="_blank" rel="noopener" href="https://dev.mysql.com/worklog/task/?id=7909">https://dev.mysql.com/worklog/task/?id=7909</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn13" class="footnote-item"><p>WL#8132: JSON datatype and binary storage format <a target="_blank" rel="noopener" href="https://dev.mysql.com/worklog/task/?id=8132">https://dev.mysql.com/worklog/task/?id=8132</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn14" class="footnote-item"><p>WL#8249: JSON comparator <a target="_blank" rel="noopener" href="https://dev.mysql.com/worklog/task/?id=8249">https://dev.mysql.com/worklog/task/?id=8249</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn15" class="footnote-item"><p>WL#8607: Inline JSON path expressions in SQL <a target="_blank" rel="noopener" href="https://dev.mysql.com/worklog/task/?id=8607">https://dev.mysql.com/worklog/task/?id=8607</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn16" class="footnote-item"><p>MySQL 5.7 Reference Manual, 13 Functions and Operators, 13.16 JSON Functions <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/json-functions.html">https://dev.mysql.com/doc/refman/5.7/en/json-functions.html</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn17" class="footnote-item"><p>2015-04 JSON Labs Release: JSON Functions, Part 1 — Manipulation JSON Data <a target="_blank" rel="noopener" href="http://mysqlserverteam.com/json-labs-release-json-functions-part-1-manipulation-json-data/">http://mysqlserverteam.com/json-labs-release-json-functions-part-1-manipulation-json-data/</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn18" class="footnote-item"><p>2015-04 JSON Labs Release: JSON Functions, Part 2 — Querying JSON Data <a target="_blank" rel="noopener" href="http://mysqlserverteam.com/mysql-5-7-lab-release-json-functions-part-2-querying-json-data/">http://mysqlserverteam.com/mysql-5-7-lab-release-json-functions-part-2-querying-json-data/</a> <a href="#fnref18" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn19" class="footnote-item"><p>JSONPath - XPath for JSON <a target="_blank" rel="noopener" href="https://goessner.net/articles/JsonPath/">https://goessner.net/articles/JsonPath/</a> <a href="#fnref19" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn20" class="footnote-item"><p>2015-10 Inline JSON Path Expressions in MySQL 5.7 <a target="_blank" rel="noopener" href="http://mysqlserverteam.com/inline-json-path-expressions-in-mysql-5-7/">http://mysqlserverteam.com/inline-json-path-expressions-in-mysql-5-7/</a> <a href="#fnref20" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn21" class="footnote-item"><p>PostgreSQL 11.10 Documentation, 9.15. JSON Functions and Operators <a target="_blank" rel="noopener" href="https://www.postgresql.org/docs/11/functions-json.html">https://www.postgresql.org/docs/11/functions-json.html</a> <a href="#fnref21" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn22" class="footnote-item"><p>What is the difference between <code>-&gt;&gt;</code> and <code>-&gt;</code> in Postgres SQL? <a target="_blank" rel="noopener" href="https://stackoverflow.com/a/47270495">https://stackoverflow.com/a/47270495</a> <a href="#fnref22" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn23" class="footnote-item"><p>2015-10 SQLite Release 3.9.0 <a target="_blank" rel="noopener" href="https://sqlite.org/releaselog/3_9_0.html">https://sqlite.org/releaselog/3_9_0.html</a> <a href="#fnref23" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn24" class="footnote-item"><p>SQLite: The JSON1 Extension <a target="_blank" rel="noopener" href="https://www.sqlite.org/json1.html">https://www.sqlite.org/json1.html</a> <a href="#fnref24" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn25" class="footnote-item"><p>Bug #81364: Indexing JSON column should suggest generated columns <a target="_blank" rel="noopener" href="https://bugs.mysql.com/bug.php?id=81364">https://bugs.mysql.com/bug.php?id=81364</a> <a href="#fnref25" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn26" class="footnote-item"><p>WL#411: Computed virtual columns as MS SQL server has <a target="_blank" rel="noopener" href="https://web.archive.org/web/20080917094638/http://forge.mysql.com/worklog/task.php?id=411">https://web.archive.org/web/20080917094638/http://forge.mysql.com/worklog/task.php?id=411</a> <a href="#fnref26" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn27" class="footnote-item"><p>Bug #46491: Patch: Virtual columns (WL#411) <a target="_blank" rel="noopener" href="https://bugs.mysql.com/bug.php?id=46491">https://bugs.mysql.com/bug.php?id=46491</a> <a href="#fnref27" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn28" class="footnote-item"><p>2008-09 MySQL virtual columns <a target="_blank" rel="noopener" href="https://datacharmer.blogspot.com/2008/09/mysql-virtual-columns.html">https://datacharmer.blogspot.com/2008/09/mysql-virtual-columns.html</a> <a href="#fnref28" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn29" class="footnote-item"><p>MySQL virtual columns preview <a target="_blank" rel="noopener" href="https://web.archive.org/web/20120629093123/http://forge.mysql.com/wiki/MySQL_virtual_columns_preview">https://web.archive.org/web/20120629093123/http://forge.mysql.com/wiki/MySQL_virtual_columns_preview</a> <a href="#fnref29" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn30" class="footnote-item"><p>WL#411: Generated columns <a target="_blank" rel="noopener" href="https://dev.mysql.com/worklog/task/?id=411">https://dev.mysql.com/worklog/task/?id=411</a> <a href="#fnref30" class="footnote-backref">↩︎</a> <a href="#fnref30:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn31" class="footnote-item"><p>MariaDB: Generated (Virtual and Persistent/Stored) Columns <a target="_blank" rel="noopener" href="https://mariadb.com/kb/en/generated-columns/">https://mariadb.com/kb/en/generated-columns/</a> <a href="#fnref31" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn32" class="footnote-item"><p>Virtual column <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Virtual_column">https://en.wikipedia.org/wiki/Virtual_column</a> <a href="#fnref32" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn33" class="footnote-item"><p>2016-02 Generated columns in MariaDB and MySQL <a target="_blank" rel="noopener" href="https://planet.mysql.com/entry/?id=5994068">https://planet.mysql.com/entry/?id=5994068</a> <a href="#fnref33" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn34" class="footnote-item"><p>MySQL 5.7 Source Code: sql/json_binary.h <a target="_blank" rel="noopener" href="https://github.com/mysql/mysql-server/blob/5.7/sql/json_binary.h">https://github.com/mysql/mysql-server/blob/5.7/sql/json_binary.h</a> <a href="#fnref34" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn35" class="footnote-item"><p>MySQL 5.7 Source Code: sql/json_binary.cc <a target="_blank" rel="noopener" href="https://github.com/mysql/mysql-server/blob/5.7/sql/json_binary.cc">https://github.com/mysql/mysql-server/blob/5.7/sql/json_binary.cc</a> <a href="#fnref35" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn36" class="footnote-item"><p>MySQL 8.0 Source Code Documentation: json_binary.h File Reference (doxygen) <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/dev/mysql-server/8.0.16/json__binary_8h.html#details">https://dev.mysql.com/doc/dev/mysql-server/8.0.16/json__binary_8h.html#details</a> <a href="#fnref36" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2019/06/mysql-5.7-json/" title="MySQL 5.7 的 JSON 类型">https://nullwy.me/2019/06/mysql-5.7-json/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/01/elastic-stack/" rel="prev" title="Elastic Stack 日志分析平台搭建笔记">
+      <i class="fa fa-chevron-left"></i> Elastic Stack 日志分析平台搭建笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/05/kong-gateway/" rel="next" title="微服务 API 网关 Kong 实践">
+      微服务 API 网关 Kong 实践 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#JSON-%E5%87%BD%E6%95%B0%E5%88%97%E8%A1%A8"><span class="nav-number">1.</span> <span class="nav-text">JSON 函数列表</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E4%B8%8E%E6%8F%92%E5%85%A5-JSON"><span class="nav-number">2.</span> <span class="nav-text">创建与插入 JSON</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2-JSON"><span class="nav-number">3.</span> <span class="nav-text">查询 JSON</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#json-extract-%E4%B8%8E-%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="nav-number">3.1.</span> <span class="nav-text">json_extract() 与 -&gt; 操作符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#json-unquote-%E4%B8%8E-%E6%93%8D%E4%BD%9C%E7%AC%A6"><span class="nav-number">3.2.</span> <span class="nav-text">json_unquote() 与 -&gt;&gt; 操作符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E4%BB%96%E6%9F%A5%E8%AF%A2%E5%87%BD%E6%95%B0"><span class="nav-number">3.3.</span> <span class="nav-text">其他查询函数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9-JSON"><span class="nav-number">4.</span> <span class="nav-text">修改 JSON</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95-JSON%EF%BC%9A%E7%94%9F%E6%88%90%E5%88%97"><span class="nav-number">5.</span> <span class="nav-text">索引 JSON：生成列</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JSON-%E4%BA%8C%E8%BF%9B%E5%88%B6%E6%A0%BC%E5%BC%8F"><span class="nav-number">6.</span> <span class="nav-text">JSON 二进制格式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">7.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2019/06/mysql-5.7-json/";
+    this.page.identifier = "2019/06/mysql-5.7-json/";
+    this.page.title = "MySQL 5.7 的 JSON 类型";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

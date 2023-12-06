@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="javac 是 Java 代码的编译器[1][2]，初学 Java 的时候就应该接触过。本文整理一些 javac 相关的高级用法。Lombok 库，大家平常一直在使用，但可能并不知道实现原理解析，其实 Lombok 实现上依赖的是 Java 编译器的注解处理 API（JSR-296）[3]，本文同时尝试解析 Lombok 的实现原理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 编译器 javac 及 Lombok 实现原理解析">
+<meta property="og:url" content="https://nullwy.me/2017/04/javac-api/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="javac 是 Java 代码的编译器[1][2]，初学 Java 的时候就应该接触过。本文整理一些 javac 相关的高级用法。Lombok 库，大家平常一直在使用，但可能并不知道实现原理解析，其实 Lombok 实现上依赖的是 Java 编译器的注解处理 API（JSR-296）[3]，本文同时尝试解析 Lombok 的实现原理。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.nullwy.me/2017-04-24-1492606028088_5.png">
+<meta property="og:image" content="https://static.nullwy.me/2017-04-24-javac-flow.png">
+<meta property="og:image" content="https://static.nullwy.me/JavaCompiler-compile.png">
+<meta property="og:image" content="https://static.nullwy.me/javac-scanner.png">
+<meta property="og:image" content="https://static.nullwy.me/javac-syntax-tree.png">
+<meta property="og:image" content="https://static.nullwy.me/idea-debug-watch.png">
+<meta property="article:published_time" content="2017-04-20T03:53:53.000Z">
+<meta property="article:modified_time" content="2022-10-30T16:55:42.000Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="JVM">
+<meta property="article:tag" content="编译器">
+<meta property="article:tag" content="javac">
+<meta property="article:tag" content="Lombok">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.nullwy.me/2017-04-24-1492606028088_5.png">
+
+<link rel="canonical" href="https://nullwy.me/2017/04/javac-api/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 编译器 javac 及 Lombok 实现原理解析 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2017/04/javac-api/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 编译器 javac 及 Lombok 实现原理解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-04-20 11:53:53" itemprop="dateCreated datePublished" datetime="2017-04-20T11:53:53+08:00">2017-04-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2017/04/javac-api/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2017/04/javac-api/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>17k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>16 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><code>javac</code> 是 Java 代码的编译器<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup><sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>，初学 Java 的时候就应该接触过。本文整理一些 <code>javac</code> 相关的高级用法。Lombok 库，大家平常一直在使用，但可能并不知道实现原理解析，其实 Lombok 实现上依赖的是 Java 编译器的注解处理 API（<a target="_blank" rel="noopener" href="https://www.jcp.org/en/jsr/detail?id=269">JSR-296</a>）<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>，本文同时尝试解析 Lombok 的实现原理。</p>
+<span id="more"></span>
+<p>先来看下 <code>javac</code> 命令行工具。<code>javac</code> 命令行工具，官方文档有完整的使用说明<sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup>，当然也可以，运行 <code>javac -help</code> 或 <code>man javac</code> 查看帮助信息。下面是经典的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/%22Hello,_World!%22_program">hello world</a> 代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.example;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Greeting</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;hello world&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译与运行：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">tree   <span class="comment"># 代码目录结构</span></span></span><br><span class="line">.</span><br><span class="line">├── pom.xml</span><br><span class="line">└── src</span><br><span class="line">    └── main</span><br><span class="line">        ├── java</span><br><span class="line">        │   └── com</span><br><span class="line">        │       └── example</span><br><span class="line">        │           └── Greeting.java</span><br><span class="line">        └── resources</span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash"><span class="built_in">mkdir</span> -p target/classes   <span class="comment"># 创建 class 文件的存放目录</span></span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">javac -d target/classes src/main/java/com/example/Greeting.java</span></span><br><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">java -<span class="built_in">cp</span> target/classes com.example.Greeting</span></span><br><span class="line">hello world</span><br></pre></td></tr></table></figure>
+<p>除了使用命令行工具编译 Java 代码，JDK 6 增加了规范“<a target="_blank" rel="noopener" href="https://jcp.org/en/jsr/detail?id=199">JSR-199</a>: Java Compiler API”和“<a target="_blank" rel="noopener" href="https://www.jcp.org/en/jsr/detail?id=269">JSR-296</a>: Pluggable Annotation Processing API”，开始还提供相关的 Java 编译器 API。Java 编译器的实现代码和 API 的整体结构如图所示<sup class="footnote-ref"><a href="#fn2" id="fnref2:1">[2:1]</a></sup><sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup>：</p>
+<p><img src="https://static.nullwy.me/2017-04-24-1492606028088_5.png" alt="Compiler Package Overview"></p>
+<p><span style="background-color: #cbe29a">绿色</span>标注的包是官方 API（Official API），即 JSR-199 和 JSR-296，<span style="background-color: #e4e48a;">黄色</span>标注的包为Supported API，<span style="background-color: #ccccff">紫色</span>标注的包代码全部在 <code>com.sun.tools.javac.*</code> 包下，为内部 API（Internal API）和实现类。完整的包说明如下<sup class="footnote-ref"><a href="#fn2" id="fnref2:2">[2:2]</a></sup><sup class="footnote-ref"><a href="#fn5" id="fnref5:1">[5:1]</a></sup><sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/package-summary.html">javax.annotation.processing</a> - 注解处理 (<a target="_blank" rel="noopener" href="https://www.jcp.org/en/jsr/detail?id=269">JSR-296</a>)</li>
+<li><a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/javax/lang/model/package-summary.html">javax.lang.model</a> - 注解处理和编译器 Tree API 使用的语言模型 (<a target="_blank" rel="noopener" href="https://www.jcp.org/en/jsr/detail?id=269">JSR-296</a>)
+<ul>
+<li><a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/javax/lang/model/element/package-summary.html">javax.lang.model.element</a> - 语言元素。主要包含 <code>Element</code> 及其子类</li>
+<li><a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/javax/lang/model/type/package-summary.html">javax.lang.model.type</a> - 类型。主要包含 <code>TypeMirror</code> 及其子类</li>
+<li><a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/javax/lang/model/util/package-summary.html">javax.lang.model.util</a> - 语言模型工具。包含 <code>Elements</code>、<code>Types</code> 等类</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/javax/tools/package-summary.html">javax.tools</a> - Java 编译器 API (<a target="_blank" rel="noopener" href="https://jcp.org/en/jsr/detail?id=199">JSR-199</a>)</li>
+<li><a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/jdk/api/javac/tree/index.html">com.sun.source.*</a> - 编译器的 Tree API，支持对抽象语法树做<strong>只读访问</strong></li>
+<li><a target="_blank" rel="noopener" href="https://www.javadoc.io/static/org.kohsuke.sorcerer/sorcerer-javac/0.11/index.html?com/sun/tools/javac/package-summary.html">com.sun.tools.javac.*</a> - 内部 API 和实现类
+<ul>
+<li><code>com.sun.tools.javac.api</code> - <code>javax.tools</code> 包下的 <code>JavaCompiler</code> 和其他 API 的实现</li>
+<li><code>com.sun.tools.javac.code</code> - <code>javax.lang.model.*</code> 包下的 API 的实现</li>
+<li><code>com.sun.tools.javac.comp</code> - 编译器主要处理阶段的实现</li>
+<li><code>com.sun.tools.javac.file</code> - 实现访问文件系统，包括 <code>javax.tools.StandardFileManager</code> 的实现</li>
+<li><code>com.sun.tools.javac.jvm</code> - class 文件的读写，编译器的字节码生成阶段的实现</li>
+<li><code>com.sun.tools.javac.main</code> - 代码编译的入口实现</li>
+<li><code>com.sun.tools.javac.model</code> - <code>javax.lang.model.*</code> 包的其他实现</li>
+<li><code>com.sun.tools.javac.parser</code> - 读取 Java 源代码，并生成语法树</li>
+<li><code>com.sun.tools.javac.processing</code> - 注解处理 API 的实现</li>
+<li><code>com.sun.tools.javac.resources</code> - 本地化文本和版本号的资源文件</li>
+<li><code>com.sun.tools.javac.tree</code> - 编译器语法树相关的表示类和工具类，<code>com.sun.source.*</code> 包下的 API 的实现</li>
+<li><code>com.sun.tools.javac.util</code> - 基础工具类</li>
+</ul>
+</li>
+</ul>
+<p>全部源码都位于 JDK 源码的 <a target="_blank" rel="noopener" href="https://github.com/openjdk/jdk8u/tree/master/langtools">langtools</a> 目录下。对外的 API，被编译到 <code>rt.jar</code>，<code>com.sun.source.*</code> 和 <code>com.sun.tools.javac.*</code> 包，被编译到 <code>tools.jar</code>，在 JDK 下的具体位置是 <code>$JAVA_HOME\lib\tools.jar</code>。值得一提的是，<code>langtools</code> 目录，除了包含 <code>javac</code> 的实现外，还实现了 <code>javadoc</code>、<code>javah</code> 等命令，编译后也是在 <code>tools.jar</code> 下。</p>
+<p>另外，由于是内部 API 和实现类，<code>com.sun.tools.javac.*</code> 包下全部代码中都有标注警告：</p>
+<blockquote>
+<p>This is NOT part of any supported API. If you write code that depends on this, you do so at your own risk. This code and its internal interfaces are subject to change or deletion without notice.</p>
+</blockquote>
+<h1 id="Java-编译器-API">Java 编译器 API</h1>
+<p>首先，看下 <a target="_blank" rel="noopener" href="https://jcp.org/en/jsr/detail?id=199">JSR-199</a> 引入的 Java 编译器 API（Java Compiler API）。在没有引入 JSR-199 之前，如果要通过编程方式编译 Java 代码，只能使用 <code>com.sun.tools.javac.*</code> 包下提供内部 API。上文提到的使用命令 <code>javac</code> 编译 <code>Greeting.java</code> 的等价写法如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.tools.javac.main.Main;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JavacMain</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">Main</span> <span class="variable">compiler</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Main</span>(<span class="string">&quot;javac&quot;</span>);</span><br><span class="line">        compiler.compile(<span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;src/main/com/example/Greeting.java&quot;</span>, <span class="string">&quot;-d&quot;</span>, <span class="string">&quot;target/classes&quot;</span>&#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>事实上，<code>javac</code> 命令的底层实现就是执行 <a target="_blank" rel="noopener" href="https://github.com/openjdk/jdk8u/blob/master/langtools/src/share/classes/com/sun/tools/javac/Main.java">com.sun.tools.javac.Main</a> 类。执行 <code>javac</code> 命令，等价于执行 <code>java -cp $JAVA_HOME/lib/tools.jar com.sun.tools.javac.Main</code>。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 直接执行 com.sun.tools.javac.Main 类编译 Java 源代码</span></span><br><span class="line">java -<span class="built_in">cp</span> <span class="variable">$JAVA_HOME</span>/lib/tools.jar com.sun.tools.javac.Main -d target/classes src/main/java/com/example/Greeting.java</span><br></pre></td></tr></table></figure>
+<p>JSR-199，提供了 Java 编译器 API，对应的是 <code>javax.tools.*</code> 包。阅读包的 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/tools/package-summary.html#package.description">javadoc</a> 容易发现，API 最核心是 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/tools/JavaCompiler.html">javax.tools.JavaCompiler</a> 接口，该类的 javadoc 阐述了如何使用该类，可以阅读。使用 Java 编译器 API 编译 Java 源代码，示例如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.tools.*;</span><br><span class="line"><span class="keyword">import</span> java.io.File;</span><br><span class="line"><span class="keyword">import</span> java.io.IOException;</span><br><span class="line"><span class="keyword">import</span> java.util.Arrays;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Jsr199Main</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> IOException &#123;</span><br><span class="line">        <span class="type">JavaCompiler</span> <span class="variable">compiler</span> <span class="operator">=</span> ToolProvider.getSystemJavaCompiler();</span><br><span class="line">        DiagnosticCollector&lt;JavaFileObject&gt; diagnostics = <span class="keyword">new</span> <span class="title class_">DiagnosticCollector</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">        <span class="type">StandardJavaFileManager</span> <span class="variable">fileManager</span> <span class="operator">=</span> compiler.getStandardFileManager(diagnostics, <span class="literal">null</span>, <span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">        <span class="type">File</span> <span class="variable">file</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">File</span>(<span class="string">&quot;src/main/java/com/example/Greeting.java&quot;</span>);</span><br><span class="line">        Iterable&lt;? <span class="keyword">extends</span> <span class="title class_">JavaFileObject</span>&gt; compilationUnits = fileManager.getJavaFileObjectsFromFiles(Arrays.asList(file));</span><br><span class="line">        List&lt;String&gt; options = Arrays.asList(<span class="string">&quot;-d&quot;</span>, <span class="string">&quot;target/classes&quot;</span>);</span><br><span class="line"></span><br><span class="line">        compiler.getTask(<span class="literal">null</span>, fileManager, diagnostics, options, <span class="literal">null</span>, compilationUnits).call();</span><br><span class="line"></span><br><span class="line">        fileManager.close();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述两种编程方式编译 Java 代码的方式，在 <code>javac</code> 命令的 man<sup class="footnote-ref"><a href="#fn4" id="fnref4:1">[4:1]</a></sup> 文档的 “Programmatic Interface” 小节也有提及，有兴趣可以阅读。</p>
+<p>在实际开发过程中，我们基本上都是使用 Maven 或 Gradle 编译 Java 代码。Maven 编译 Java 代码，依赖的是 Maven 的 <code>maven-compiler-plugin</code> 插件。那么 <code>maven-compiler-plugin</code> 插件底层实现是否使用了 <code>javax.tools.JavaCompiler</code> 呢？查阅官网文档后，容易发现实际情况和猜想的一样（其实也是显而易见的结论） [<a target="_blank" rel="noopener" href="https://maven.apache.org/plugins/maven-compiler-plugin/">doc</a>]：</p>
+<blockquote>
+<p>The Compiler Plugin is used to compile the sources of your project. Since 3.0, the default compiler is <code>javax.tools.JavaCompiler</code> (if you are using java 1.6) and is used to compile Java sources. If you want to force the plugin using javac, you must configure the plugin option <code>forceJavacCompilerUse</code>.</p>
+</blockquote>
+<p>类似的，Gradle 编译 Java 代码，底层也使用了 Java 编译器 API，可以参见源码 <code>JdkJavaCompiler</code> [<a target="_blank" rel="noopener" href="https://github.com/gradle/gradle/blob/v7.5.0/subprojects/language-java/src/main/java/org/gradle/api/internal/tasks/compile/JdkJavaCompiler.java">github</a>]。</p>
+<h1 id="javac-的编译过程">javac 的编译过程</h1>
+<p>上文提到，<a target="_blank" rel="noopener" href="https://www.jcp.org/en/jsr/detail?id=269">JSR-269</a>，可插拔式注解处理 API（Pluggable Annotation Processing API）。注解处理，是编译过程中的其中一个阶段。要理解注解处理，需要先了解 Java 代码的编译过程。完整的编译过程如下图所示<sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup>：</p>
+<p><img src="https://static.nullwy.me/2017-04-24-javac-flow.png" alt="javac-flow.png"></p>
+<p>整个过程就是：</p>
+<ol>
+<li>源代码经过词法解析和语法解析（parse），生成抽象语法树（abstract syntax tree）。然后遍历抽象语法树，将遇到的符号填充入符号表（enter symbol table）。</li>
+<li>注解处理（annotation processing），所有注解处理器会被处理，若处理器生成新的代码或 class 文件，编译过程会重新开始，直到没有新的文件生成。每一次循环称为一个 round，也就是上图的回环过程。</li>
+<li>语义分析和字节码生成，包括标注（attribute）、数据及控制流分析（flow）、解语法糖（desugar）、字节码生成（generate）。</li>
+</ol>
+<p>把上述编译过程对应到代码中，javac 编译动作的入口是 <a target="_blank" rel="noopener" href="https://www.javadoc.io/static/org.kohsuke.sorcerer/sorcerer-javac/0.11/com/sun/tools/javac/main/JavaCompiler.html">com.sun.tools.javac.main.JavaCompiler</a> 类，上述 3 个过程的代码逻辑集中在这个类的 compile(）和 compile2(）方法，如下图所示，整个编译过程主要的处理由图中标注的 8 个方法来完成<sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup>：</p>
+<img width="700" alt="JavaCompiler compile" title="JavaCompiler compile" src="https://static.nullwy.me/JavaCompiler-compile.png">
+<p>具体来看下，词法解析和语法解析。Java 的词法和语法规则，在《Java语言规范》（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/index.html">The Java Language Specification</a>）中定义。从底层实现上来看，<a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/parser/Scanner.html">com.sun.tools.javac.parser.Scanner</a> 类，按照单个字符的方式读取 Java 源文件中的关键字和标示符等内容，然后将其转换为符合 Java 语法规范（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html">JLS ch3</a>）的 <a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/parser/Tokens.Token.html">Token</a> 序列。例如，针对语句 <code>int y = x + 1;</code> 的词法解析过程如下图所示<sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup>：</p>
+<img width="700" alt="词法解析" title="词法解析" src="https://static.nullwy.me/javac-scanner.png">
+<p>然后，<a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/parser/JavacParser.html">com.sun.tools.javac.parser.JavacParser</a> 类，读取 Token 序列，将 Token 序列构造为抽象语法树 <a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/tree/JCTree.html">com.sun.tools.javac.tree.JCTree</a>。语句 <code>int y = x + 1;</code>，生成的抽象语法树，如下图所示<sup class="footnote-ref"><a href="#fn9" id="fnref9:1">[9:1]</a></sup>：</p>
+<img width="650" alt="抽象语法树" title="抽象语法树" src="https://static.nullwy.me/javac-syntax-tree.png">
+<p>该语句对应的 <code>JCTree.JCVariableDecl</code> 对象，在 IDEA 的 debug 模式下查看，如下图所示：</p>
+<img width="400" alt="IDEA debug" title="IDEA debug" src="https://static.nullwy.me/idea-debug-watch.png">
+<p>语法树中的每一个语法节点，实际上都直接或者间接地继承了 <code>JCTree</code> 类，并且都以静态内部类的形式定义在 <code>JCTree</code> 类中。Java 源文件的完整的词法解析和语法解析，由 <code>JavacParser</code> 的 <code>parseCompilationUnit</code> 方法完成。解析完成后，方法返回 <code>JCTree.JCCompilationUnit</code> 类。<code>JCTree.JCCompilationUnit</code> 类，为某个 Java 源文件解析后的整个语法树的根节点。</p>
+<p>上文提到，<code>com.sun.source.*</code> 包下暴露的 Tree API，提供对语法树只能做只读操作。<code>com.sun.tools.javac.tree</code> 包，是 <code>com.sun.source.*</code> 包下的 API 的实现。<code>com.sun.source.tree.Tree</code> 接口对应的实现类为 <code>JCTree</code>，<code>Tree</code> 的子接口的实现类为 <code>JCTree</code> 的子类，并一一对应，比如，<code>com.sun.source.tree.ClassTree</code> 对应的实现类为 <code>JCTree.JCClassDecl</code>。<code>Tree</code> 接口及其子接口只暴露只读方法，而 <code>JCTree</code> 类及其子类，大部分的内部定义字段都是 <code>public</code>，可以直接读写。</p>
+<p>主要的语法树节点 <code>JCTree</code> 子类，如下：</p>
+<ul>
+<li>JCTree.<a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/tree/JCTree.JCStatement.html">JCStatement</a>：声明语句的语法树节点。主要的子类包括：
+<ul>
+<li><code>JCTree.JCBlock</code>：语句块（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.2">JLS 14.2</a>）</li>
+<li><code>JCTree.JCClassDecl</code>：类声明（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-8.html#jls-8.1">JLS 8.1</a>）</li>
+<li><code>JCTree.JCForLoop</code>：<code>for</code> 语句（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.14.1">JLS 14.14.1</a>）</li>
+<li><code>JCTree.JCEnhancedForLoop</code>：增强for语句（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.14.2">JLS 14.14.2</a>）</li>
+<li><code>JCTree.JCIf</code>：<code>if</code> 语句（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.9">JLS 14.9</a>）</li>
+<li><code>JCTree.JCReturn</code>：<code>return</code> 语句（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.17">JLS 14.7</a>）</li>
+<li><code>JCTree.JCVariableDecl</code>：变量声明，比如 <code>int x = 0</code> 语句（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-14.html#jls-14.4">JLS 14.4</a>）</li>
+<li>其他（不一一列举）</li>
+</ul>
+</li>
+<li>JCTree.<a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/tree/JCTree.JCExpression.html">JCExpression</a>：表达式的语法树节点。主要的子类包括：
+<ul>
+<li><code>JCAssign</code>：赋值语句表达式，比如 <code>x = 0</code> 语句（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.26">JLS 15.26</a>）</li>
+<li><code>JCIdent</code>：标识符表达式，比如 <code>x</code> 标识符（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.8">JLS 3.8</a>）</li>
+<li><code>JCBinary</code>：二元运算符，比如 <code>x + 1</code> 语句（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-15.html#jls-15.18">JLS 15.18</a>）</li>
+<li><code>JCLiteral</code>：字面量运算符表达式，比如 <code>1</code> 字面量（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-3.html#jls-3.10">JLS 3.10</a>）</li>
+<li><code>JCTree.JCPrimitiveTypeTree</code>：基础类型，比如 <code>int</code> 等类型（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-4.html#jls-4.2">JLS 4.2</a>）</li>
+</ul>
+</li>
+<li>JCTree.<a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/tree/JCTree.JCMethodDecl.html">JCMethodDecl</a>：方法声明（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-8.html#jls-8.4">JLS 8.4</a>）</li>
+<li>JCTree.<a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/tree/JCTree.JCCompilationUnit.html">JCCompilationUnit</a>：编译单元，对应单个源文件内的全部内容（<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/specs/jls/se8/html/jls-7.html#jls-7.3">JLS 7.3</a>）</li>
+</ul>
+<p>全部的各个类型的树节点的类定义，可以参见 <code>JCTree</code> 和 <code>Tree</code> 类的 javadoc 或源代码。</p>
+<p>在构造抽象语法树后，就是符号表填充阶段。在符号表填充阶段，会扫描 <code>JCTree</code> 语法树，遇到类型、变量、方法定义时，会它们的信息存储到符号表中，方便后续阶段进行快速查询。符号，对应的是 <code>com.sun.tools.javac.code.Symbol</code> 类。而 <code>Symbol</code> 类，是 <code>javax.lang.model</code> 包下 <code>Element</code> 的实现类，<code>Symbol</code> 子类是对应 <code>Element</code> 子类的实现。</p>
+<p><code>Element</code> 提供 <code>ElementKind getKind()</code> 方法，能获取元素类型（<code>ElementKind</code>）。全部的 <code>ElementKind</code> 共 17 种：<code>ANNOTATION_TYPE</code>（注解）、<code>CLASS</code>（类）、<code>CONSTRUCTOR</code>（构造方法）、<code>ENUM</code>（枚举）、<code>ENUM_CONSTANT</code>（枚举值）、<code>EXCEPTION_PARAMETER</code>（异常参数）、<code>FIELD</code>（字段）、<code>INSTANCE_INIT</code>（实例初始化语句块）、<code>INTERFACE</code>（接口）、<code>LOCAL_VARIABLE</code>（本地变量）、<code>METHOD</code>（方法）、<code>PACKAGE</code>（包）、<code>PARAMETER</code>（参数）、<code>RESOURCE_VARIABLE</code>（资源变量）、<code>STATIC_INIT</code>（静态初始化语句块）、<code>TYPE_PARAMETER</code>（类型参数） 以及 <code>OTHER</code>（其他）。</p>
+<p>全部 <code>Element</code> 子类以及对应的 <code>Symbol</code> 子类，如下：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/lang/model/element/PackageElement.html">PackageElement</a>：表示包 package
+<ul>
+<li>实现类：<code>Symbol.PackageSymbol</code></li>
+<li>元素类型 <code>ElementKind</code>：<code>PACKAGE</code>（包）</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/lang/model/element/TypeElement.html">TypeElement</a>：表示类 class 或接口 interface 等
+<ul>
+<li>实现类：<code>Symbol.ClassSymbol</code></li>
+<li>元素类型 <code>ElementKind</code>：<code>ANNOTATION_TYPE</code>（注解）、<code>INTERFACE</code>（接口）、<code>ENUM</code>（枚举）、<code>CLASS</code>（类）</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/lang/model/element/VariableElement.html">VariableElement</a>：表示字段、枚举值、方法参数、本地变量、资源变量、异常参数
+<ul>
+<li>实现类：<code>Symbol.VarSymbol</code></li>
+<li>元素类型 <code>ElementKind</code>：<code>EXCEPTION_PARAMETER</code>（异常参数）、<code>PARAMETER</code>（参数）、<code>ENUM_CONSTANT</code>（枚举值）、<code>RESOURCE_VARIABLE</code>（资源变量）、<code>LOCAL_VARIABLE</code>（本地变量）、<code>FIELD</code>（字段）</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/lang/model/element/ExecutableElement.html">ExecutableElement</a>：表示方法、构造方法、初始化语句块
+<ul>
+<li>实现类：<code>Symbol.MethodSymbol</code></li>
+<li>元素类型 <code>ElementKind</code>：<code>CONSTRUCTOR</code>（构造方法）、<code>STATIC_INIT</code>（静态初始化语句块）、<code>INSTANCE_INIT</code>（实例初始化语句块）、<code>METHOD</code>（方法）</li>
+</ul>
+</li>
+<li><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/lang/model/element/TypeParameterElement.html">TypeParameterElement</a>：表示参数化类型，即泛型尖括号内的类型
+<ul>
+<li>实现类：<code>Symbol.TypeVariableSymbol</code></li>
+<li>元素类型 <code>ElementKind</code>：<code>TYPE_PARAMETER</code>（类型参数）</li>
+</ul>
+</li>
+</ul>
+<p>在填充符号表后，就是语义分析和代码生成，包括标注（attribute）、数据及控制流分析（flow）、解语法糖（desugar）、字节码生成（generate）阶段。</p>
+<p>在实际开发时，比如常见的“找不到符号（cannot find symbol）”编译报错，就是在标注阶段的名称消解（name resolution）时触发的。编译报错示例代码，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CantResolve</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">foo</span> <span class="operator">=</span> bar;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译错误的提示内容：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">找不到符号</span><br><span class="line">  符号:   变量 bar</span><br><span class="line">  位置: 类 CantResolve</span><br></pre></td></tr></table></figure>
+<p>编译过程的各个阶段的更详细的阐述可以阅读书籍<sup class="footnote-ref"><a href="#fn8" id="fnref8:1">[8:1]</a></sup><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup>，本文不再展开。</p>
+<h1 id="可插拔式注解处理-API">可插拔式注解处理 API</h1>
+<p>JSR-296 定义的可插拔式注解处理 API 在 <code>javax.annotation.processing</code> 包下，最核心的接口是 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html">javax.annotation.processing.Processor</a>，通过实现这个接口来定义自己的注解处理器。</p>
+<p>编译器工具与 <code>Processor</code> 实现类的交互过程是：</p>
+<ul>
+<li>如果存在没有被使用的 <code>Processor</code> 对象，就调用无参构造方法创建一个 <code>Processor</code> 实例。</li>
+<li>然后，编译器工具调用注解处理器的 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html#init-javax.annotation.processing.ProcessingEnvironment-">init</a> 方法，初始化注解处理器，方法参数是 <code>ProcessingEnvironment</code> 对象（注解处理的执行环境，从环境中获得相关工具类，比如 <code>Elements</code>）。</li>
+<li>之后，编译器工具调用注解处理器的 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html#getSupportedAnnotationTypes--">getSupportedAnnotationTypes</a>（查询该注解处理器支持的注解集合）、<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html#getSupportedOptions--">getSupportedOptions</a>（查询该注解处理器支持的参数选项集合）、<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html#getSupportedSourceVersion--">getSupportedSourceVersion</a>（查询该注解处理器支持的源代码版本）方法。</li>
+<li>最后，调用注解处理器的 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/annotation/processing/Processor.html#process-java.util.Set-javax.annotation.processing.RoundEnvironment-">process</a> 方法。</li>
+</ul>
+<p>注解处理会执行多轮（round），每轮都会调用 <code>process</code> 方法，调用时传入在上一轮的源代码和 class 文件中找到的该注解处理器支持的注解子集。在处理注解期间，如果任何注解处理器生成了新的源文件或 class 文件，编译器将回到解析、填充符号表、注解处理的过程，直到没有新的文件生成。</p>
+<p><code>init</code> 方法的参数 <code>ProcessingEnvironment</code> 对象，为注解处理的执行环境，从环境中获得相关工具类，比如，<code>Elements</code> 类，用于操作 <code>Element</code> 元素；<code>Filer</code> 类，用于生成新的文件；<code>Messager</code> 类，用于报告编译错误、告警或其他消息。另外，<code>ProcessingEnvironment</code>，也可以获得传递给注解处理器参数选项。</p>
+<p><code>AbstractProcessor</code> 抽象类，实现类了 <code>Processor</code> 接口，用于简化实际的注解处理器类的实现。该类通过读取 <code>@SupportedAnnotationTypes</code>、<code>@SupportedOptions</code>、<code>@SupportedSourceVersion</code> 注解值，来实现 <code>Processor</code> 接口对应的三个方法。</p>
+<p>用命令行编译代码时，<code>javac</code> 编译器，会搜索可用的注解处理器。搜索路径可以通过参数选项 <code>-processorpath</code> 指定，如果未指定，将使用 <code>classpath</code>。注解处理器，可以通过 <code>-processor</code> 参数选项指定。若未通过 <code>-processor</code> 参数选项指定，注解处理器会使用 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/ServiceLoader.html">SPI</a> 方式定位，在搜索路径查找 <code>META-INF/services/javax.annotation.processing.Processor</code> 文件。文件中填写的是注解处理器类名（多个的话，换行填写），编译器就会自动使用这里填写的注解处理器进行注解处理。另外，编译器 API 的 <code>CompilationTask</code> 的 <code>setProcessors</code> 方法也可以传入注解处理器。</p>
+<p>如果注解处理器支持参数选项，编译时，参数选项可以用 <code>-Akey[=value]</code> 的方式传递<sup class="footnote-ref"><a href="#fn4" id="fnref4:2">[4:2]</a></sup>。</p>
+<h2 id="扫描语法树">扫描语法树</h2>
+<p>JDK 源码的 <code>langtools</code> 目录下，提供了示例注解处理器 <a target="_blank" rel="noopener" href="https://github.com/openjdk/jdk8u/blob/master/langtools/src/share/sample/javac/processing/src/CheckNamesProcessor.java">CheckNamesProcessor</a>，一个检查命名的注解处理器。<code>CheckNamesProcessor</code> 注解处理器，内部实现了 <code>javax.lang.model.util</code> 包下 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/javax/lang/model/util/ElementScanner8.html">ElementScanner</a>，用来扫描 <code>Element</code> 元素符号，然后检查类命名、方法命名、字段命名、参数命名等是否符合命名规范，如果不符合命名规范，就打印编译器告警。</p>
+<p><code>javax.lang.model.util.ElementScanner8</code> 类用于扫描 <code>Element</code> 的核心方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> R <span class="title function_">scan</span><span class="params">(Element e)</span></span><br></pre></td></tr></table></figure>
+<p>对语法树的扫描，<code>com.sun.source.util</code> 包下，提供了语法树扫描器 <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/jdk/api/javac/tree/com/sun/source/util/TreeScanner.html">TreeScanner</a>，用于扫描语法树上的树节点 <code>Tree</code>。类似的，<code>com.sun.tools.javac.tree.TreeScanner</code>，用于扫描语法树上的树节点 <code>JCTree</code>。</p>
+<p><code>com.sun.source.util.TreeScanner</code> 类用于扫描语法树的核心方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> R <span class="title function_">scan</span><span class="params">(Tree node, P p)</span></span><br></pre></td></tr></table></figure>
+<p><code>com.sun.tools.javac.tree.TreeScanner</code> 类用于扫描语法树的核心方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">scan</span><span class="params">(JCTree tree)</span></span><br></pre></td></tr></table></figure>
+<p>需要注意的是，注解处理器的 <code>process</code> 方法，传递过来的是 <code>Element</code> 对象，需要先获得 <code>Element</code> 对象关联的 <code>Tree</code> 或 <code>JCTree</code> 对象，才能扫描语法树。工具类 <code>com.sun.source.util.Trees</code> 提供了这样的桥接能力，该类的实现类为 <code>com.sun.tools.javac.api.JavacTrees</code>。<code>Trees</code> 的相关方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过 ProcessingEnvironment 获得 Trees 对象</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Trees <span class="title function_">instance</span><span class="params">(ProcessingEnvironment env)</span></span><br><span class="line"><span class="comment">// 通过 Element 获得 Tree</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> Tree <span class="title function_">getTree</span><span class="params">(Element element)</span>;</span><br></pre></td></tr></table></figure>
+<p>类似的，<code>JavacTrees</code> 的相关方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 通过 ProcessingEnvironment 获得 JavacTrees 对象</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> JavacTrees <span class="title function_">instance</span><span class="params">(ProcessingEnvironment env)</span></span><br><span class="line"><span class="comment">// 通过 Element 获得 JCTree</span></span><br><span class="line"><span class="keyword">public</span> JCTree <span class="title function_">getTree</span><span class="params">(Element element)</span></span><br></pre></td></tr></table></figure>
+<p>使用 <code>ElementScanner</code> 或 <code>TreeScanner</code> 扫描语法树的示例注解处理器，参见 <a target="_blank" rel="noopener" href="https://github.com/yulewei/annotation-processor-demo/blob/master/processor-demo/src/main/java/com/example/visitor/VisitorProcessor.java">VisitProcessor</a>。</p>
+<h2 id="修改语法树">修改语法树</h2>
+<p>在语法解析时，<code>JavacParser</code> 类，底层实现上利用 <a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/tree/TreeMaker.html">TreeMaker</a> 类构造的语法树各个节点。<code>TreeMaker</code> 类，封装了创建语法树节点的方法，部分常用的方法举例：</p>
+<ul>
+<li>TreeMaker.<a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/tree/TreeMaker.html#Assign-com.sun.tools.javac.tree.JCTree.JCExpression-com.sun.tools.javac.tree.JCTree.JCExpression-">Assign</a> 方法：用于生成赋值语句的语法树节点 <code>JCTree.JCAssign</code>。</li>
+<li>TreeMaker.<a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/tree/TreeMaker.html#Binary-com.sun.tools.javac.tree.JCTree.Tag-com.sun.tools.javac.tree.JCTree.JCExpression-com.sun.tools.javac.tree.JCTree.JCExpression-">Binary</a> 方法：用于生成二元操作符的语法树节点 <code>JCTree.JCBinary</code>。</li>
+<li>TreeMaker.<a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/tree/TreeMaker.html#Block-long-com.sun.tools.javac.util.List-">Block</a> 方法：用于生成语句块的语法树节点 <code>JCTree.JCBlock</code>。</li>
+<li>TreeMaker.<a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/tree/TreeMaker.html">VarDef</a> 方法：用于生成变量定义的语法树节点 <code>JCTree.JCVariableDecl</code>。</li>
+<li>TreeMaker.<a target="_blank" rel="noopener" href="https://www.javadoc.io/doc/org.kohsuke.sorcerer/sorcerer-javac/latest/com/sun/tools/javac/tree/TreeMaker.html">MethodDef</a> 方法：用于生成方法定义的语法树节点 <code>JCTree.JCMethodDecl</code>。</li>
+<li>等等</li>
+</ul>
+<p>在注解处理阶段，<code>init</code> 方法传入了 <code>ProcessingEnvironment</code> 对象，通过该对象可以获得当前上下文中的 <code>TreeMaker</code> 对象，然后就可以利用 <code>TreeMaker</code> 创建新的语法树节点。</p>
+<p>语句 <code>int y = x + 1;</code>，使用 <code>TreeMaker</code> 构造对应的 <code>JCTree.JCVariableDecl</code>，示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Name</span> <span class="variable">x</span> <span class="operator">=</span> ...</span><br><span class="line"><span class="type">Name</span> <span class="variable">y</span> <span class="operator">=</span> names.fromString(<span class="string">&quot;y&quot;</span>);</span><br><span class="line"><span class="comment">// x + 1</span></span><br><span class="line">JCTree.<span class="type">JCBinary</span> <span class="variable">binary</span> <span class="operator">=</span> maker.Binary(JCTree.Tag.PLUS, maker.Ident(x), maker.Literal(TypeTag.INT, <span class="number">1</span>));</span><br><span class="line"><span class="comment">// int y = x + 1</span></span><br><span class="line">JCTree.<span class="type">JCVariableDecl</span> <span class="variable">decl</span> <span class="operator">=</span> maker.VarDef(maker.Modifiers(<span class="number">0</span>), y, maker.TypeIdent(TypeTag.INT), binary);</span><br></pre></td></tr></table></figure>
+<p>因为 <code>JCTree</code> 类及其子类的大部分的内部定义字段都是 <code>public</code>，可以直接读写，所以要想<strong>修改语法树</strong>，可以直接相关字段的值。比如，把 <code>int y = x + 1</code> 语句对应的 <code>JCTree.JCVariableDecl</code> 树节点改为 <code>int y = 42</code>，可以直接修改 <code>JCTree.JCVariableDecl</code> 的 <code>init</code> 字段，示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">JCTree.<span class="type">JCVariableDecl</span> <span class="variable">decl</span> <span class="operator">=</span> ...</span><br><span class="line">decl.init = maker.Literal(TypeTag.INT, <span class="number">42</span>);</span><br></pre></td></tr></table></figure>
+<p>修改语法树的示例代码，参见 <a target="_blank" rel="noopener" href="https://github.com/yulewei/annotation-processor-demo/blob/master/processor-demo/src/main/java/com/example/maker/PlusProcessor.java">PlusProcessor</a> 注解处理器。该示例注解处理器，修改 <code>@PlusOne</code> 注解标注的方法的内部实现，改造后的方法的逻辑为，返回请求参数值加 1 后的值。比如，修改语法树前，<code>func</code> 方法实现如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@PlusOne</span></span><br><span class="line"><span class="keyword">public</span> <span class="type">int</span> <span class="title function_">func</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> x * x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>被 <code>PlusProcessor</code> 注解处理器修改语法树后，<code>func</code> 方法变成：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="type">int</span> <span class="title function_">func</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> x + <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>修改方法内部实现的核心代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">modifyToPlusOneMethod</span><span class="params">(JCTree.JCMethodDecl methodDecl)</span> &#123;</span><br><span class="line">    JCTree.<span class="type">JCVariableDecl</span> <span class="variable">param</span> <span class="operator">=</span> methodDecl.params.head;</span><br><span class="line">    <span class="comment">// x + 1</span></span><br><span class="line">    JCTree.<span class="type">JCBinary</span> <span class="variable">binary</span> <span class="operator">=</span> maker.Binary(JCTree.Tag.PLUS, maker.Ident(param.name), maker.Literal(TypeTag.INT, <span class="number">1</span>));</span><br><span class="line">    JCTree.<span class="type">JCReturn</span> <span class="variable">ret</span> <span class="operator">=</span> maker.Return(binary);</span><br><span class="line">    <span class="comment">// 修改方法内部实现</span></span><br><span class="line">    methodDecl.body.stats = List.of(ret);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个注解处理器仅仅用于示例，没有其他实际用途。实际开发中，Lombok 库被广泛使用，其底层实现就是利用注解处理器修改由 Lombok 注解（<code>@Data</code>、<code>@Getter</code>、<code>@Setter</code> 等）标注的代码的语法树，自动生成样板代码。针对 Lombok 库实现原理的解析，参见下文。</p>
+<h2 id="创建新文件">创建新文件</h2>
+<p>可插拔式注解处理 API，定义了 <code>javax.annotation.processing.Filer</code> 接口，这个接口提供了让注解处理器创建新文件的能力。<code>createSourceFile</code> 方法，用于创建新的源代码文件，<code>createClassFile</code>，用于创建新的 class 文件。</p>
+<p>来看下示例代码，<a target="_blank" rel="noopener" href="https://github.com/yulewei/annotation-processor-demo/blob/master/processor-demo/src/main/java/com/example/filer/GreetingProcessor.java">GreetingProcessor</a> 注解处理器。该注解处理器功能就是基于 <code>Filer</code> 自动生成 <code>Greeting</code> 类（打印 &quot;hello world&quot;）。核心代码片段如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="type">boolean</span> <span class="title function_">generateGreeting</span><span class="params">(String className)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">byte</span>[] bytes = Files.readAllBytes(Paths.get(<span class="built_in">this</span>.getClass().getResource(<span class="string">&quot;/Greeting.tpl&quot;</span>).toURI()));</span><br><span class="line">    <span class="type">String</span> <span class="variable">greetingTemplate</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">String</span>(bytes, StandardCharsets.UTF_8);</span><br><span class="line">    <span class="type">String</span> <span class="variable">greetingSourceCode</span> <span class="operator">=</span> String.format(greetingTemplate, LocalDateTime.now(), className);</span><br><span class="line">    <span class="type">JavaFileObject</span> <span class="variable">fileObject</span> <span class="operator">=</span> filer.createSourceFile(className);</span><br><span class="line">    <span class="keyword">try</span> (<span class="type">PrintWriter</span> <span class="variable">writer</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">PrintWriter</span>(fileObject.openWriter())) &#123;</span><br><span class="line">        writer.println(greetingSourceCode);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>模板文件 <code>Greeting.tpl</code> 的内容为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.annotation.Generated;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Generated(value = &quot;by GreetingProcessor&quot;, date = &quot;%s&quot;)</span></span><br><span class="line"><span class="keyword">public</span> class %s &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        System.out.println(<span class="string">&quot;hello world&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在实际开发中，<a target="_blank" rel="noopener" href="https://mapstruct.org/">MapStruct</a> 是流行的用于 Bean 之间映射的工具库之一，其底层实现就是基于注解处理器 API。阅读源码，容易发现 MapStruct 库内部实现的注解处理器是 <code>org.mapstruct.ap.MappingProcessor</code>（<a target="_blank" rel="noopener" href="https://mapstruct.org/documentation/1.5/api/org/mapstruct/ap/MappingProcessor.html">javadoc</a>、<a target="_blank" rel="noopener" href="https://github.com/mapstruct/mapstruct/blob/1.5.x/processor/src/main/java/org/mapstruct/ap/MappingProcessor.java">github</a>）。<code>MappingProcessor</code> 注解处理器生成的 Mapper 实现类，底层调用的就是 <code>Filer</code> 接口的 <code>createSourceFile</code> 方法，参见源代码 <a target="_blank" rel="noopener" href="https://github.com/mapstruct/mapstruct/blob/1.5.x/processor/src/main/java/org/mapstruct/ap/internal/processor/MapperRenderingProcessor.java">github</a>。另外，MapStruct 库的注解处理器生成源代码文件利用了模板引擎 FreeMarker 库，可以参见 <a target="_blank" rel="noopener" href="https://mapstruct.org/documentation/1.5/api/org/mapstruct/ap/MappingProcessor.html">javadoc</a>、<a target="_blank" rel="noopener" href="https://github.com/mapstruct/mapstruct/tree/1.5.x/processor/src/main/resources/org/mapstruct/ap/internal/model">github</a>。</p>
+<p>另外值得一提的是，除了模板引擎，生成源代码文件也可以使用 <a target="_blank" rel="noopener" href="https://github.com/square/javapoet">JavaPoet</a> 工具库，JavaPoet 库提供 Java API 来生成 <code>.java</code> 源文件。笔者基于 JavaPoet 库，实现了能处理类似 Lombok 的 <code>@Builder</code> 注解的 <a target="_blank" rel="noopener" href="https://github.com/yulewei/annotation-processor-demo/blob/master/mylombok/src/main/java/com/example/filer/BuilderProcessor.java">BuilderProcessor</a> 注解处理器，有兴趣的话可以查阅（附注：实际的 Lombok 的 <code>@Builder</code> 注解实现原理是修改语法树，并不是生成新的 <code>Builder</code> 类文件）。</p>
+<h1 id="Lombok-的实现原理">Lombok 的实现原理</h1>
+<p>依赖 JSR-269 实现的第三方工具库有很多<sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup>，比如代码自动生成的 <a target="_blank" rel="noopener" href="https://projectlombok.org/">Lombok</a>、<a target="_blank" rel="noopener" href="https://mapstruct.org/">MapStruct</a> 和 Google <a target="_blank" rel="noopener" href="https://github.com/google/auto">Auto</a>，代码检查的 <a target="_blank" rel="noopener" href="https://checkerframework.org/">Checker</a> 和 Google <a target="_blank" rel="noopener" href="http://errorprone.info/">Error Prone</a>，编译阶段完成依赖注入的 Google <a target="_blank" rel="noopener" href="https://github.com/google/dagger">Dagger 2</a> 等。笔者在实际开发中就经常使用 Lombok 库和 MapStruct 库。MapStruct 库的实现原理，上文已经做了简单介绍。现在来看下 Lombok 的实现原理。</p>
+<p>Lombok <a target="_blank" rel="noopener" href="https://projectlombok.org/features/index.html">提供</a> <code>@NonNull</code>、<code>@Getter</code>, <code>@Setter</code>, <code>@ToString</code>, <code>@EqualsAndHashCode</code>, <code>@Data</code> 等注解，自动生成常见样板代码 boilerplate，解放开发效率。Lombok 支持 javac 和 ecj (Eclipse Compiler for Java)。对于 javac 编译器对应的注解处理器是 <a target="_blank" rel="noopener" href="https://github.com/rzwitserloot/lombok/blob/v1.16.10/src/core/lombok/javac/apt/LombokProcessor.java">LombokProcessor</a>，然后经过一些处理过程，每个注解都会有特定的 <a target="_blank" rel="noopener" href="https://github.com/rzwitserloot/lombok/tree/v1.16.10/src/core/lombok/javac/handlers">handler</a> 来处理，<code>@NonNull</code> 对应 <code>HandleNonNull</code>、<code>@Getter</code> 对应 <code>HandleGetter</code>、<code>@Setter</code> 对应 <code>HandleSetter</code>、<code>@ToString</code> 对应 <code>HandleToString</code>、<code>@EqualsAndHashCode</code> 对应 <code>HandleEqualsAndHashCode</code>、<code>@Data</code> 对应 <code>HandleData</code>。如果想要改造 Lombok 项目，让 Lombok 支持新的注解，其实就是添加新的 handler。关于 Lombok 原理以及如何为 Lombok 贡献代码，文档 “Documentation for lombok developers”<sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup>，也有简单介绍，可以阅读。</p>
+<p>阅读这些 handler 的实现，可以看到样板代码的生成依赖的就是 <code>com.sun.tools.javac.*</code> 包。最新版的 Lombok 源码太繁杂了，可以从早期版本入手，比如 <a target="_blank" rel="noopener" href="https://github.com/projectlombok/lombok/tree/v0.8.1">v0.8.1</a> 版本。</p>
+<p>现在来看下如何实现 <code>@Getter</code> 注解。<code>@Getter</code> 注解的功能，就是自动生成类字段的 getter 方法，如果注解加到 class 上，就生成类的全部字段的 getter 方法。假设字段名叫 <code>foo</code>，那边生成的 getter 方法如下所示：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getFoo</span><span class="params">()</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> foo;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>参考 Lombok v0.8.1 和 v0.9.3 的 <a target="_blank" rel="noopener" href="https://github.com/projectlombok/lombok/blob/v0.9.3/src/core/lombok/javac/handlers/HandleGetter.java">HandleGetter</a> 实现源码（从 v0.9.3 版本开始，<code>@Getter</code> 注解支持加到 class 上，之前只能加到字段上），提取出其中的核心代码，实现 <code>@Getter</code> 的示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">handleGetter</span><span class="params">(JCTree.JCClassDecl classDecl)</span> &#123;</span><br><span class="line">    List&lt;JCTree&gt; methodDecls = List.nil();</span><br><span class="line">    <span class="keyword">for</span> (JCTree tree : classDecl.defs) &#123;</span><br><span class="line">        <span class="keyword">if</span> (tree <span class="keyword">instanceof</span> JCTree.JCVariableDecl) &#123;</span><br><span class="line">            <span class="comment">// 创建 getter 方法</span></span><br><span class="line">            JCTree.<span class="type">JCVariableDecl</span> <span class="variable">fieldDecl</span> <span class="operator">=</span> (JCTree.JCVariableDecl) tree;</span><br><span class="line">            <span class="type">String</span> <span class="variable">methodGetterName</span> <span class="operator">=</span> Utils.toGetterName(fieldDecl);</span><br><span class="line">            <span class="keyword">if</span> (!Utils.methodExists(methodGetterName, classDecl)) &#123;</span><br><span class="line">                JCTree.<span class="type">JCMethodDecl</span> <span class="variable">methodGetter</span> <span class="operator">=</span> <span class="built_in">this</span>.createGetter(fieldDecl);</span><br><span class="line">                methodDecls = methodDecls.append(methodGetter);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    classDecl.defs = classDecl.defs.appendList(methodDecls);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 生成 getter 方法</span></span><br><span class="line"><span class="keyword">private</span> JCTree.JCMethodDecl <span class="title function_">createGetter</span><span class="params">(JCTree.JCVariableDecl field)</span> &#123;</span><br><span class="line">    JCTree.<span class="type">JCStatement</span> <span class="variable">returnStatement</span> <span class="operator">=</span> maker.Return(maker.Ident(field));</span><br><span class="line">    JCTree.<span class="type">JCBlock</span> <span class="variable">methodBody</span> <span class="operator">=</span> maker.Block(<span class="number">0</span>, List.of(returnStatement));</span><br><span class="line">    <span class="type">Name</span> <span class="variable">methodName</span> <span class="operator">=</span> names.fromString(Utils.toGetterName(field));</span><br><span class="line">    JCTree.<span class="type">JCExpression</span> <span class="variable">methodType</span> <span class="operator">=</span> (JCTree.JCExpression) field.getType();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> maker.MethodDef(maker.Modifiers(Flags.PUBLIC), methodName, methodType,</span><br><span class="line">            List.nil(), List.nil(), List.nil(), methodBody, <span class="literal">null</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>容易发现，实现 <code>@Getter</code> 注解依赖的 <code>JCTree</code>、<code>TreeMaker</code> 等相关类，这些类在上文都已经提及并介绍，不再复述。</p>
+<p>为了加深对 javac 内部 API 的理解，笔者参考 Lombok 的源码，<strong>实现了支持类似 Lombok 的 <code>@Data</code>、<code>@Getter</code>、<code>@Setter</code>、<code>@Slf4j</code> 注解的注解处理器</strong>，<a target="_blank" rel="noopener" href="https://github.com/yulewei/annotation-processor-demo/blob/master/mylombok/src/main/java/com/example/processor/MyLombokProcessor.java">MyLombokProcessor</a>，代码参见 GitHub。</p>
+<p><strong>附注</strong>：本文的示例代码的完整代码，都可以在 GitHub 的 annotation-processor-demo<sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup> 仓库上找到。</p>
+<h1 id="参考资料">参考资料</h1>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>OpenJDK: The Java programming language Compiler Group <a target="_blank" rel="noopener" href="http://openjdk.java.net/groups/compiler/">http://openjdk.java.net/groups/compiler/</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p>The Java Programming Language Compiler, javac <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/guides/javac/">https://docs.oracle.com/javase/8/docs/technotes/guides/javac/</a> <a href="#fnref2" class="footnote-backref">↩︎</a> <a href="#fnref2:1" class="footnote-backref">↩︎</a> <a href="#fnref2:2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p>2011-05 How does lombok work? <a target="_blank" rel="noopener" href="http://stackoverflow.com/q/6107197">http://stackoverflow.com/q/6107197</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p>javac <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/tools/unix/javac.html">https://docs.oracle.com/javase/8/docs/technotes/tools/unix/javac.html</a> <a target="_blank" rel="noopener" href="https://www.mankier.com/1/javac">https://www.mankier.com/1/javac</a> <a href="#fnref4" class="footnote-backref">↩︎</a> <a href="#fnref4:1" class="footnote-backref">↩︎</a> <a href="#fnref4:2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p>OpenJDK: Compiler Package Overview <a target="_blank" rel="noopener" href="https://openjdk.org/groups/compiler/doc/package-overview/index.html">https://openjdk.org/groups/compiler/doc/package-overview/index.html</a> <a href="#fnref5" class="footnote-backref">↩︎</a> <a href="#fnref5:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn6" class="footnote-item"><p>OpenJDK: The Hitchhiker's Guide to javac <a target="_blank" rel="noopener" href="https://openjdk.org/groups/compiler/doc/hhgtjavac/index.html">https://openjdk.org/groups/compiler/doc/hhgtjavac/index.html</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn7" class="footnote-item"><p>OpenJDK: Compilation Overview <a target="_blank" rel="noopener" href="https://openjdk.org/groups/compiler/doc/compilation-overview/index.html">https://openjdk.org/groups/compiler/doc/compilation-overview/index.html</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn8" class="footnote-item"><p>深入理解Java 7虚拟机，周志明 第2版2013：第10章 早期 (编译期) 优化 <a href="#fnref8" class="footnote-backref">↩︎</a> <a href="#fnref8:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn9" class="footnote-item"><p>莫枢 RednaxelaFX ：JVM分享——Java程序的编译、加载与执行 <a target="_blank" rel="noopener" href="http://www.valleytalk.org/2011/07/28/java-%E7%A8%8B%E5%BA%8F%E7%9A%84%E7%BC%96%E8%AF%91%EF%BC%8C%E5%8A%A0%E8%BD%BD-%E5%92%8C-%E6%89%A7%E8%A1%8C/">http://www.valleytalk.org/2011/07/28/java-程序的编译，加载-和-执行/</a> <a href="#fnref9" class="footnote-backref">↩︎</a> <a href="#fnref9:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn10" class="footnote-item"><p>深入解析Java编译器：源码剖析与实例详解，马智 2019 <a href="#fnref10" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn11" class="footnote-item"><p>Awesome Java Annotation Processing <a target="_blank" rel="noopener" href="https://github.com/gunnarmorling/awesome-annotation-processing">https://github.com/gunnarmorling/awesome-annotation-processing</a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn12" class="footnote-item"><p>Documentation for lombok developers <a target="_blank" rel="noopener" href="https://projectlombok.org/contributing/">https://projectlombok.org/contributing/</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn13" class="footnote-item"><p>annotation-processor-demo <a target="_blank" rel="noopener" href="https://github.com/yulewei/annotation-processor-demo">https://github.com/yulewei/annotation-processor-demo</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2017/04/javac-api/" title="Java 编译器 javac 及 Lombok 实现原理解析">https://nullwy.me/2017/04/javac-api/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/JVM/" rel="tag"># JVM</a>
+              <a href="/tags/%E7%BC%96%E8%AF%91%E5%99%A8/" rel="tag"># 编译器</a>
+              <a href="/tags/javac/" rel="tag"># javac</a>
+              <a href="/tags/Lombok/" rel="tag"># Lombok</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/03/java-executor/" rel="prev" title="Java Executor 框架笔记">
+      <i class="fa fa-chevron-left"></i> Java Executor 框架笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/05/java-method-parameter/" rel="next" title="Java 运行时获取方法参数名">
+      Java 运行时获取方法参数名 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-%E7%BC%96%E8%AF%91%E5%99%A8-API"><span class="nav-number">1.</span> <span class="nav-text">Java 编译器 API</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#javac-%E7%9A%84%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B"><span class="nav-number">2.</span> <span class="nav-text">javac 的编译过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%AF%E6%8F%92%E6%8B%94%E5%BC%8F%E6%B3%A8%E8%A7%A3%E5%A4%84%E7%90%86-API"><span class="nav-number">3.</span> <span class="nav-text">可插拔式注解处理 API</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%89%AB%E6%8F%8F%E8%AF%AD%E6%B3%95%E6%A0%91"><span class="nav-number">3.1.</span> <span class="nav-text">扫描语法树</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E8%AF%AD%E6%B3%95%E6%A0%91"><span class="nav-number">3.2.</span> <span class="nav-text">修改语法树</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%96%B0%E6%96%87%E4%BB%B6"><span class="nav-number">3.3.</span> <span class="nav-text">创建新文件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Lombok-%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">4.</span> <span class="nav-text">Lombok 的实现原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2017/04/javac-api/";
+    this.page.identifier = "2017/04/javac-api/";
+    this.page.title = "Java 编译器 javac 及 Lombok 实现原理解析";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

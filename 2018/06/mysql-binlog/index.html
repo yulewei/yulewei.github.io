@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="MySQL 的 binlog 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。 STATEMENT 格式的 binlog 要想开启 binlog，需要在启动 MySQL 时传入 --log-bin 参数。或者也可以在 MySQL 配置文件 &#x2F;etc&#x2F;my.cnf，设置 log_bin 开启 binlog。M">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL binlog：格式、增量恢复、闪回、Java 解析">
+<meta property="og:url" content="https://nullwy.me/2018/06/mysql-binlog/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="MySQL 的 binlog 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。 STATEMENT 格式的 binlog 要想开启 binlog，需要在启动 MySQL 时传入 --log-bin 参数。或者也可以在 MySQL 配置文件 &#x2F;etc&#x2F;my.cnf，设置 log_bin 开启 binlog。M">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-06-18T07:09:51.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:15:57.833Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="数据库">
+<meta property="article:tag" content="binlog">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://nullwy.me/2018/06/mysql-binlog/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MySQL binlog：格式、增量恢复、闪回、Java 解析 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2018/06/mysql-binlog/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL binlog：格式、增量恢复、闪回、Java 解析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-06-18 15:09:51" itemprop="dateCreated datePublished" datetime="2018-06-18T15:09:51+08:00">2018-06-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2018/06/mysql-binlog/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/06/mysql-binlog/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>12k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>11 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>MySQL 的 <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/binary-log.html">binlog</a> 日志文件，记录了数据库表的全部修改操作。本文简单整理 MySQL binlog 相关知识，以及如何使用 binlog 恢复或闪回数据库数据。</p>
+<h1 id="STATEMENT-格式的-binlog">STATEMENT 格式的 binlog</h1>
+<p>要想开启 binlog，需要在启动 MySQL 时传入 --<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/replication-options-binary-log.html#option_mysqld_log-bin">log-bin</a> 参数。或者也可以在 MySQL 配置文件 <code>/etc/my.cnf</code>，设置 <code>log_bin</code> 开启 binlog。MySQL 5.7 开始，开启 binlog 后，<code>--server-id</code> 参数也必须指定，否则 MySQL 服务器会启动失败。</p>
+<span id="more"></span>
+<p><code>binlog_format</code> 支持 <code>STATEMENT</code>, <code>ROW</code>, <code>MIXED</code> 三种格式，MySQL 5.5 和 5.6 默认为 <code>STATEMENT</code>，MySQL 5.7.7 开始默认为 <code>ROW</code>。若 SQL 使用 UUID(), RAND(), VERSION() 等函数，或者使用存储过程、自定义函数，基于 STATEMENT 的主从复时，是不安全的（很多人可能会认为 NOW(), CURRENT_TIMESTAMP 这些函数也是不安全的，事实上是安全的）[ <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/mysql-replication-excerpt/5.7/en/replication-sbr-rbr.html">doc1</a>, <a target="_blank" rel="noopener" href="https://mariadb.com/kb/en/library/unsafe-statements-for-statement-based-replication/">doc2</a> ]。基于 <code>ROW</code> 的主从复制，是最安全的复制方式。</p>
+<p>现在先来看下 <code>STATEMENT</code> 格式的 binlog，<code>/etc/my.cnf</code> 文件修改的内容如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">server_id = 1</span><br><span class="line">log_bin = mysql-bin</span><br><span class="line">binlog_format = STATEMENT</span><br><span class="line">binlog_row_image=FULL</span><br></pre></td></tr></table></figure>
+<p>重启 MySQL 后，在数据目录 <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/server-options.html#option_mysqld_datadir">datadir</a> 下，比如 <code>/var/lib/mysql/</code>，将会生成相应的 binlog 文件，<code>mysql-bin.index</code> 和 <code>mysql-bin.000001</code>。<code>.index</code> 后缀的文件保存全部 binlog 文件名。<code>mysql-bin.000001</code> 文件记录 binlog 内容。每次 MySQL 启动或者 flush 日志，都将按序号创建一个新的日志文件。另外，当日志文件大小超过 <code>max_binlog_size</code> 时，也会创建一个新的日志文件。</p>
+<p>现在来试一试 binlog 功能。假设在 <code>testdb</code> 库在有 <code>hello</code> 表，并对其中某行做修改操作：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> hello;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> name  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> Andy  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">2</span> <span class="operator">|</span> Bill  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">3</span> <span class="operator">|</span> Candy <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------+</span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">update</span> hello <span class="keyword">set</span> name <span class="operator">=</span> <span class="string">&#x27;Will&#x27;</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">3</span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.02</span> sec)</span><br><span class="line"><span class="keyword">Rows</span> matched: <span class="number">1</span>  Changed: <span class="number">1</span>  Warnings: <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>binlog 为二进制文件，需要使用 <code>mysqlbinlog</code>（<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/mysqlbinlog.html">doc</a>, <a target="_blank" rel="noopener" href="https://www.mankier.com/1/mysqlbinlog">man</a>）命令查看：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mysqlbinlog /var/lib/mysql/mysql-bin.000001  # 直接在 mysql 服务器上读取 binlog 文件</span><br><span class="line">$ mysqlbinlog -R -h192.168.2.107 -uroot -p123456 mysql-bin.000001  # 或者，远程读取 binlog 文件</span><br></pre></td></tr></table></figure>
+<p>执行 <code>update</code> 后相应新增的 binlog 文件内容：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"># <span class="keyword">at</span> <span class="number">154</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">47</span>:<span class="number">49</span> server id <span class="number">1</span>  end_log_pos <span class="number">219</span> CRC32 <span class="number">0x4bd9d69b</span> 	Anonymous_GTID	last_committed<span class="operator">=</span><span class="number">0</span>	sequence_number<span class="operator">=</span><span class="number">1</span>	rbr_only<span class="operator">=</span><span class="keyword">no</span></span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@SESSION</span>.GTID_NEXT<span class="operator">=</span> <span class="string">&#x27;ANONYMOUS&#x27;</span><span class="comment">/*!*/</span>;</span><br><span class="line"># <span class="keyword">at</span> <span class="number">219</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">47</span>:<span class="number">49</span> server id <span class="number">1</span>  end_log_pos <span class="number">302</span> CRC32 <span class="number">0x476fafc9</span> 	Query	thread_id<span class="operator">=</span><span class="number">2</span>	exec_time<span class="operator">=</span><span class="number">0</span>	error_code<span class="operator">=</span><span class="number">0</span></span><br><span class="line"><span class="keyword">SET</span> <span class="type">TIMESTAMP</span><span class="operator">=</span><span class="number">1529246869</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.pseudo_thread_id<span class="operator">=</span><span class="number">2</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.foreign_key_checks<span class="operator">=</span><span class="number">1</span>, @<span class="variable">@session</span>.sql_auto_is_null<span class="operator">=</span><span class="number">0</span>, @<span class="variable">@session</span>.unique_checks<span class="operator">=</span><span class="number">1</span>, @<span class="variable">@session</span>.autocommit<span class="operator">=</span><span class="number">1</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.sql_mode<span class="operator">=</span><span class="number">1075838976</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.auto_increment_increment<span class="operator">=</span><span class="number">1</span>, @<span class="variable">@session</span>.auto_increment_offset<span class="operator">=</span><span class="number">1</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="comment">/*!\C utf8 */</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.character_set_client<span class="operator">=</span><span class="number">33</span>,@<span class="variable">@session</span>.collation_connection<span class="operator">=</span><span class="number">33</span>,@<span class="variable">@session</span>.collation_server<span class="operator">=</span><span class="number">33</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.lc_time_names<span class="operator">=</span><span class="number">0</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.collation_database<span class="operator">=</span><span class="keyword">DEFAULT</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line"><span class="comment">/*!*/</span>;</span><br><span class="line"># <span class="keyword">at</span> <span class="number">302</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">47</span>:<span class="number">49</span> server id <span class="number">1</span>  end_log_pos <span class="number">423</span> CRC32 <span class="number">0x7f2c2c7a</span> 	Query	thread_id<span class="operator">=</span><span class="number">2</span>	exec_time<span class="operator">=</span><span class="number">0</span>	error_code<span class="operator">=</span><span class="number">0</span></span><br><span class="line">use `testdb`<span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="type">TIMESTAMP</span><span class="operator">=</span><span class="number">1529246869</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">update</span> hello <span class="keyword">set</span> name <span class="operator">=</span> <span class="string">&#x27;Will&#x27;</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">3</span></span><br><span class="line"><span class="comment">/*!*/</span>;</span><br><span class="line"># <span class="keyword">at</span> <span class="number">423</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">47</span>:<span class="number">49</span> server id <span class="number">1</span>  end_log_pos <span class="number">454</span> CRC32 <span class="number">0x68da744a</span> 	Xid <span class="operator">=</span> <span class="number">12</span></span><br><span class="line"><span class="keyword">COMMIT</span><span class="comment">/*!*/</span>;</span><br></pre></td></tr></table></figure>
+<h1 id="ROW-格式的-binlog">ROW 格式的 binlog</h1>
+<p>修改 <code>/etc/my.cnf</code> 的 <code>binlog_format</code> 为 <code>ROW</code>，再重启 MySQL。格式修改后，会生成一个新的 binlog 文件 <code>mysql-bin.000002</code>。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> <span class="keyword">create</span> <span class="keyword">table</span> hello;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------+-------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="keyword">Table</span> <span class="operator">|</span> <span class="keyword">Create</span> <span class="keyword">Table</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+-------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> hello <span class="operator">|</span> <span class="keyword">CREATE</span> <span class="keyword">TABLE</span> `hello` (</span><br><span class="line">  `id` <span class="type">bigint</span>(<span class="number">20</span>) <span class="keyword">NOT</span> <span class="keyword">NULL</span> AUTO_INCREMENT,</span><br><span class="line">  `name` <span class="type">varchar</span>(<span class="number">20</span>) <span class="keyword">DEFAULT</span> <span class="keyword">NULL</span>,</span><br><span class="line">  <span class="keyword">PRIMARY</span> KEY (`id`)</span><br><span class="line">) ENGINE<span class="operator">=</span>InnoDB AUTO_INCREMENT<span class="operator">=</span><span class="number">4</span> <span class="keyword">DEFAULT</span> CHARSET<span class="operator">=</span>utf8mb4 <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+-------------------------------------------------------------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> hello <span class="keyword">where</span> id;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> name <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> Andy <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">2</span> <span class="operator">|</span> Lily <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">3</span> <span class="operator">|</span> Will <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">update</span> hello <span class="keyword">set</span> name <span class="operator">=</span> <span class="string">&#x27;David&#x27;</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">3</span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.02</span> sec)</span><br><span class="line"><span class="keyword">Rows</span> matched: <span class="number">1</span>  Changed: <span class="number">1</span>  Warnings: <span class="number">0</span></span><br></pre></td></tr></table></figure>
+<p>查看 <code>ROW</code> 格式的 binlog，需要使用 <code>sudo mysqlbinlog -v --base64-output=DECODE-ROWS /var/lib/mysql/mysql-bin.000002</code> 命令。执行 <code>update</code> 后相应新增的 binlog 内容：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"># <span class="keyword">at</span> <span class="number">154</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">54</span>:<span class="number">13</span> server id <span class="number">1</span>  end_log_pos <span class="number">219</span> CRC32 <span class="number">0x2ce70d4d</span> 	Anonymous_GTID	last_committed<span class="operator">=</span><span class="number">0</span>	sequence_number<span class="operator">=</span><span class="number">1</span>	rbr_only<span class="operator">=</span>yes</span><br><span class="line"><span class="comment">/*!50718 SET TRANSACTION ISOLATION LEVEL READ COMMITTED*/</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@SESSION</span>.GTID_NEXT<span class="operator">=</span> <span class="string">&#x27;ANONYMOUS&#x27;</span><span class="comment">/*!*/</span>;</span><br><span class="line"># <span class="keyword">at</span> <span class="number">219</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">54</span>:<span class="number">13</span> server id <span class="number">1</span>  end_log_pos <span class="number">293</span> CRC32 <span class="number">0x8183fddf</span> 	Query	thread_id<span class="operator">=</span><span class="number">2</span>	exec_time<span class="operator">=</span><span class="number">0</span>	error_code<span class="operator">=</span><span class="number">0</span></span><br><span class="line"><span class="keyword">SET</span> <span class="type">TIMESTAMP</span><span class="operator">=</span><span class="number">1529247253</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.pseudo_thread_id<span class="operator">=</span><span class="number">2</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.foreign_key_checks<span class="operator">=</span><span class="number">1</span>, @<span class="variable">@session</span>.sql_auto_is_null<span class="operator">=</span><span class="number">0</span>, @<span class="variable">@session</span>.unique_checks<span class="operator">=</span><span class="number">1</span>, @<span class="variable">@session</span>.autocommit<span class="operator">=</span><span class="number">1</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.sql_mode<span class="operator">=</span><span class="number">1075838976</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.auto_increment_increment<span class="operator">=</span><span class="number">1</span>, @<span class="variable">@session</span>.auto_increment_offset<span class="operator">=</span><span class="number">1</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="comment">/*!\C utf8 */</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.character_set_client<span class="operator">=</span><span class="number">33</span>,@<span class="variable">@session</span>.collation_connection<span class="operator">=</span><span class="number">33</span>,@<span class="variable">@session</span>.collation_server<span class="operator">=</span><span class="number">33</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.lc_time_names<span class="operator">=</span><span class="number">0</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@session</span>.collation_database<span class="operator">=</span><span class="keyword">DEFAULT</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line"><span class="comment">/*!*/</span>;</span><br><span class="line"># <span class="keyword">at</span> <span class="number">293</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">54</span>:<span class="number">13</span> server id <span class="number">1</span>  end_log_pos <span class="number">346</span> CRC32 <span class="number">0x0fc7e1a4</span> 	Table_map: `testdb`.`hello` mapped <span class="keyword">to</span> number <span class="number">110</span></span><br><span class="line"># <span class="keyword">at</span> <span class="number">346</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">54</span>:<span class="number">13</span> server id <span class="number">1</span>  end_log_pos <span class="number">411</span> CRC32 <span class="number">0xb58e729d</span> 	Update_rows: <span class="keyword">table</span> id <span class="number">110</span> flags: STMT_END_F</span><br><span class="line">### <span class="keyword">UPDATE</span> `testdb`.`hello`</span><br><span class="line">### <span class="keyword">WHERE</span></span><br><span class="line">###   <span class="variable">@1</span><span class="operator">=</span><span class="number">3</span></span><br><span class="line">###   <span class="variable">@2</span><span class="operator">=</span><span class="string">&#x27;Will&#x27;</span></span><br><span class="line">### <span class="keyword">SET</span></span><br><span class="line">###   <span class="variable">@1</span><span class="operator">=</span><span class="number">3</span></span><br><span class="line">###   <span class="variable">@2</span><span class="operator">=</span><span class="string">&#x27;David&#x27;</span></span><br><span class="line"># <span class="keyword">at</span> <span class="number">411</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">54</span>:<span class="number">13</span> server id <span class="number">1</span>  end_log_pos <span class="number">442</span> CRC32 <span class="number">0xef964db8</span> 	Xid <span class="operator">=</span> <span class="number">13</span></span><br><span class="line"><span class="keyword">COMMIT</span><span class="comment">/*!*/</span>;</span><br></pre></td></tr></table></figure>
+<p>若执行如下 SQL：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> hello (name) <span class="keyword">values</span> (<span class="string">&#x27;Frank&#x27;</span>);</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.02</span> sec)</span><br></pre></td></tr></table></figure>
+<p>相应生成的 binlog 内容：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># <span class="keyword">at</span> <span class="number">442</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">55</span>:<span class="number">47</span> server id <span class="number">1</span>  end_log_pos <span class="number">507</span> CRC32 <span class="number">0x79de08a7</span> 	Anonymous_GTID	last_committed<span class="operator">=</span><span class="number">1</span>	sequence_number<span class="operator">=</span><span class="number">2</span>	rbr_only<span class="operator">=</span>yes</span><br><span class="line"><span class="comment">/*!50718 SET TRANSACTION ISOLATION LEVEL READ COMMITTED*/</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@SESSION</span>.GTID_NEXT<span class="operator">=</span> <span class="string">&#x27;ANONYMOUS&#x27;</span><span class="comment">/*!*/</span>;</span><br><span class="line"># <span class="keyword">at</span> <span class="number">507</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">55</span>:<span class="number">47</span> server id <span class="number">1</span>  end_log_pos <span class="number">581</span> CRC32 <span class="number">0x56f9eb6a</span> 	Query	thread_id<span class="operator">=</span><span class="number">2</span>	exec_time<span class="operator">=</span><span class="number">0</span>	error_code<span class="operator">=</span><span class="number">0</span></span><br><span class="line"><span class="keyword">SET</span> <span class="type">TIMESTAMP</span><span class="operator">=</span><span class="number">1529247347</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line"><span class="comment">/*!*/</span>;</span><br><span class="line"># <span class="keyword">at</span> <span class="number">581</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">55</span>:<span class="number">47</span> server id <span class="number">1</span>  end_log_pos <span class="number">634</span> CRC32 <span class="number">0xedb73620</span> 	Table_map: `testdb`.`hello` mapped <span class="keyword">to</span> number <span class="number">110</span></span><br><span class="line"># <span class="keyword">at</span> <span class="number">634</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">55</span>:<span class="number">47</span> server id <span class="number">1</span>  end_log_pos <span class="number">684</span> CRC32 <span class="number">0x525a6a70</span> 	Write_rows: <span class="keyword">table</span> id <span class="number">110</span> flags: STMT_END_F</span><br><span class="line">### <span class="keyword">INSERT</span> <span class="keyword">INTO</span> `testdb`.`hello`</span><br><span class="line">### <span class="keyword">SET</span></span><br><span class="line">###   <span class="variable">@1</span><span class="operator">=</span><span class="number">4</span></span><br><span class="line">###   <span class="variable">@2</span><span class="operator">=</span><span class="string">&#x27;Frank&#x27;</span></span><br><span class="line"># <span class="keyword">at</span> <span class="number">684</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">55</span>:<span class="number">47</span> server id <span class="number">1</span>  end_log_pos <span class="number">715</span> CRC32 <span class="number">0x09a0d4de</span> 	Xid <span class="operator">=</span> <span class="number">14</span></span><br><span class="line"><span class="keyword">COMMIT</span><span class="comment">/*!*/</span>;</span><br></pre></td></tr></table></figure>
+<p>若执行如下 SQL：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">delete</span> <span class="keyword">from</span> hello <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">2</span>;</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.02</span> sec)</span><br></pre></td></tr></table></figure>
+<p>相应生成的 binlog 内容：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># <span class="keyword">at</span> <span class="number">715</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">56</span>:<span class="number">44</span> server id <span class="number">1</span>  end_log_pos <span class="number">780</span> CRC32 <span class="number">0x9f52450e</span> 	Anonymous_GTID	last_committed<span class="operator">=</span><span class="number">2</span>	sequence_number<span class="operator">=</span><span class="number">3</span>	rbr_only<span class="operator">=</span>yes</span><br><span class="line"><span class="comment">/*!50718 SET TRANSACTION ISOLATION LEVEL READ COMMITTED*/</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">SET</span> @<span class="variable">@SESSION</span>.GTID_NEXT<span class="operator">=</span> <span class="string">&#x27;ANONYMOUS&#x27;</span><span class="comment">/*!*/</span>;</span><br><span class="line"># <span class="keyword">at</span> <span class="number">780</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">56</span>:<span class="number">44</span> server id <span class="number">1</span>  end_log_pos <span class="number">854</span> CRC32 <span class="number">0x0959bc8d</span> 	Query	thread_id<span class="operator">=</span><span class="number">2</span>	exec_time<span class="operator">=</span><span class="number">0</span>	error_code<span class="operator">=</span><span class="number">0</span></span><br><span class="line"><span class="keyword">SET</span> <span class="type">TIMESTAMP</span><span class="operator">=</span><span class="number">1529247404</span><span class="comment">/*!*/</span>;</span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line"><span class="comment">/*!*/</span>;</span><br><span class="line"># <span class="keyword">at</span> <span class="number">854</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">56</span>:<span class="number">44</span> server id <span class="number">1</span>  end_log_pos <span class="number">907</span> CRC32 <span class="number">0x2945260f</span> 	Table_map: `testdb`.`hello` mapped <span class="keyword">to</span> number <span class="number">110</span></span><br><span class="line"># <span class="keyword">at</span> <span class="number">907</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">56</span>:<span class="number">44</span> server id <span class="number">1</span>  end_log_pos <span class="number">956</span> CRC32 <span class="number">0xc70df255</span> 	Delete_rows: <span class="keyword">table</span> id <span class="number">110</span> flags: STMT_END_F</span><br><span class="line">### <span class="keyword">DELETE</span> <span class="keyword">FROM</span> `testdb`.`hello`</span><br><span class="line">### <span class="keyword">WHERE</span></span><br><span class="line">###   <span class="variable">@1</span><span class="operator">=</span><span class="number">2</span></span><br><span class="line">###   <span class="variable">@2</span><span class="operator">=</span><span class="string">&#x27;Bill&#x27;</span></span><br><span class="line"># <span class="keyword">at</span> <span class="number">956</span></span><br><span class="line">#<span class="number">180617</span> <span class="number">22</span>:<span class="number">56</span>:<span class="number">44</span> server id <span class="number">1</span>  end_log_pos <span class="number">987</span> CRC32 <span class="number">0x0c98f18e</span> 	Xid <span class="operator">=</span> <span class="number">15</span></span><br><span class="line"><span class="keyword">COMMIT</span><span class="comment">/*!*/</span>;</span><br></pre></td></tr></table></figure>
+<h1 id="使用-binlog-增量恢复">使用 binlog 增量恢复</h1>
+<p>MySQL 逻辑备份通常会结合<strong>全量备份</strong>和<strong>增量备份</strong>，使用 <code>mysqldump</code> 定期全量备份数据库，然后利用 binlog 保存增量数据。恢复数据时，就是用 <code>mysqldump</code> 备份的数据恢复到备份的时间点。数据库在备份时间点到当前时间的增量修改，则通过 <code>mysqlbinlog</code> 将 binlog 中的增量数据恢复到数据库。现在假设已经使用 <code>mysqldump</code> 将数据库还原到：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> hello;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> name <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> Andy <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">2</span> <span class="operator">|</span> Lily <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">3</span> <span class="operator">|</span> Will <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+------+</span></span><br><span class="line"><span class="number">3</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<p>之后执行的 SQL：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">update</span> hello <span class="keyword">set</span> name <span class="operator">=</span> <span class="string">&#x27;David&#x27;</span> <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">3</span>;</span><br><span class="line"><span class="keyword">insert</span> hello (name) <span class="keyword">values</span> (<span class="string">&#x27;Frank&#x27;</span>);</span><br><span class="line"><span class="keyword">delete</span> <span class="keyword">from</span> hello <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">2</span>;</span><br></pre></td></tr></table></figure>
+<p>不管是使用 <code>STATEMENT</code> 还是 <code>ROW</code>，<code>mysqlbinlog</code> 命令都可以将 binlog 增量恢复到数据库 [ <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/point-in-time-recovery.html">doc</a> ]。</p>
+<p>观察 <code>binlog</code> 可以看到，从最开始的 <code>update hello set name = 'David' where id = 3;</code> 到最终的 <code>delete from hello where id = 2;</code>，时间上从 &quot;2018-06-17 22:54:13&quot; 到 &quot;2018-06-17 22:56:44&quot;，所以基于时间点恢复，命令如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mysqlbinlog --start-datetime=&quot;2018-06-17 22:54:13&quot; --stop-datetime=&quot;2018-06-17 22:56:44&quot; mysql-bin.000002 | mysql -uroot -p123456</span><br></pre></td></tr></table></figure>
+<p><code>binlog</code> 的事件位置号是从 &quot;154&quot; 到 &quot;956&quot;，但需要注意的是 用 <code>--start-position</code> 和 <code>--stop-position</code> 指定位置点范围，逻辑上对应的是 <code>start &lt;= position &lt; stop</code>，所以基于时间点恢复，命令如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo mysqlbinlog --start-position=154 --stop-position=957 mysql-bin.000002 | mysql -uroot -p123456</span><br></pre></td></tr></table></figure>
+<p>两种方式任意执行，都能将数据恢复到：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> hello;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> name  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">1</span> <span class="operator">|</span> Andy  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">3</span> <span class="operator">|</span> David <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">4</span> <span class="operator">|</span> Frank <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------+</span></span><br><span class="line"><span class="number">3</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<h1 id="使用-binlog2sql-闪回">使用 binlog2sql 闪回</h1>
+<p><a target="_blank" rel="noopener" href="https://github.com/danfengcao/binlog2sql">binlog2sql</a>，作者为曹单锋，大众点评 DBA。<code>binlog2sql</code>，从 MySQL binlog 解析出你要的 SQL。根据不同选项，你可以得到原始 SQL、回滚 SQL、去除主键的 INSERT SQL 等。<code>binlog2sql</code>，底层实现依赖 <a target="_blank" rel="noopener" href="https://github.com/noplay/python-mysql-replication">python-mysql-replication</a>，由该库完成 MySQL 复制协议和 binlog 格式的解析。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">python binlog2sql/binlog2sql.py -h192.168.2.107 -uroot -p123456 --start-position=154 --stop-position=957 --start-file=<span class="string">&#x27;mysql-bin.000002&#x27;</span></span></span><br><span class="line">UPDATE `testdb`.`hello` SET `id`=3, `name`=&#x27;David&#x27; WHERE `id`=3 AND `name`=&#x27;Will&#x27; LIMIT 1; #start 4 end 411 time 2018-06-17 22:54:13</span><br><span class="line">INSERT INTO `testdb`.`hello`(`id`, `name`) VALUES (4, &#x27;Frank&#x27;); #start 442 end 684 time 2018-06-17 22:55:47</span><br><span class="line">DELETE FROM `testdb`.`hello` WHERE `id`=2 AND `name`=&#x27;Bill&#x27; LIMIT 1; #start 715 end 956 time 2018-06-17 22:56:44</span><br></pre></td></tr></table></figure>
+<p>生成回滚 sql：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">python binlog2sql/binlog2sql.py --flashback -h192.168.2.107 -uroot -p123456 --start-position=154 --stop-position=956 --start-file=<span class="string">&#x27;mysql-bin.000002&#x27;</span></span></span><br><span class="line">INSERT INTO `testdb`.`hello`(`id`, `name`) VALUES (2, &#x27;Bill&#x27;); #start 715 end 956 time 2018-06-17 22:56:44</span><br><span class="line">DELETE FROM `testdb`.`hello` WHERE `id`=4 AND `name`=&#x27;Frank&#x27; LIMIT 1; #start 442 end 684 time 2018-06-17 22:55:47</span><br><span class="line">UPDATE `testdb`.`hello` SET `id`=3, `name`=&#x27;Will&#x27; WHERE `id`=3 AND `name`=&#x27;David&#x27; LIMIT 1; #start 154 end 411 time 2018-06-17 22:54:13</span><br></pre></td></tr></table></figure>
+<p>闪回的现实原理很简单，先通过 MySQL <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/internals/en/replication-protocol.html">复制协议</a>的 <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/internals/en/com-binlog-dump.html">com-binlog-dump</a> 命令 dump 出 binlog，然后按照 binlog 的<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/internals/en/binary-log.html">格式规范</a>解析 binlog，将 binlog 转换成 SQL，再将这些 SQL 转换反向逻辑的 SQL，最后再倒序执行。具体可以看，<code>binlog2sql</code> 作者的文章 [ <a target="_blank" rel="noopener" href="https://github.com/danfengcao/binlog2sql/blob/master/example/mysql-flashback-priciple-and-practice.md">ref</a> ]。</p>
+<h1 id="Java-解析-binlog">Java 解析 binlog</h1>
+<p>上文中的 <code>binlog2sql</code> 其实底层依赖 <code>python-mysql-replication</code> 库，这是 Python 库。如果想使用 Java 解析 binlog 可以使用 <code>mysql-binlog-connector-java</code>（<a target="_blank" rel="noopener" href="https://github.com/shyiko/mysql-binlog-connector-java">github</a>）库。目前开源的 CDC 工具，如 Zendesk <a target="_blank" rel="noopener" href="https://github.com/zendesk/maxwell">maxwell</a>、Redhat <a target="_blank" rel="noopener" href="https://github.com/debezium/debezium">debezium</a>、LinkedIn <a target="_blank" rel="noopener" href="https://github.com/linkedin/databus">Databus</a> 等都底层依赖 <code>mysql-binlog-connector-java</code> 或者其前身 <a target="_blank" rel="noopener" href="https://github.com/zendesk/open-replicator">open-replicator</a>。使用 <code>mysql-binlog-connector-java</code> 的示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">BinaryLogClient</span> <span class="variable">client</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BinaryLogClient</span>(<span class="string">&quot;192.168.2.107&quot;</span>, <span class="number">3306</span>, <span class="string">&quot;root&quot;</span>, <span class="string">&quot;123456&quot;</span>);</span><br><span class="line">client.setBinlogFilename(<span class="string">&quot;mysql-bin.000001&quot;</span>);</span><br><span class="line">client.setBinlogPosition(<span class="number">4</span>);</span><br><span class="line">client.setBlocking(<span class="literal">false</span>);</span><br><span class="line">client.registerEventListener(event -&gt; &#123;</span><br><span class="line">    System.out.println(event);</span><br><span class="line">&#125;);</span><br><span class="line">client.connect();</span><br></pre></td></tr></table></figure>
+<p>输出（省略部分内容）：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">Event&#123;header=EventHeaderV4&#123;timestamp=<span class="number">1529247253000</span>, eventType=TABLE_MAP, serverId=<span class="number">1</span>, headerLength=<span class="number">19</span>, dataLength=<span class="number">34</span>, nextPosition=<span class="number">346</span>, flags=<span class="number">0</span>&#125;, data=TableMapEventData&#123;tableId=<span class="number">110</span>, database=<span class="string">&#x27;testdb&#x27;</span>, table=<span class="string">&#x27;hello&#x27;</span>, columnTypes=<span class="number">8</span>, <span class="number">15</span>, columnMetadata=<span class="number">0</span>, <span class="number">40</span>, columnNullability=&#123;<span class="number">1</span>&#125;&#125;&#125;</span><br><span class="line">Event&#123;header=EventHeaderV4&#123;timestamp=<span class="number">1529247253000</span>, eventType=EXT_UPDATE_ROWS, serverId=<span class="number">1</span>, headerLength=<span class="number">19</span>, dataLength=<span class="number">46</span>, nextPosition=<span class="number">411</span>, flags=<span class="number">0</span>&#125;, data=UpdateRowsEventData&#123;tableId=<span class="number">110</span>, includedColumnsBeforeUpdate=&#123;<span class="number">0</span>, <span class="number">1</span>&#125;, includedColumns=&#123;<span class="number">0</span>, <span class="number">1</span>&#125;, rows=[</span><br><span class="line">    &#123;before=[<span class="number">3</span>, Will], after=[<span class="number">3</span>, David]&#125;</span><br><span class="line">]&#125;&#125;</span><br><span class="line">...</span><br><span class="line">Event&#123;header=EventHeaderV4&#123;timestamp=<span class="number">1529247347000</span>, eventType=TABLE_MAP, serverId=<span class="number">1</span>, headerLength=<span class="number">19</span>, dataLength=<span class="number">34</span>, nextPosition=<span class="number">634</span>, flags=<span class="number">0</span>&#125;, data=TableMapEventData&#123;tableId=<span class="number">110</span>, database=<span class="string">&#x27;testdb&#x27;</span>, table=<span class="string">&#x27;hello&#x27;</span>, columnTypes=<span class="number">8</span>, <span class="number">15</span>, columnMetadata=<span class="number">0</span>, <span class="number">40</span>, columnNullability=&#123;<span class="number">1</span>&#125;&#125;&#125;</span><br><span class="line">Event&#123;header=EventHeaderV4&#123;timestamp=<span class="number">1529247347000</span>, eventType=EXT_WRITE_ROWS, serverId=<span class="number">1</span>, headerLength=<span class="number">19</span>, dataLength=<span class="number">31</span>, nextPosition=<span class="number">684</span>, flags=<span class="number">0</span>&#125;, data=WriteRowsEventData&#123;tableId=<span class="number">110</span>, includedColumns=&#123;<span class="number">0</span>, <span class="number">1</span>&#125;, rows=[</span><br><span class="line">    [<span class="number">4</span>, Frank]</span><br><span class="line">]&#125;&#125;</span><br><span class="line">...</span><br><span class="line">Event&#123;header=EventHeaderV4&#123;timestamp=<span class="number">1529247404000</span>, eventType=TABLE_MAP, serverId=<span class="number">1</span>, headerLength=<span class="number">19</span>, dataLength=<span class="number">34</span>, nextPosition=<span class="number">907</span>, flags=<span class="number">0</span>&#125;, data=TableMapEventData&#123;tableId=<span class="number">110</span>, database=<span class="string">&#x27;testdb&#x27;</span>, table=<span class="string">&#x27;hello&#x27;</span>, columnTypes=<span class="number">8</span>, <span class="number">15</span>, columnMetadata=<span class="number">0</span>, <span class="number">40</span>, columnNullability=&#123;<span class="number">1</span>&#125;&#125;&#125;</span><br><span class="line">Event&#123;header=EventHeaderV4&#123;timestamp=<span class="number">1529247404000</span>, eventType=EXT_DELETE_ROWS, serverId=<span class="number">1</span>, headerLength=<span class="number">19</span>, dataLength=<span class="number">30</span>, nextPosition=<span class="number">956</span>, flags=<span class="number">0</span>&#125;, data=DeleteRowsEventData&#123;tableId=<span class="number">110</span>, includedColumns=&#123;<span class="number">0</span>, <span class="number">1</span>&#125;, rows=[</span><br><span class="line">    [<span class="number">2</span>, Bill]</span><br><span class="line">]&#125;&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="参考资料">参考资料</h1>
+<ol>
+<li>MySQL Replication: 5.1.1 Advantages and Disadvantages of Statement-Based and Row-Based Replication <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/mysql-replication-excerpt/5.7/en/replication-sbr-rbr.html">https://dev.mysql.com/doc/mysql-replication-excerpt/5.7/en/replication-sbr-rbr.html</a></li>
+<li>Unsafe Statements for Statement-based Replication <a target="_blank" rel="noopener" href="https://mariadb.com/kb/en/library/unsafe-statements-for-statement-based-replication/">https://mariadb.com/kb/en/library/unsafe-statements-for-statement-based-replication/</a></li>
+<li>MySQL 5.7 Reference Manual: 4.6.7 mysqlbinlog <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/5.7/en/mysqlbinlog.html">https://dev.mysql.com/doc/refman/5.7/en/mysqlbinlog.html</a></li>
+<li>MySQL Internals Manual: 14.9 Replication Protocol <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/internals/en/replication-protocol.html">https://dev.mysql.com/doc/internals/en/replication-protocol.html</a></li>
+<li>MySQL Internals Manual: 20 The Binary Log <a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/internals/en/binary-log.html">https://dev.mysql.com/doc/internals/en/binary-log.html</a></li>
+<li>MySQL闪回原理与实战 <a target="_blank" rel="noopener" href="https://github.com/danfengcao/binlog2sql/blob/master/example/mysql-flashback-priciple-and-practice.md">https://github.com/danfengcao/binlog2sql/blob/master/example/mysql-flashback-priciple-and-practice.md</a></li>
+<li><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/dev/mysql-server/8.0.11/classbinary__log_1_1Table__map__event.html#details">https://dev.mysql.com/doc/dev/mysql-server/8.0.11/classbinary__log_1_1Table__map__event.html#details</a></li>
+<li><a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/dev/mysql-server/8.0.11/classbinary__log_1_1Rows__event.html#details">https://dev.mysql.com/doc/dev/mysql-server/8.0.11/classbinary__log_1_1Rows__event.html#details</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2018/06/mysql-binlog/" title="MySQL binlog：格式、增量恢复、闪回、Java 解析">https://nullwy.me/2018/06/mysql-binlog/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+              <a href="/tags/binlog/" rel="tag"># binlog</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/01/stack-frame-calling-convention/" rel="prev" title="栈帧与调用惯例">
+      <i class="fa fa-chevron-left"></i> 栈帧与调用惯例
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/10/java-agent/" rel="next" title="Java Agent 学习笔记">
+      Java Agent 学习笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#STATEMENT-%E6%A0%BC%E5%BC%8F%E7%9A%84-binlog"><span class="nav-number">1.</span> <span class="nav-text">STATEMENT 格式的 binlog</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ROW-%E6%A0%BC%E5%BC%8F%E7%9A%84-binlog"><span class="nav-number">2.</span> <span class="nav-text">ROW 格式的 binlog</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-binlog-%E5%A2%9E%E9%87%8F%E6%81%A2%E5%A4%8D"><span class="nav-number">3.</span> <span class="nav-text">使用 binlog 增量恢复</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-binlog2sql-%E9%97%AA%E5%9B%9E"><span class="nav-number">4.</span> <span class="nav-text">使用 binlog2sql 闪回</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-%E8%A7%A3%E6%9E%90-binlog"><span class="nav-number">5.</span> <span class="nav-text">Java 解析 binlog</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">6.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2018/06/mysql-binlog/";
+    this.page.identifier = "2018/06/mysql-binlog/";
+    this.page.title = "MySQL binlog：格式、增量恢复、闪回、Java 解析";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

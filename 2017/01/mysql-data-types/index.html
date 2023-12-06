@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="文本整理MySQL字段类型的常见问题和用法。 数值类型 int和int(3) 新手在定义整数字段时，常常想当然通过，如int(3)，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用tinyint（1个字节）、smallint（2个字节）、mediumint（3个字节）、int（4个字节）或bigint（8个字节）。MySQL的相关文档如下[doc]：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MySQL数据库字段类型杂记">
+<meta property="og:url" content="https://nullwy.me/2017/01/mysql-data-types/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="文本整理MySQL字段类型的常见问题和用法。 数值类型 int和int(3) 新手在定义整数字段时，常常想当然通过，如int(3)，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用tinyint（1个字节）、smallint（2个字节）、mediumint（3个字节）、int（4个字节）或bigint（8个字节）。MySQL的相关文档如下[doc]：">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-01-04T15:26:28.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:16:04.399Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="MySQL">
+<meta property="article:tag" content="数据库">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://nullwy.me/2017/01/mysql-data-types/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>MySQL数据库字段类型杂记 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2017/01/mysql-data-types/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          MySQL数据库字段类型杂记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-01-04 23:26:28" itemprop="dateCreated datePublished" datetime="2017-01-04T23:26:28+08:00">2017-01-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2017/01/mysql-data-types/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2017/01/mysql-data-types/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>文本整理MySQL字段类型的常见问题和用法。</p>
+<h1 id="数值类型">数值类型</h1>
+<h2 id="int和int-3">int和int(3)</h2>
+<p>新手在定义整数字段时，常常想当然通过，如<code>int(3)</code>，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用<code>tinyint</code>（1个字节）、<code>smallint</code>（2个字节）、<code>mediumint</code>（3个字节）、<code>int</code>（4个字节）或<code>bigint</code>（8个字节）。MySQL的相关文档如下[<a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/numeric-type-attributes.html">doc</a>]：</p>
+<span id="more"></span>
+<blockquote>
+<p>MySQL supports an extension for optionally specifying the <em>display width</em> of integer data types in parentheses following the base keyword for the type. For example, <a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/integer-types.html">INT(4)</a> specifies an <a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/integer-types.html">INT</a> with a display width of four digits.</p>
+</blockquote>
+<blockquote>
+<p>The display width does <em>not</em> constrain the range of values that can be stored in the column. Nor does it prevent values wider than the column display width from being displayed correctly. For example, a column specified as <a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/integer-types.html">SMALLINT(3)</a> has the usual <a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/integer-types.html">SMALLINT</a> range of <code>-32768</code> to <code>32767</code>, and values outside the range permitted by three digits are displayed in full using more than three digits.</p>
+</blockquote>
+<blockquote>
+<p>When used in conjunction with the optional (nonstandard) attribute ZEROFILL, the default padding of spaces is replaced with zeros. For example, for a column declared as <a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/integer-types.html">INT(4) ZEROFILL</a>, a value of <code>5</code> is retrieved as <code>0005</code>.</p>
+</blockquote>
+<p>如下示例，字段<code>bar</code>类型是<code>int(3)</code>，但依然能够正确保存数值<code>12345</code>：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> test (foo <span class="type">int</span>(<span class="number">3</span>) zerofill, bar <span class="type">int</span>(<span class="number">3</span>) zerofill, baz <span class="type">int</span>);</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.16</span> sec)</span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> test <span class="keyword">values</span> (<span class="number">42</span>, <span class="number">12345</span>, <span class="number">12345</span>);</span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.00</span> sec)</span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> test;</span><br><span class="line"><span class="operator">+</span><span class="comment">------+-------+-------+</span></span><br><span class="line"><span class="operator">|</span> foo  <span class="operator">|</span> bar   <span class="operator">|</span> baz   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+-------+-------+</span></span><br><span class="line"><span class="operator">|</span>  <span class="number">042</span> <span class="operator">|</span> <span class="number">12345</span> <span class="operator">|</span> <span class="number">12345</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+-------+-------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<h2 id="bit和bool">bit和bool</h2>
+<p>MySQL同时支持<code>bit</code>和<code>bool</code>类型，但<code>bool</code>仅仅是<code>tinyint(1)</code>的同义词，创建的字段值的范围并不是<code>0</code>和<code>1</code>或<code>true</code>和<code>false</code>，而是<code>-128</code>到<code>127</code>。如下所示：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> test (foo bool, bar bit);</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.10</span> sec)</span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">desc</span> test;</span><br><span class="line"><span class="operator">+</span><span class="comment">---------+------------+--------+-------+-----------+---------+</span></span><br><span class="line"><span class="operator">|</span> Field   <span class="operator">|</span> Type       <span class="operator">|</span> <span class="keyword">Null</span>   <span class="operator">|</span> Key   <span class="operator">|</span>   <span class="keyword">Default</span> <span class="operator">|</span> Extra   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span><span class="comment">---------+------------+--------+-------+-----------+---------|</span></span><br><span class="line"><span class="operator">|</span> foo     <span class="operator">|</span> tinyint(<span class="number">1</span>) <span class="operator">|</span> YES    <span class="operator">|</span>       <span class="operator">|</span>    <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span> <span class="operator">|</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> bar     <span class="operator">|</span> bit(<span class="number">1</span>)     <span class="operator">|</span> YES    <span class="operator">|</span>       <span class="operator">|</span>    <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span> <span class="operator">|</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---------+------------+--------+-------+-----------+---------+</span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+<h1 id="字符串类型">字符串类型</h1>
+<h2 id="长度和编码">长度和编码</h2>
+<p>从MySQL 4.1开始（2004年10月），用<strong>字符</strong>单位解释在字符列定义中的长度规范。(以前的一些MySQL版本以<strong>字节</strong>解释长度）。官方文档描述如下[<a target="_blank" rel="noopener" href="https://docs.oracle.com/cd/E17952_01/mysql-5.0-en/string-type-overview.html">doc</a>]</p>
+<blockquote>
+<p>In MySQL 4.1 and up , string data types include some features that you may not have encountered in working with versions of MySQL prior to 4.1:</p>
+</blockquote>
+<blockquote>
+<p>MySQL interprets length specifications in character column definitions in character units. (Before MySQL 4.1, column lengths were interpreted in bytes.) This applies to <code>CHAR</code>, <code>VARCHAR</code>, and the <code>TEXT</code> types.</p>
+</blockquote>
+<p>MySQL服务器默认的<em>字符集</em>是<code>latin1</code>，使用的<em>校对规则</em>是<code>latin1_swedish_ci</code> [<a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/charset-server.html">doc</a>]（<em>校对规则</em>是在字符集内用于比较字符的一套规则）。若要保存中文，典型的做法是使用<code>utf8</code>编码。但MySQL的<code>utf8</code>编码最多只能保存使用<code>utf8</code>编码后长度是3个字节的字符，即只支持<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/Unicode%E5%AD%97%E7%AC%A6%E5%B9%B3%E9%9D%A2%E6%98%A0%E5%B0%84">基本多文种平面</a>。使用MySQL的utf8保存常见的字符基本上没有问题，但对于生僻字或<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Emoji">emoji</a>字符就无能为力了。emoji的中的<code>笑脸（grinning face）</code>的Unicode编码，如下 [<a target="_blank" rel="noopener" href="http://www.iemoji.com/view/emoji/885/smileys-people/grinning-face">ref1</a>][<a target="_blank" rel="noopener" href="https://en.wikibooks.org/wiki/Unicode/Character_reference/1F000-1FFFF">ref2</a>]：</p>
+<table>
+<thead>
+<tr>
+<th>表情</th>
+<th>Unicode</th>
+<th>UTF-16</th>
+<th>UTF8</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>😀</td>
+<td>U+1F604</td>
+<td>0xD83D 0xDE04</td>
+<td>0xF0 0x9F 0x98 0x84</td>
+</tr>
+</tbody>
+</table>
+<p>emoji位于辅助多文种平面，<code>utf8</code>需要4个字节保存。为了解决这个问题，MySQL 5.5.3开始支持<code>utf8mb4</code>，支持辅助多文种平面，每个字符最大4个字节 [<a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.5/en/charset-unicode-utf8mb4.html">doc</a>]。除了<code>utf8</code>，MySQL还支持<code>ucs2</code>、<code>utf16</code>、<code>utf32</code>等，完整列表如下 [<a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.5/en/charset-unicode.html">ref</a>]</p>
+<table>
+<thead>
+<tr>
+<th>字符集</th>
+<th>支持的字符</th>
+<th>每个字符需要的存储空间</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>utf8</code></td>
+<td>基本多文种平面</td>
+<td>1, 2, 或 3 个字节</td>
+</tr>
+<tr>
+<td><code>ucs2</code></td>
+<td>基本多文种平面</td>
+<td>2字节</td>
+</tr>
+<tr>
+<td><code>utf8mb4</code></td>
+<td>基本多文种平面和辅助多文种平面</td>
+<td>1, 2, 3,或4字节</td>
+</tr>
+<tr>
+<td><code>utf16</code></td>
+<td>基本多文种平面和辅助多文种平面</td>
+<td>2或4字节</td>
+</tr>
+<tr>
+<td><code>utf16le</code></td>
+<td>基本多文种平面和辅助多文种平面</td>
+<td>2或4字节</td>
+</tr>
+<tr>
+<td><code>utf32</code></td>
+<td>基本多文种平面和辅助多文种平面</td>
+<td>4字节</td>
+</tr>
+</tbody>
+</table>
+<p>##varchar和text</p>
+<p>MySQL支持多种字符串类型， 如下表所示：</p>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>最大字节长度</th>
+<th>最大<code>utf8</code>字符数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>char(M)</code></td>
+<td>M，M为0~255之间的整数</td>
+<td>85个<code>utf8</code>字符</td>
+</tr>
+<tr>
+<td><code>varchar(M)</code></td>
+<td>M，M为0~65,535之间的整数</td>
+<td>21,844个<code>utf8</code>字符</td>
+</tr>
+<tr>
+<td><code>tinytext </code></td>
+<td>255 (2<sup>8</sup>−1) 字节</td>
+<td>85个<code>utf8</code>字符</td>
+</tr>
+<tr>
+<td><code>text</code></td>
+<td>65,535 (2<sup>16</sup>−1) 字节 = 64 KB</td>
+<td>21,844个<code>utf8</code>字符</td>
+</tr>
+<tr>
+<td><code>mediumtext</code></td>
+<td>16,777,215 (2<sup>24</sup>−1) 字节 = 16 MB</td>
+<td>5,592,405个<code>utf8</code>字符</td>
+</tr>
+<tr>
+<td><code>longtext</code></td>
+<td>4,294,967,295 (2<sup>32</sup>−1) 字节 = 4 GB</td>
+<td>1,431,655,765个<code>utf8</code>字符</td>
+</tr>
+</tbody>
+</table>
+<p>字符串类型实际支持的最大字符数与编码有关。比如，<code>varchar</code>类型在<code>utf8</code>编码下最大支持保存21,844 (65,535 / 3 = 21,844) 个字符，而<code>utf8mb4</code>编码下最大支持保存16,383 (65,535 / 4 = 16,383) 个字符。</p>
+<p>另外，MySQL表行最大总长度为65,535字节 [<a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/column-count-limit.html">doc</a>]， 所以<code>varchar</code>类型字段的最大字符数会被表中其他字段所占用的存储空间挤掉。<code>blob</code>或<code>text</code>类型的字段不会受表行总长度的限制，因为字段存储的实际内容和表行是<strong>分离</strong>的，只会占用表行的9到12个字节。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> test ( foo <span class="type">varchar</span>(<span class="number">21845</span>) <span class="type">character</span> <span class="keyword">set</span> utf8 );</span><br><span class="line">ERROR <span class="number">1118</span> (<span class="number">42000</span>): <span class="type">Row</span> size too large. The maximum <span class="type">row</span> size <span class="keyword">for</span> the used <span class="keyword">table</span> type, <span class="keyword">not</span> counting BLOBs, <span class="keyword">is</span> <span class="number">65535.</span> This includes storage overhead, <span class="keyword">check</span> the manual. You have <span class="keyword">to</span> change <span class="keyword">some</span> columns <span class="keyword">to</span> TEXT <span class="keyword">or</span> BLOBs</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> test ( foo <span class="type">varchar</span>(<span class="number">21844</span>) <span class="type">character</span> <span class="keyword">set</span> utf8 );</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.19</span> sec)</span><br><span class="line"> </span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> test2 ( foo <span class="type">varchar</span>(<span class="number">16384</span>) <span class="type">character</span> <span class="keyword">set</span> utf8mb4 );</span><br><span class="line">ERROR <span class="number">1074</span> (<span class="number">42000</span>): <span class="keyword">Column</span> length too big <span class="keyword">for</span> <span class="keyword">column</span> <span class="string">&#x27;foo&#x27;</span> (max <span class="operator">=</span> <span class="number">16383</span>); use <span class="type">BLOB</span> <span class="keyword">or</span> TEXT instead</span><br></pre></td></tr></table></figure>
+<h1 id="日期和时间类型">日期和时间类型</h1>
+<p>MySQL支持的日期和时间类型如下表所示 [<a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/date-and-time-type-overview.html">doc</a>]：</p>
+<table>
+<thead>
+<tr>
+<th>日期和时间类型</th>
+<th>字节</th>
+<th>最小值</th>
+<th>最大值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>date</code></td>
+<td>4</td>
+<td><code>1000-01-01</code></td>
+<td><code>9999-12-31</code></td>
+</tr>
+<tr>
+<td><code>datetime</code></td>
+<td>8</td>
+<td><code>1000-01-01 00:00:00.000000</code></td>
+<td><code>9999-12-31 23:59:59.999999</code></td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td>4</td>
+<td><code>1970-01-01 00:00:01.000000</code></td>
+<td><code>2038-01-19 03:14:07.999999</code></td>
+</tr>
+<tr>
+<td><code>time</code></td>
+<td>3</td>
+<td><code>-838:59:59.000000</code></td>
+<td><code>838:59:59.000000</code></td>
+</tr>
+<tr>
+<td><code>year</code></td>
+<td>1</td>
+<td><code>1901</code></td>
+<td><code>2155</code></td>
+</tr>
+</tbody>
+</table>
+<h1 id="参考资料">参考资料</h1>
+<ol>
+<li>MySQL 5.7 Reference Manual, <em><strong>12 Data Types</strong></em> <a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/data-types.html">http://dev.mysql.com/doc/refman/5.7/en/data-types.html</a></li>
+<li>MySQL 5.7 Reference Manual, <em><strong>10.1 Character Set Support</strong></em> <a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.5/en/charset.html">http://dev.mysql.com/doc/refman/5.5/en/charset.html</a></li>
+<li>MySQL 5.7 Reference Manual, <em><strong>C.10.4 Limits on Table Column Count and Row Size</strong></em> <a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/column-count-limit.html">http://dev.mysql.com/doc/refman/5.7/en/column-count-limit.html</a></li>
+<li>Difference between “int” and “int(3)” data types in mysql <a target="_blank" rel="noopener" href="http://stackoverflow.com/q/5562322">http://stackoverflow.com/q/5562322</a></li>
+<li>Which MySQL Datatype to use for storing boolean values? <a target="_blank" rel="noopener" href="http://stackoverflow.com/q/289727">http://stackoverflow.com/q/289727</a></li>
+<li>MySQL: Large VARCHAR vs. TEXT? <a target="_blank" rel="noopener" href="http://stackoverflow.com/q/2023481">http://stackoverflow.com/q/2023481</a></li>
+<li>TINYTEXT, TEXT, MEDIUMTEXT, and LONGTEXT maximum storage sizes <a target="_blank" rel="noopener" href="http://stackoverflow.com/q/13932750">http://stackoverflow.com/q/13932750</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2017/01/mysql-data-types/" title="MySQL数据库字段类型杂记">https://nullwy.me/2017/01/mysql-data-types/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/MySQL/" rel="tag"># MySQL</a>
+              <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/12/mybatis-generator/" rel="prev" title="MyBatis 生成器的表注释">
+      <i class="fa fa-chevron-left"></i> MyBatis 生成器的表注释
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/03/java-executor/" rel="next" title="Java Executor 框架笔记">
+      Java Executor 框架笔记 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E5%80%BC%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.</span> <span class="nav-text">数值类型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#int%E5%92%8Cint-3"><span class="nav-number">1.1.</span> <span class="nav-text">int和int(3)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#bit%E5%92%8Cbool"><span class="nav-number">1.2.</span> <span class="nav-text">bit和bool</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.</span> <span class="nav-text">字符串类型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%95%BF%E5%BA%A6%E5%92%8C%E7%BC%96%E7%A0%81"><span class="nav-number">2.1.</span> <span class="nav-text">长度和编码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%97%A5%E6%9C%9F%E5%92%8C%E6%97%B6%E9%97%B4%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">日期和时间类型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2017/01/mysql-data-types/";
+    this.page.identifier = "2017/01/mysql-data-types/";
+    this.page.title = "MySQL数据库字段类型杂记";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

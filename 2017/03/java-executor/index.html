@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="本文整理 Java 并发框架 Executor 的用法，并对结合 JDK 相关的实现源码作简单分析。 任务与线程池 先来看下 Executor 框架的 javadoc 描述 [ ref1 ref2 ]">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java Executor 框架笔记">
+<meta property="og:url" content="https://nullwy.me/2017/03/java-executor/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="本文整理 Java 并发框架 Executor 的用法，并对结合 JDK 相关的实现源码作简单分析。 任务与线程池 先来看下 Executor 框架的 javadoc 描述 [ ref1 ref2 ]">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://nullwy.me/media/executor.png">
+<meta property="og:image" content="https://nullwy.me/media/future.png">
+<meta property="og:image" content="https://nullwy.me/media/ThreadPoolExecutor.jpg">
+<meta property="og:image" content="https://nullwy.me/media/ThreadPoolExecutor%202.jpg">
+<meta property="og:image" content="https://nullwy.me/media/task.png">
+<meta property="og:image" content="https://nullwy.me/media/work-stealing.png">
+<meta property="og:image" content="https://nullwy.me/media/fork-join.png">
+<meta property="article:published_time" content="2017-03-23T07:09:51.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:14:46.382Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="并发">
+<meta property="article:tag" content="Java">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://nullwy.me/media/executor.png">
+
+<link rel="canonical" href="https://nullwy.me/2017/03/java-executor/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java Executor 框架笔记 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2017/03/java-executor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java Executor 框架笔记
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-03-23 15:09:51" itemprop="dateCreated datePublished" datetime="2017-03-23T15:09:51+08:00">2017-03-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2017/03/java-executor/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2017/03/java-executor/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>15k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>本文整理 Java 并发框架 Executor 的用法，并对结合 JDK 相关的实现源码作简单分析。</p>
+<h1 id="任务与线程池">任务与线程池</h1>
+<p>先来看下 Executor 框架的 javadoc 描述 [ <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/package-summary.html#package_description">ref1</a> <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/package-summary.html#package.description">ref2</a> ]</p>
+<span id="more"></span>
+<p>接口：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Executor.html">Executor</a> 是一个简单的标准化接口，用于定义类似于线程的自定义子系统，包括线程池、异步 IO 和轻量级任务框架。根据所使用的具体 Executor 类的不同，可能在新创建的线程中，现有的任务执行线程中，或者调用 execute() 的线程中执行任务，并且可能顺序或并发执行。</li>
+<li><a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ExecutorService.html">ExecutorService</a> 提供了多个完整的异步任务执行框架。ExecutorService 管理任务的排队和安排，并允许受控制的关闭。<a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ScheduledExecutorService.html">ScheduledExecutorService</a> 子接口及相关的接口添加了对延迟的和定期任务执行的支持。ExecutorService 提供了安排异步执行的方法，可执行由 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Callable.html">Callable</a> 表示的任何函数，结果类似于 Runnable。</li>
+<li><a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Future.html">Future</a> 返回函数的结果，允许确定执行是否完成，并提供取消执行的方法。<a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/RunnableFuture.html">RunnableFuture</a> 是拥有 run 方法的 Future，run 方法执行时将设置其结果。</li>
+</ul>
+<p>实现：</p>
+<ul>
+<li>类 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html">ThreadPoolExecutor</a> 和 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ScheduledThreadPoolExecutor.html">ScheduledThreadPoolExecutor</a> 提供可调的、灵活的线程池。</li>
+<li><a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Executors.html">Executors</a> 类提供大多数 Executor 的常见类型和配置的工厂方法，以及使用它们的几种实用工具方法。</li>
+<li>其他基于 Executor 的实用工具包括具体类 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/FutureTask.html">FutureTask</a>，它提供 Future 的常见可扩展实现，以及 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ExecutorCompletionService.html">ExecutorCompletionService</a>，它有助于协调对异步任务组的处理。</li>
+</ul>
+<p>涉及到的类与接口的层次结构，如下图所示：</p>
+<img width="400" alt="Executor 相关类" src="/media/executor.png">
+<img width="400" alt="任务相关类" src="/media/future.png">
+<h2 id="线程池">线程池</h2>
+<p>Executor，此接口提供一种将任务提交与每个任务将如何运行的机制（包括线程使用的细节、调度等）分离开来的方法。接口只定义唯一一个方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(Runnable command)</span></span><br><span class="line">    在未来某个时间执行给定的命令</span><br></pre></td></tr></table></figure>
+<p>实现 Executor 接口，就是定义某种运行任务的机制。最简单的运行任务的机制是，在调用者的线程中立即运行已提交的任务，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">DirectExecutor</span> <span class="keyword">implements</span> <span class="title class_">Executor</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(Runnable r)</span> &#123;</span><br><span class="line">        r.run();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>或者，以下实现将为每个任务生成一个新线程：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">ThreadPerTaskExecutor</span> <span class="keyword">implements</span> <span class="title class_">Executor</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(Runnable r)</span> &#123;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(r).start();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>更典型的执行任务的方式是，使用线程池（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Thread_pool">Thread pool</a>）。</p>
+<p>JDK 下的 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Executors.html">Executors</a> 类提供创建线程池的静态工厂方法：</p>
+<ol>
+<li><a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Executors.html#newFixedThreadPool%28int%29">newFixedThreadPool</a>：固定大小线程池，创建一个可重用固定线程数的线程池，以共享的无界队列方式来运行这些线程</li>
+<li><a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Executors.html#newCachedThreadPool%28%29">newCachedThreadPool</a>：无界线程池，创建一个可根据需要创建新线程的线程池，但是在以前构造的线程可用时将重用它们</li>
+<li><a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Executors.html#newSingleThreadExecutor%28%29">newSingleThreadExecutor</a>：单个后台线程池，创建一个使用单个 worker 线程的 Executor，以无界队列方式来运行该线程</li>
+<li><a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Executors.html#newScheduledThreadPool%28int%29">newScheduledThreadPool</a>：任务调度线程池，创建一个线程池，它可安排在给定延迟后运行命令或者定期地执行</li>
+</ol>
+<p>这 4 个工厂方法返回的类型是 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ExecutorService.html">ExecutorService</a>，该接口扩展自 Executor。ExecutorService 提供了管理终止的方法，以及可为跟踪一个或多个异步任务执行状况而生成 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Future.html">Future</a> 的方法。</p>
+<p>现在让我们来看看创建线程池的静态工厂方法，对应的实现源码 [ <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/jdk/src/share/classes/java/util/concurrent/Executors.java">src</a> ]：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ExecutorService <span class="title function_">newFixedThreadPool</span><span class="params">(<span class="type">int</span> nThreads)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ThreadPoolExecutor</span>(nThreads, nThreads, <span class="number">0L</span>, TimeUnit.MILLISECONDS, <span class="keyword">new</span> <span class="title class_">LinkedBlockingQueue</span>&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ExecutorService <span class="title function_">newCachedThreadPool</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ThreadPoolExecutor</span>(<span class="number">0</span>, Integer.MAX_VALUE, <span class="number">60L</span>, TimeUnit.SECONDS, <span class="keyword">new</span> <span class="title class_">SynchronousQueue</span>&lt;Runnable&gt;());</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ExecutorService <span class="title function_">newSingleThreadExecutor</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">FinalizableDelegatedExecutorService</span></span><br><span class="line">        (<span class="keyword">new</span> <span class="title class_">ThreadPoolExecutor</span>(<span class="number">1</span>, <span class="number">1</span>, <span class="number">0L</span>, TimeUnit.MILLISECONDS, <span class="keyword">new</span> <span class="title class_">LinkedBlockingQueue</span>&lt;Runnable&gt;()));</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> ScheduledExecutorService <span class="title function_">newScheduledThreadPool</span><span class="params">(<span class="type">int</span> corePoolSize)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ScheduledThreadPoolExecutor</span>(corePoolSize);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到 <code>newFixedThreadPool</code>、<code>newCachedThreadPool</code> 和 <code>newSingleThreadExecutor</code> 内部都是通过类 <code>ThreadPoolExecutor</code> 实现。<a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html">ThreadPoolExecutor</a> 的构造方法的 javadoc 如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">ThreadPoolExecutor</span><span class="params">(<span class="type">int</span> corePoolSize,</span></span><br><span class="line"><span class="params">                          <span class="type">int</span> maximumPoolSize,</span></span><br><span class="line"><span class="params">                          <span class="type">long</span> keepAliveTime,</span></span><br><span class="line"><span class="params">                          TimeUnit unit,</span></span><br><span class="line"><span class="params">                          BlockingQueue&lt;Runnable&gt; workQueue)</span></span><br><span class="line"></span><br><span class="line">    用给定的初始参数和默认的线程工厂及被拒绝的执行处理程序创建新的 ThreadPoolExecutor。使用 Executors 工厂方法之一比使用此通用构造方法方便得多。</span><br><span class="line"></span><br><span class="line">    参数：</span><br><span class="line">        corePoolSize - 池中所保存的线程数，包括空闲线程。</span><br><span class="line">        maximumPoolSize - 池中允许的最大线程数。</span><br><span class="line">        keepAliveTime - 当线程数大于核心时，此为终止前多余的空闲线程等待新任务的最长时间。</span><br><span class="line">        unit - keepAliveTime 参数的时间单位。</span><br><span class="line">        workQueue - 执行前用于保持任务的队列。此队列仅保持由 execute 方法提交的 Runnable 任务。 </span><br></pre></td></tr></table></figure>
+<p>ThreadPoolExecutor 的处理流程如下图所示（参考自《Java并发编程的艺术》第9章 Java中的线程池）：<br>
+<img width="700" alt="线程池的主要处理流程" src="/media/ThreadPoolExecutor.jpg"><br>
+<img width="500" alt="ThreadPoolExecutor 执行示意图" src="/media/ThreadPoolExecutor%202.jpg"></p>
+<p>基本上预定义的三个线程池已经满足常见的使用需求，若有特殊需求也可以，特殊构造 ThreadPoolExecutor 实例。此类提供 protected 的 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html#beforeExecute(java.lang.Thread,%20java.lang.Runnable)">beforeExecute</a> 和 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html#afterExecute(java.lang.Runnable,%20java.lang.Throwable)">afterExecute</a> 钩子 (hook) 方法，就是预留扩展用的。</p>
+<p><a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ScheduledExecutorService.html">ScheduledExecutorService</a> 类提供的方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ScheduledFuture&lt;V&gt; <span class="title function_">schedule</span><span class="params">(Callable&lt;V&gt; callable, <span class="type">long</span> delay, TimeUnit unit)</span></span><br><span class="line">    创建并执行在给定延迟后启用的 ScheduledFuture</span><br><span class="line">ScheduledFuture&lt;?&gt; schedule(Runnable command, <span class="type">long</span> delay, TimeUnit unit)</span><br><span class="line">    创建并执行在给定延迟后启用的一次性操作</span><br><span class="line">ScheduledFuture&lt;?&gt; scheduleAtFixedRate(Runnable command, <span class="type">long</span> initialDelay, <span class="type">long</span> period, TimeUnit unit)</span><br><span class="line">    创建并执行一个在给定初始延迟后首次启用的定期操作，后续操作具有给定的周期</span><br><span class="line">ScheduledFuture&lt;?&gt; scheduleWithFixedDelay(Runnable command, <span class="type">long</span> initialDelay, <span class="type">long</span> delay, TimeUnit unit)</span><br><span class="line">    创建并执行一个在给定初始延迟后首次启用的定期操作，随后，在每一次执行终止和下一次执行开始之间都存在给定的延迟</span><br></pre></td></tr></table></figure>
+<p>用法就如文档所示，不展开描述。</p>
+<h2 id="提交任务">提交任务</h2>
+<p>若直接使用线程运行任务，则典型的做法是创建 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/lang/Runnable.html">Runnable</a> 接口实例，然后启动线程，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">Runnable</span> <span class="variable">r</span> <span class="operator">=</span> ...</span><br><span class="line"><span class="type">Thread</span> <span class="variable">worker</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(r);</span><br><span class="line">worker.start();</span><br><span class="line">worker.join();</span><br><span class="line"><span class="type">int</span> <span class="variable">result</span> <span class="operator">=</span> getSavedValue();</span><br></pre></td></tr></table></figure>
+<p>Runnable 实例是没有直接的办法获取运行结果的返回值的，若要获取，需要添加额外的代码，如示例中 <code>getSavedValue</code>。</p>
+<p>Executor 框架下，使用 ExecutorService 的 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ExecutorService.html#submit(java.util.concurrent.Callable)">submit</a> 方法提交任务。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;T&gt; Future&lt;T&gt; <span class="title function_">submit</span><span class="params">(Callable&lt;T&gt; task)</span></span><br><span class="line">    提交一个返回值的任务用于执行，返回一个表示任务的未决结果的 Future。该 Future 的 get 方法在成功完成时将会返回该任务的结果。 </span><br></pre></td></tr></table></figure>
+<p>Callable 接口类似于 Runnable，两者都是为那些其实例可能被另一个线程执行的类设计的。但是 Callable 会返回结果，并且可以抛出经过检查的异常。 submit 方法也可以接受 Runnable 参数，但阅读内部实现代码的话，就可以看到，最终还是会通过 Executors 类的 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Executors.html#callable(java.lang.Runnable)">callable</a> 方法，将 Runnable 转换成 Callable [ <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/jdk/src/share/classes/java/util/concurrent/AbstractExecutorService.java#L73">src</a> <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/jdk/src/share/classes/java/util/concurrent/FutureTask.java#L139">src</a> ]。Runnable 是为线程设计的，Callable 是为任务设计。任务和线程概念上分离，这样线程如何运用任务，即运行任务的机制，就可以按具体情况定义了。</p>
+<p>上文提到 ExecutorService 扩展自 Executor 接口，那么现在就看下 submit 方法实现<span id="submit-src">源码</span> [ <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/jdk/src/share/classes/java/util/concurrent/AbstractExecutorService.java#L127">src</a> ]：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;T&gt; Future&lt;T&gt; <span class="title function_">submit</span><span class="params">(Callable&lt;T&gt; task)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (task == <span class="literal">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>();</span><br><span class="line">    RunnableFuture&lt;T&gt; ftask = newTaskFor(task);</span><br><span class="line">    execute(ftask);</span><br><span class="line">    <span class="keyword">return</span> ftask;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到内部实现其实就是调用 execute，但传入参数和返回结果包裹了 Callable 和 Future。execute 方法跟具体实现有关，对于 ThreadPoolExecutor 的实现逻辑，代码会根据线程大小，以及任务队列 <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/jdk/src/share/classes/java/util/concurrent/ThreadPoolExecutor.java#L433">workQueue</a> 和工作线程 <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/jdk/src/share/classes/java/util/concurrent/ThreadPoolExecutor.java#L461">worker</a> 状况，做出相应选择：[ <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html">doc</a> <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/jdk/src/share/classes/java/util/concurrent/ThreadPoolExecutor.java#L1318">src</a> ]：</p>
+<ul>
+<li>如果运行的线程少于 corePoolSize，则 Executor 始终首选添加新的线程，而不进行排队。</li>
+<li>如果运行的线程等于或多于 corePoolSize，则 Executor 始终首选将请求加入队列，而不添加新的线程。</li>
+<li>如果无法将请求加入队列，则创建新的线程，除非创建此线程超出 maximumPoolSize，在这种情况下，任务将被拒绝。</li>
+</ul>
+<h2 id="使用-ExecutorService">使用 ExecutorService</h2>
+<p><code>ExecutorService</code> 示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> concurrent;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ExecutorMain</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException, ExecutionException, TimeoutException &#123;</span><br><span class="line">        <span class="type">ExecutorService</span> <span class="variable">pool</span> <span class="operator">=</span> Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line"></span><br><span class="line">        List&lt;Future&lt;Integer&gt;&gt; futures = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        futures.add(pool.submit(() -&gt; &#123;</span><br><span class="line">            Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;return 1&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;));</span><br><span class="line">        futures.add(pool.submit(() -&gt; &#123;</span><br><span class="line">            Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;return 2&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">        &#125;));</span><br><span class="line">        futures.add(pool.submit(() -&gt; &#123;</span><br><span class="line">            Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;return 3&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">3</span>;</span><br><span class="line">        &#125;));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (Future&lt;Integer&gt; future : futures) &#123;</span><br><span class="line">            <span class="type">Integer</span> <span class="variable">result</span> <span class="operator">=</span> future.get();</span><br><span class="line">            System.out.println(<span class="string">&quot;get &quot;</span> + result);</span><br><span class="line">        &#125;</span><br><span class="line">        pool.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">return 2</span><br><span class="line">return 1</span><br><span class="line">get 1</span><br><span class="line">get 2</span><br><span class="line">return 3</span><br><span class="line">get 3</span><br></pre></td></tr></table></figure>
+<p>为什么输出结果是这样呢？查文档知道，Future 的 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Future.html#get()">get</a> 方法，若已经完成，则直接返回，否则会等待计算完成，然后获取其结果。在示例代码中，任务1 需要 2 秒完成，任务2 需要 1 秒完成，任务3 需要 3 秒完成。自然，在线程池中完成次序是，任务2 - 任务1 - 任务3。main 主线程，先是获取 get 任务1 的执行结果，需要等待 2 秒，在去获取 get 任务2 的执行结果，此时该任务已经完成，直接返回，接下来是获取 get 任务3 的执行结果，任务3 耗时 3 秒，此时时间线是第 2 秒，所以需等 1 秒，才能获取 get 执行结果。</p>
+<p>使用 ExecutorService，若想按任务完成次序获取执行结果，可以将代码中 for 循环，修改为轮询方式，就不断地在调用 get 前，先用 isDone 判断是否任务已经完成。代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    Iterator&lt;Future&lt;Integer&gt;&gt; iter = futures.iterator();</span><br><span class="line">    <span class="keyword">if</span> (!iter.hasNext()) <span class="keyword">break</span>;</span><br><span class="line">    <span class="keyword">while</span> (iter.hasNext()) &#123;</span><br><span class="line">        Future&lt;Integer&gt; future = iter.next();</span><br><span class="line">        <span class="keyword">if</span> (future.isDone()) &#123;</span><br><span class="line">            <span class="type">Integer</span> <span class="variable">result</span> <span class="operator">=</span> future.get();</span><br><span class="line">            System.out.println(<span class="string">&quot;get &quot;</span> + result);</span><br><span class="line">            iter.remove();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">return 2</span><br><span class="line">get 2</span><br><span class="line">return 1</span><br><span class="line">get 1</span><br><span class="line">return 3</span><br><span class="line">get 3</span><br></pre></td></tr></table></figure>
+<p>这种实现方式，虽然可行，但相当繁琐。幸运的是，JDK 还提供一种更好的方法，<a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/CompletionService.html">CompletionService</a>。</p>
+<h2 id="使用-CompletionService">使用 CompletionService</h2>
+<p><a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/CompletionService.html">CompletionService</a> 将 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/Executor.html">Executor</a> 和 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/BlockingQueue.html">BlockingQueue</a> 的功能融合在一起。你可以将 Callable 任务提交给它来执行，然后使用类似于队列操作的 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/CompletionService.html#take()">take</a> 和 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/CompletionService.html#poll()">poll</a> 等方法来获得已完成的结果，而这些结果会在完成时将被封装为 Future。<a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ExecutorCompletionService.html">ExecutorCompletionService</a> 实现了 CompletionService。ExecutorCompletionService 的实现非常简单。在构造函数中创建一个 BlockingQueue 来保存计算完成的结果。当计算完成时，调用 FutureTask 中的 done 方法。当提交某个任务时，该任务将首先包装为一个 QueueingFuture，这是 FutureTask 一个子类，然后再改写子类的 done 方法，并将结果放入 BlockingQueue 中，take 和 poll 方法委托给了 BlockingQueue，这些方法会在得出结果之前阻塞。[ Goetz 2006, 6.3.5 ]</p>
+<p>可以看出整个实现逻辑核心在于重写 FutureTask 的 done 方法，正如这个方法的 javadoc 所述，定义该方法的目的就是如此：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">done</span><span class="params">()</span></span><br><span class="line">    当此任务转换到状态 isDone（不管是正常地还是通过取消）时，调用受保护的方法。默认实现不执行任何操作。子类可以重写此方法，以调用完成回调或执行簿记</span><br></pre></td></tr></table></figure>
+<p>再来看下，BlockingQueue 的实现源码 [ <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/jdk/src/share/classes/java/util/concurrent/ExecutorCompletionService.java#L112">src</a> ]，以及 submit 任务是对应的实现源码 [ <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/jdk/src/share/classes/java/util/concurrent/ExecutorCompletionService.java#L178">src</a> ]：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Future&lt;V&gt; <span class="title function_">submit</span><span class="params">(Callable&lt;V&gt; task)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (task == <span class="literal">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">NullPointerException</span>();</span><br><span class="line">    RunnableFuture&lt;V&gt; f = newTaskFor(task);</span><br><span class="line">    executor.execute(<span class="keyword">new</span> <span class="title class_">QueueingFuture</span>(f));</span><br><span class="line">    <span class="keyword">return</span> f;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">class</span> <span class="title class_">QueueingFuture</span> <span class="keyword">extends</span> <span class="title class_">FutureTask</span>&lt;Void&gt; &#123;</span><br><span class="line">    QueueingFuture(RunnableFuture&lt;V&gt; task) &#123;</span><br><span class="line">        <span class="built_in">super</span>(task, <span class="literal">null</span>);</span><br><span class="line">        <span class="built_in">this</span>.task = task;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">done</span><span class="params">()</span> &#123; completionQueue.add(task); &#125;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Future&lt;V&gt; task;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后再看下 ExecutorCompletionService 的 take 和 poll 方法的实现源码 [ <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk8u/jdk8u/jdk/src/share/classes/java/util/concurrent/ExecutorCompletionService.java#L192">src</a> ]：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Future&lt;V&gt; <span class="title function_">take</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">    <span class="keyword">return</span> completionQueue.take();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> Future&lt;V&gt; <span class="title function_">poll</span><span class="params">()</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> completionQueue.poll();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>整个实现逻辑正如上面文字所述。</p>
+<p>上文示例的 <code>ExecutorMain</code>，现在用 <code>CompletionService</code> 重现实现如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> concurrent;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.*;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CompletionServiceMain</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException, ExecutionException &#123;</span><br><span class="line">        <span class="type">ExecutorService</span> <span class="variable">pool</span> <span class="operator">=</span> Executors.newFixedThreadPool(<span class="number">10</span>);</span><br><span class="line">        CompletionService&lt;Integer&gt; service = <span class="keyword">new</span> <span class="title class_">ExecutorCompletionService</span>&lt;&gt;(pool);</span><br><span class="line"></span><br><span class="line">        List&lt;Future&lt;Integer&gt;&gt; futures = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        futures.add(service.submit(() -&gt; &#123;</span><br><span class="line">            Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;return 1&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;));</span><br><span class="line">        futures.add(service.submit(() -&gt; &#123;</span><br><span class="line">            Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;return 2&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">2</span>;</span><br><span class="line">        &#125;));</span><br><span class="line">        futures.add(service.submit(() -&gt; &#123;</span><br><span class="line">            Thread.sleep(<span class="number">3000</span>);</span><br><span class="line">            System.out.println(<span class="string">&quot;return 3&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">3</span>;</span><br><span class="line">        &#125;));</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; futures.size(); i++) &#123;</span><br><span class="line">            <span class="type">Integer</span> <span class="variable">result</span> <span class="operator">=</span> service.take().get();</span><br><span class="line">            System.out.println(<span class="string">&quot;get &quot;</span> + result);</span><br><span class="line">        &#125;</span><br><span class="line">        pool.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果，就是依次输出，任务2 - 任务1 - 任务3：</p>
+<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">return 2</span><br><span class="line">get 2</span><br><span class="line">return 1</span><br><span class="line">get 1</span><br><span class="line">return 3</span><br><span class="line">get 3</span><br></pre></td></tr></table></figure>
+<h2 id="Guava-的-ListenableFuture">Guava 的 ListenableFuture</h2>
+<p>CompletionService 的逻辑是，任务完成后，依次添加到完成队列中，然后让主线程主动去获取这些已经完成的任务。其实这种主线程主动模式，也可以修为被动模式，即任务完成后主动以事件回调的形式通知主线程，主动方从主线程换成了任务本身。这种方式就消除了等待任务完成的过程。可惜的是直到 Java 8 新添加的 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CompletableFuture.html">CompletableFuture</a> 才支持实现这种机制。在 Java 8 之前，需要借助第三方库，比如 Guava 提供的 <a target="_blank" rel="noopener" href="http://google.github.io/guava/releases/20.0/api/docs/com/google/common/util/concurrent/ListenableFuture.html">ListenableFuture</a>。使用 CompletableFuture 需要了解 lambda 以及函数式编程相关知识，本文暂不展开，本文只讨论 ListenableFuture。来看下 Guava 的 ListenableFuture 主要涉及到的类 [ <a target="_blank" rel="noopener" href="https://github.com/google/guava/wiki/ListenableFutureExplained">doc</a> ]：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="http://google.github.io/guava/releases/snapshot/api/docs/com/google/common/util/concurrent/ListeningExecutorService.html">ListeningExecutorService</a>：扩展自 ExecutorService 接口，但不同的是，提交 <a target="_blank" rel="noopener" href="http://google.github.io/guava/releases/snapshot/api/docs/com/google/common/util/concurrent/ListeningExecutorService.html#submit-java.util.concurrent.Callable-">submit</a> 过去的任务返回的是 ListenableFuture 实例。</li>
+<li><a target="_blank" rel="noopener" href="http://google.github.io/guava/releases/snapshot/api/docs/com/google/common/util/concurrent/ListenableFuture.html">ListenableFuture</a>：扩展自 Future 接口，唯一新增的方法是 <a target="_blank" rel="noopener" href="http://google.github.io/guava/releases/snapshot/api/docs/com/google/common/util/concurrent/ListenableFuture.html#addListener-java.lang.Runnable-java.util.concurrent.Executor-">addListener</a>，用于添加 Future 完成后的回调监听器。</li>
+<li><a target="_blank" rel="noopener" href="http://google.github.io/guava/releases/snapshot/api/docs/com/google/common/util/concurrent/MoreExecutors.html">MoreExecutors</a>：工具类，类似于 JDK 的 Executors，主要提供 Executor 的桥接、转换和构造的工具方法。</li>
+<li><a target="_blank" rel="noopener" href="http://google.github.io/guava/releases/snapshot/api/docs/com/google/common/util/concurrent/Futures.html">Futures</a>：工具类，提供 Future 接口相关的静态工具方法，如静态方法 <a target="_blank" rel="noopener" href="http://google.github.io/guava/releases/snapshot/api/docs/com/google/common/util/concurrent/Futures.html#addCallback-com.google.common.util.concurrent.ListenableFuture-com.google.common.util.concurrent.FutureCallback-">addCallback</a> 用于添加任务执行的回调监听器，包括对任务执行成功的 onSuccess 事件和执行失败（抛出异常或<a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/CancellationException.html">被取消</a>）的 onFailure 事件。</li>
+<li><a target="_blank" rel="noopener" href="http://google.github.io/guava/releases/snapshot/api/docs/com/google/common/util/concurrent/ListenableFutureTask.html">ListenableFutureTask</a>：实现 ListenableFuture 接口的 FutureTask。</li>
+</ul>
+<p>这些类如何使用呢？还是先来看下示例代码吧。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> concurrent;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.google.common.util.concurrent.*;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Executors;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ListenableFutureMain</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">ListeningExecutorService</span> <span class="variable">service</span> <span class="operator">=</span> MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(<span class="number">10</span>));</span><br><span class="line"></span><br><span class="line">        ListenableFuture&lt;Integer&gt; task = service.submit(() -&gt; &#123;</span><br><span class="line">            Thread.sleep(<span class="number">2000</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">42</span>;</span><br><span class="line">        &#125;);</span><br><span class="line">        Futures.addCallback(task, <span class="keyword">new</span> <span class="title class_">FutureCallback</span>&lt;Integer&gt;() &#123;</span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onSuccess</span><span class="params">(Integer result)</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;onSuccess &quot;</span> + result);</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onFailure</span><span class="params">(Throwable t)</span> &#123;</span><br><span class="line">                System.out.println(<span class="string">&quot;onFailure&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line"></span><br><span class="line">        service.shutdown();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>简单解释下。MoreExecutors 工具类的 listeningDecorator 方法将 JDK 创建的 ExecutorService 装饰为 ListeningExecutorService。接下来，创建的任务，并提交 submit 到这个 ExecutorService 里。submit 方法返回 ListenableFuture 接口实例（内部实现其实就是 ListenableFutureTask 对象）。Futures 工具类的 addCallback 方法用于添加在任务执行回调的监听器。</p>
+<p>类似于 JDK 的 CompletionService，实现 Guava 的 ListeningExecutorService 也是通过重写 FutureTask 的 done 方法完成的。FutureTask 对应的子类就是 ListenableFutureTask（事实上，Guava 版本 19 开始 ListenableFutureTask 类替换成立了 TrustedListenableFutureTask 类 [ <a target="_blank" rel="noopener" href="https://github.com/google/guava/commit/99d2816f0a099430f28b69639e9f6f5aae388812">github</a> ]，这里暂不展开分析）。实现 ListenableFutureTask 的核心代码如下 [ <a target="_blank" rel="noopener" href="https://github.com/google/guava/blob/v18.0/guava/src/com/google/common/util/concurrent/ListenableFutureTask.java">src</a> ]：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> <span class="type">ExecutionList</span> <span class="variable">executionList</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ExecutionList</span>();</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">addListener</span><span class="params">(Runnable listener, Executor exec)</span> &#123;</span><br><span class="line">    executionList.add(listener, exec);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">done</span><span class="params">()</span> &#123;</span><br><span class="line">    executionList.execute();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>之前查看 submit 方法实现<a href="#submit-src">源码</a>时，看到该方法内部会调用 newTaskFor 方法创建 FutureTask。相应的 JDK 的 AbstractExecutorService 的 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/AbstractExecutorService.html#newTaskFor(java.util.concurrent.Callable)">newTaskFor</a> 也 Guava 的 AbstractListeningExecutorService 被重写为 [ <a target="_blank" rel="noopener" href="https://github.com/google/guava/blob/v18.0/guava/src/com/google/common/util/concurrent/AbstractListeningExecutorService.java#L45">src</a> ]：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span> <span class="keyword">protected</span> <span class="keyword">final</span> &lt;T&gt; ListenableFutureTask&lt;T&gt; <span class="title function_">newTaskFor</span><span class="params">(Callable&lt;T&gt; callable)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> ListenableFutureTask.create(callable);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样在线程池中运行任务的不再是 FutureTask，而变成了 ListenableFutureTask。任务完成后调用 done 方法，而 done 方法就去执行该任务关联的监听器列表，即 <code>executionList.execute()</code>。</p>
+<p>再来看下 Futures 工具类的 addCallback 方法的实现 [ <a target="_blank" rel="noopener" href="https://github.com/google/guava/blob/v18.0/guava/src/com/google/common/util/concurrent/Futures.java#L1261">src</a> ]：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> &lt;V&gt; <span class="keyword">void</span> <span class="title function_">addCallback</span><span class="params">(<span class="keyword">final</span> ListenableFuture&lt;V&gt; future,</span></span><br><span class="line"><span class="params">    <span class="keyword">final</span> FutureCallback&lt;? <span class="built_in">super</span> V&gt; callback, Executor executor)</span> &#123;</span><br><span class="line">  Preconditions.checkNotNull(callback);</span><br><span class="line">  <span class="type">Runnable</span> <span class="variable">callbackListener</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">      <span class="keyword">final</span> V value;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// TODO(user): (Before Guava release), validate that this</span></span><br><span class="line">        <span class="comment">// is the thing for IE.</span></span><br><span class="line">        value = getUninterruptibly(future);</span><br><span class="line">      &#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">        callback.onFailure(e.getCause());</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</span><br><span class="line">        callback.onFailure(e);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125; <span class="keyword">catch</span> (Error e) &#123;</span><br><span class="line">        callback.onFailure(e);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      callback.onSuccess(value);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;;</span><br><span class="line">  future.addListener(callbackListener, executor);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>ListenableFuture API 功能的完整介绍参见 <a target="_blank" rel="noopener" href="https://github.com/google/guava/wiki/ListenableFutureExplained">ListenableFutureExplained</a>，本文不再展开。</p>
+<h1 id="Fork-Join-框架">Fork/Join 框架</h1>
+<p>一个大的任务可能会由多个子任务组成，比如整个任务A，由任务B 和任务C 组成，而任务B 又可以被分解为任务D 和任务E，如下图所示。任务分解组合问题，利用 ListenableFuture 的回调将子任务组合起来是一种解决办法，但还是不够优雅简洁。Java 7 引入的 Fork/Join 框架，就是以这种方式设计的。Fork/Join 框架编程的风格就是，将任务分解为多个子任务，并行执行，然后将结果组合起来，即分而治之。ExecutorService 适合解决相互独立的任务，而 Fork/Join 框架适合解决任务分解组合的情况 [ <a target="_blank" rel="noopener" href="https://stackoverflow.com/q/21156599">ref</a> ]。</p>
+<img width="300" alt="任务的分治" src="/media/task.png">
+<p>其实整个 java.util.concurrent 包是由 <a target="_blank" rel="noopener" href="http://g.oswego.edu/dl/concurrency-interest/">JSR-166</a> <a target="_blank" rel="noopener" href="https://www.jcp.org/en/jsr/detail?id=166">规范</a>引入的，Fork/Join 框架就是其中的 jsr166y。JSR-166 由 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Doug_Lea">Doug Lea</a> 主导，是主要设计和代码实现者，而 jsr166y 最初源自他发表于 2000 年的论文“A Java Fork/Join Framework”（<a target="_blank" rel="noopener" href="https://academic.microsoft.com/#/detail/1975579741">msa</a> <a target="_blank" rel="noopener" href="http://gee.cs.oswego.edu/dl/papers/fj.pdf">pdf</a>）。</p>
+<h2 id="工作窃取">工作窃取</h2>
+<p>Fork/Join 框架采用工作窃取（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Work_stealing">work stealing</a>）的任务调度机制 [ <a target="_blank" rel="noopener" href="http://ifeve.com/a-java-fork-join-framework-3-2/">ref</a> ]：</p>
+<ul>
+<li>每一个工作线程维护自己的调度队列中的可运行任务。</li>
+<li>队列以双端队列 deque 的形式被维护，不仅支持 LIFO（last-in-first-out 后进先出）的 push 和 pop 操作，还支持 FIFO（first-in-first-out 先进先出）的 take 操作。</li>
+<li>对于一个给定的工作线程来说，任务所产生的子任务将会被放入到工作者自己的双端队列 deque 中。</li>
+<li>工作线程使用 LIFO（最早的优先）的顺序，通过弹出任务来处理队列中的任务。</li>
+<li>当一个工作线程的本地没有任务去运行的时候，它将使用 FIFO 的规则尝试随机的从别的工作线程中拿（“窃取 steal”）一个任务去运行。</li>
+<li>当一个工作线程触及了 join 操作，如果可能的话它将处理其他任务，直到目标任务被告知已经结束（通过 isDone 方法）。所有的任务都会无阻塞的完成。</li>
+<li>当一个工作线程无法再从其他线程中获取任务和失败处理的时候，它就会退出（通过 yields, sleeps, 和/或者优先级调整）并经过一段时间之后再度尝试直到所有的工作线程都被告知他们都处于空闲的状态。在这种情况下，他们都会阻塞直到其他的任务再度被上层调用。</li>
+</ul>
+<img width="350" alt="work stealing" src="/media/work-stealing.png">
+<p>使用 LIFO 规则来处理每个工作线程的自己任务，窃取别的工作线程的任务却使用 FIFO 规则，这是一种被广泛使用的进行递归 fork/join 设计的一种调优手段。这种模式有以下两个优点：它通过窃取工作线程队列反方向的任务减少了竞争。同时，它利用了递归的分治算法越早的产生大任务这一特点。因此，更早期被窃取的任务有可能会提供一个更大的单元任务，从而使得窃取线程能够在将来进行递归分解。</p>
+<p>这些规则的结果是，拥有相对细粒度的基本任务，比那些仅仅使用粗粒度划分或没有使用递归分解的任务运行更快。</p>
+<h2 id="使用示例">使用示例</h2>
+<p><a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinPool.html">ForkJoinPool</a> 类是用于执行 ForkJoinTask 的 ExecutorService。在构造过程中，可以在构造函数中指定线程池的大小。如果使用的是默认的无参构造函数，那么会创建大小等同于可用处理器数量的线程池。ForkJoinPool 类的典型方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(ForkJoinTask&lt;?&gt; task)</span></span><br><span class="line">  异步，不需要等待计算结果，只是将任务提交给线程池</span><br><span class="line"><span class="keyword">public</span> &lt;T&gt; T <span class="title function_">invoke</span><span class="params">(ForkJoinTask&lt;T&gt; task)</span></span><br><span class="line">  同步，等待计算结束，并返回计算结果值</span><br><span class="line"><span class="keyword">public</span> &lt;T&gt; ForkJoinTask&lt;T&gt; <span class="title function_">submit</span><span class="params">(ForkJoinTask&lt;T&gt; task)</span></span><br><span class="line">  异步，不需要等待计算结果，只是将任务提交给线程池</span><br></pre></td></tr></table></figure>
+<p>提交到 ForkJoinPool 中的任务由 <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinTask.html">ForkJoinTask</a> 抽象类表示。ForkJoinTask 的实现子类有 <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/RecursiveAction.html">RecursiveAction</a> 和 <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/RecursiveTask.html">RecursiveTask</a>，以及 Java 8 新增的 <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/CountedCompleter.html">CountedCompleter</a>。RecursiveAction 用于没有返回结果的任务，RecursiveTask 用于返回结果的任务。CountedCompleter 用于完成动作会触发另外一个动作的任务 [ <a target="_blank" rel="noopener" href="http://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ForkJoinTask.html">javadoc</a> ]。</p>
+<p>计算斐波那契数（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Fibonacci_number">Fibonacci number</a>）是一个经典的分而治之的问题。Doug Lea 的论文以及 RecursiveTask 的 javadoc 都以斐波那契数为例进行说明。斐波那契数定义公式为：</p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>F</mi><mi>n</mi></msub><mo>=</mo><msub><mi>F</mi><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow></msub><mo>+</mo><msub><mi>F</mi><mrow><mi>n</mi><mo>−</mo><mn>2</mn></mrow></msub></mrow><annotation encoding="application/x-tex">F_{n}=F_{n-1}+F_{n-2}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.1514em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8917em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8917em;vertical-align:-0.2083em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathnormal mtight">n</span><span class="mbin mtight">−</span><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.2083em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><semantics><mrow><msub><mi>F</mi><mn>0</mn></msub><mo>=</mo><mn>0</mn><mo separator="true">,</mo><msub><mi>F</mi><mn>1</mn></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">F_{0}=0, F_{1}=1
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">0</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.8778em;vertical-align:-0.1944em;"></span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.1667em;"></span><span class="mord"><span class="mord mathnormal" style="margin-right:0.13889em;">F</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.3011em;"><span style="top:-2.55em;margin-left:-0.1389em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2778em;"></span></span><span class="base"><span class="strut" style="height:0.6444em;"></span><span class="mord">1</span></span></span></span></span></p>
+<p>使用 Fork/Join 框架计算斐波那契数的示例代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> concurrent;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ForkJoinPool;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.RecursiveTask;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ForkJoinMain</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Fibonacci</span> <span class="keyword">extends</span> <span class="title class_">RecursiveTask</span>&lt;Integer&gt; &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">int</span> n;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">Fibonacci</span><span class="params">(<span class="type">int</span> n)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.n = n;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">protected</span> Integer <span class="title function_">compute</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (n &lt;= <span class="number">1</span>)</span><br><span class="line">                <span class="keyword">return</span> n;</span><br><span class="line">            <span class="type">Fibonacci</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fibonacci</span>(n - <span class="number">1</span>);</span><br><span class="line">            <span class="type">Fibonacci</span> <span class="variable">f2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fibonacci</span>(n - <span class="number">2</span>);</span><br><span class="line">            f1.fork();</span><br><span class="line">            <span class="keyword">return</span> f2.compute() + f1.join();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ForkJoinPool</span> <span class="variable">pool</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ForkJoinPool</span>();</span><br><span class="line">        <span class="type">Fibonacci</span> <span class="variable">fib</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fibonacci</span>(<span class="number">3</span>);</span><br><span class="line">        pool.invoke(fib); <span class="comment">// 等待计算完成</span></span><br><span class="line">        <span class="type">Integer</span> <span class="variable">result</span> <span class="operator">=</span> fib.get();</span><br><span class="line">        System.out.println(result);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这个计算过程如下图所示：</p>
+<p><img src="/media/fork-join.png" alt="fork-join"></p>
+<h1 id="参考资料">参考资料</h1>
+<ol>
+<li>Java 并发编程实战，Goetz，2006；第6章 任务执行 <a target="_blank" rel="noopener" href="https://book.douban.com/subject/10484692/">https://book.douban.com/subject/10484692/</a></li>
+<li>Java并发编程的艺术，方腾飞，2015 <a target="_blank" rel="noopener" href="https://book.douban.com/subject/26591326/">https://book.douban.com/subject/26591326/</a></li>
+<li>ExecutorService vs ExecutorCompletionService in Java <a target="_blank" rel="noopener" href="https://dzone.com/articles/executorservice-vs">https://dzone.com/articles/executorservice-vs</a></li>
+<li>Java's Fork/Join vs ExecutorService - when to use which? <a target="_blank" rel="noopener" href="https://stackoverflow.com/q/21156599">https://stackoverflow.com/q/21156599</a></li>
+<li>Java Fork Join框架 (三) 设计 <a target="_blank" rel="noopener" href="http://ifeve.com/a-java-fork-join-framework-3-2/">http://ifeve.com/a-java-fork-join-framework-3-2/</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2017/03/java-executor/" title="Java Executor 框架笔记">https://nullwy.me/2017/03/java-executor/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%B9%B6%E5%8F%91/" rel="tag"># 并发</a>
+              <a href="/tags/Java/" rel="tag"># Java</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/01/mysql-data-types/" rel="prev" title="MySQL数据库字段类型杂记">
+      <i class="fa fa-chevron-left"></i> MySQL数据库字段类型杂记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/04/javac-api/" rel="next" title="Java 编译器 javac 及 Lombok 实现原理解析">
+      Java 编译器 javac 及 Lombok 实现原理解析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E4%B8%8E%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-number">1.</span> <span class="nav-text">任务与线程池</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BA%BF%E7%A8%8B%E6%B1%A0"><span class="nav-number">1.1.</span> <span class="nav-text">线程池</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8F%90%E4%BA%A4%E4%BB%BB%E5%8A%A1"><span class="nav-number">1.2.</span> <span class="nav-text">提交任务</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-ExecutorService"><span class="nav-number">1.3.</span> <span class="nav-text">使用 ExecutorService</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8-CompletionService"><span class="nav-number">1.4.</span> <span class="nav-text">使用 CompletionService</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Guava-%E7%9A%84-ListenableFuture"><span class="nav-number">1.5.</span> <span class="nav-text">Guava 的 ListenableFuture</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Fork-Join-%E6%A1%86%E6%9E%B6"><span class="nav-number">2.</span> <span class="nav-text">Fork&#x2F;Join 框架</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B7%A5%E4%BD%9C%E7%AA%83%E5%8F%96"><span class="nav-number">2.1.</span> <span class="nav-text">工作窃取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E7%A4%BA%E4%BE%8B"><span class="nav-number">2.2.</span> <span class="nav-text">使用示例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">3.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2017/03/java-executor/";
+    this.page.identifier = "2017/03/java-executor/";
+    this.page.title = "Java Executor 框架笔记";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

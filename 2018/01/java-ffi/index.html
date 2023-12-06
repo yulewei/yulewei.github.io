@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="遇到的问题 前段时间开发的时候，遇到一个问题，就是如何用 Java 实现 chdir？网上搜索一番，发现了 JNR-POSIX 项目 [ stackoverflow ]。俗话说，好记性不如烂笔头。现在将涉及到的相关知识点总结成笔记。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 外部函数接口：JNI, JNA, JNR">
+<meta property="og:url" content="https://nullwy.me/2018/01/java-ffi/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="遇到的问题 前段时间开发的时候，遇到一个问题，就是如何用 Java 实现 chdir？网上搜索一番，发现了 JNR-POSIX 项目 [ stackoverflow ]。俗话说，好记性不如烂笔头。现在将涉及到的相关知识点总结成笔记。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.nullwy.me/jnr-layered-runtime.png">
+<meta property="article:published_time" content="2018-01-24T08:09:51.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:14:52.544Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="Java">
+<meta property="article:tag" content="JNI">
+<meta property="article:tag" content="JNA">
+<meta property="article:tag" content="JNR">
+<meta property="article:tag" content="FFI">
+<meta property="article:tag" content="Pyhon">
+<meta property="article:tag" content="Ruby">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.nullwy.me/jnr-layered-runtime.png">
+
+<link rel="canonical" href="https://nullwy.me/2018/01/java-ffi/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Java 外部函数接口：JNI, JNA, JNR | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2018/01/java-ffi/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Java 外部函数接口：JNI, JNA, JNR
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-01-24 16:09:51" itemprop="dateCreated datePublished" datetime="2018-01-24T16:09:51+08:00">2018-01-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2018/01/java-ffi/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2018/01/java-ffi/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>10k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="遇到的问题">遇到的问题</h1>
+<p>前段时间开发的时候，遇到一个问题，就是如何用 Java 实现 <code>chdir</code>？网上搜索一番，发现了 <code>JNR-POSIX</code> 项目 [ <a target="_blank" rel="noopener" href="https://stackoverflow.com/q/840190">stackoverflow</a> ]。俗话说，好记性不如烂笔头。现在将涉及到的相关知识点总结成笔记。</p>
+<span id="more"></span>
+<p>其实针对 Java 实现 <code>chdir</code> 问题，官方 20 多年前就存在对应的 bug，即 <a target="_blank" rel="noopener" href="https://bugs.openjdk.java.net/browse/JDK-4045688">JDK-4045688</a> 'Add chdir or equivalent notion of changing working directory'。这个 bug 在 1997.04 创建，目前的状态是 <code>Won't Fix</code>（不予解决），理由大致是，若实现与操作系统一样的进程级别的 <code>chdir</code>，将影响 JVM 上的全部线程，这样引入了可变（mutable）的全局状态，这与 Java 的安全性优先原则冲突，现在添加全局可变的进程状态，已经太迟了，对不变性（immutability）的支持才是 Java 要实现的特性。</p>
+<p><code>chdir</code> 是平台相关的操作系统接口，POSIX 下对应的 <a target="_blank" rel="noopener" href="https://www.mankier.com/2/chdir">API</a> 为 <code>int chdir(const char *path);</code>，而 Windows 下对应的 <a target="_blank" rel="noopener" href="https://msdn.microsoft.com/library/aa365530.aspx">API</a> 为 <code>BOOL WINAPI SetCurrentDirectory(_In_ LPCTSTR lpPathName);</code>，另外 Windows 下也可以使用 MSVCRT 中 <a target="_blank" rel="noopener" href="https://msdn.microsoft.com/library/bf7fwze1.aspx">API</a> 的 <code>int _chdir(const char *dirname);</code>（MSVCRT 下内部实现其实就是调用 <code>SetCurrentDirectory</code> [ <a target="_blank" rel="noopener" href="https://github.com/reactos/reactos/blob/releases/0.4.7/sdk/lib/crt/direct/chdir.c">reactos</a> ] ）。</p>
+<p>Java 设计理念是跨平台，&quot;write once, run anywhere&quot;。很平台相关的 API，虽然各个平台都有自己的类似的实现，但存在会差异。除了多数常见功能，Java 并没有对全部操作系统接口提供完整支持，比如很多 POSIX API。除了 <code>chdir</code>，另外一个典型的例子是，在 Java 9 以前 JDK 获取进程 id 一直没有简洁的方法 [ <a target="_blank" rel="noopener" href="https://stackoverflow.com/q/35842">stackoverflow</a> ]，最新发布的 Java 9 中的 <a target="_blank" rel="noopener" href="http://openjdk.java.net/jeps/102">JEP 102</a>（Process API Updates）才增强了进程 API。获取进程 id 可以使用以下方式 [ <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/9/docs/api/java/lang/ProcessHandle.html#pid--">javadoc</a> ]：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">long</span> <span class="variable">pid</span> <span class="operator">=</span> ProcessHandle.current().pid();</span><br></pre></td></tr></table></figure>
+<p>相比其他语言，Pyhon 和 Ruby，对操作系统相关的接口都有更多的原生支持。Pyhon 和 Ruby 实现的相关 API 基本上都带有 POSIX 风格。比如上文提到，<code>chdir</code> 和 <code>getpid</code>，在 Pyhon 和 Ruby 下对应的 API 为：Pyhon 的 os 模块 <a target="_blank" rel="noopener" href="https://docs.python.org/3.6/library/os.html#os.chdir">os.chdir(path)</a> 和 <a target="_blank" rel="noopener" href="https://docs.python.org/3.6/library/os.html#os.getpid">os.getpid()</a>；Ruby 的 Dir 类的 <a target="_blank" rel="noopener" href="https://ruby-doc.org/core-2.2.0/Dir.html#method-c-chdir">Dir.chdir( [ string] )</a> 类方法和 Process 类的 <a target="_blank" rel="noopener" href="https://ruby-doc.org/core-2.2.0/Process.html#method-c-pid">Process.pid</a> 类属性。Python 解释器的 <code>chdir</code> 对应源码为 <a target="_blank" rel="noopener" href="https://github.com/python/cpython/blob/v3.6.0/Modules/posixmodule.c#L2611">posixmodule.c#L2611</a>，Ruby 解释器的 <code>chdir</code> 对应源码为 <a target="_blank" rel="noopener" href="https://github.com/ruby/ruby/blob/v2_2_0/dir.c#L848">dir.c#L848</a> 和 <a target="_blank" rel="noopener" href="https://github.com/ruby/ruby/blob/v2_2_0/win32/win32.c#L6741">win32.c#L6741</a>。</p>
+<h1 id="JNI-实现-getpid">JNI 实现 getpid</h1>
+<p>Java 下要想实现本地方法调用，需要通过 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Java_Native_Interface">JNI</a>。关于 JNI 的介绍，可以参阅“Java核心技术，卷II：高级特性，第9版2013”的“第12章 本地方法”，或者读当年 Sun 公司 JNI 设计者 Sheng Liang（梁胜）写的“Java Native Interface: Programmer's Guide and Specification”。本文只给出实现 <code>getpid</code> 的一个简单示例。</p>
+<p>首先使用 Maven 创建一个简单的脚手架：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mvn archetype:generate     \</span><br><span class="line">  -DgroupId=com.test       \</span><br><span class="line">  -DartifactId=jni-jnr     \</span><br><span class="line">  -DpackageName=com.test   \</span><br><span class="line">  -DinteractiveMode=<span class="literal">false</span>  </span><br></pre></td></tr></table></figure>
+<p>在 <code>com.test</code> 包下添加 <code>GetPidJni</code> 类：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.test;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GetPidJni</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">native</span> <span class="type">long</span> <span class="title function_">getpid</span><span class="params">()</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        System.loadLibrary(<span class="string">&quot;getpidjni&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        System.out.println(getpid());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>用 <code>javac</code> 编译代码 <code>GetPidJNI.java</code>，然后用 <code>javah</code> 生成 JNI 头文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir -p target/classes</span><br><span class="line">$ javac src/main/java/com/test/GetPidJni.java -d &quot;target/classes&quot;</span><br><span class="line">$ javah -cp &quot;target/classes&quot; com.test.GetPidJni</span><br></pre></td></tr></table></figure>
+<p>生成的 JNI 头文件 <code>com_test_GetPidJni.h</code>，内容如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* DO NOT EDIT THIS FILE - it is machine generated */</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;jni.h&gt;</span></span></span><br><span class="line"><span class="comment">/* Header for class com_test_GetPidJni */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _Included_com_test_GetPidJni</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _Included_com_test_GetPidJni</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> __cplusplus</span></span><br><span class="line"><span class="keyword">extern</span> <span class="string">&quot;C&quot;</span> &#123;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Class:     com_test_GetPidJni</span></span><br><span class="line"><span class="comment"> * Method:    getpid</span></span><br><span class="line"><span class="comment"> * Signature: ()J</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">JNIEXPORT jlong JNICALL <span class="title">Java_com_test_GetPidJni_getpid</span></span></span><br><span class="line"><span class="function">  <span class="params">(JNIEnv *, jclass)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> __cplusplus</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
+<p>现在有了头文件声明，但还没有实现，手动敲入 <code>com_test_GetPidJni.c</code>：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;com_test_GetPidJni.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function">JNIEXPORT jlong JNICALL</span></span><br><span class="line"><span class="function"><span class="title">Java_com_test_GetPidJni_getpid</span> <span class="params">(JNIEnv * env, jclass c)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">getpid</span>();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>编译 <code>com_test_GetPidJni.c</code>，生成 <code>libgetpidjni.dylib</code>：</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ gcc -I <span class="variable">$JAVA_HOME</span>/include -I <span class="variable">$JAVA_HOME</span>/include/darwin -dynamiclib -o libgetpidjni.dylib com_test_GetPidJni.c</span><br></pre></td></tr></table></figure>
+<p>生成的 <code>libgetpidjni.dylib</code>，就是 <code>GetPidJni.java</code> 代码中的 <code>System.loadLibrary(&quot;getpidjni&quot;);</code>，需要加载的 lib。</p>
+<p>现在运行 <code>GetPidJni</code> 类，就能正确获取 pid：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ java -Djava.library.path=`pwd` -cp &quot;target/classes&quot; com.test.GetPidJni</span><br></pre></td></tr></table></figure>
+<p>JNI 的问题是，<strong>胶水代码</strong>（黏合 Java 和 C 库的代码）需要程序员手动书写，对不熟悉 C/C++ 的同学是很大的挑战。</p>
+<h1 id="JNA-实现-getpid">JNA 实现 getpid</h1>
+<p>JNA（Java Native Access, <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Java_Native_Access">wiki</a>, <a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna">github</a>, <a target="_blank" rel="noopener" href="https://javadoc.io/doc/net.java.dev.jna/jna">javadoc</a>, <a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/net.java.dev.jna/jna">mvn</a>），提供了相对 JNI 更加简洁的调用本地方法的方式。除了 Java 代码外，不再需要额外的胶水代码。这个项目最早可以追溯到 Sun 公司 JNI 设计者 Sheng Liang 在 1999 年 JavaOne 上的分享。2006 年 11月，Todd Fast (也来自 Sun 公司) 首次将 JNA 发布到 <a target="_blank" rel="noopener" href="http://dev.java.net">dev.java.net</a> 上。Todd Fast 在发布时提到，自己在这个项目上已经断断续续开发并完善了 6-7 年时间，项目刚刚在 JDK 5 上重构和重设计过，还可能有很多缺陷或缺点，希望其他人能浏览代码并参与进来。Timothy Wall 在 2007 年 2 月重启了这项目，引入了很多重要功能，添加了 Linux 和 OSX 支持（原本只在 Win32 上测试过），加强了 lib 的可用性（而非仅仅基本功能可用）[ <a target="_blank" rel="noopener" href="https://web.archive.org/web/20110221190148/http://jna.java.net:80/#history">ref</a> ]。</p>
+<p>看下示例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> com.sun.jna.Library;</span><br><span class="line"><span class="keyword">import</span> com.sun.jna.Native;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GetPidJNA</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">LibC</span> <span class="keyword">extends</span> <span class="title class_">Library</span> &#123;</span><br><span class="line">        <span class="type">long</span> <span class="title function_">getpid</span><span class="params">()</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">LibC</span> <span class="variable">libc</span> <span class="operator">=</span> Native.loadLibrary(<span class="string">&quot;c&quot;</span>, LibC.class);</span><br><span class="line">        System.out.println(libc.getpid());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="JNR-实现-getpid">JNR 实现 getpid</h1>
+<p>最初，JRuby 的核心开发者 Charles Nutter 在实现 Ruby 的 POSIX 集成时就使用了 JNA [ <a target="_blank" rel="noopener" href="https://www.infoq.com/news/2007/09/jna-jruby/">ref</a> ]。但过了一段时候后，开始开发 JNR（Java Native Runtime, <a target="_blank" rel="noopener" href="https://github.com/jnr">github</a>, <a target="_blank" rel="noopener" href="http://mvnrepository.com/artifact/com.github.jnr">mvn</a>） 替代 JNA。Charles Nutter 在介绍 JNR 的 <a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/jvmls2013nutter-2013526.pdf">slides</a> 中阐述了原因：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Why Not JNA?</span><br><span class="line">- Preprocessor constants?</span><br><span class="line">- Standard API sets out of the box</span><br><span class="line">- C callbacks?</span><br><span class="line">- Performance?!?</span><br></pre></td></tr></table></figure>
+<p>即，(1) 预处理器的常量支持（通过 <a target="_blank" rel="noopener" href="https://github.com/jnr/jnr-constants">jnr-constants</a> 解决）；(2) 开箱即用的标准 API（作者实现了 <a target="_blank" rel="noopener" href="https://github.com/jnr/jnr-posix">jnr-posix</a>, <a target="_blank" rel="noopener" href="https://github.com/jnr/jnr-x86asm">jnr-x86asm</a>, <a target="_blank" rel="noopener" href="https://github.com/jnr/jnr-enxio">jnr-enxio</a>, <a target="_blank" rel="noopener" href="https://github.com/jnr/jnr-unixsocket">jnr-unixsocket</a>）；(3) C 回调 callback 支持；(4) 性能（提升 8-10 倍）。</p>
+<img width="600" alt="JNR 各个模块的层次结构" title="JNR 各个模块的层次结构" src="https://static.nullwy.me/jnr-layered-runtime.png">
+<p>使用 JNR-FFI（<a target="_blank" rel="noopener" href="https://github.com/jnr/jnr-ffi">github</a>, <a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/com.github.jnr/jnr-ffi">mvn</a>）实现 <code>getpid</code>，示例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> jnr.ffi.LibraryLoader;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GetPidJnr</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">LibC</span> &#123;</span><br><span class="line">        <span class="type">long</span> <span class="title function_">getpid</span><span class="params">()</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">LibC</span> <span class="variable">libc</span> <span class="operator">=</span> LibraryLoader.create(LibC.class).load(<span class="string">&quot;c&quot;</span>);</span><br><span class="line">        System.out.println(libc.getpid());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>使用 JNR-POSIX（<a target="_blank" rel="noopener" href="https://github.com/jnr/jnr-posix">github</a>, <a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/com.github.jnr/jnr-posix">mvn</a>）实现 <code>chdir</code> 和 <code>getpid</code>，示例代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> jnr.posix.POSIX;</span><br><span class="line"><span class="keyword">import</span> jnr.posix.POSIXFactory;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">GetPidJnrPosix</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">POSIX</span> <span class="variable">posix</span> <span class="operator">=</span> POSIXFactory.getPOSIX();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        System.out.println(posix.getcwd());</span><br><span class="line">        posix.chdir(<span class="string">&quot;..&quot;</span>);</span><br><span class="line">        System.out.println(posix.getcwd());</span><br><span class="line">        System.out.println(posix.getpid());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="JMH-性能比较">JMH 性能比较</h1>
+<p>性能测试代码为 <code>BenchmarkFFI.java</code>（<a target="_blank" rel="noopener" href="https://github.com/yulewei/java-ffi-demo/blob/master/src/main/java/com/test/BenchmarkFFI.java">github</a>），测试结果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># JMH version: 1.19</span><br><span class="line"># VM version: JDK 1.8.0_144, VM 25.144-b01</span><br><span class="line"></span><br><span class="line">Benchmark                          Mode  Cnt      Score      Error   Units</span><br><span class="line">BenchmarkFFI.testGetPidJna        thrpt   10   8225.209 ±  206.829  ops/ms</span><br><span class="line">BenchmarkFFI.testGetPidJnaDirect  thrpt   10  10257.505 ±  736.135  ops/ms</span><br><span class="line">BenchmarkFFI.testGetPidJni        thrpt   10  77852.899 ± 3167.101  ops/ms</span><br><span class="line">BenchmarkFFI.testGetPidJnr        thrpt   10  58261.657 ± 5187.550  ops/ms</span><br></pre></td></tr></table></figure>
+<p><strong>即：JNI &gt; JNR &gt; JNA (Direct Mapping) &gt; JNA (Interface Mapping)</strong>。相对 JNI 的实现性能，其他三种方式，从大到小的性能百分比依次为：74.8% (JNR),  13.2% (JnaDirect),  10.6% (JNA)。在博主电脑上测试，JNR 相比 JNA 将近快了 6-7 倍（JNR 作者 Charles Nutter 针对 <code>getpid</code> 的测试结果是 JNR 比 JNA 快 8-10 倍 [ <a target="_blank" rel="noopener" href="https://twitter.com/headius/status/360988359927148545">twitter</a> <a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/jvmls2013nutter-2013526.pdf">slides</a> ]）。</p>
+<h1 id="实现原理">实现原理</h1>
+<h2 id="JNA-源码简析">JNA 源码简析</h2>
+<p>先来看下 JNA，JNA 官方文档 <a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna/blob/master/www/FunctionalDescription.md">FunctionalDescription.md</a>，对其实现原理有很好的阐述。这里将从源码角度分析实现的核心逻辑。</p>
+<p>回顾下代码，我们现实定义了接口 <code>LibC</code>，然后通过 <code>Native.loadLibrary(&quot;c&quot;, LibC.class)</code> 获取了接口实现。这一步是怎么做到的呢？翻下源码 <a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna/blob/4.5.X/src/com/sun/jna/Native.java#L547">Native.java#L547</a> 就知道，其实是通过**动态代理（dynamic proxy）**实现的。使用动态代理需要实现 <a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/InvocationHandler.html">InvocationHandler</a> 接口，这个接口的实现在 JNA 源码中是类 com.sun.jna.Library.<a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna/blob/4.5.X/src/com/sun/jna/Library.java#L115">Handler</a>。示例中的 <code>LibC</code> 接口定义的全部方法，将全部分派到 Handler 的 <a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna/blob/4.5.X/src/com/sun/jna/Library.java#L195">invoke</a> 方法下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> Object <span class="title function_">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable;</span><br></pre></td></tr></table></figure>
+<p>然后根据返回参数的不同，分派到 Native 类的，invokeXxx 本地方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Call the native function.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> function  Present to prevent the GC to collect the Function object</span></span><br><span class="line"><span class="comment"> *                  prematurely</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> fp        function pointer</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> callFlags calling convention to be used</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> args      Arguments to pass to the native function</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> The value returned by the target native function</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">native</span> <span class="type">int</span> <span class="title function_">invokeInt</span><span class="params">(Function function, <span class="type">long</span> fp, <span class="type">int</span> callFlags, Object[] args)</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">native</span> <span class="type">long</span> <span class="title function_">invokeLong</span><span class="params">(Function function, <span class="type">long</span> fp, <span class="type">int</span> callFlags, Object[] args)</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">native</span> Object <span class="title function_">invokeObject</span><span class="params">(Function function, <span class="type">long</span> fp, <span class="type">int</span> callFlags, Object[] args)</span>;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>比如，<code>long getpid()</code> 会被分派到 invokeLong，而 <code>int chmod(String filename, int mode)</code> 会被分派到 <code>invokeInt</code>。invokeXxx 本地方法参数：</p>
+<ul>
+<li>参数 <code>Function function</code>，记录了 lib 信息、函数名称、函数指针地址、调用惯例等元信息；</li>
+<li>参数 <code>long fp</code>，即函数指针地址，函数指针地址通过 Native#<a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna/blob/4.5.X/src/com/sun/jna/Native.java#L2060">findSymbol()</a>获得（底层是 Linux API <a target="_blank" rel="noopener" href="https://www.mankier.com/3/dlsym">dlsym</a> 或 Windows API <a target="_blank" rel="noopener" href="https://msdn.microsoft.com/en-us/library/ms683212.aspx">GetProcAddress</a> ）。</li>
+<li>参数 <code>int callFlags</code>，即调用约定，对应 cdecl 或 stdcall。</li>
+<li>参数 <code>int callFlags</code>，即函数入参，若无参数，args 大小为 0，若有多个参数，原本的入参被从左到右依次保存到 args 数组中。</li>
+</ul>
+<p>再来看下 <code>invokeXxx</code> 本地方法的实现 <a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna/blob/4.5.X/native/dispatch.c#L2122">dispatch.c#L2122</a>（<code>invokeInt</code> 或 <code>invokeLong</code> 实现源码类似）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Class:     com_sun_jna_Native</span></span><br><span class="line"><span class="comment"> * Method:    invokeInt</span></span><br><span class="line"><span class="comment"> * Signature: (Lcom/sun/jna/Function;JI[Ljava/lang/Object;)I</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">JNIEXPORT jint JNICALL</span><br><span class="line"><span class="title function_">Java_com_sun_jna_Native_invokeInt</span><span class="params">(JNIEnv *env, jclass UNUSED(cls), </span></span><br><span class="line"><span class="params">                                  jobject UNUSED(function), jlong fp, jint callconv,</span></span><br><span class="line"><span class="params">                                  jobjectArray arr)</span></span><br><span class="line">&#123;</span><br><span class="line">    ffi_arg result;</span><br><span class="line">    dispatch(env, L2A(fp), callconv, arr, &amp;ffi_type_sint32, &amp;result);</span><br><span class="line">    <span class="keyword">return</span> (jint)result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>即，全部 <code>invokeXxx</code> 本地方法统一被分派到 <code>dispatch</code> 函数 <a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna/blob/4.5.X/native/dispatch.c#L439">dispatch.c#L439</a>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">dispatch</span><span class="params">(JNIEnv *env, <span class="type">void</span>* func, jint flags, jobjectArray args,</span></span><br><span class="line"><span class="params">ffi_type *return_type, <span class="type">void</span> *presult)</span></span><br></pre></td></tr></table></figure>
+<p>这个 <code>dispatch</code> 函数是全部逻辑的核心，实现最终的本地函数调用。</p>
+<p>我们知道，发起函数调用，需要构造一个<strong>栈帧</strong>（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Call_stack#Structure">stack frame</a>）。构造栈帧，涉及到参数压栈次序（参数从左到右压入还是从右到左压入）和清理栈帧（调用者清理还是被调用者清理）等实现细节问题。不同的编译器在不同的 CPU 架构下有不同的选择。构造栈帧的具体实现细节的选择，被称为<strong>调用惯例</strong>（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/X86_calling_conventions">calling convention</a>）。按照调用惯例构造整个栈帧，这个过程由编译器在<strong>编译阶段</strong>完成的。比如要想发起 <code>sum(2, 3)</code> 这个函数调用，编译器可能会生成如下等价汇编代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">; 调用者清理堆栈（caller clean-up），参数从右到左压入栈</span><br><span class="line">push 3</span><br><span class="line">push 2</span><br><span class="line">call _sum      ; 将返回地址压入栈, 同时 sum 的地址装入 eip</span><br><span class="line">add  esp, 8    ; 清理堆栈, 两个参数占用 8 字节</span><br></pre></td></tr></table></figure>
+<p><code>dispatch</code> 函数是，需要调用的函数指针地址、输入参数和返回参数，全部是<strong>运行时确定</strong>。要想完成这个函数调用逻辑，就要运行时构造栈帧，生成参数压栈和清理堆栈的工作。JNA 3.0 之前，实现运行时构造栈帧的逻辑的对应代码 <a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna/blob/2.5/jnalib/native/dispatch_i386.c">dispatch_i386.c</a>、<a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna/blob/2.5/jnalib/native/dispatch_ppc.c">dispatch_ppc.c</a> 和 <a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna/blob/2.5/jnalib/native/dispatch_sparc.s">dispatch_sparc.s</a>，分别实现 Intel x86、PowerPC 和 Sparc 三种 CPU 架构。</p>
+<p>运行时函数调用，这个问题其实是一个一般性的通用问题。早在 1996 年 10 月，Cygnus Solutions 的工程师 Anthony Green 等人就开发了 libffi（<a target="_blank" rel="noopener" href="https://sourceware.org/libffi/">home</a>, <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Libffi">wiki</a>, <a target="_blank" rel="noopener" href="https://github.com/libffi/libffi">github</a>, <a target="_blank" rel="noopener" href="http://www.chiark.greenend.org.uk/doc/libffi-dev/html/index.html">doc</a>），解决的正是这个问题。目前，libffi 几乎支持全部常见的 CPU 架构。于是，从 <a target="_blank" rel="noopener" href="https://github.com/java-native-access/jna/tree/3.0/jnalib/native">JNA 3.0</a> 开始，摒弃了原先手动构造栈帧的做法，把 libffi 集成进了 JNA。</p>
+<p>直接映射（Direct Mapping）<br>
+<a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/functions.html#RegisterNatives">https://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/functions.html#RegisterNatives</a><br>
+<a target="_blank" rel="noopener" href="http://www.chiark.greenend.org.uk/doc/libffi-dev/html/The-Closure-API.html">http://www.chiark.greenend.org.uk/doc/libffi-dev/html/The-Closure-API.html</a></p>
+<h2 id="JNR-源码简析">JNR 源码简析</h2>
+<p>JNR 底层同样也是依赖 libffi，参见 <a target="_blank" rel="noopener" href="https://github.com/jnr/jffi">jffi</a>。但 JNR 相比 JNA 性能更好，做了很有优化。比较重要的点是，JNA 使用动态代理生成实现类，而 JNR 使用 ASM 字节码操作库生成直接实现类，去除了每次调用本地方法时额外的动态代理的逻辑。使用 ASM 生成实现类，对应的代码为 <a target="_blank" rel="noopener" href="https://github.com/jnr/jnr-ffi/blob/master/src/main/java/jnr/ffi/provider/jffi/AsmLibraryLoader.java">AsmLibraryLoader.java</a>。其他细节，限于文档不全，本人精力有限，不再展开。</p>
+<h1 id="Java-9-的-getpid-实现">Java 9 的 getpid 实现</h1>
+<p>Java 9 以前 JDK 获取进程 id 没有简洁的方法，最新发布的 Java 9 中的 <a target="_blank" rel="noopener" href="http://openjdk.java.net/jeps/102">JEP 102</a>（Process API Updates）增强了进程 API。进程 id 可以使用以下方式 [ <a target="_blank" rel="noopener" href="http://download.java.net/java/jdk9/docs/api/java/lang/ProcessHandle.html#pid--">javadoc</a> ]</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">long</span> <span class="variable">pid</span> <span class="operator">=</span> ProcessHandle.current().pid();</span><br></pre></td></tr></table></figure>
+<p>翻阅实现源码，可以看到对应的实现就是 JNI 调用：</p>
+<p>jdk/src/java.base/share/classes/java/lang/ProcessHandleImpl [ <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/jdk/src/java.base/share/classes/java/lang/ProcessHandleImpl.java">src</a> ]</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Return the pid of the current process.</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* <span class="doctag">@return</span> the pid of the  current process</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">native</span> <span class="type">long</span> <span class="title function_">getCurrentPid0</span><span class="params">()</span>;</span><br></pre></td></tr></table></figure>
+<p>*nix 平台下实现为：</p>
+<p>jdk/src/java.base/unix/native/libjava/ProcessHandleImpl_unix.c [ <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/jdk/src/java.base/unix/native/libjava/ProcessHandleImpl_unix.c#L296">src</a> ]</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Class:     java_lang_ProcessHandleImpl</span></span><br><span class="line"><span class="comment"> * Method:    getCurrentPid0</span></span><br><span class="line"><span class="comment"> * Signature: ()J</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">JNIEXPORT jlong JNICALL</span></span><br><span class="line"><span class="function"><span class="title">Java_java_lang_ProcessHandleImpl_getCurrentPid0</span><span class="params">(JNIEnv *env, jclass clazz)</span> </span>&#123;</span><br><span class="line">    <span class="type">pid_t</span> pid = <span class="built_in">getpid</span>();</span><br><span class="line">    <span class="keyword">return</span> (jlong) pid;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Windows 平台下实现为：</p>
+<p>jdk/src/java.base/windows/native/libjava/ProcessHandleImpl_win.c [ <a target="_blank" rel="noopener" href="https://github.com/dmlloyd/openjdk/blob/jdk9/jdk9/jdk/src/java.base/windows/native/libjava/ProcessHandleImpl_win.c#L137">src</a> ]</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Returns the pid of the caller.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * Class:     java_lang_ProcessHandleImpl</span></span><br><span class="line"><span class="comment"> * Method:    getCurrentPid0</span></span><br><span class="line"><span class="comment"> * Signature: ()J</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function">JNIEXPORT jlong JNICALL</span></span><br><span class="line"><span class="function"><span class="title">Java_java_lang_ProcessHandleImpl_getCurrentPid0</span><span class="params">(JNIEnv *env, jclass clazz)</span> </span>&#123;</span><br><span class="line">    DWORD  pid = <span class="built_in">GetCurrentProcessId</span>();</span><br><span class="line">    <span class="keyword">return</span> (jlong)pid;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="参考资料">参考资料</h1>
+<ol>
+<li>Changing the current working directory in Java? <a target="_blank" rel="noopener" href="https://stackoverflow.com/q/840190">https://stackoverflow.com/q/840190</a></li>
+<li>How can a Java program get its own process ID? <a target="_blank" rel="noopener" href="http://stackoverflow.com/q/35842">http://stackoverflow.com/q/35842</a></li>
+<li>Java核心技术，卷II：高级特性，第9版2013：第12章 本地方法，<a target="_blank" rel="noopener" href="https://book.douban.com/subject/25841326/">豆瓣</a></li>
+<li>Java Native Interface: Programmer's Guide and Specification, <em>Sheng Liang</em> (<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Sheng_Liang">wiki</a>，<a target="_blank" rel="noopener" href="https://www.linkedin.com/in/shengliang/">linkedin</a>，<a target="_blank" rel="noopener" href="https://academic.microsoft.com/#/detail/2131857791">msa</a>), 1999，<a target="_blank" rel="noopener" href="https://book.douban.com/subject/3162962/">豆瓣</a>：作者梁胜，中国科技大学少年班83级，并拥有耶鲁大学计算机博士学位（1990-1996），目前 Rancher Labs 创始人兼 CEO [ <a target="_blank" rel="noopener" href="https://www.toutiao.com/a6283841554134401282/">ref</a> ]</li>
+<li>2013-07 Charles Nutter: Java Native Runtime <a target="_blank" rel="noopener" href="http://www.oracle.com/technetwork/java/jvmls2013nutter-2013526.pdf">http://www.oracle.com/technetwork/java/jvmls2013nutter-2013526.pdf</a></li>
+<li>JEP 191: Foreign Function Interface <a target="_blank" rel="noopener" href="http://openjdk.java.net/jeps/191">http://openjdk.java.net/jeps/191</a> 作者是Charles Nutter</li>
+<li>2014-03 Java 外部函数接口 <a target="_blank" rel="noopener" href="http://www.infoq.com/cn/news/2014/03/java-foreign-function-interface">http://www.infoq.com/cn/news/2014/03/java-foreign-function-interface</a></li>
+<li>2005-08 Brian Goetz：用动态代理进行修饰 <a target="_blank" rel="noopener" href="https://www.ibm.com/developerworks/cn/java/j-jtp08305.html">https://www.ibm.com/developerworks/cn/java/j-jtp08305.html</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2018/01/java-ffi/" title="Java 外部函数接口：JNI, JNA, JNR">https://nullwy.me/2018/01/java-ffi/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Java/" rel="tag"># Java</a>
+              <a href="/tags/JNI/" rel="tag"># JNI</a>
+              <a href="/tags/JNA/" rel="tag"># JNA</a>
+              <a href="/tags/JNR/" rel="tag"># JNR</a>
+              <a href="/tags/FFI/" rel="tag"># FFI</a>
+              <a href="/tags/Pyhon/" rel="tag"># Pyhon</a>
+              <a href="/tags/Ruby/" rel="tag"># Ruby</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/11/zookeeper-note/" rel="prev" title="ZooKeeper 学习笔记">
+      <i class="fa fa-chevron-left"></i> ZooKeeper 学习笔记
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/01/stack-frame-calling-convention/" rel="next" title="栈帧与调用惯例">
+      栈帧与调用惯例 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%81%87%E5%88%B0%E7%9A%84%E9%97%AE%E9%A2%98"><span class="nav-number">1.</span> <span class="nav-text">遇到的问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JNI-%E5%AE%9E%E7%8E%B0-getpid"><span class="nav-number">2.</span> <span class="nav-text">JNI 实现 getpid</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JNA-%E5%AE%9E%E7%8E%B0-getpid"><span class="nav-number">3.</span> <span class="nav-text">JNA 实现 getpid</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JNR-%E5%AE%9E%E7%8E%B0-getpid"><span class="nav-number">4.</span> <span class="nav-text">JNR 实现 getpid</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#JMH-%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83"><span class="nav-number">5.</span> <span class="nav-text">JMH 性能比较</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86"><span class="nav-number">6.</span> <span class="nav-text">实现原理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#JNA-%E6%BA%90%E7%A0%81%E7%AE%80%E6%9E%90"><span class="nav-number">6.1.</span> <span class="nav-text">JNA 源码简析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JNR-%E6%BA%90%E7%A0%81%E7%AE%80%E6%9E%90"><span class="nav-number">6.2.</span> <span class="nav-text">JNR 源码简析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Java-9-%E7%9A%84-getpid-%E5%AE%9E%E7%8E%B0"><span class="nav-number">7.</span> <span class="nav-text">Java 9 的 getpid 实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">8.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2018/01/java-ffi/";
+    this.page.identifier = "2018/01/java-ffi/";
+    this.page.title = "Java 外部函数接口：JNI, JNA, JNR";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="SOA 与微服务 Amazon，1994 年创立，早期网站是单服务、单数据库的单体架构的系统[1][2][3]，全部代码由 C++ 编写，编译成单个二进制文件，整个代码仓库被命名为 Obidos。Obidos 是底层是一个 Web 页面渲染引擎，是一个框架，业务逻辑基于这个框架开发，Obidos 渲染引擎和业务逻辑共同组成整个代码仓库。随着时间的推移，Obidos 变得越来越复杂，编译 Obido">
+<meta property="og:type" content="article">
+<meta property="og:title" content="亚马逊网站架构演进">
+<meta property="og:url" content="https://nullwy.me/2023/11/amazon-architecture-evolution/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="SOA 与微服务 Amazon，1994 年创立，早期网站是单服务、单数据库的单体架构的系统[1][2][3]，全部代码由 C++ 编写，编译成单个二进制文件，整个代码仓库被命名为 Obidos。Obidos 是底层是一个 Web 页面渲染引擎，是一个框架，业务逻辑基于这个框架开发，Obidos 渲染引擎和业务逻辑共同组成整个代码仓库。随着时间的推移，Obidos 变得越来越复杂，编译 Obido">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.nullwy.me/amazon-architecture-1995.png">
+<meta property="og:image" content="https://static.nullwy.me/amazon-architecture-evolution.png">
+<meta property="og:image" content="https://static.nullwy.me/soa-vs-microservices.svg">
+<meta property="og:image" content="https://static.nullwy.me/amazon-typical-weekly-traffic.png">
+<meta property="og:image" content="https://static.nullwy.me/amazon-november-traffic-static-scaling.png">
+<meta property="og:image" content="https://static.nullwy.me/amazon-november-traffic-elastic-scaling.png">
+<meta property="article:published_time" content="2023-11-04T04:43:00.000Z">
+<meta property="article:modified_time" content="2023-12-06T13:34:25.634Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="架构">
+<meta property="article:tag" content="可扩展性">
+<meta property="article:tag" content="技术栈">
+<meta property="article:tag" content="微服务">
+<meta property="article:tag" content="SOA">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.nullwy.me/amazon-architecture-1995.png">
+
+<link rel="canonical" href="https://nullwy.me/2023/11/amazon-architecture-evolution/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>亚马逊网站架构演进 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2023/11/amazon-architecture-evolution/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          亚马逊网站架构演进
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2023-11-04 12:43:00" itemprop="dateCreated datePublished" datetime="2023-11-04T12:43:00+08:00">2023-11-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2023/11/amazon-architecture-evolution/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2023/11/amazon-architecture-evolution/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="SOA-与微服务">SOA 与微服务</h1>
+<p>Amazon，1994 年创立，早期网站是单服务、单数据库的单体架构的系统<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup><sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup><sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>，全部代码由 C++ 编写，编译成单个二进制文件，整个代码仓库被命名为 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Obidos_(software)">Obidos</a>。Obidos 是底层是一个 Web 页面渲染引擎，是一个框架，业务逻辑基于这个框架开发，Obidos 渲染引擎和业务逻辑共同组成整个代码仓库。随着时间的推移，Obidos 变得越来越复杂，编译 Obidos 整个代码库耗时 12 小时，开发调试效率低下<sup class="footnote-ref"><a href="#fn2" id="fnref2:1">[2:1]</a></sup>。另外，全部业务逻辑在单个二进制文件中，导致紧耦合，新功能特性无法快速发布上线。1995 年，Amazon 网站的技术架构，如下图所示<sup class="footnote-ref"><a href="#fn3" id="fnref3:1">[3:1]</a></sup>：</p>
+<span id="more"></span>
+<img width="600" alt="Amazon 网站技术架构（1995）" title="Amazon 网站技术架构（1995）" src="https://static.nullwy.me/amazon-architecture-1995.png">
+<p>到 2000 年，为了应对流量增长，解决网站的可扩展性问题，开始拆分 Obidos，向可扩展的 SOA 架构演进。拆分出的服务有，用户服务（customer service）、订单服务（order service）、商品服务（item service）等，并且每个服务都拥有各自独立的数据库。2005 年 1 月，Amazon 网站开始从 Obidos 引擎迁移到 Gurupa 引擎。Gurupa 是一个 Web 页面渲染引擎，同时也是一个 SOA 框架，Gurupa 被用于集成背后的数百个服务，使用 Perl 的 Mason 模板将各个服务响应的数据渲染成 Web 页面。到 2006 年完成了到 Gurupa 的全部迁移<sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup>。</p>
+<p>Amazon 网站技术架构演进过程，如下图所示<sup class="footnote-ref"><a href="#fn2" id="fnref2:2">[2:2]</a></sup>：</p>
+<img width="600" alt="Amazon 网站技术架构演进" title="Amazon 网站技术架构演进" src="https://static.nullwy.me/amazon-architecture-evolution.png">
+<p>需要注意的是，图中认为从 2006 年开始 Amazon 网站架构从 SOA 演进为微服务，但是事实上，“微服务”这个术语诞生的时间是 2012 年。2006 年的架构实现与之前的 SOA 架构实现的不同点是，开始更细粒度的服务拆分。</p>
+<p>本质上来看，微服务架构是一种特殊的 SOA 架构，在“微服务”术语诞生之前，亚马逊的 SOA 架构实现被认为是“SOA done right”（正确实现的 SOA）<sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup>。Netflix 的 SOA 架构实现也在“微服务”术语诞生之前，Netflix 认为自己实现架构的是“fine-grained SOA”（细粒度的 SOA）<sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup>。James Lewis 和 Martin Fowler 等人是“微服务”概念的早期提倡者，他们将亚马逊和 Netflix 的 SOA 架构实现归类为微服务的经典案例<sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup>。所以，SOA 和微服务的关系可以简单理解为，微服务是“fine-grained SOA”或“SOA done right”。</p>
+<p>根据 Martin Fowler 的解释<sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup>，SOA 与微服务的关系，如下图所示：</p>
+<img width="400" alt="SOA 与微服务的关系" title="SOA 与微服务的关系" src="https://static.nullwy.me/soa-vs-microservices.svg">
+<p>在 SOA 架构的具体实践上，根据前亚马逊工程师 Steve Yegge 的 2011 年的文章<sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup>，在 2002 年左右，亚马逊创始人兼 CEO Jeff Bezos 向全公司发布了一道指令（这个指令被外界称为“API Mandate”），具体内容如下：</p>
+<blockquote>
+<ol>
+<li>从今天起，所有的团队都要以服务接口的方式提供数据和各种功能。</li>
+<li>团队之间必须通过接口来通信。</li>
+<li>不允许任何其他形式的互操作：不允许直接链接，不允许直接读其他团队的数据，不允许共享内存，不允许任何形式的后门。唯一许可的通信方式就是通过网络调用服务。</li>
+<li>至于具体的技术则不做规定。HTTP、Corba、Pubsub、自定义协议都可以。贝索斯不关心这个。</li>
+<li>所有的服务接口，必须从一开始就要以可以公开为设计导向，没有例外。这就是说，团队必须在设计的时候就计划好，接口要可以对外面的开发人员开放。没有讨价还价的余地。</li>
+<li>不听话的人会被炒鱿鱼。</li>
+</ol>
+</blockquote>
+<h1 id="技术栈演进">技术栈演进</h1>
+<p>Amazon 网站的技术栈演进过程<sup class="footnote-ref"><a href="#fn2" id="fnref2:3">[2:3]</a></sup><sup class="footnote-ref"><a href="#fn4" id="fnref4:1">[4:1]</a></sup><sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup>：</p>
+<ul>
+<li>1995 ~ 2000：单体架构，Unix（Sun）、Obidos、Oracle、C++
+<ul>
+<li>Obidos 是亚马逊内部 Web 动态页面渲染引擎，编程语言是 C++。</li>
+</ul>
+</li>
+<li>2000 ~ 2006：SOA 架构，Linux、Obidos、Oracle、C++
+<ul>
+<li>2000 年，将 Sun/Unix 服务器替换为 HP/Linux 服务器<sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup>。</li>
+<li>2000 年，开始拆分应用服务，向 SOA 架构演进。</li>
+<li>2005 年初，开始将 Obidos 框架替换为 Gurupa 框架，Gurupa 是 Web 页面渲染引擎，同时也是 SOA 框架。Web 动态页面的编程语言从 C++ 替换为 Perl/Mason，同时应用服务开始被更细粒度的拆分。</li>
+</ul>
+</li>
+<li>2006 年开始：微服务架构，Linux、Gurupa、Oracle、Perl &amp; Java &amp; C++
+<ul>
+<li>2019.10，彻底去掉 Oracle 数据库，迁移到 Amazon RDS 和 NoSQL<sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup>。</li>
+</ul>
+</li>
+</ul>
+<p>当前 Amazon 网站的主要技术栈：</p>
+<ul>
+<li><strong>应用服务</strong><sup class="footnote-ref"><a href="#fn4" id="fnref4:2">[4:2]</a></sup><sup class="footnote-ref"><a href="#fn11" id="fnref11:1">[11:1]</a></sup>：
+<ul>
+<li><strong>展示层</strong>：Perl/Mason<sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup></li>
+<li><strong>业务逻辑层</strong>：Java（主要）、C++ 等</li>
+<li><strong>RPC框架</strong>：Gurupa 框架（自研闭源）
+<ul>
+<li>2006 年更早之前使用 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Obidos_%28software%29">Obidos</a> 框架</li>
+</ul>
+</li>
+<li><strong>消息队列MQ</strong>：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Amazon_Simple_Queue_Service">Amazon SQS</a></li>
+</ul>
+</li>
+<li><strong>数据存储</strong><sup class="footnote-ref"><a href="#fn13" id="fnref13:1">[13:1]</a></sup>：
+<ul>
+<li><strong>关系数据库</strong>：Amazon RDS for PostgreSQL<sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>、Amazon Aurora (PostgreSQL)
+<ul>
+<li>2019 年 10 月彻底去掉 Oracle 数据库，迁移到 Amazon RDS 和 NoSQL。</li>
+</ul>
+</li>
+<li><strong>键值存储</strong>：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Amazon_DynamoDB">Amazon DynamoDB</a></li>
+<li><strong>缓存</strong>：Amazon ElastiCache for Redis<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup></li>
+<li><strong>Blob文件存储</strong>：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Amazon_S3">Amazon S3</a></li>
+</ul>
+</li>
+</ul>
+<h1 id="AWS-的诞生">AWS 的诞生</h1>
+<p>Amazon 网站架构演进的过程，伴随着 AWS 云服务的诞生，促使 AWS 云服务诞生的因素主要有<sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup><sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup>：</p>
+<ul>
+<li><strong>技术价值</strong>：Amazon 网站在向可扩展架构演进的过程中，其基础设施团队开始善于运营像计算、存储和数据库这样的基础设施，团队已经变得能非常熟练地运营可靠的、可扩展的、具有成本效益的数据中心，这些专业能力推动了亚马逊电商平台的发展。将维护可靠、可扩展的基础设施专业能力通过服务的方式对外交付，能有效节省第三方企业或初创公司的成本，当时亚马逊预计基础设施的成本可能会从 70% 降低至 30% 或更低<sup class="footnote-ref"><a href="#fn19" id="fnref19">[19]</a></sup>。</li>
+<li><strong>原始动机</strong>：Amazon 网站的流量有很强的季节性，每年 11 月和 12 月（尤其是在<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E9%BB%91%E8%89%B2%E6%98%9F%E6%9C%9F%E4%BA%94_(%E8%B4%AD%E7%89%A9)">感恩节</a>和圣诞节前后）流量都会飙升。为了应对购物季，不得不扩容，增加服务器资源。在购物季结束后，服务器资源被大量闲置。零售电商的利润很薄，却要面对数据中心基础设施不断扩展所带来的成本压力。所以，很多人（包括部分亚马逊员工）<sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup><sup class="footnote-ref"><a href="#fn21" id="fnref21">[21]</a></sup>认为推出 AWS 产品的一个重要原因是为了出租 SOA 网站在销售淡季时的过剩服务器容量。不过，出租过剩容量的故事是一个神话，因为不可能在每年购物季时把开发商从服务器里踢出去，而且实际上在推出 EC2 云服务后的 2 个月内，AWS 就已经烧掉了过剩的 Amazon 网站容量<sup class="footnote-ref"><a href="#fn19" id="fnref19:1">[19:1]</a></sup>。</li>
+<li><strong>商业理念</strong>：<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Jeff_Bezos">Jeff Bezos</a>，将亚马逊定位为一家技术公司，而不仅仅是一家在线零售商，所以在亚马逊的核心业务之外进行很多投资尝试，AWS 产品就是其中之一<sup class="footnote-ref"><a href="#fn17" id="fnref17:1">[17:1]</a></sup>。</li>
+</ul>
+<p>于是，在 2003 年亚马逊团队内部逐渐开始形成销售基础设施服务的设想。2003 年 9 月<sup class="footnote-ref"><a href="#fn22" id="fnref22">[22]</a></sup>，<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Andy_Jassy">Andy Jassy</a> 写了 6 页纸的关于 AWS 的愿景文档（vision document）并提交给管理团队，愿景文档中提议了设想的 AWS 业务，并概述了 AWS 提供的初始的基础设施服务集，首批提供的服务包括存储、计算和数据库等。同年，Jassy 组建了由 57 人组成的 AWS 团队，AWS 团队的 CEO 由 Jassy 担任（Jassy 担任 AWS CEO 一直到 2021 年，2021 年 7 月开始任职亚马逊 CEO）。<strong>三年之后，2006 年 3 月 AWS 对外发布 S3 云存储，8 月对外发布 EC2 弹性云计算服务器，S3 和 EC2 是行业内最早的云服务产品</strong>。S3 发布的刚开始几个月，并没有引起太大的关注。EC2 发布后，大量开发商开始飞速涌入。在没有其他类似云服务产品最初几年，几乎每一家创业公司都在亚马逊的服务器上构建自己的系统。能吸引大量开发商的原因主要是，按需使用和收费的商业模式，以及亚马逊故意压力利润的价格策略<sup class="footnote-ref"><a href="#fn17" id="fnref17:2">[17:2]</a></sup>。</p>
+<h1 id="迁移到-AWS">迁移到 AWS</h1>
+<p>2011 年 11 月，Amazon 网站全部都迁移到了 AWS 云服务器上<sup class="footnote-ref"><a href="#fn23" id="fnref23">[23]</a></sup>。迁移到 AWS 上最大的动机是能利用  AWS 云服务器的弹性伸缩能力，从而节省成本。如果没有弹性伸缩能力，在淡季时，总体上服务器资源容量的利用率是 61%，无法有效利用的容量是 39%，到购物季的 11 月，无法有效利用的容量高到 76%。引入弹性伸缩技术后，可以按网站的实际流量负载情况，供应恰当的容量，避免资源浪费。Amazon 网站在淡季和购物季时的静态伸缩与弹性伸缩，如下图所示<sup class="footnote-ref"><a href="#fn23" id="fnref23:1">[23:1]</a></sup><sup class="footnote-ref"><a href="#fn24" id="fnref24">[24]</a></sup>。</p>
+<img width="600" alt="Amazon 网站的典型的周流量分布" title="Amazon 网站的典型的周流量分布" src="https://static.nullwy.me/amazon-typical-weekly-traffic.png">
+<img width="600" alt="Amazon 网站的静态伸缩" title="Amazon 网站的静态伸缩" src="https://static.nullwy.me/amazon-november-traffic-static-scaling.png">
+<img width="600" alt="Amazon 网站的弹性伸缩" title="Amazon 网站的弹性伸缩" src="https://static.nullwy.me/amazon-november-traffic-elastic-scaling.png">
+<h1 id="参考资料">参考资料</h1>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>2006-05 ACM Queue Interview: A Conversation with Amazon CTO Werner Vogels <a target="_blank" rel="noopener" href="https://queue.acm.org/detail.cfm?id=1142065">https://queue.acm.org/detail.cfm?id=1142065</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p>2021-02 Amazon’s architecture evolution and AWS strategy (AWS re:Invent 2020) <a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=HtWKZSLLYTE">https://www.youtube.com/watch?v=HtWKZSLLYTE</a> <a href="#fnref2" class="footnote-backref">↩︎</a> <a href="#fnref2:1" class="footnote-backref">↩︎</a> <a href="#fnref2:2" class="footnote-backref">↩︎</a> <a href="#fnref2:3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p>2022-11 Reliable scalability: How Amazon scales in the cloud (AWS re:Invent 2022) <a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=_AhfV5LZmvo">https://www.youtube.com/watch?v=_AhfV5LZmvo</a> <a href="#fnref3" class="footnote-backref">↩︎</a> <a href="#fnref3:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p>2011-04 Charlie Cheever: How did Google, Amazon, and the like initially develop and code their websites, databases, etc.? <a target="_blank" rel="noopener" href="https://qr.ae/pKKyB0">https://qr.ae/pKKyB0</a> <a href="#fnref4" class="footnote-backref">↩︎</a> <a href="#fnref4:1" class="footnote-backref">↩︎</a> <a href="#fnref4:2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p>2007-06 SOA done right: the Amazon strategy <a target="_blank" rel="noopener" href="https://www.zdnet.com/article/soa-done-right-the-amazon-strategy/">https://www.zdnet.com/article/soa-done-right-the-amazon-strategy/</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn6" class="footnote-item"><p>2011-05 How the cloud helps Netflix (interview Adrian Cockcroft) <a target="_blank" rel="noopener" href="http://radar.oreilly.com/2011/05/netflix-cloud.html">http://radar.oreilly.com/2011/05/netflix-cloud.html</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn7" class="footnote-item"><p>2014-03 James Lewis &amp; Martin Fowler: Microservices <a target="_blank" rel="noopener" href="https://martinfowler.com/articles/microservices.html">https://martinfowler.com/articles/microservices.html</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn8" class="footnote-item"><p>2014-11 Microservices • Martin Fowler • GOTO 2014 <a target="_blank" rel="noopener" href="https://youtu.be/wgdBVIX9ifA?t=880">https://youtu.be/wgdBVIX9ifA?t=880</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn9" class="footnote-item"><p>2011-10 Steve's Google Platform rant <a target="_blank" rel="noopener" href="https://gist.github.com/chitchcock/1281611">https://gist.github.com/chitchcock/1281611</a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn10" class="footnote-item"><p>2016-09 亚马逊如何变成 SOA（面向服务的架构）？（摘录自Steve Yegg的《程序员的呐喊》） <a target="_blank" rel="noopener" href="https://www.ruanyifeng.com/blog/2016/09/how_amazon_take_soa.html">https://www.ruanyifeng.com/blog/2016/09/how_amazon_take_soa.html</a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn11" class="footnote-item"><p>What programming languages are used at Amazon? <a target="_blank" rel="noopener" href="https://qr.ae/pKFwnw">https://qr.ae/pKFwnw</a> <a href="#fnref11" class="footnote-backref">↩︎</a> <a href="#fnref11:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn12" class="footnote-item"><p>2001-10 How Linux saved Amazon millions <a target="_blank" rel="noopener" href="https://web.archive.org/web/0/http://news.com.com/2100-1001-275155.html">https://web.archive.org/web/0/http://news.com.com/2100-1001-275155.html</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn13" class="footnote-item"><p>2019-10 Migration Complete – Amazon’s Consumer Business Just Turned off its Final Oracle Database <a target="_blank" rel="noopener" href="https://aws.Amazon/blogs/aws/migration-complete-amazons-consumer-business-just-turned-off-its-final-oracle-database/?nc1=h_ls">https://aws.Amazon/blogs/aws/migration-complete-amazons-consumer-business-just-turned-off-its-final-oracle-database/?nc1=h_ls</a> <a href="#fnref13" class="footnote-backref">↩︎</a> <a href="#fnref13:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn14" class="footnote-item"><p>2016-04 Is Amazon still using Perl Mason to render its content? <a target="_blank" rel="noopener" href="https://qr.ae/pKFwFm">https://qr.ae/pKFwFm</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn15" class="footnote-item"><p>Amazon RDS for PostgreSQL customers <a target="_blank" rel="noopener" href="https://aws.Amazon/rds/postgresql/customers/?nc1=h_ls">https://aws.Amazon/rds/postgresql/customers/?nc1=h_ls</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn16" class="footnote-item"><p>Amazon ElastiCache for Redis customers <a target="_blank" rel="noopener" href="https://aws.Amazon/elasticache/redis/customers/?nc1=h_ls">https://aws.Amazon/elasticache/redis/customers/?nc1=h_ls</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn17" class="footnote-item"><p>一网打尽：贝佐斯与亚马逊时代，Brad Stone，2013，<a target="_blank" rel="noopener" href="https://book.douban.com/subject/25766700/">豆瓣</a>：第7章 一家技术公司，而非零售商 <a href="#fnref17" class="footnote-backref">↩︎</a> <a href="#fnref17:1" class="footnote-backref">↩︎</a> <a href="#fnref17:2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn18" class="footnote-item"><p>2016-07 AWS CEO Andy Jassy: How AWS came to be <a target="_blank" rel="noopener" href="https://techcrunch.com/2016/07/02/andy-jassys-brief-history-of-the-genesis-of-aws/">https://techcrunch.com/2016/07/02/andy-jassys-brief-history-of-the-genesis-of-aws/</a> <a href="#fnref18" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn19" class="footnote-item"><p>2011-01 Amazon CTO Werner Vogels: How and why did Amazon get into the cloud computing business? <a target="_blank" rel="noopener" href="https://qr.ae/pKscWd">https://qr.ae/pKscWd</a> <a href="#fnref19" class="footnote-backref">↩︎</a> <a href="#fnref19:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn20" class="footnote-item"><p>2016-07 前亚马逊员工在 Reddit 上对文章“How AWS came to be”的评论 <a target="_blank" rel="noopener" href="https://www.reddit.com/r/programming/comments/4qxthq/comment/d4wrnk7/">https://www.reddit.com/r/programming/comments/4qxthq/comment/d4wrnk7/</a> <a href="#fnref20" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn21" class="footnote-item"><p>2021-01 前亚马逊员工 Dan Rose：全球最大云厂商AWS是如何诞生的？ <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/C7Mqeh1hyT6k5BQOzpWL9w">https://mp.weixin.qq.com/s/C7Mqeh1hyT6k5BQOzpWL9w</a> <a href="#fnref21" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn22" class="footnote-item"><p>2013-11 Andy Jassy's Book Review of &quot;The Everything Store&quot; <a target="_blank" rel="noopener" href="https://www.Amazon/review/R1Q4CQQV1ALSN0/">https://www.Amazon/review/R1Q4CQQV1ALSN0/</a> <a href="#fnref22" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn23" class="footnote-item"><p>2011-07 2011 AWS Tour Australia, Closing Keynote: How Amazon migrated to AWS, by Jon Jenkins <a target="_blank" rel="noopener" href="https://www.slideshare.net/AmazonWebServices/2011-aws-tour-australia-closing-keynote-how-amazoncom-migrated-to-aws-by-jon-jenkins">https://www.slideshare.net/AmazonWebServices/2011-aws-tour-australia-closing-keynote-how-amazoncom-migrated-to-aws-by-jon-jenkins</a> <a href="#fnref23" class="footnote-backref">↩︎</a> <a href="#fnref23:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn24" class="footnote-item"><p>2017-03 AWS: Elasticity and Management <a target="_blank" rel="noopener" href="https://www.slideshare.net/AmazonWebServices/elasticity-and-management">https://www.slideshare.net/AmazonWebServices/elasticity-and-management</a> <a href="#fnref24" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2023/11/amazon-architecture-evolution/" title="亚马逊网站架构演进">https://nullwy.me/2023/11/amazon-architecture-evolution/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7/" rel="tag"># 可扩展性</a>
+              <a href="/tags/%E6%8A%80%E6%9C%AF%E6%A0%88/" rel="tag"># 技术栈</a>
+              <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" rel="tag"># 微服务</a>
+              <a href="/tags/SOA/" rel="tag"># SOA</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/11/reliability-engineering/" rel="prev" title="可靠性工程概述">
+      <i class="fa fa-chevron-left"></i> 可靠性工程概述
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/12/popular-websites-tech-stack/" rel="next" title="流行互联网网站技术栈整理">
+      流行互联网网站技术栈整理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#SOA-%E4%B8%8E%E5%BE%AE%E6%9C%8D%E5%8A%A1"><span class="nav-number">1.</span> <span class="nav-text">SOA 与微服务</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%8A%80%E6%9C%AF%E6%A0%88%E6%BC%94%E8%BF%9B"><span class="nav-number">2.</span> <span class="nav-text">技术栈演进</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AWS-%E7%9A%84%E8%AF%9E%E7%94%9F"><span class="nav-number">3.</span> <span class="nav-text">AWS 的诞生</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BF%81%E7%A7%BB%E5%88%B0-AWS"><span class="nav-number">4.</span> <span class="nav-text">迁移到 AWS</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2023/11/amazon-architecture-evolution/";
+    this.page.identifier = "2023/11/amazon-architecture-evolution/";
+    this.page.title = "亚马逊网站架构演进";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

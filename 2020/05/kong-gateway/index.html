@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Kong 简介 Kong 是云原生、高效、可扩展、分布式的微服务抽象层，被称为 API 网关，或者 API 中间件。Kong 在 2015 年 4 月由 Mashape 公司开源，基于 OpenResty 和 Apache Cassandra&#x2F;PostgreSQL 构建，提供易于使用的 RESTful API 来操作和配置 API 系统[1][2]。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微服务 API 网关 Kong 实践">
+<meta property="og:url" content="https://nullwy.me/2020/05/kong-gateway/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="Kong 简介 Kong 是云原生、高效、可扩展、分布式的微服务抽象层，被称为 API 网关，或者 API 中间件。Kong 在 2015 年 4 月由 Mashape 公司开源，基于 OpenResty 和 Apache Cassandra&#x2F;PostgreSQL 构建，提供易于使用的 RESTful API 来操作和配置 API 系统[1][2]。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.nullwy.me/kong-old-way-vs-kong-way.png">
+<meta property="og:image" content="https://static.nullwy.me/kong-architecture.png">
+<meta property="og:image" content="https://static.nullwy.me/konga.png">
+<meta property="og:image" content="https://static.nullwy.me/kong-overview.png">
+<meta property="article:published_time" content="2020-05-30T07:22:41.000Z">
+<meta property="article:modified_time" content="2023-12-05T06:15:32.036Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="架构">
+<meta property="article:tag" content="微服务">
+<meta property="article:tag" content="Kong">
+<meta property="article:tag" content="API">
+<meta property="article:tag" content="Nginx">
+<meta property="article:tag" content="OpenResty">
+<meta property="article:tag" content="网关">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.nullwy.me/kong-old-way-vs-kong-way.png">
+
+<link rel="canonical" href="https://nullwy.me/2020/05/kong-gateway/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>微服务 API 网关 Kong 实践 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2020/05/kong-gateway/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          微服务 API 网关 Kong 实践
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-30 15:22:41" itemprop="dateCreated datePublished" datetime="2020-05-30T15:22:41+08:00">2020-05-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2020/05/kong-gateway/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/05/kong-gateway/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>12k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>11 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Kong-简介">Kong 简介</h1>
+<p>Kong 是云原生、高效、可扩展、分布式的微服务抽象层，被称为 API 网关，或者 API 中间件。Kong 在 2015 年 4 月由 Mashape 公司开源，基于 OpenResty 和 Apache Cassandra/PostgreSQL 构建，提供易于使用的 RESTful API 来操作和配置 API 系统<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup><sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>。</p>
+<span id="more"></span>
+<p>Mashape 是 API 集市，是为应用开发者与 API 提供者服务的 API 交易市场，Mashape 让发者能够方便地查找与购买 API，而 API 提供商则能轻松地销售与管理 API<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>。随着 Mashape 市场上的 API 越来越多，原先基于 Node.js 实现的 API 代理不再适用，不能处理大流量尖峰，无法快速扩容。于是，寻找处理大流量的方案，同时需要保证可靠性和安全性，成为 Mashape 亟待解决的问题。2013 年，在 CloudFlare（当时 OpenResty 背后的公司）的工程师的建议下，Mashape 开始在 OpenResty 基础上开发 Kong 项目<sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup>。Mashape 公司的名字，MashAPE，有人猿猩猩的含义，公司 logo 也是相应动物。类似的，Kong，对应的是，<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/King_Kong">King Kong</a>，就是电影里的金刚<sup class="footnote-ref"><a href="#fn4" id="fnref4:1">[4:1]</a></sup>。在 Mashape 开启 Kong 项目两年后，2015 年 4 月，Mashape 公司开源了 Kong<sup class="footnote-ref"><a href="#fn2" id="fnref2:1">[2:1]</a></sup>。</p>
+<p>2017 年 5月，Mashape 和 RapidAPI 合并，组成全球最大的 API 集市<sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup><sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup>。5 个月后，Mashape, Inc. 改名为 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Kong_Inc%2E">Kong Inc.</a>，新的公司以 Kong 项目为聚焦，把全部工程师投入到 Kong 开发中，并且于此同时他们发布了 <a target="_blank" rel="noopener" href="https://konghq.com/products/kong-enterprise/">Kong 企业版</a><sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup>。</p>
+<p>Kong，作为微服务的请求的网关，能通过插件提供负载均衡、日志记录、鉴权、限流、转换以及其他等功能。相对与旧的、没有使用网关的方式，Kong 把这些通用功能中心化，让微服务更加专注于业务本身。</p>
+<img width="800" alt="The Old way vs. The Kong Way" title="The Old way vs. The Kong Way" src="https://static.nullwy.me/kong-old-way-vs-kong-way.png">
+<p>Kong 的整体架构，如下图所示<sup class="footnote-ref"><a href="#fn1" id="fnref1:1">[1:1]</a></sup>：</p>
+<ul>
+<li>管理 API：通过 RESTful API 管理 Kong；能自动化集成；管理 API 能通过插件扩展</li>
+<li>插件：使用 Lua 脚本创建 Plugins；实现强力的定制化；与第三方服务集成</li>
+<li>集群和数据存储：数据存储可选择 PostgreSQL 或 Cassandra；能从单节点扩展为集群；使用内存缓存提高性能</li>
+<li>OpenResty：拦截请求/响应生命周期；基于 NGINX 扩展；Lua 脚本化</li>
+<li>NGINX：验证过的高性能基础组件；HTTP 和反向代理服务器；处理底层操作</li>
+</ul>
+<img width="300" alt="Kong Architecture" title="Kong Architecture" src="https://static.nullwy.me/kong-architecture.png">
+<h1 id="Kong-安装">Kong 安装</h1>
+<p>目前最新的 Kong 版本是 2.0.x，2.0 发布时间是 2020 年 1 月，而 1.0 发布时间是 2018 年 12 月<sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup><sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup>。笔者公司使用的 Kong 版本是 0.14.1，暂时未升级自最新版，所以下文阐述的 Kong 版本主要以 0.14.1 为准，并同时会提及其他版本的特性。</p>
+<p>安装 Kong 很简单，参见<a target="_blank" rel="noopener" href="https://konghq.com/install/">官方文档</a>即可。在 <a target="_blank" rel="noopener" href="https://docs.konghq.com/install/ubuntu/">Ubuntu</a> 18.04 下安装 Kong 0.14.1，可以执行下面的命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># kong 安装</span></span><br><span class="line">$ sudo apt update</span><br><span class="line">$ sudo apt install openssl libpcre3 procps perl</span><br><span class="line">$ wget -O kong-community-edition-0.14.1.trusty.all.deb https://bintray.com/kong/kong-community-edition-deb/download_file?file_path=dists/kong-community-edition-0.14.1.trusty.all.deb</span><br><span class="line">$ sudo dpkg -i kong-community-edition-0.14.1.trusty.all.deb</span><br><span class="line">$ kong version</span><br><span class="line">0.14.1</span><br></pre></td></tr></table></figure>
+<p>Kong 依赖数据库，Postgres 或者 Cassandra，默认依赖 Postgres（kong 1.1 开始支持无数据库声明式配置<sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup>）。我们预先安装 Postgres：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 安装 postgresql</span></span><br><span class="line">$ sudo apt install postgresql</span><br><span class="line">$ sudo service postgresql start</span><br><span class="line">$ psql --version</span><br><span class="line">psql (PostgreSQL) 10.12 (Ubuntu 10.12-0ubuntu0.18.04.1)</span><br></pre></td></tr></table></figure>
+<p>在 Postgres 下添加 Kong 需要的的数据库实例和用户。下面的示例，创建数据库 <code>kong</code>，用户名 <code>kong</code>，密码为 <code>kong</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ sudo -u postgres psql</span><br><span class="line">postgres=<span class="comment"># CREATE USER kong; CREATE DATABASE kong OWNER kong;</span></span><br><span class="line">postgres=<span class="comment"># ALTER USER kong WITH PASSWORD &#x27;kong&#x27;;</span></span><br><span class="line">postgres=<span class="comment"># \q</span></span><br></pre></td></tr></table></figure>
+<p>执行完成后，即可使用用户名为 <code>kong</code> 的用户连接 Postgres，<code>psql -h localhost -U kong -d kong</code>。</p>
+<p>Kong 安装完成后，默认会创建配置文件 <code>/etc/kong/kong.conf.default</code>，这份配置文件在 <a target="_blank" rel="noopener" href="https://github.com/Kong/kong/blob/0.14.1/kong.conf.default">GitHub</a> 上也能找到，被注释掉的配置项，就是默认设置。</p>
+<p>在启动 Kong 网关服务器前，我们参考 <code>kong.conf.default</code>，创建自己的 <code>kong.conf</code> 配置文件。我们把配置文件放在 <code>/home/yulewei/kong</code> 目录下，同时也把这目录当作为 Kong 的 <code>prefix</code> 目录。修改这配置 <code>kong.conf</code>，文件末尾添加：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">prefix = /home/yulewei/kong/</span><br><span class="line">pg_user=kong</span><br><span class="line">pg_password=kong</span><br><span class="line">pg_database = kong</span><br></pre></td></tr></table></figure>
+<p>使用 <a target="_blank" rel="noopener" href="https://docs.konghq.com/0.14.x/cli/"><code>kong</code></a> 命令，启动 Kong 网关服务器：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 初始化或迁移数据库数据</span></span><br><span class="line">$ kong migrations up -c /home/yulewei/kong/kong.conf</span><br><span class="line"><span class="comment"># 启动 kong</span></span><br><span class="line">$ kong start -c /home/yulewei/kong/kong.conf</span><br></pre></td></tr></table></figure>
+<p>Kong 默认绑定 4 个端口：</p>
+<ul>
+<li><code>:8000</code> 用来接收来自客户端的 HTTP 流量的请求，并转发到上游服务</li>
+<li><code>:8443</code> 用来接收来自客户端的 HTTPS 流量的请求，并转发到上游服务</li>
+<li><code>:8001</code> 用来接收访问 <a target="_blank" rel="noopener" href="https://docs.konghq.com/0.14.x/admin-api/">Admin API</a> 的 HTTP 流量的请求</li>
+<li><code>:8444</code> 用来接收访问 Admin API 的 HTTPS 流量的请求</li>
+</ul>
+<p>所以，可以执行下面的命令，来确认 Kong 是否正常运行：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 确认 Kong 是否正常运行</span></span><br><span class="line">$ curl -i http://localhost:8000/</span><br><span class="line">$ curl -i http://localhost:8001/</span><br></pre></td></tr></table></figure>
+<p>Kong 底层依赖 OpenResty，启动 Kong 后，可以看到 nginx 进程：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看 nginx 进程</span></span><br><span class="line">$ ps -ef | grep nginx</span><br><span class="line">yulewei  19090     1  0 16:05 ?        00:00:00 nginx: master process /usr/local/openresty/nginx/sbin/nginx -p /home/yulewei/kong -c nginx.conf</span><br><span class="line">yulewei  19091 19090  0 16:05 ?        00:00:00 nginx: worker process</span><br><span class="line">yulewei  19092 19090  0 16:05 ?        00:00:00 nginx: worker process</span><br></pre></td></tr></table></figure>
+<p>安装 Kong 0.14.1，自动安装的 OpenResty 版本是 1.13.6.2，OpenResty 捆绑的安装了 LuaJIT。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">$ /usr/local/openresty/nginx/sbin/nginx -v</span><br><span class="line">nginx version: openresty/1.13.6.2</span><br><span class="line"></span><br><span class="line">$ /usr/local/openresty/bin/resty -V</span><br><span class="line">resty 0.21</span><br><span class="line">nginx version: openresty/1.13.6.2</span><br><span class="line">built by gcc 4.8.4 (Ubuntu 4.8.4-2ubuntu1~14.04.4)</span><br><span class="line">built with OpenSSL 1.0.2n  7 Dec 2017</span><br><span class="line">TLS SNI support enabled</span><br><span class="line">configure arguments: ... 省略 ...</span><br><span class="line"></span><br><span class="line">$ /usr/local/openresty/luajit/bin/luajit -v</span><br><span class="line">LuaJIT 2.1.0-beta3 -- Copyright (C) 2005-2017 Mike Pall. http://luajit.org/</span><br></pre></td></tr></table></figure>
+<p>另外，同时也安装了 LuaRocks，LuaRocks 关联的是 OpenResty 捆绑的 LuaJIT。事实上，Kong 就是一个 LuaRocks 的 <a target="_blank" rel="noopener" href="https://luarocks.org/modules/kong/kong">rock</a> 包，在Kong 项目的 GitHub 上可以看到 <a target="_blank" rel="noopener" href="https://github.com/Kong/kong/blob/0.14.1/kong-0.14.1-0.rockspec">rockspec</a> 文件。Kong 的安装，底层实现上，是通过 <code>luarocks</code> 命令完成的，类似这样的命令，<code>luarocks install kong 0.14.1-0</code><sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup><sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup>。可以使用 <code>luarocks show</code> 命令查看这个 Kong 的 rcok 包：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">$ luarocks show kong</span><br><span class="line">kong 0.14.1-0 - Kong is a scalable and customizable API Management Layer built on top of Nginx.</span><br><span class="line"></span><br><span class="line">License: 	MIT</span><br><span class="line">Homepage: 	http://getkong.org</span><br><span class="line">Installed <span class="keyword">in</span>: 	/usr/local</span><br><span class="line"></span><br><span class="line">Modules:</span><br><span class="line">	kong (/usr/local/share/lua/5.1/kong/init.lua)</span><br><span class="line">	kong.api (/usr/local/share/lua/5.1/kong/api/init.lua)</span><br><span class="line">... 省略 ...</span><br></pre></td></tr></table></figure>
+<p>有个小细节值得注意，通过 <code>luarocks</code> 看到，Kong 采用的协议是 MIT。但事实上，Kong 0.5.0 开始协议从 MIT <a target="_blank" rel="noopener" href="https://github.com/Kong/kong/commit/9faa7f0e0648a037bb6a465bad08d5928a9ca31f">改成了</a> Apache 2.0。此处是一个小 bug，Kong 的 rockspec 文件没有及时更新，这个问题后来修复了，参见 <a target="_blank" rel="noopener" href="https://github.com/Kong/kong/pull/4125">#4125</a>。</p>
+<h2 id="GUI-管理工具">GUI 管理工具</h2>
+<p>管理 Kong 可以直接使用 Admin API，当然也有基于 Admin API 实现 GUI 管理工具。</p>
+<p>Kong 官方的企业版提供了 GUI 管理工具，<a target="_blank" rel="noopener" href="https://konghq.com/products/kong-enterprise/kong-manager/"><code>Kong Manager</code></a>（Kong EE 0.34 之前称为 <a target="_blank" rel="noopener" href="https://docs.konghq.com/enterprise/0.33-x/admin-gui/overview/"><code>Admin GUI</code></a>），Kong 社区版没有提供 GUI 管理工具。</p>
+<p>第三方的开源 GUI 工具，比较活跃的就是 <a target="_blank" rel="noopener" href="https://github.com/pantsel/konga"><code>Konga</code></a>，值得推荐，如下图。</p>
+<img width="800" alt="konga" title="konga" src="https://static.nullwy.me/konga.png">
+<p>另外，还有其他的 GUI 工具，比如 <a target="_blank" rel="noopener" href="https://github.com/PGBI/kong-dashboard"><code>Kong Dashboard</code></a>，也可以了解下。</p>
+<h1 id="Kong-使用">Kong 使用</h1>
+<p>Kong 核心概念：</p>
+<ul>
+<li><code>Service</code>：对应位于 Kong 后方的自身的 <code>Upstream</code> API 或微服务。</li>
+<li><code>Route</code>：Kong 的入口点，定义了如何把请求发送到特定 <code>Service</code> 的规则。一个 <code>Service</code> 可以有多个<code>Route</code>。</li>
+<li><code>Plugin</code>：插件提供了模块化系统，用来修改或控制 Kong。插件提供了大量功能，比如访问控制、缓存、限流、日志记录等。</li>
+<li><code>Consumer</code>：消费者，表示使用 API 的用户，能用来对用户进行访问控制、跟踪等。</li>
+</ul>
+<p>Kong 网关的请求响应工作流，如下图所示：</p>
+<img width="700" alt="Kong Overview" title="Kong Overview" src="https://static.nullwy.me/kong-overview.png">
+<h2 id="反向代理">反向代理</h2>
+<p>Kong 的核心功能就是对现有的上游服务的 API 作反向代理。反向代理，官方的完整的文档参见<sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup>。现在我们来试验下 Kong 的反向代理功能，执行下面的命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加 service</span></span><br><span class="line">$ curl -XPOST -H <span class="string">&#x27;Content-Type: application/json&#x27;</span> \</span><br><span class="line">     -d <span class="string">&#x27;&#123;&quot;name&quot;:&quot;example.service&quot;,&quot;url&quot;:&quot;http://httpbin.org&quot;&#125;&#x27;</span> \</span><br><span class="line">     http://localhost:8001/services/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 service 上添加 route</span></span><br><span class="line">$ curl -XPOST -H <span class="string">&#x27;Content-Type: application/json&#x27;</span> \</span><br><span class="line">     -d <span class="string">&#x27;&#123;&quot;paths&quot;:[&quot;/base64&quot;],&quot;strip_path&quot;:false&#125;&#x27;</span> \</span><br><span class="line">     http://localhost:8001/services/example.service/routes</span><br></pre></td></tr></table></figure>
+<p>上面的第一条命令，通过调用 Kong 提供的 Admin API，让 Kong 创建了名为 <code>example.service</code> 的 <code>service</code>，<code>service</code> 指向的上游服务是 <code>http://httpbin.org</code>。第二条命令，在 <code>example.service</code> 上添加 <code>route</code> 规则，规则是让请求路径前缀为 <code>/base64</code> 的请求转发到这个 <code>service</code>。来验证下，刚刚的 Kong 的配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 验证 Kong 配置结果</span></span><br><span class="line">$ curl http://httpbin.org/base64/aGVsbG8ga29uZw==</span><br><span class="line">hello kong</span><br><span class="line">$ curl http://localhost:8000/base64/aGVsbG8ga29uZw==</span><br><span class="line">hello kong</span><br></pre></td></tr></table></figure>
+<p>上文的 Kong 配置，等价的 <code>nginx.conf</code> 配置文件的写法是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">  listen 8000;</span><br><span class="line">  location /base64 &#123;</span><br><span class="line">    proxy_pass http://httpbin.org/base64;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>除了前缀外，<code>route</code> 规则的 <code>paths</code> 字段也支持 PCRE <a target="_blank" rel="noopener" href="https://docs.konghq.com/0.14.x/proxy/#using-regexes-in-paths">正则表达式</a>，来看下示例：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl -XPOST -H <span class="string">&#x27;Content-Type: application/json&#x27;</span> \</span><br><span class="line">     -d <span class="string">&#x27;&#123;&quot;paths&quot;:[&quot;/status/\\d+&quot;],&quot;strip_path&quot;:false&#125;&#x27;</span> \</span><br><span class="line">     http://localhost:8001/services/example.service/routes</span><br></pre></td></tr></table></figure>
+<p>上面的命令，添加 <code>route</code> 规则，设置的 <code>paths</code> 字段值为 <code>/status/\d+</code>，让只有请求路径的中包含数字才能匹配。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 验证 Kong 配置结果</span></span><br><span class="line">$ curl -sI http://httpbin.org/status/418 | <span class="built_in">head</span> -n1</span><br><span class="line">HTTP/1.1 418 I<span class="string">&#x27;M A TEAPOT</span></span><br><span class="line"><span class="string">$ curl -sI http://localhost:8000/status/418 | head -n1</span></span><br><span class="line"><span class="string">HTTP/1.1 418 I&#x27;</span>M A TEAPOT</span><br><span class="line">$ curl -sI http://localhost:8000/status/200 | <span class="built_in">head</span> -n1</span><br><span class="line">HTTP/1.1 200 OK</span><br><span class="line">$ curl http://localhost:8000/status/abc</span><br><span class="line">&#123;<span class="string">&quot;message&quot;</span>:<span class="string">&quot;no route and no API found with those values&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="负载均衡">负载均衡</h2>
+<p>上文的反向代理指向的是单台的上游服务器，如果要指向多台上游服务器，实现负载均衡，要如何配置呢？负载均衡，Nginx 可以通过 <code>upstream</code> 指令实现，而类似的，Kong 通过创建 <code>upstream</code> 对象实现。</p>
+<p>假设在服务器 <code>192.168.2.100:80</code> 和 <code>192.168.2.101:80</code> 上运行着本地版的 <code>httpbin.org</code> 的 REST API 服务（通过 <code>docker run -p 80:80 kennethreitz/httpbin</code>）。执行下面的命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加 upstream</span></span><br><span class="line">curl -XPOST -H <span class="string">&#x27;Content-Type: application/json&#x27;</span> \</span><br><span class="line">     -d <span class="string">&#x27;&#123;&quot;name&quot;:&quot;example.upstream&quot;&#125;&#x27;</span> \</span><br><span class="line">     http://localhost:8001/upstreams/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 upstream 上添加 target</span></span><br><span class="line">curl -XPOST -H <span class="string">&#x27;Content-Type: application/json&#x27;</span> \</span><br><span class="line">     -d <span class="string">&#x27;&#123;&quot;target&quot;:&quot;192.168.2.100:80&quot;&#125;&#x27;</span> \</span><br><span class="line">     http://localhost:8001/upstreams/example.upstream/targets</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 upstream 上添加 target</span></span><br><span class="line">curl -XPOST -H <span class="string">&#x27;Content-Type: application/json&#x27;</span> \</span><br><span class="line">     -d <span class="string">&#x27;&#123;&quot;target&quot;:&quot;192.168.2.101:80&quot;&#125;&#x27;</span> \</span><br><span class="line">     http://localhost:8001/upstreams/example.upstream/targets</span><br><span class="line"></span><br><span class="line"><span class="comment"># 添加 service</span></span><br><span class="line">curl -XPOST -H <span class="string">&#x27;Content-Type: application/json&#x27;</span> \</span><br><span class="line">     -d <span class="string">&#x27;&#123;&quot;name&quot;:&quot;example.service&quot;,&quot;host&quot;:&quot;example.upstream&quot;&#125;&#x27;</span> \</span><br><span class="line">     http://localhost:8001/services/</span><br><span class="line"></span><br><span class="line"><span class="comment"># 在 service 上添加 route</span></span><br><span class="line">curl -XPOST -H <span class="string">&#x27;Content-Type: application/json&#x27;</span> \</span><br><span class="line">     -d <span class="string">&#x27;&#123;&quot;paths&quot;:[&quot;/base64&quot;],&quot;strip_path&quot;:false&#125;&#x27;</span> \</span><br><span class="line">     http://localhost:8001/services/example.service/routes</span><br></pre></td></tr></table></figure>
+<p>上面的命令，先创建了 <code>upstream</code> 对象，虚拟主机名（virtual hostname）为 <code>example.upstream</code> 。然后在这个 <code>upstream</code> 上添加 <code>target</code>，<code>192.168.2.100:80</code> 和 <code>192.168.2.101:80</code>。再然后把 <code>service</code> 对象的 <code>host</code> 字段值设置为  <code>example.upstream</code>。这样全部发送到这个 <code>service</code> 的请求都会被转发到 <code>example.upstream</code> 这个 <code>upstream</code>，<code>upstream</code> 再执行负载均衡算法，把请求转发到最终的上游服务器。和 Nginx 一样，默认的负载均衡算法为加权轮询算法（weighted-round-robin）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 验证 Kong 配置结果</span></span><br><span class="line">$ curl http://localhost:8000/base64/aGVsbG8ga29uZw==</span><br><span class="line">hello kong</span><br></pre></td></tr></table></figure>
+<p>上文的 Kong 配置，等价的 <code>nginx.conf</code> 配置文件的写法是：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">upstream example.upstream &#123;</span><br><span class="line">  server 192.168.2.100:80;</span><br><span class="line">  server 192.168.2.101:80;</span><br><span class="line">&#125;</span><br><span class="line">server &#123;</span><br><span class="line">  listen 8000;</span><br><span class="line">  location /base64 &#123;</span><br><span class="line">    proxy_pass http://example.upstream/base64;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>关于 Kong 负载均衡的更多介绍，可以阅读官方文档<sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup>，本文不再展开。</p>
+<h2 id="开启插件">开启插件</h2>
+<p>Kong 提供了很多插件，官方整理维护的全部插件列表，可以在<a target="_blank" rel="noopener" href="https://docs.konghq.com/hub/">官网</a>上看到。全部插件分 8 大类：身份认证类插件（Authentication）、安全控制类插件（Security）、流量控制类插件（Traffic Control）、无服务器计算类插件（Serverless）、分析与监控类插件（Analytics &amp; Monitoring）、协议转换类插件（Transformations）、日志记录类插件（Logging）、部署类插件（Deployment）。Kong 0.14.1 社区版默认绑定的预定义插件，全部 31 个，调用下面的 <a target="_blank" rel="noopener" href="https://docs.konghq.com/0.14.x/admin-api/#plugin-object">Admin API</a> 可以查看：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Kong 社区版全部默认绑定的插件，共 31 个</span></span><br><span class="line">$ curl http://localhost:8001/plugins/enabled</span><br><span class="line">&#123;<span class="string">&quot;enabled_plugins&quot;</span>:[<span class="string">&quot;response-transformer&quot;</span>,<span class="string">&quot;oauth2&quot;</span>,<span class="string">&quot;acl&quot;</span>,<span class="string">&quot;correlation-id&quot;</span>,<span class="string">&quot;pre-function&quot;</span>,<span class="string">&quot;jwt&quot;</span>,<span class="string">&quot;cors&quot;</span>,<span class="string">&quot;ip-restriction&quot;</span>,<span class="string">&quot;basic-auth&quot;</span>,<span class="string">&quot;key-auth&quot;</span>,<span class="string">&quot;rate-limiting&quot;</span>,<span class="string">&quot;request-transformer&quot;</span>,<span class="string">&quot;http-log&quot;</span>,<span class="string">&quot;file-log&quot;</span>,<span class="string">&quot;hmac-auth&quot;</span>,<span class="string">&quot;ldap-auth&quot;</span>,<span class="string">&quot;datadog&quot;</span>,<span class="string">&quot;tcp-log&quot;</span>,<span class="string">&quot;zipkin&quot;</span>,<span class="string">&quot;post-function&quot;</span>,<span class="string">&quot;request-size-limiting&quot;</span>,<span class="string">&quot;bot-detection&quot;</span>,<span class="string">&quot;syslog&quot;</span>,<span class="string">&quot;loggly&quot;</span>,<span class="string">&quot;azure-functions&quot;</span>,<span class="string">&quot;udp-log&quot;</span>,<span class="string">&quot;response-ratelimiting&quot;</span>,<span class="string">&quot;aws-lambda&quot;</span>,<span class="string">&quot;statsd&quot;</span>,<span class="string">&quot;prometheus&quot;</span>,<span class="string">&quot;request-termination&quot;</span>]&#125;</span><br></pre></td></tr></table></figure>
+<p>现在我们来试下 Kong 的 <a target="_blank" rel="noopener" href="https://docs.konghq.com/hub/kong-inc/basic-auth/">basic-auth</a> 插件，用来实现 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Basic_access_authentication">HTTP Basic 认证</a>（RFC 7617）。执行下面的命令，在上文的 <code>example.service</code> 的 <code>service</code> 上开启 <code>basic-auth</code> 插件：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 在 service 上开启 basic-auth 插件</span></span><br><span class="line">$ curl -XPOST --data <span class="string">&quot;name=basic-auth&quot;</span> \</span><br><span class="line">       http://localhost:8001/services/example.service/plugins</span><br></pre></td></tr></table></figure>
+<p>这样全部到 <code>example.service</code> 的请求都需要进行 Basic 认证。再次请求之前的 <code>/base64</code> 接口，返回状态码 <code>401 Unauthorized</code>：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 接口 HTTP 状态码返回 401</span></span><br><span class="line">$ curl -i http://localhost:8000/base64/aGVsbG8ga29uZw==</span><br><span class="line">HTTP/1.1 401 Unauthorized</span><br><span class="line">... 省略 ...</span><br><span class="line"></span><br><span class="line">&#123;<span class="string">&quot;message&quot;</span>:<span class="string">&quot;Unauthorized&quot;</span>&#125;</span><br></pre></td></tr></table></figure>
+<p>添加身份认证的凭证，添加 username/password：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 添加 consumer</span></span><br><span class="line">$ curl -XPOST --data <span class="string">&quot;username=Jason&quot;</span> \</span><br><span class="line">       http://localhost:8001/consumers/</span><br><span class="line"><span class="comment"># 在 consumer 上添加 basic-auth 插件的凭证 username/password</span></span><br><span class="line">$ curl -XPOST --data <span class="string">&quot;username=test&amp;password=123456&quot;</span> \</span><br><span class="line">       http://localhost:8001/consumers/Jason/basic-auth</span><br></pre></td></tr></table></figure>
+<p>现在请求头上带上凭证，重新请求 <code>/base64</code> 接口，响应正常：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ curl -u <span class="string">&#x27;test:123456&#x27;</span> http://localhost:8000/base64/aGVsbG8ga29uZw==</span><br><span class="line">hello kong</span><br></pre></td></tr></table></figure>
+<p>Kong 插件，除了绑定到 <code>service</code> 上外，也可以绑定在 <code>route</code> 和 <code>consumer</code> 上。如果开启插件时，<code>service</code>、<code>route</code> 或 <code>consumer</code> 全部都不关联，就是全局范围开启插件，插件会在全部请求上运行。全局范围上开启 <code>basic-auth</code> 插件，命令如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 全局范围上开启 basic-auth 插件</span></span><br><span class="line">$ curl -XPOST --data <span class="string">&quot;name=basic-auth&quot;</span> \</span><br><span class="line">       http://localhost:8001/plugins</span><br></pre></td></tr></table></figure>
+<p>关于 Kong 插件的更多介绍，可以阅读<a target="_blank" rel="noopener" href="https://docs.konghq.com/1.5.x/admin-api/#plugin-object">官方文档</a>，本文不再展开。</p>
+<h1 id="Kong-插件开发">Kong 插件开发</h1>
+<p>Kong 基于 OpenResty，OpenResty 通过 <a target="_blank" rel="noopener" href="https://github.com/openresty/lua-nginx-module"><code>ngx_http_lua_module</code></a> 模块实现了在 Nginx 中内嵌 Lua 脚本的能力。Kong 插件，使用 Lua 脚本实现，全部默认加载的预定义插件对应的 Lua 源码（包括上文提到的 basic-auth 插件），可以在 Kong 项目仓库的 <code>kong/plugins</code> 目录下看到。</p>
+<p>除了能使用 Kong 预定义插件，我们可以根据 Kong 插件开发文档<sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>，开发自定义插件。</p>
+<p>如何开发插件，文本不展开。Kong 官方提供了自定义插件的模板代码，源码参见项目 kong-plugin<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup>。另外，有兴趣也可以参考笔者提供的 Kong 自定义插件示例，源码参见 kong-plugin-demo<sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup>。</p>
+<p>值得注意的是，Kong 使用 Lua 的 <a target="_blank" rel="noopener" href="https://github.com/rxi/classic"><code>rxi/classic</code></a> 模块来模拟 Lua 中的类，自定义 Kong 的插件时，实现 handler 需要继承 <code>BasePlugin</code> class，目前最新的文档还是采用这种写法。不过，Kong 1.2 开始，Kong 内部的预定义实现的插件，废弃了继承 <code>BasePlugin</code> class 的写法，参见 Pull Request <a target="_blank" rel="noopener" href="https://github.com/Kong/kong/pull/4590">#4590</a>，“plugins handlers do not have to inherit from BasePlugin anymore #4590”。去掉对 <code>BasePlugin</code> class 的继承后，在开启单个插件（key-auth）的场景下，压测 Kong 性能提升 6%，开启多个插件的场景，性能提升更高。</p>
+<h1 id="参考资料">参考资料</h1>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>What is Kong? <a target="_blank" rel="noopener" href="https://konghq.com/about-kong/">https://konghq.com/about-kong/</a> <a href="#fnref1" class="footnote-backref">↩︎</a> <a href="#fnref1:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p>2015-04 Mashape 开源 API 网关——Kong <a target="_blank" rel="noopener" href="https://www.infoq.cn/article/2015/04/kong/">https://www.infoq.cn/article/2015/04/kong/</a> <a href="#fnref2" class="footnote-backref">↩︎</a> <a href="#fnref2:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p>2012-07 打造大集市：API交易网站Mashape正式推出 <a target="_blank" rel="noopener" href="https://www.csdn.net/article/2012-07-31/2807936">https://www.csdn.net/article/2012-07-31/2807936</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p>2015-10 How Mashape Manages Over 15,000 APIs &amp; Microservices <a target="_blank" rel="noopener" href="https://stackshare.io/kong/how-mashape-manages-over-15000-apis-and-microservices">https://stackshare.io/kong/how-mashape-manages-over-15000-apis-and-microservices</a> <a href="#fnref4" class="footnote-backref">↩︎</a> <a href="#fnref4:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p>2017-05 Mashape 和 RapidAPI 合并，组成全球最大的应用编程接口（API）集市！ <a target="_blank" rel="noopener" href="https://www.sohu.com/a/144114294_465914">https://www.sohu.com/a/144114294_465914</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn6" class="footnote-item"><p>2017-05 The API Marketplace Joins RapidAPI <a target="_blank" rel="noopener" href="https://konghq.com/blog/the-api-marketplace-joins-rapidapi/">https://konghq.com/blog/the-api-marketplace-joins-rapidapi/</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn7" class="footnote-item"><p>2017-10 Welcome Kong Inc. A New Name, a New Product, a New Era. <a target="_blank" rel="noopener" href="https://konghq.com/blog/introducing-kong-inc/">https://konghq.com/blog/introducing-kong-inc/</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn8" class="footnote-item"><p>2018-12 Kong 1.0 GA <a target="_blank" rel="noopener" href="https://konghq.com/blog/kong-1-0-ga/">https://konghq.com/blog/kong-1-0-ga/</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn9" class="footnote-item"><p>2020-01 Kong Gateway 2.0 GA <a target="_blank" rel="noopener" href="https://konghq.com/blog/kong-gateway-2-0-0-released/">https://konghq.com/blog/kong-gateway-2-0-0-released/</a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn10" class="footnote-item"><p>Documentation for Kong: DB-less and Declarative Configuration <a target="_blank" rel="noopener" href="https://docs.konghq.com/1.1.x/db-less-and-declarative-config/">https://docs.konghq.com/1.1.x/db-less-and-declarative-config/</a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn11" class="footnote-item"><p>Kong Installation: Compile Source <a target="_blank" rel="noopener" href="https://docs.konghq.com/install/source/">https://docs.konghq.com/install/source/</a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn12" class="footnote-item"><p>Build tools to package and release Kong <a target="_blank" rel="noopener" href="https://github.com/Kong/kong-build-tools">https://github.com/Kong/kong-build-tools</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn13" class="footnote-item"><p>Documentation for Kong: Proxy Reference <a target="_blank" rel="noopener" href="https://docs.konghq.com/0.14.x/proxy/">https://docs.konghq.com/0.14.x/proxy/</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn14" class="footnote-item"><p>Documentation for Kong: Load Balancing Reference <a target="_blank" rel="noopener" href="https://docs.konghq.com/0.14.x/loadbalancing/">https://docs.konghq.com/0.14.x/loadbalancing/</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn15" class="footnote-item"><p>Documentation for Kong: Plugin Development <a target="_blank" rel="noopener" href="https://docs.konghq.com/0.14.x/plugin-development/">https://docs.konghq.com/0.14.x/plugin-development/</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn16" class="footnote-item"><p>Kong 官方自定义插件的模板代码 <a target="_blank" rel="noopener" href="https://github.com/Kong/kong-plugin">https://github.com/Kong/kong-plugin</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn17" class="footnote-item"><p>Kong 自定义插件示例 <a target="_blank" rel="noopener" href="https://github.com/yulewei/kong-plugin-demo">https://github.com/yulewei/kong-plugin-demo</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2020/05/kong-gateway/" title="微服务 API 网关 Kong 实践">https://nullwy.me/2020/05/kong-gateway/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" rel="tag"># 微服务</a>
+              <a href="/tags/Kong/" rel="tag"># Kong</a>
+              <a href="/tags/API/" rel="tag"># API</a>
+              <a href="/tags/Nginx/" rel="tag"># Nginx</a>
+              <a href="/tags/OpenResty/" rel="tag"># OpenResty</a>
+              <a href="/tags/%E7%BD%91%E5%85%B3/" rel="tag"># 网关</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/06/mysql-5.7-json/" rel="prev" title="MySQL 5.7 的 JSON 类型">
+      <i class="fa fa-chevron-left"></i> MySQL 5.7 的 JSON 类型
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/07/innodb-locking/" rel="next" title="InnoDB 的并发控制：锁与 MVCC">
+      InnoDB 的并发控制：锁与 MVCC <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Kong-%E7%AE%80%E4%BB%8B"><span class="nav-number">1.</span> <span class="nav-text">Kong 简介</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kong-%E5%AE%89%E8%A3%85"><span class="nav-number">2.</span> <span class="nav-text">Kong 安装</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#GUI-%E7%AE%A1%E7%90%86%E5%B7%A5%E5%85%B7"><span class="nav-number">2.1.</span> <span class="nav-text">GUI 管理工具</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kong-%E4%BD%BF%E7%94%A8"><span class="nav-number">3.</span> <span class="nav-text">Kong 使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86"><span class="nav-number">3.1.</span> <span class="nav-text">反向代理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B4%9F%E8%BD%BD%E5%9D%87%E8%A1%A1"><span class="nav-number">3.2.</span> <span class="nav-text">负载均衡</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BC%80%E5%90%AF%E6%8F%92%E4%BB%B6"><span class="nav-number">3.3.</span> <span class="nav-text">开启插件</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kong-%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91"><span class="nav-number">4.</span> <span class="nav-text">Kong 插件开发</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">5.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">25</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">53</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">304k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">4:36</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2020/05/kong-gateway/";
+    this.page.identifier = "2020/05/kong-gateway/";
+    this.page.title = "微服务 API 网关 Kong 实践";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
