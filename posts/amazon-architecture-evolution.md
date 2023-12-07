@@ -23,7 +23,7 @@ Amazon 网站技术架构演进过程，如下图所示[^2]：
 
 本质上来看，微服务架构是一种特殊的 SOA 架构，在“微服务”术语诞生之前，亚马逊的 SOA 架构实现被认为是“SOA done right”（正确实现的 SOA）[^5]。Netflix 的 SOA 架构实现也在“微服务”术语诞生之前，Netflix 认为自己实现架构的是“fine-grained SOA”（细粒度的 SOA）[^6]。James Lewis 和 Martin Fowler 等人是“微服务”概念的早期提倡者，他们将亚马逊和 Netflix 的 SOA 架构实现归类为微服务的经典案例[^7]。所以，SOA 和微服务的关系可以简单理解为，微服务是“fine-grained SOA”或“SOA done right”。
 
-根据 Martin Fowler 的解释[^8]，SOA 与微服务的关系，如下图所示：
+根据 Martin Fowler 的解释[^7][^8]，SOA 与微服务的关系，如下图所示：
 
 <img width="400" alt="SOA 与微服务的关系" title="SOA 与微服务的关系" src="https://static.nullwy.me/soa-vs-microservices.svg">
 
