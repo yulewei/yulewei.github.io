@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="-327.5 1094.5 493 61" width="986" height="122">
+  <defs>
+    <font-face font-family="PingFang SC" font-size="11" panose-1="2 11 4 0 0 0 0 0 0 0" units-per-em="1000" underline-position="-150" underline-thickness="58" slope="0" x-height="600" cap-height="860" ascent="1060.0021" descent="-340.0007" font-weight="400">
+      <font-face-src>
+        <font-face-name name="PingFangSC-Regular"/>
+      </font-face-src>
+    </font-face>
+    <font-face font-family="PingFang SC" font-size="13" panose-1="2 11 4 0 0 0 0 0 0 0" units-per-em="1000" underline-position="-150" underline-thickness="58" slope="0" x-height="600" cap-height="860" ascent="1060.0021" descent="-340.0007" font-weight="400">
+      <font-face-src>
+        <font-face-name name="PingFangSC-Regular"/>
+      </font-face-src>
+    </font-face>
+    <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="StickArrow_Marker" stroke-linejoin="miter" stroke-miterlimit="10" viewBox="-1 -4 10 8" markerWidth="10" markerHeight="8" color="black">
+      <g>
+        <path d="M 8 0 L 0 0 M 0 -3 L 8 0 L 0 3" fill="none" stroke="currentColor" stroke-width="1"/>
+      </g>
+    </marker>
+    <font-face font-family="PingFang SC" font-size="8.5" panose-1="2 11 4 0 0 0 0 0 0 0" units-per-em="1000" underline-position="-150" underline-thickness="58" slope="0" x-height="600" cap-height="860" ascent="1060.0021" descent="-340.0007" font-weight="400">
+      <font-face-src>
+        <font-face-name name="PingFangSC-Regular"/>
+      </font-face-src>
+    </font-face>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.7.1 
+    <dc:date>2023-12-05 08:27:04 +0000</dc:date>
+  </metadata>
+  <g id="版面_____" fill-opacity="1" stroke-dasharray="none" stroke="none" stroke-opacity="1" fill="none">
+    <g id="版面_____: 图层 1">
+      <g id="Group_47">
+        <g id="Graphic_54">
+          <path d="M -319 1098 L -203 1098 C -200.23858 1098 -198 1100.2386 -198 1103 L -198 1147 C -198 1149.7614 -200.23858 1152 -203 1152 L -319 1152 C -321.76142 1152 -324 1149.7614 -324 1147 L -324 1103 C -324 1100.2386 -321.76142 1098 -319 1098 Z" fill="white"/>
+          <path d="M -319 1098 L -203 1098 C -200.23858 1098 -198 1100.2386 -198 1103 L -198 1147 C -198 1149.7614 -200.23858 1152 -203 1152 L -319 1152 C -321.76142 1152 -324 1149.7614 -324 1147 L -324 1103 C -324 1100.2386 -321.76142 1098 -319 1098 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(-319 1108)" fill="black">
+            <tspan font-family="PingFang SC" font-size="11" font-weight="400" fill="black" x="3" y="12">在开发过程中人为产生</tspan>
+            <tspan font-family="PingFang SC" font-size="13" font-weight="400" fill="black" x="34.509" y="30">mistake</tspan>
+          </text>
+        </g>
+        <g id="Graphic_53">
+          <path d="M -148 1098 L -32 1098 C -29.238576 1098 -27 1100.2386 -27 1103 L -27 1147 C -27 1149.7614 -29.238576 1152 -32 1152 L -148 1152 C -150.76142 1152 -153 1149.7614 -153 1147 L -153 1103 C -153 1100.2386 -150.76142 1098 -148 1098 Z" fill="white"/>
+          <path d="M -148 1098 L -32 1098 C -29.238576 1098 -27 1100.2386 -27 1103 L -27 1147 C -27 1149.7614 -29.238576 1152 -32 1152 L -148 1152 C -150.76142 1152 -153 1149.7614 -153 1147 L -153 1103 C -153 1100.2386 -150.76142 1098 -148 1098 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(-148 1108)" fill="black">
+            <tspan font-family="PingFang SC" font-size="11" font-weight="400" fill="black" x="25" y="12">在软件中存在</tspan>
+            <tspan font-family="PingFang SC" font-size="13" font-weight="400" fill="black" x="6.104" y="30">fault, bug, defect</tspan>
+          </text>
+        </g>
+        <g id="Graphic_52">
+          <path d="M 41 1098 L 157 1098 C 159.76142 1098 162 1100.2386 162 1103 L 162 1147 C 162 1149.7614 159.76142 1152 157 1152 L 41 1152 C 38.238576 1152 36 1149.7614 36 1147 L 36 1103 C 36 1100.2386 38.238576 1098 41 1098 Z" fill="white"/>
+          <path d="M 41 1098 L 157 1098 C 159.76142 1098 162 1100.2386 162 1103 L 162 1147 C 162 1149.7614 159.76142 1152 157 1152 L 41 1152 C 38.238576 1152 36 1149.7614 36 1147 L 36 1103 C 36 1100.2386 38.238576 1098 41 1098 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(41 1108)" fill="black">
+            <tspan font-family="PingFang SC" font-size="11" font-weight="400" fill="black" x="8.5" y="12">在运行时用户观察到</tspan>
+            <tspan font-family="PingFang SC" font-size="13" font-weight="400" fill="black" x="39.1305" y="30">failure</tspan>
+          </text>
+        </g>
+        <g id="Line_51">
+          <line x1="-198" y1="1125" x2="-162.9" y2="1125" marker-end="url(#StickArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_50">
+          <line x1="-27" y1="1125" x2="26.1" y2="1125" marker-end="url(#StickArrow_Marker)" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_49">
+          <text transform="translate(-27 1110)" fill="black">
+            <tspan font-family="PingFang SC" font-size="8.5" font-weight="400" fill="black" x="5.6515" y="9">遭遇fault导致</tspan>
+          </text>
+        </g>
+        <g id="Graphic_48">
+          <text transform="translate(-198 1110)" fill="black">
+            <tspan font-family="PingFang SC" font-size="8.5" font-weight="400" fill="black" x="14" y="9">导致</tspan>
+          </text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

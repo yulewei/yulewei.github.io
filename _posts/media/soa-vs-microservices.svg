@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="-246.5 347.5 250 115" width="500" height="230">
+  <defs>
+    <font-face font-family="Menlo" font-size="10" panose-1="2 11 6 9 3 8 4 2 2 4" units-per-em="1000" underline-position="-63.47656" underline-thickness="43.94531" slope="0" x-height="546.875" cap-height="729.0039" ascent="928.2227" descent="-235.83984" font-weight="400">
+      <font-face-src>
+        <font-face-name name="Menlo-Regular"/>
+      </font-face-src>
+    </font-face>
+    <font-face font-family="Menlo" font-size="15" panose-1="2 11 6 9 3 8 4 2 2 4" units-per-em="1000" underline-position="-63.47656" underline-thickness="43.94531" slope="0" x-height="546.875" cap-height="729.0039" ascent="928.2227" descent="-235.83984" font-weight="400">
+      <font-face-src>
+        <font-face-name name="Menlo-Regular"/>
+      </font-face-src>
+    </font-face>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.7.1 
+    <dc:date>2023-11-06 10:52:01 +0000</dc:date>
+  </metadata>
+  <g id="版面____" fill-opacity="1" stroke-dasharray="none" stroke="none" stroke-opacity="1" fill="none">
+    <g id="版面____: 图层 1">
+      <g id="Group_11">
+        <g id="Graphic_10">
+          <ellipse cx="-121.5" cy="405" rx="121.50019414508" ry="54.0000862867024" fill="#ebebeb"/>
+          <ellipse cx="-121.5" cy="405" rx="121.50019414508" ry="54.0000862867024" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_9">
+          <ellipse cx="-175.5" cy="409.5" rx="49.5000790961439" ry="22.5000359527927" fill="white"/>
+          <ellipse cx="-175.5" cy="409.5" rx="49.5000790961439" ry="22.5000359527927" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(-215.1 402.5)" fill="black">
+            <tspan font-family="Menlo" font-size="10" font-weight="400" fill="black" x=".4666992" y="12">Microservices</tspan>
+          </text>
+        </g>
+        <g id="Graphic_8">
+          <ellipse cx="-67.5" cy="409.5" rx="49.5000790961439" ry="22.5000359527927" fill="white"/>
+          <ellipse cx="-67.5" cy="409.5" rx="49.5000790961439" ry="22.5000359527927" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(-107.1 404)" fill="black">
+            <tspan font-family="Menlo" font-size="10" font-weight="400" fill="black" x="3.476953" y="9">SOA with ESB</tspan>
+          </text>
+        </g>
+        <g id="Graphic_7">
+          <text transform="translate(-148 364.5)" fill="black">
+            <tspan font-family="Menlo" font-size="15" font-weight="400" fill="black" x="12.953857" y="14">SOA</tspan>
+          </text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

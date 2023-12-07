@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="-219.5 770.5 385 223" width="770" height="446">
+  <defs>
+    <font-face font-family="PingFang SC" font-size="16" panose-1="2 11 4 0 0 0 0 0 0 0" units-per-em="1000" underline-position="-150" underline-thickness="58" slope="0" x-height="600" cap-height="860" ascent="1060.0021" descent="-340.0007" font-weight="400">
+      <font-face-src>
+        <font-face-name name="PingFangSC-Regular"/>
+      </font-face-src>
+    </font-face>
+    <font-face font-family="PingFang SC" font-size="15" panose-1="2 11 4 0 0 0 0 0 0 0" units-per-em="1000" underline-position="-150" underline-thickness="58" slope="0" x-height="600" cap-height="860" ascent="1060.0021" descent="-340.0007" font-weight="400">
+      <font-face-src>
+        <font-face-name name="PingFangSC-Regular"/>
+      </font-face-src>
+    </font-face>
+    <font-face font-family="PingFang SC" font-size="14" panose-1="2 11 4 0 0 0 0 0 0 0" units-per-em="1000" underline-position="-150" underline-thickness="58" slope="0" x-height="600" cap-height="860" ascent="1060.0021" descent="-340.0007" font-weight="400">
+      <font-face-src>
+        <font-face-name name="PingFangSC-Regular"/>
+      </font-face-src>
+    </font-face>
+  </defs>
+  <metadata> Produced by OmniGraffle 7.7.1 
+    <dc:date>2023-12-06 04:12:04 +0000</dc:date>
+  </metadata>
+  <g id="版面_____" fill-opacity="1" stroke-dasharray="none" stroke="none" stroke-opacity="1" fill="none">
+    <rect fill="white" x="-219.5" y="770.5" width="385" height="223"/>
+    <g id="版面_____: 图层 1">
+      <g id="Group_55">
+        <g id="Graphic_74">
+          <ellipse cx="-27" cy="882" rx="45.0000719055853" ry="27.0000431433513" fill="white"/>
+          <ellipse cx="-27" cy="882" rx="45.0000719055853" ry="27.0000431433513" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(-58 871)" fill="black">
+            <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="15" y="17">故障</tspan>
+          </text>
+        </g>
+        <g id="Graphic_73">
+          <path d="M -211 864 L -140 864 C -137.23858 864 -135 866.2386 -135 869 L -135 895 C -135 897.7614 -137.23858 900 -140 900 L -211 900 C -213.76142 900 -216 897.7614 -216 895 L -216 869 C -216 866.2386 -213.76142 864 -211 864 Z" fill="white"/>
+          <path d="M -211 864 L -140 864 C -137.23858 864 -135 866.2386 -135 869 L -135 895 C -135 897.7614 -137.23858 900 -140 900 L -211 900 C -213.76142 900 -216 897.7614 -216 895 L -216 869 C -216 866.2386 -213.76142 864 -211 864 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(-211 871)" fill="black">
+            <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="11.5" y="17">可靠性</tspan>
+          </text>
+        </g>
+        <g id="Graphic_72">
+          <path d="M -130 774 L -59 774 C -56.238576 774 -54 776.2386 -54 779 L -54 805 C -54 807.7614 -56.238576 810 -59 810 L -130 810 C -132.76142 810 -135 807.7614 -135 805 L -135 779 C -135 776.2386 -132.76142 774 -130 774 Z" fill="white"/>
+          <path d="M -130 774 L -59 774 C -56.238576 774 -54 776.2386 -54 779 L -54 805 C -54 807.7614 -56.238576 810 -59 810 L -130 810 C -132.76142 810 -135 807.7614 -135 805 L -135 779 C -135 776.2386 -132.76142 774 -130 774 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(-130 781)" fill="black">
+            <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="11.5" y="17">维修性</tspan>
+          </text>
+        </g>
+        <g id="Graphic_71">
+          <path d="M 5 774 L 76 774 C 78.76142 774 81 776.2386 81 779 L 81 805 C 81 807.7614 78.76142 810 76 810 L 5 810 C 2.2385763 810 33817688e-23 807.7614 0 805 L 17763568e-22 779 C 21145337e-22 776.2386 2.2385763 774 5 774 Z" fill="white"/>
+          <path d="M 5 774 L 76 774 C 78.76142 774 81 776.2386 81 779 L 81 805 C 81 807.7614 78.76142 810 76 810 L 5 810 C 2.2385763 810 33817688e-23 807.7614 0 805 L 17763568e-22 779 C 21145337e-22 776.2386 2.2385763 774 5 774 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(5 781)" fill="black">
+            <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="11.5" y="17">保障性</tspan>
+          </text>
+        </g>
+        <g id="Graphic_70">
+          <path d="M 86 864 L 157 864 C 159.76142 864 162 866.2386 162 869 L 162 895 C 162 897.7614 159.76142 900 157 900 L 86 900 C 83.23858 900 81 897.7614 81 895 L 81 869 C 81 866.2386 83.23858 864 86 864 Z" fill="white"/>
+          <path d="M 86 864 L 157 864 C 159.76142 864 162 866.2386 162 869 L 162 895 C 162 897.7614 159.76142 900 157 900 L 86 900 C 83.23858 900 81 897.7614 81 895 L 81 869 C 81 866.2386 83.23858 864 86 864 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(86 871)" fill="black">
+            <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="11.5" y="17">测试性</tspan>
+          </text>
+        </g>
+        <g id="Graphic_69">
+          <path d="M 5 954 L 76 954 C 78.76142 954 81 956.2386 81 959 L 81 985 C 81 987.7614 78.76142 990 76 990 L 5 990 C 2.2385763 990 33817688e-23 987.7614 0 985 L 17763568e-22 959 C 21145337e-22 956.2386 2.2385763 954 5 954 Z" fill="white"/>
+          <path d="M 5 954 L 76 954 C 78.76142 954 81 956.2386 81 959 L 81 985 C 81 987.7614 78.76142 990 76 990 L 5 990 C 2.2385763 990 33817688e-23 987.7614 0 985 L 17763568e-22 959 C 21145337e-22 956.2386 2.2385763 954 5 954 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(5 961)" fill="black">
+            <tspan font-family="PingFang SC" font-size="16" font-weight="400" fill="black" x="11.5" y="17">安全性</tspan>
+          </text>
+        </g>
+        <g id="Graphic_68">
+          <path d="M -139 954 L -59 954 C -56.238576 954 -54 956.2386 -54 959 L -54 985 C -54 987.7614 -56.238576 990 -59 990 L -139 990 C -141.76142 990 -144 987.7614 -144 985 L -144 959 C -144 956.2386 -141.76142 954 -139 954 Z" fill="white"/>
+          <path d="M -139 954 L -59 954 C -56.238576 954 -54 956.2386 -54 959 L -54 985 C -54 987.7614 -56.238576 990 -59 990 L -139 990 C -141.76142 990 -144 987.7614 -144 985 L -144 959 C -144 956.2386 -141.76142 954 -139 954 Z" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+          <text transform="translate(-139 961.5)" fill="black">
+            <tspan font-family="PingFang SC" font-size="15" font-weight="400" fill="black" x="2.5" y="16">环境适应性</tspan>
+          </text>
+        </g>
+        <g id="Line_67">
+          <line x1="-81" y1="810" x2="-45.4714" y2="857.3715" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_66">
+          <line x1="27" y1="810" x2="-8.528597" y2="857.3715" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_65">
+          <line x1="-135" y1="882" x2="-72.00002" y2="882" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_64">
+          <line x1="81" y1="882" x2="18.000022" y2="882" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_63">
+          <line x1="-84.6" y1="954" x2="-46.4782" y2="906.3478" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Line_62">
+          <line x1="-8.528599" y1="906.6285" x2="27" y2="954" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
+        </g>
+        <g id="Graphic_61">
+          <rect x="-90" y="819" width="54" height="27" fill="white"/>
+          <text transform="translate(-85 822.5)" fill="black">
+            <tspan font-family="PingFang SC" font-size="14" font-weight="400" fill="black" x="8" y="15">修复</tspan>
+          </text>
+        </g>
+        <g id="Graphic_60">
+          <rect x="-18" y="819" width="72" height="27" fill="white"/>
+          <text transform="translate(-13 822.5)" fill="black">
+            <tspan font-family="PingFang SC" font-size="14" font-weight="400" fill="black" x="3" y="15">供应资源</tspan>
+          </text>
+        </g>
+        <g id="Graphic_59">
+          <rect x="-126.93471" y="873" width="45" height="18" fill="white"/>
+          <text transform="translate(-121.93471 872)" fill="black">
+            <tspan font-family="PingFang SC" font-size="14" font-weight="400" fill="black" x="3.5" y="15">减少</tspan>
+          </text>
+        </g>
+        <g id="Graphic_58">
+          <rect x="26.77788" y="873" width="45" height="18" fill="white"/>
+          <text transform="translate(31.77788 872)" fill="black">
+            <tspan font-family="PingFang SC" font-size="14" font-weight="400" fill="black" x="3.5" y="15">检测</tspan>
+          </text>
+        </g>
+        <g id="Graphic_57">
+          <rect x="-153" y="918" width="126" height="27" fill="white"/>
+          <text transform="translate(-148 921.5)" fill="black">
+            <tspan font-family="PingFang SC" font-size="14" font-weight="400" fill="black" x="2" y="15">各种环境下零故障</tspan>
+          </text>
+        </g>
+        <g id="Graphic_56">
+          <rect x="-18" y="918" width="72" height="27" fill="white"/>
+          <text transform="translate(-13 921.5)" fill="black">
+            <tspan font-family="PingFang SC" font-size="14" font-weight="400" fill="black" x="3" y="15">降低风险</tspan>
+          </text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
