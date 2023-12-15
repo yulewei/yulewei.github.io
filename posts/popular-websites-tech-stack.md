@@ -24,6 +24,7 @@ tags: [技术栈, 架构, MySQL, Java]
 - 1995.05，[Java](https://en.wikipedia.org/wiki/Java_%28programming_language%29) 语言诞生，创造者为 Sun 公司。Java 平台早期并不真正开源，虽然 1998 年 JDK 1.2 开始以 [SCSL](https://en.wikipedia.org/wiki/Sun_Community_Source_License) 协议开放源代码，但 SCSL 协议限制太大，饱受批评，直到 [2006.11](https://web.archive.org/web/0/http://www.sun.com/2006-1113/feature/story.jsp) 才以 GPL 协议真正开源。
 - 1995.06，[PHP](https://en.wikipedia.org/wiki/PHP) 语言诞生，源码采用 [PHP](https://www.php.net/license/) 协议（BSD 风格的协议）。
 - 1995.12，[HTML](https://en.wikipedia.org/wiki/HTML) 标准规范首次发布，版本为 HTML 2.0
+- 1996.05，HTTP/1.0 规范发布（[RFC1945](https://datatracker.ietf.org/doc/html/rfc1945)），第一作者 [Tim Berners-Lee](https://en.wikipedia.org/wiki/Tim_Berners-Lee)，第二作者 [Roy Fielding](https://en.wikipedia.org/wiki/Roy_Fielding)。1997 年 HTTP 1.1 规范发布（[RFC2068](https://datatracker.ietf.org/doc/html/rfc2068)），1999 年 HTTP 1.1 规范发布更新版（[RFC2616](https://datatracker.ietf.org/doc/html/rfc2616)）。HTTP 1.1 的主要设计者是 Roy Fielding，他也是 Apache HTTP Server 项目（1995.02 创建）的[主要创建者](https://httpd.apache.org/ABOUT_APACHE.html)之一。基于 HTTP 的设计思想，Roy Fielding 在 2000 年的博士论文创造了 [REST](https://en.wikipedia.org/wiki/REST) 架构风格。
 - 1996.05，Sun 公司首次对外发布 [Java Servlet](https://en.wikipedia.org/wiki/Jakarta_Servlet) API。
 - 1996.10，[MySQL](https://en.wikipedia.org/wiki/MySQL) 首次公开对外发布，最初的公开发行版仅提供了 Solaris 的二进制发行版，一个月后，源代码和 Linux 二进制文件发布，源码采用的是专有协议“MySQL Free Public License”，到 [2000.06](https://web.archive.org/web/0/http://www.mysql.com/news/article-23.html) 改为 GPL 协议。
 - 1996.10，[PostgreSQL](https://en.wikipedia.org/wiki/PostgreSQL) 的诞生日是在 10 月 22 日，在这一天 PostgreSQL.org 网站上线。PostgreSQL 之前的项目名为 Postgres，之所以改名是为了反映其对 SQL 的支持。源码采用 [PostgreSQL 协议](https://www.postgresql.org/about/licence/)（类似 BSD 或 MIT 协议）。
@@ -33,8 +34,10 @@ tags: [技术栈, 架构, MySQL, Java]
 - 2002.08，[Nginx](https://en.wikipedia.org/wiki/Nginx) 首次对外发布，源码采用 BSD 协议。最初，研发 Nginx 目的是为了解决 [C10k](https://en.wikipedia.org/wiki/C10k_problem) 问题。之后，Nginx 逐渐替代 Apache HTTP Server，LAMP 技术栈改为 LNMP 技术栈。
 - 2003.06，Java 的 [Spring](https://en.wikipedia.org/wiki/Spring_Framework) 框架首次对外发布，版本为 0.9，源码采用 Apache 协议。
 - 2004.08，[Ruby on Rails](https://en.wikipedia.org/wiki/Ruby_on_Rails) 框架首次对外发布，源码采用 MIT 协议。
-- 2005.02，“[Ajax](https://en.wikipedia.org/wiki/Ajax_%28programming%29)”术语诞生，早期使用 Ajax 技术的经典案例是 Google 在 2004 发布的 Gmail 和 2005 发布的 Google Maps。
+- 2004.10，首届 [Web 2.0 Conference](https://web.archive.org/web/20041001082754/http://www.web2con.com/) 举办，[Web 2.0](https://en.wikipedia.org/wiki/Web_2.0) 概念开始流行。
+- 2005.02，“[Ajax](https://en.wikipedia.org/wiki/Ajax_%28programming%29)”术语诞生，缩写代表的是“Asynchronous JavaScript + XML”。早期使用 Ajax 技术的经典案例是 Google 在 2004 年发布的 Gmail、2004 年 12 月发布的 Google 搜索的 [Google Suggest](https://en.wikipedia.org/wiki/Timeline_of_Google_Search) 特性、2005 年发布的 Google Maps，以及 2004 年发布的 Flickr 等。早期 Ajax 前后端交互的数据格式是 XML，从 2005 年 [del.icio.us API](https://inkdroid.org/2005/09/21/delicious-json/) 和 [Yahoo! Web Services](https://simonwillison.net/2005/Dec/16/json/) 支持 [JSON](https://en.wikipedia.org/wiki/JSON) 格式等代表性转变开始，XML 逐渐被 JSON 取代。
 - 2005.07，Python 的 [Django](https://en.wikipedia.org/wiki/Django_%28web_framework%29) 框架首次对外发布，源码采用 BSD 协议。
+- 2006.06，Rails 的创造者 DHH 在 RailsConf 2006 会议上做了题为“Discovering a world of Resources on Rails”的演讲，介绍了将要发布的 Rails 1.2（2007.01 正式发布）对 [REST](https://en.wikipedia.org/wiki/REST) 开发的支持。Rails 框架支持 REST 开发，大力推动了 REST 的普及。受 Rails 的影响，其他编程语言的 Web 开发框架[模仿 Rails 的方式](https://groups.google.com/g/rest_in_action/c/G7sBHhkNdsw)开始对支持 REST 开发。
 - 2007.02，[HBase](https://en.wikipedia.org/wiki/Apache_HBase) 宣布在 Hadoop 项目中成立，成为 Hadoop 的子项目。HBase 是 Google 的 [BigTable](https://en.wikipedia.org/wiki/Bigtable)（OSDI'2006）论文的开源实现。
 - 2007.01，iPhone 手机首次对外发布，同年 6 月 iPhone 正式发售，11 月 Android 系统首次对外公布，移到互联网开始大爆发。
 - 2008.07，Facebook 对外开源 [Cassandra](https://en.wikipedia.org/wiki/Apache_Cassandra) 项目，项目受 Amazon 的 [Dynamo](https://en.wikipedia.org/wiki/Dynamo_%28storage_system%29)（SOSP'2007）论文和 Google 的 BigTable（OSDI'2006）论文的。
@@ -101,7 +104,7 @@ Yahoo!，1994 年创立，早期网站操作系统是 FreeBSD，Web 服务器是
 
 <img width="600" alt="Yahoo! 技术架构（2005）" title="Yahoo! 技术架构（2005）" src="https://static.nullwy.me/yahoo-architecture-2005.png">
 
-2000 年 ~ 2010 年，Yahoo! 是世界上流量最大的网站，虽然期间被 Google 短暂超越，但随后又反超，一直到到 2010 年后才被 Google 彻底超越。2000 年前后 Yahoo! 转向到 MySQL 和 PHP，并在技术上助力 LAMP 生态的发展壮大，对 LAMP 技术栈的流行起到巨大的推动作用。值得一提的是，知名 MySQL 专家 [Jeremy Zawodny](https://en.wikipedia.org/wiki/Jeremy_Zawodny)，《高性能MySQL》2004 年第 1 版（[豆瓣](https://book.douban.com/subject/1495763/)）的作者，在 1999.12 ~ 2008.06 期间为 Yahoo! 工程师；PHP 之父 [Rasmus Lerdorf](https://en.wikipedia.org/wiki/Rasmus_Lerdorf) 在 2002.09 ~ 2009.11 期间为 Yahoo! 工程师。
+2000 年 ~ 2010 年，Yahoo! 是世界上流量最大的网站，虽然期间被 Google 短暂超越，但随后又反超，一直到到 2010 年后才被 Google 彻底超越。2000 年前后 Yahoo! 转向到 MySQL 和 PHP，并在技术上助力 LAMP 生态的发展壮大，对 LAMP 技术栈的流行起到巨大的推动作用。值得一提的是，知名 MySQL 专家 [Jeremy Zawodny](https://en.wikipedia.org/wiki/Jeremy_Zawodny)，《高性能MySQL》2004 年第 1 版（[豆瓣](https://book.douban.com/subject/1495763/)）的作者，在 1999.12 ~ 2008.06 期间为 Yahoo! 工程师。PHP 之父 [Rasmus Lerdorf](https://en.wikipedia.org/wiki/Rasmus_Lerdorf) 在 2002.09 ~ 2009.11 期间为 Yahoo! 工程师。在前端领域，JSON 创造者 [Douglas Crockford](https://en.wikipedia.org/wiki/Douglas_Crockford)，在 2005 年至 2012 年期间供职于 Yahoo!。
 
 # Amazon（1994）
 
