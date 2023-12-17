@@ -46,7 +46,7 @@
 <meta property="og:image" content="https://static.nullwy.me/twitter-architecture-rails.png">
 <meta property="og:image" content="https://static.nullwy.me/twitter-architecture-2013.png">
 <meta property="article:published_time" content="2023-12-03T15:37:00.000Z">
-<meta property="article:modified_time" content="2023-12-16T14:49:50.370Z">
+<meta property="article:modified_time" content="2023-12-17T06:44:53.090Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="技术栈">
@@ -392,7 +392,7 @@
 <h2 id="技术栈和架构演进">技术栈和架构演进</h2>
 <p>容易发现多数网站的技术栈的演进模式类似。在创建网站早期通常选择使用 PHP、Ruby、Python 脚本语言和框架来开发，这些脚本语言和框架具有更快的开发效率，能快速交付上线。随着网站流量的增长，面临性能和可扩展性问题，通常会将网站服务化，从单体架构向面向服务的 SOA 和微服务架构演进，一大部分网站在服务化过程中会选择将核心业务改由其他性能更佳的编译型编程语言来实现，如 Java、Scala、C++、Go，原先的脚本语言可能全部废弃，也可能仅用于前端展示层的 Web 动态页面渲染，比如 Facebook、Twitter 等。当然也有一部分网站，演进为 SOA 和微服务架构后，业务逻辑的实现一直以最初的脚本语言为主。</p>
 <p>在架构微服务化后，很多网站实现的微服务之间采用基于 HTTP 协议的 REST 方式通信（或者使用的 RPC 框架支持跨语言 RPC 调用），各个微服务的实现在理论上编程语言不需要统一，可以根据该微服务的性能要求或负责该微服务的团队的技术偏好自由选择，所以真实世界的互联网公司内部各个业务子系统的技术栈可能不统一。但是内部技术栈不统一会带来额外的维护成本。另外，考虑技术栈的迁移重构成本，新的业务子系统使用新的技术栈，而有些旧的业务子系统很可能继续使用旧的技术栈。除了业务子系统外，很可能团队内部有自研的中间件、运维工具等，这些组件由中间件团队、运维团队研发，很可能会选择与业务系统不一样的技术栈。</p>
-<p>注意，解决网站的可扩展性问题，不一定需要演进为服务化架构。架构服务化意味着将完整的单体服务按业务的功能领域做垂直拆分，而实际上在应用服务层可以通过部署多个相同副本的单体服务的方式实现系统的水平扩展，网站的可扩展性问题主要在数据存储层上。拆分应用服务的好处在于能实现组织团队的规模化。解决数据库的扩展性的策略有，数据复制（数据缓存、数据库主从读写分离）、数据垂直拆分、数据水平拆分（也叫数据分片，sharding）。数据库被拆分后，如果单个事务内的数据分散在多个节点就要解决分布式事务问题，但是实现分布式事务代价太大，通常的选择是牺牲一致性，仅满足最终一致性（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Eventual_consistency">BASE</a>）。</p>
+<p><strong>注意，解决网站的可扩展性问题，不一定需要演进为服务化架构</strong>。架构服务化意味着将完整的单体服务按业务的功能领域做垂直拆分，而实际上在应用服务层可以通过部署多个相同副本的单体服务的方式实现系统的水平扩展，网站的可扩展性问题主要在数据存储层上。<strong>拆分应用服务的好处更多在于能实现组织团队的规模化，拆分后的小团队独立维护各自的微服务，能有效提升研发效率</strong>。解决数据库的扩展性的策略有，数据复制（数据缓存、数据库主从读写分离）、数据垂直拆分、数据水平拆分（也叫数据分片，sharding）。数据库被拆分后，如果单个事务内的数据分散在多个节点就要解决分布式事务问题，但是实现分布式事务代价太大，通常的选择是牺牲一致性，仅满足最终一致性（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Eventual_consistency">BASE</a>）。对于无或弱事务要求的非关系型的数据存储，也可以选择存储在可扩展性能力更强的 NoSQL 数据库。</p>
 <p>没有拆分应用服务，始终采用单体架构的经典案例是 Instagram，2019 年 Instagram 在技术博客上有这样一段话<sup class="footnote-ref"><a href="#fn37" id="fnref37:1">[37:1]</a></sup>：</p>
 <blockquote>
 <p>Our server app is a monolith, one big codebase of several million lines and a few thousand Django endpoints, all loaded up and served together. A few services have been split out of the monolith, but we don’t have any plans to aggressively break it up.</p>
