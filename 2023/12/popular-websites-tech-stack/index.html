@@ -22,12 +22,12 @@
     var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
-  <meta name="description" content="技术栈是构建应用的技术集合，由编程语言、框架、库、服务器、数据库、工具等组合而成。组成技术栈的技术是与具体业务无关的基础软件。互联网公司选择的技术栈，倾向于使用开源软件，相对于专有软件，开源软件具有高质量、免费、开放、灵活等优势。互联网的早期开拓者 Yahoo 的技术栈选择是经典案例，受开源运动的影响，在 2000 左右 Yahoo 从最初基于自定义的专属软件迁移了到 LAMP 技术栈。">
+  <meta name="description" content="本文整理总结主要的流行互联网网站技术栈，以及这些网站的技术栈和架构的历史演进过程。涉及的网站大部分都是当前或曾经访问量或月活用户量 Top 的网站（参见 similarweb 网站的统计，或访问量 Top 10 网站的历史演变，或 wiki 整理的月活用户量 Top 社交平台）。国内网站或 APP 涵盖了主流的阿里、腾讯、百度、美团、字节、京东等大厂的互联网产品（之所以称为“主流”，参见 2022">
 <meta property="og:type" content="article">
 <meta property="og:title" content="流行互联网网站技术栈整理">
 <meta property="og:url" content="https://nullwy.me/2023/12/popular-websites-tech-stack/index.html">
 <meta property="og:site_name" content="nullwy&#39;s blog">
-<meta property="og:description" content="技术栈是构建应用的技术集合，由编程语言、框架、库、服务器、数据库、工具等组合而成。组成技术栈的技术是与具体业务无关的基础软件。互联网公司选择的技术栈，倾向于使用开源软件，相对于专有软件，开源软件具有高质量、免费、开放、灵活等优势。互联网的早期开拓者 Yahoo 的技术栈选择是经典案例，受开源运动的影响，在 2000 左右 Yahoo 从最初基于自定义的专属软件迁移了到 LAMP 技术栈。">
+<meta property="og:description" content="本文整理总结主要的流行互联网网站技术栈，以及这些网站的技术栈和架构的历史演进过程。涉及的网站大部分都是当前或曾经访问量或月活用户量 Top 的网站（参见 similarweb 网站的统计，或访问量 Top 10 网站的历史演变，或 wiki 整理的月活用户量 Top 社交平台）。国内网站或 APP 涵盖了主流的阿里、腾讯、百度、美团、字节、京东等大厂的互联网产品（之所以称为“主流”，参见 2022">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://static.nullwy.me/gocon-tokyo-2014-fitzpatrick-go-fun-fast.png">
 <meta property="og:image" content="https://static.nullwy.me/yahoo-architecture-2005.png">
@@ -46,7 +46,7 @@
 <meta property="og:image" content="https://static.nullwy.me/twitter-architecture-rails.png">
 <meta property="og:image" content="https://static.nullwy.me/twitter-architecture-2013.png">
 <meta property="article:published_time" content="2023-12-03T15:37:00.000Z">
-<meta property="article:modified_time" content="2023-12-17T06:44:53.090Z">
+<meta property="article:modified_time" content="2023-12-17T18:26:09.973Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="技术栈">
@@ -289,14 +289,14 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>34k</span>
+              <span>35k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
                 <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>31 分钟</span>
+              <span>32 分钟</span>
             </span>
 
         </div>
@@ -308,7 +308,8 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>技术栈是构建应用的技术集合，由编程语言、框架、库、服务器、数据库、工具等组合而成。组成技术栈的技术是与具体业务无关的基础软件。互联网公司选择的技术栈，倾向于使用开源软件，相对于专有软件，开源软件具有高质量、免费、开放、灵活等优势。互联网的早期开拓者 Yahoo 的技术栈选择是经典案例，受开源运动的影响，在 2000 左右 Yahoo 从最初基于自定义的专属软件迁移了到 LAMP 技术栈。</p>
+        <p>本文整理总结主要的流行互联网网站技术栈，以及这些网站的技术栈和架构的历史演进过程。涉及的网站大部分都是当前或曾经访问量或月活用户量 Top 的网站（参见 <a target="_blank" rel="noopener" href="https://www.similarweb.com/top-websites/">similarweb</a> 网站的统计，或访问量 Top 10 网站的<a target="_blank" rel="noopener" href="https://statisticsanddata.org/data/most-popular-websites-in-the-world-1996-2021/">历史演变</a>，或 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/List_of_social_platforms_with_at_least_100_million_active_users">wiki</a> 整理的月活用户量 Top 社交平台）。国内网站或 APP 涵盖了主流的阿里、腾讯、百度、美团、字节、京东等大厂的互联网产品（之所以称为“主流”，参见 2022 年度中国 APP 月活<a target="_blank" rel="noopener" href="https://www.iimedia.cn/c880/91597.html">排行榜</a>）。整理的技术栈主要是流行网站的服务端业务系统的技术栈，包括编程语言、数据库、RPC 框架等，同时也简单整理了大数据技术栈。除了对大部分流行网站的技术栈做系统性梳理外，本文还挑选部分有代表性的网站，对这些网站的技术栈和架构的演进做详细解析。</p>
+<p>技术栈是构建应用的技术集合，由编程语言、框架、库、服务器、数据库、工具等组合而成。组成技术栈的技术是与具体业务无关的基础软件。互联网公司选择的技术栈，倾向于使用开源软件，相对于专有软件，开源软件具有高质量、免费、开放、灵活等优势。互联网的早期开拓者 Yahoo 的技术栈选择是经典案例，受开源运动的影响，在 2000 左右 Yahoo 从最初基于自定义的专属软件迁移了到 LAMP 技术栈。</p>
 <span id="more"></span>
 <p>在“开源”（open source）一词出现之前，技术社区的黑客选择使用“自由软件”（free software）这个词。但是“自由软件”这个词与对知识产权的敌意、共产主义和其它观点相联系，几乎不受管理者和投资者的欢迎，于是 1998 年 2 月 3 日在由 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Eric_S._Raymond">Eric Raymond</a> 等人参加的会议上“开源”一词诞生，2 月下旬开源软件促进会成立 <a target="_blank" rel="noopener" href="https://opensource.org/history/">OSI</a>，Eric Raymond 担任主席。自由软件和开源软件被合称为 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Free_and_open-source_software">FOSS</a>。缩写“<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/LAMP_%28software_bundle%29">LAMP</a>”代表的是 Linux-Apache-MySQL-PHP，这些软件都是自由软件或开源软件。</p>
 <h1 id="案例汇总与解析">案例汇总与解析</h1>
@@ -392,7 +393,7 @@
 <h2 id="技术栈和架构演进">技术栈和架构演进</h2>
 <p>容易发现多数网站的技术栈的演进模式类似。在创建网站早期通常选择使用 PHP、Ruby、Python 脚本语言和框架来开发，这些脚本语言和框架具有更快的开发效率，能快速交付上线。随着网站流量的增长，面临性能和可扩展性问题，通常会将网站服务化，从单体架构向面向服务的 SOA 和微服务架构演进，一大部分网站在服务化过程中会选择将核心业务改由其他性能更佳的编译型编程语言来实现，如 Java、Scala、C++、Go，原先的脚本语言可能全部废弃，也可能仅用于前端展示层的 Web 动态页面渲染，比如 Facebook、Twitter 等。当然也有一部分网站，演进为 SOA 和微服务架构后，业务逻辑的实现一直以最初的脚本语言为主。</p>
 <p>在架构微服务化后，很多网站实现的微服务之间采用基于 HTTP 协议的 REST 方式通信（或者使用的 RPC 框架支持跨语言 RPC 调用），各个微服务的实现在理论上编程语言不需要统一，可以根据该微服务的性能要求或负责该微服务的团队的技术偏好自由选择，所以真实世界的互联网公司内部各个业务子系统的技术栈可能不统一。但是内部技术栈不统一会带来额外的维护成本。另外，考虑技术栈的迁移重构成本，新的业务子系统使用新的技术栈，而有些旧的业务子系统很可能继续使用旧的技术栈。除了业务子系统外，很可能团队内部有自研的中间件、运维工具等，这些组件由中间件团队、运维团队研发，很可能会选择与业务系统不一样的技术栈。</p>
-<p><strong>注意，解决网站的可扩展性问题，不一定需要演进为服务化架构</strong>。架构服务化意味着将完整的单体服务按业务的功能领域做垂直拆分，而实际上在应用服务层可以通过部署多个相同副本的单体服务的方式实现系统的水平扩展，网站的可扩展性问题主要在数据存储层上。<strong>拆分应用服务的好处更多在于能实现组织团队的规模化，拆分后的小团队独立维护各自的微服务，能有效提升研发效率</strong>。解决数据库的扩展性的策略有，数据复制（数据缓存、数据库主从读写分离）、数据垂直拆分、数据水平拆分（也叫数据分片，sharding）。数据库被拆分后，如果单个事务内的数据分散在多个节点就要解决分布式事务问题，但是实现分布式事务代价太大，通常的选择是牺牲一致性，仅满足最终一致性（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Eventual_consistency">BASE</a>）。对于无或弱事务要求的非关系型的数据存储，也可以选择存储在可扩展性能力更强的 NoSQL 数据库。</p>
+<p><strong>注意，解决网站的可扩展性问题，不一定需要演进为服务化架构</strong>。架构服务化意味着将完整的单体服务按业务的功能领域做垂直拆分，而实际上在应用服务层可以通过部署多个相同副本的单体服务的方式实现系统的水平扩展，网站的可扩展性问题主要在数据存储层上。<strong>拆分应用服务的好处更多在于能实现组织团队的规模化，拆分后的小团队独立维护各自的微服务，能有效提升研发效率</strong>。解决数据库的扩展性的策略有，数据复制（数据缓存、数据库主从读写分离）、数据垂直拆分、数据水平拆分（也叫数据分片，sharding）。数据库被拆分后，如果单个事务内的数据分散在多个节点就要解决分布式事务问题，但是实现分布式事务代价太大，通常的选择是牺牲一致性，仅满足最终一致性（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Eventual_consistency">BASE</a>）。对于无或弱事务要求的非关系型的数据，也可以选择存储在可扩展性能力更强的 NoSQL 数据库。</p>
 <p>没有拆分应用服务，始终采用单体架构的经典案例是 Instagram，2019 年 Instagram 在技术博客上有这样一段话<sup class="footnote-ref"><a href="#fn37" id="fnref37:1">[37:1]</a></sup>：</p>
 <blockquote>
 <p>Our server app is a monolith, one big codebase of several million lines and a few thousand Django endpoints, all loaded up and served together. A few services have been split out of the monolith, but we don’t have any plans to aggressively break it up.</p>
@@ -1235,7 +1236,7 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">304k</span>
+    <span title="站点总字数">305k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
