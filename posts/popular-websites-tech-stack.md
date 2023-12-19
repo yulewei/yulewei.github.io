@@ -5,7 +5,7 @@ categories: 架构
 tags: [技术栈, 架构, MySQL, Java]
 ---
 
-本文整理总结主要的流行互联网网站技术栈，以及这些网站的技术栈和架构的历史演进过程。涉及的网站大部分都是当前或曾经访问量或月活用户量 Top 的网站（参见 [similarweb](https://www.similarweb.com/top-websites/) 网站的统计，或访问量 Top 10 网站的[历史演变](https://statisticsanddata.org/data/most-popular-websites-in-the-world-1996-2021/)，或 [wiki](https://en.wikipedia.org/wiki/List_of_social_platforms_with_at_least_100_million_active_users) 整理的至少 1 亿月活用户量的社交平台）。国内网站或 APP 涵盖了主流的阿里、腾讯、百度、美团、字节、京东等大厂的互联网产品（之所以称为“主流”，参见 2022 年度中国 APP 月活[排行榜](https://www.iimedia.cn/c880/91597.html)）。整理的技术栈主要是流行网站的服务端业务系统的技术栈，包括编程语言、数据库、RPC 框架等，同时也简单整理了大数据技术栈，前端 JavaScript、CSS 库或框架等不涉及。除了对大部分流行网站的技术栈做系统性梳理外，本文还挑选部分有代表性的网站，对这些网站的技术栈和架构的历史演进做详细解析。
+本文整理总结主要的流行互联网网站技术栈，以及这些网站的技术栈和架构的历史演进过程。涉及的网站大部分都是当前或曾经访问量或月活用户量 Top 的网站（参见 [similarweb](https://www.similarweb.com/top-websites/) 网站的统计，或访问量 Top 10 网站的[历史演变](https://statisticsanddata.org/data/most-popular-websites-in-the-world-1996-2021/)，或 [wiki](https://en.wikipedia.org/wiki/List_of_social_platforms_with_at_least_100_million_active_users) 整理的至少 1 亿月活用户量的社交平台）。国内网站或 APP 涵盖了主流的阿里、腾讯、百度、美团、字节、京东等大厂的互联网产品（之所以称为“主流”，参见 2022 年度中国 APP 月活[排行榜](https://www.iimedia.cn/c880/91597.html)）。整理的技术栈主要是流行网站的服务端业务系统的技术栈，包括编程语言、数据库、RPC 框架等，同时也简单整理了大数据技术栈，前端和客户端技术栈等不涉及。除了对大部分流行网站的技术栈做系统性梳理外，本文还挑选部分有代表性的网站，对这些网站的技术栈和架构的历史演进做详细解析。
 
 <!--more-->
 
