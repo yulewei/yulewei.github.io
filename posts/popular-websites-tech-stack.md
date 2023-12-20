@@ -402,7 +402,7 @@ Twitter，2006 年创立，早期采用 Ruby on Rails 技术栈，数据库是 M
 
 [^1]: 2007 Jeff Dean: Software Engineering Advice from Building Large-Scale Distributed Systems (Stanford CS295 class lecture, Spring, 2007) <https://research.google.com/people/jeff/stanford-295-talk.pdf>
 [^2]: 2008-11 Google Architecture <http://highscalability.com/blog/2008/11/22/google-architecture.html>
-[^3]: 2008-06 新浪夏清然、徐继哲：自由软件和新浪网. 程序员 2008年第6期54-55，[cnki](https://kns.cnki.net/kcms2/article/abstract?v=ZJxhFRRmSIg_vY22yRVhkaZ3NFShMPerPSVyBcl5KtU1GPeMckBBqC6JofK0uoXZcpMb_u50yyIHg_huHMXonf16rr9nHnx0SNyD-yhdN_DnO10Dxtf9yQ==&uniplatform=NZKPT)，[cqvip](http://lib.cqvip.com/Qikan/Article/Detail?id=27523653) <http://www.zeuux.com/blog/content/3620/>
+[^3]: 2008-06 新浪夏清然、徐继哲：自由软件和新浪网. 程序员 2008年第6期54-55，[cnki](https://kns.cnki.net/kcms2/article/abstract?v=zcLOVLBHd2yRQ8cenitMd2JyjVqLnTRrIbCiNVgweUi0oksDMHi6mpnw3tjzJCetgm1nmkLf3WsQz_LDhH0H4WbuX5fX2pEZlAPiMqseXpMsfZMncrPMYOQ77jJKNZBm&uniplatform=NZKPT&flag=copy)，[cqvip](http://lib.cqvip.com/Qikan/Article/Detail?id=27523653) <http://www.zeuux.com/blog/content/3620/>
 [^4]: 2016-01 微信张文瑞：从无到有：微信后台系统的演进之路 <https://www.infoq.cn/article/the-road-of-the-growth-weixin-background>
 [^5]: 2008-02 Yandex Architecture http://highscalability.com/yandex-architecture
 [^6]: 2007-08 Wikimedia architecture <http://highscalability.com/wikimedia-architecture>

@@ -1,5 +1,5 @@
-https://nullwy.me/2023/11/reliability-engineering/
 https://nullwy.me/2023/12/popular-websites-tech-stack/
+https://nullwy.me/2023/11/reliability-engineering/
 https://nullwy.me/2023/11/amazon-architecture-evolution/
 https://nullwy.me/2017/11/zookeeper-note/
 https://nullwy.me/2018/01/stack-frame-calling-convention/
