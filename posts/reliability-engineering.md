@@ -282,7 +282,7 @@ IDC 数据中心等级划分（[data centre tiers](https://en.wikipedia.org/wiki
 
 # 参考资料
 
-[^1]: 秦咏红，吕乃基：工程系统可靠性的演进，东北大学学报，2011年第4期295-299，[cnki](https://kns.cnki.net/kcms2/article/abstract?v=ZJxhFRRmSIhhkgwsHZ-KWQt3AuEfaSIwSBo3ArgpvZBYgD9jd-D3aac9ZrFgyszRx3DONgEbyOOjQI3USyqx9ZMLzGCp3woRnbWBVvHFMA9qCsGNQ8c16eEZ3lctcHA5LCxQDegcnIo=&uniplatform=NZKPT&language=CHS)，[cqvip](https://qikan.cqvip.com/Qikan/Article/Detail?id=38777595)
+[^1]: 秦咏红，吕乃基：工程系统可靠性的演进，东北大学学报，2011年第4期295-299，[cnki](https://kns.cnki.net/kcms2/article/abstract?v=zcLOVLBHd2wIt8gpzydgP6J3pB-hC88RrjSmTExnvcHvDDGG-WWagNHfY8JcfcgvEZjVrR4jQJ5Duh_KjbIUFWmw0rDVJqeHyfZG93hQC7B8vh91-Q5vECPlrcF0-t_l&uniplatform=NZKPT&flag=copy)，[cqvip](https://qikan.cqvip.com/Qikan/Article/Detail?id=38777595)
 [^2]: 可靠性概论，工信部电子第五研究所潘勇，2015，[豆瓣](https://book.douban.com/subject/26870237/)：第11章 可靠性标准
 [^3]: 2022-09 【标准解读】用标准语言解读装备“六性” <https://mp.weixin.qq.com/s/FqfLL_ovGIZ-GO998HB4uw>
 [^4]: 2021-07 张健：装备通用质量特性关系概述 <https://mp.weixin.qq.com/s/nXmrTrz7c5EnEh4C_h4JEg>
@@ -294,7 +294,7 @@ IDC 数据中心等级划分（[data centre tiers](https://en.wikipedia.org/wiki
 [^10]: System Reliability Theory, Rausand, etc., 3rd 2020，[豆瓣](https://book.douban.com/subject/35473900/)：3 Failures and Faults, Figure 3.3 Illustration of the difference between failure and fault for a degrading item.
 [^11]: 2021-09 揭秘：SSD 的“可靠性”到底可不可靠 <https://memblaze.com/innovate/technical-articles/169.html>
 [^12]: 实用可靠性工程（Practical Reliability Engineering），O'Connor, etc.，第5版2012，[豆瓣](https://book.douban.com/subject/35263950/)
-[^13]: 陈光宇，黄锡滋：软件可靠性学科发展现状及展望，电子科技大学学报社科版，2002年第3期99-102，[cnki](https://kns.cnki.net/kcms2/article/abstract?v=ZJxhFRRmSIilbKq4RNwVtS87RXdXZ5YCD_Y6C2gZNuvFtfYRFtXp2ktEjomsCs7EJXN0IjZFwB5Tj2-0mAAp1We4Zc8Kn9Z3gw77ZrQ-rkCu3ohyzaYnezB7-wCbVGjvRz3bFfHK6tE=&uniplatform=NZKPT&language=CHS)，[cqvip](https://qikan.cqvip.com/Qikan/Article/Detail?id=6859748)
+[^13]: 陈光宇，黄锡滋：软件可靠性学科发展现状及展望，电子科技大学学报社科版，2002年第3期99-102，[cnki](https://kns.cnki.net/kcms2/article/abstract?v=zcLOVLBHd2zqRn-SkRJjlRMqbVpWEZ7eixyUtZPjIkGDWM0ZZEly0jGgd6xE2xxgo1E7iX46uLXaMFUfS0eD7b9dTozKwVt_XXdd_svP-taFGshzUvzPODSCvVkd2rIz&uniplatform=NZKPT&flag=copy)，[cqvip](https://qikan.cqvip.com/Qikan/Article/Detail?id=6859748)
 [^14]: SRE：Google运维解密，Beyer, etc. 2016，[豆瓣](https://book.douban.com/subject/26875239/)：序言
 [^15]: SRE原理与实践：构建高可靠性互联网应用，张观石，2022，[豆瓣](https://book.douban.com/subject/36202918/)：第1章 互联网软件可靠性概论
 [^16]: 软件工程：实践者的研究方法，Pressman，第8版2014，[豆瓣](https://book.douban.com/subject/26918148/)：第21章 软件质量保证，21.7 软件可靠性
