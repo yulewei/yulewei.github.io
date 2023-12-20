@@ -298,7 +298,7 @@ IDC 数据中心等级划分（[data centre tiers](https://en.wikipedia.org/wiki
 [^14]: SRE：Google运维解密，Beyer, etc. 2016，[豆瓣](https://book.douban.com/subject/26875239/)：序言
 [^15]: SRE原理与实践：构建高可靠性互联网应用，张观石，2022，[豆瓣](https://book.douban.com/subject/36202918/)：第1章 互联网软件可靠性概论
 [^16]: 软件工程：实践者的研究方法，Pressman，第8版2014，[豆瓣](https://book.douban.com/subject/26918148/)：第21章 软件质量保证，21.7 软件可靠性
-[^17]: 2010-07 John Allspaw: MTTR is more important than MTBF (for most types of F) <https://www.kitchensoap.com/2010/11/07/mttr-mtbf-for-most-types-of-f/>
+[^17]: 2010-11 John Allspaw: MTTR is more important than MTBF (for most types of F) <https://www.kitchensoap.com/2010/11/07/mttr-mtbf-for-most-types-of-f/>
 [^18]: 2023-07 LigaAI：研发质量指标大 PK：MTTR vs MTBF，谁是靠谱王？ <https://segmentfault.com/a/1190000043971564>
 [^19]: 像火箭科学家一样思考，Ozan Varol，2020，[豆瓣](https://book.douban.com/subject/35228079/)：第1章 与不确定性共舞，为什么冗余不是多余的
 [^20]: 2020-12 艾瑞咨询：2020年中国数据中心行业研究报告 <https://report.iresearch.cn/report/202012/3699.shtml>
