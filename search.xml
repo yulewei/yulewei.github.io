@@ -4768,7 +4768,7 @@ b) 在计算机程序中不正确的步骤、过程或数据定义。注：此�
 冗余装置要正常工作，就必须独立运行。一架航天飞机配备4台计算机，这听起来非常棒，但由于它们运行着相同的软件，所以只要一个软件出现错误，4台计算机就会同时瘫痪。因此，航天飞机还配备了第5个备用飞行系统。该系统安装有一款不同的软件，而这款软件由不同于其他4款软件的分包商提供。如果某个一般性的软件错误使4台相同的主计算机瘫痪，则备用系统将启动，并会将航天飞机送回地球。</p>
 </blockquote>
 <p>在航天飞机上配备 4 台计算机属于硬件冗余，第 5 个备用飞行系统属于软件冗余。</p>
-<p>IDC 数据中心等级划分（<a href="https://en.wikipedia.org/wiki/Data_centre_tiers">data centre tiers</a>）主要是根据线路、电源、冷却等核心组件的冗余程度而划分的，不同的等级代表不同的可靠性和可用性。按 Uptime Institute 和 TIA-942 标准的建议，数据中心由低到高划分为 T1、T2、T3、T4 共 4 个等级，T1 级为基本型、T2 级为冗余型、T3 级为可并行维护冗余型、T4 级为容错型。4 个等级的冗余程度分别是，T1 级无冗余，T2 级部分 N+1 冗余，T3 级全部 N+1 冗余，T4 级 2N 或 2N+1 冗余。按我国国家标准《GB 50174-2017 数据中心设计规范》，数据中心由高到低划分为 A、B、C 三级，A 级为容错型，B 级为冗余型，C 级为基本型。不同的数据中心等级的对比，如下表所示（表格参考自 <sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup>）：</p>
+<p>IDC 数据中心等级划分（<a href="https://en.wikipedia.org/wiki/Data_centre_tiers">data centre tiers</a>）主要是根据线路、电源、冷却等核心组件的冗余程度而划分的，不同的等级代表不同的可靠性和可用性。按 Uptime Institute 和 TIA-942 标准的建议，数据中心由低到高划分为 T1、T2、T3、T4 共 4 个等级，T1 级为基本型、T2 级为冗余型、T3 级为可并行维护冗余型、T4 级为容错型。4 个等级的冗余程度分别是，T1 级无冗余，T2 级部分 N+1 冗余，T3 级全部 N+1 冗余，T4 级 2N 或 2N+1 冗余。按我国国家标准《GB 50174-2017 数据中心设计规范》，数据中心由高到低划分为 A、B、C 三级，A 级为容错型，B 级为冗余型，C 级为基本型。不同的数据中心等级的对比，如下表所示（表格参考自<sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup>）：</p>
 <img width="700" alt="数据中心等级划分" title="数据中心等级划分" src="https://static.nullwy.me/data-centre-tiers.png">
 <p>大多数商业数据中心都介于 T3 级和 T4 级之间，平衡了建设成本和可靠性。金融等行业的数据中心，如银行的数据中心，通常会同时遵循最高等级的国家标准 A 级和 Uptime Institute 的 Tier 4 级标准来建设。</p>
 <p>在生物学中，冗余是生物体的一种重要特征。生物体中的冗余结构和功能可以提高生物体的适应性和生存能力。例如，人体的很多器官是冗余的，比如耳朵、眼睛、肾、肺。冗余的器官如果出现“故障”，虽然不会让人完全失去该器官的机能，但会导致机能降级。其中一个眼睛如果完全失去视力，不会让人失明，不过视觉上无法识别远近。其中一个耳朵如果完全没有听力，不会让人失聪，但无法透过耳朵识别声音的位置。</p>
@@ -4809,7 +4809,7 @@ b) 在计算机程序中不正确的步骤、过程或数据定义。注：此�
 </li>
 <li id="fn16" class="footnote-item"><p>软件工程：实践者的研究方法，Pressman，第8版2014，<a href="https://book.douban.com/subject/26918148/">豆瓣</a>：第21章 软件质量保证，21.7 软件可靠性 <a href="#fnref16" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn17" class="footnote-item"><p>2010-07 John Allspaw: Thoughts on systems safety, software operations, and sociotechnical systems <a href="https://www.kitchensoap.com/2010/11/07/mttr-mtbf-for-most-types-of-f/">https://www.kitchensoap.com/2010/11/07/mttr-mtbf-for-most-types-of-f/</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
+<li id="fn17" class="footnote-item"><p>2010-07 John Allspaw: MTTR is more important than MTBF (for most types of F) <a href="https://www.kitchensoap.com/2010/11/07/mttr-mtbf-for-most-types-of-f/">https://www.kitchensoap.com/2010/11/07/mttr-mtbf-for-most-types-of-f/</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
 </li>
 <li id="fn18" class="footnote-item"><p>2023-07 LigaAI：研发质量指标大 PK：MTTR vs MTBF，谁是靠谱王？ <a href="https://segmentfault.com/a/1190000043971564">https://segmentfault.com/a/1190000043971564</a> <a href="#fnref18" class="footnote-backref">↩︎</a></p>
 </li>

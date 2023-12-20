@@ -270,7 +270,7 @@ Laprie 等人把提高系统可靠性的方法总结为[四种](https://en.wikip
 
 在航天飞机上配备 4 台计算机属于硬件冗余，第 5 个备用飞行系统属于软件冗余。
 
-IDC 数据中心等级划分（[data centre tiers](https://en.wikipedia.org/wiki/Data_centre_tiers)）主要是根据线路、电源、冷却等核心组件的冗余程度而划分的，不同的等级代表不同的可靠性和可用性。按 Uptime Institute 和 TIA-942 标准的建议，数据中心由低到高划分为 T1、T2、T3、T4 共 4 个等级，T1 级为基本型、T2 级为冗余型、T3 级为可并行维护冗余型、T4 级为容错型。4 个等级的冗余程度分别是，T1 级无冗余，T2 级部分 N+1 冗余，T3 级全部 N+1 冗余，T4 级 2N 或 2N+1 冗余。按我国国家标准《GB 50174-2017 数据中心设计规范》，数据中心由高到低划分为 A、B、C 三级，A 级为容错型，B 级为冗余型，C 级为基本型。不同的数据中心等级的对比，如下表所示（表格参考自 [^20]）：
+IDC 数据中心等级划分（[data centre tiers](https://en.wikipedia.org/wiki/Data_centre_tiers)）主要是根据线路、电源、冷却等核心组件的冗余程度而划分的，不同的等级代表不同的可靠性和可用性。按 Uptime Institute 和 TIA-942 标准的建议，数据中心由低到高划分为 T1、T2、T3、T4 共 4 个等级，T1 级为基本型、T2 级为冗余型、T3 级为可并行维护冗余型、T4 级为容错型。4 个等级的冗余程度分别是，T1 级无冗余，T2 级部分 N+1 冗余，T3 级全部 N+1 冗余，T4 级 2N 或 2N+1 冗余。按我国国家标准《GB 50174-2017 数据中心设计规范》，数据中心由高到低划分为 A、B、C 三级，A 级为容错型，B 级为冗余型，C 级为基本型。不同的数据中心等级的对比，如下表所示（表格参考自[^20]）：
 
 <img width="700" alt="数据中心等级划分" title="数据中心等级划分" src="https://static.nullwy.me/data-centre-tiers.png">
 
@@ -298,7 +298,7 @@ IDC 数据中心等级划分（[data centre tiers](https://en.wikipedia.org/wiki
 [^14]: SRE：Google运维解密，Beyer, etc. 2016，[豆瓣](https://book.douban.com/subject/26875239/)：序言
 [^15]: SRE原理与实践：构建高可靠性互联网应用，张观石，2022，[豆瓣](https://book.douban.com/subject/36202918/)：第1章 互联网软件可靠性概论
 [^16]: 软件工程：实践者的研究方法，Pressman，第8版2014，[豆瓣](https://book.douban.com/subject/26918148/)：第21章 软件质量保证，21.7 软件可靠性
-[^17]: 2010-07 John Allspaw: Thoughts on systems safety, software operations, and sociotechnical systems <https://www.kitchensoap.com/2010/11/07/mttr-mtbf-for-most-types-of-f/>
+[^17]: 2010-07 John Allspaw: MTTR is more important than MTBF (for most types of F) <https://www.kitchensoap.com/2010/11/07/mttr-mtbf-for-most-types-of-f/>
 [^18]: 2023-07 LigaAI：研发质量指标大 PK：MTTR vs MTBF，谁是靠谱王？ <https://segmentfault.com/a/1190000043971564>
 [^19]: 像火箭科学家一样思考，Ozan Varol，2020，[豆瓣](https://book.douban.com/subject/35228079/)：第1章 与不确定性共舞，为什么冗余不是多余的
 [^20]: 2020-12 艾瑞咨询：2020年中国数据中心行业研究报告 <https://report.iresearch.cn/report/202012/3699.shtml>
