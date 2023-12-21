@@ -11,18 +11,18 @@
   </url>
   
   <url>
-    <loc>https://nullwy.me/2023/11/reliability-engineering/</loc>
+    <loc>https://nullwy.me/2023/11/amazon-architecture-evolution/</loc>
     
-    <lastmod>2023-12-20</lastmod>
+    <lastmod>2023-12-21</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://nullwy.me/2023/11/amazon-architecture-evolution/</loc>
+    <loc>https://nullwy.me/2023/11/reliability-engineering/</loc>
     
-    <lastmod>2023-12-07</lastmod>
+    <lastmod>2023-12-20</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -628,6 +628,13 @@
   
   <url>
     <loc>https://nullwy.me/tags/SRE/</loc>
+    <lastmod>2023-12-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://nullwy.me/tags/%E5%8F%AF%E4%BC%B8%E7%BC%A9%E6%80%A7/</loc>
     <lastmod>2023-12-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>

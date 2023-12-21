@@ -150,6 +150,7 @@
         <tag>技术栈</tag>
         <tag>微服务</tag>
         <tag>SOA</tag>
+        <tag>可伸缩性</tag>
       </tags>
   </entry>
   <entry>
@@ -4585,8 +4586,12 @@ NodeChildrenChanged<br>
       <tags>
         <tag>架构</tag>
         <tag>技术栈</tag>
+        <tag>微服务</tag>
         <tag>MySQL</tag>
+        <tag>数据库</tag>
         <tag>Java</tag>
+        <tag>分布式</tag>
+        <tag>可伸缩性</tag>
       </tags>
   </entry>
   <entry>
