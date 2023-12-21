@@ -108,7 +108,7 @@ Yahoo!，1994 年创立，早期网站操作系统是 FreeBSD，Web 服务器是
 
 <img width="600" alt="Yahoo! 技术架构（2005）" title="Yahoo! 技术架构（2005）" src="https://static.nullwy.me/yahoo-architecture-2005.png">
 
-2000 年 ~ 2010 年，Yahoo! 是世界上流量最大的网站，虽然期间被 Google 短暂超越，但随后又反超，一直到到 2010 年后才被 Google 彻底超越。2000 年前后 Yahoo! 转向到 MySQL 和 PHP，并在技术上助力 LAMP 生态的发展壮大，对 LAMP 技术栈的流行起到巨大的推动作用。值得一提的是，知名 MySQL 专家 [Jeremy Zawodny](https://en.wikipedia.org/wiki/Jeremy_Zawodny)，《高性能MySQL》2004 年第 1 版（[豆瓣](https://book.douban.com/subject/1495763/)）的作者，在 1999.12 ~ 2008.06 期间为 Yahoo! 工程师。PHP 之父 [Rasmus Lerdorf](https://en.wikipedia.org/wiki/Rasmus_Lerdorf) 在 2002.09 ~ 2009.11 期间为 Yahoo! 工程师。在前端领域，JSON 创造者 [Douglas Crockford](https://en.wikipedia.org/wiki/Douglas_Crockford)，在 2005 年至 2012 年期间供职于 Yahoo!。
+2000 年 ~ 2010 年，Yahoo! 是世界上流量最大的网站，虽然期间被 Google 短暂超越，但随后又反超，一直到到 2010 年后才被 Google 彻底超越[^2]。2000 年前后 Yahoo! 转向到 MySQL 和 PHP，并在技术上助力 LAMP 生态的发展壮大，对 LAMP 技术栈的流行起到巨大的推动作用。值得一提的是，知名 MySQL 专家 [Jeremy Zawodny](https://en.wikipedia.org/wiki/Jeremy_Zawodny)，《高性能MySQL》2004 年第 1 版（[豆瓣](https://book.douban.com/subject/1495763/)）的作者，在 1999.12 ~ 2008.06 期间为 Yahoo! 工程师。PHP 之父 [Rasmus Lerdorf](https://en.wikipedia.org/wiki/Rasmus_Lerdorf) 在 2002.09 ~ 2009.11 期间为 Yahoo! 工程师。在前端领域，JSON 创造者 [Douglas Crockford](https://en.wikipedia.org/wiki/Douglas_Crockford)，在 2005 年至 2012 年期间供职于 Yahoo!。
 
 # Amazon（1994）
 
