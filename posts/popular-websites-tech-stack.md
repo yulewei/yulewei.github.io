@@ -401,7 +401,7 @@ Twitter，2006 年创立，早期采用 Ruby on Rails 技术栈，数据库是 M
 # 参考资料
 
 [^1]: Similarweb: Top Websites Ranking <https://www.similarweb.com/top-websites/>
-[^2]: 2023-02 Most visited Websites – 1996/2023 <https://statisticsanddata.org/data/most-visited-website-1996-2023/>
+[^2]: 2020-08 Ranked: The Most Popular Websites Since 1993 (Captain Gizmo) <https://www.visualcapitalist.com/most-popular-websites-since-1993/>
 [^3]: List of social platforms with at least 100 million active users <https://en.wikipedia.org/wiki/List_of_social_platforms_with_at_least_100_million_active_users>
 [^4]: 2023-02 艾媒金榜｜2022年度中国APP月活排行榜 <https://www.iimedia.cn/c880/91597.html>
 
