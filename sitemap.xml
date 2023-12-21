@@ -2,6 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://nullwy.me/2023/11/reliability-engineering/</loc>
+    
+    <lastmod>2023-12-21</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://nullwy.me/2023/12/popular-websites-tech-stack/</loc>
     
     <lastmod>2023-12-21</lastmod>
@@ -14,15 +23,6 @@
     <loc>https://nullwy.me/2023/11/amazon-architecture-evolution/</loc>
     
     <lastmod>2023-12-21</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nullwy.me/2023/11/reliability-engineering/</loc>
-    
-    <lastmod>2023-12-20</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -635,6 +635,13 @@
   
   <url>
     <loc>https://nullwy.me/tags/%E5%8F%AF%E4%BC%B8%E7%BC%A9%E6%80%A7/</loc>
+    <lastmod>2023-12-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.2</priority>
+  </url>
+  
+  <url>
+    <loc>https://nullwy.me/tags/%E7%A8%B3%E5%AE%9A%E6%80%A7/</loc>
     <lastmod>2023-12-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
