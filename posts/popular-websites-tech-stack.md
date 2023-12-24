@@ -462,8 +462,8 @@ Twitter，2006 年创立，早期采用 Ruby on Rails 技术栈，数据库是 M
 [^58]: 2009-05 Why is MySQL more popular than PostgreSQL? <https://news.ycombinator.com/item?id=619871>
 [^59]: Why is MySQL more popular than PostgreSQL? <https://qr.ae/pKPJcE>
 
-[^60]: 2002-10 Michael Radwin: Making the Case for PHP at Yahoo! (PHPCon 2002, slides) <https://web.archive.org/web/0/http://www.php-con.com/2002/view/session.php?s=1012> <https://speakerdeck.com/1024/making-the-case-for-php-at-yahoo>
-[^61]: 2005-10 Michael Radwin: PHP at Yahoo! (PHP Conference 2005, slides) <https://speakerdeck.com/1024/php-at-yahoo-zend2005>
+[^60]: 2002-10 Michael Radwin: Making the Case for PHP at Yahoo! (PHPCon 2002, slides) <https://web.archive.org/web/0/http://www.php-con.com/2002/view/session.php?s=1012> <https://speakerdeck.com/xy/making-the-case-for-php-at-yahoo>
+[^61]: 2005-10 Michael Radwin: PHP at Yahoo! (PHP Conference 2005, slides) <https://speakerdeck.com/xy/php-at-yahoo-zend2005>
 [^62]: 2007-06 Federico Feroldi: PHP in Yahoo! (slides) <https://www.slideshare.net/fullo/federico-feroldi-php-in-yahoo>
 
 [^63]: 2021-02 AWS re:Invent 2020: Amazon’s architecture evolution and AWS strategy <https://www.youtube.com/watch?v=HtWKZSLLYTE>
