@@ -4597,7 +4597,7 @@ NodeChildrenChanged<br>
   </entry>
   <entry>
     <title>可靠性工程概述</title>
-    <url>/2023/11/reliability-engineering/</url>
+    <url>/2023/10/reliability-engineering/</url>
     <content><![CDATA[<p>为了应对负载的增长，目前大型网站普遍都采用分布式架构。相对于采用单体架构的系统，分布式系统中有大量的服务器及设备，各模块之间存在错综复杂的依赖关系，存在更多的不确定性。整个系统的故障率会随设备的增加而呈指数级增加，单一节点问题可能会被无限放大，日常运行过程中一定会伴随故障发生。所以，可靠性开始成为大型网站关注的最重要的质量属性之一，并因此发展出了站点可靠性工程（<a href="https://en.wikipedia.org/wiki/Site_reliability_engineering">Site reliability engineering</a>，SRE）。站点可靠性工程，是从可靠性工程发展而来的，从可靠性工程中借鉴了概念和成果。本文溯本求源，内容主要是总结概括，可靠性工程的历史演进和核心概念，软件可靠性工程的核心概念，以及可靠性设计的方法。</p>
 <span id="more"></span>
 <h1 id="历史演进">历史演进</h1>
