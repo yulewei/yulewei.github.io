@@ -40,7 +40,7 @@
 <meta property="og:image" content="https://static.nullwy.me/amazon-november-traffic-static-scaling.png">
 <meta property="og:image" content="https://static.nullwy.me/amazon-november-traffic-elastic-scaling.png">
 <meta property="article:published_time" content="2023-12-08T04:43:00.000Z">
-<meta property="article:modified_time" content="2023-12-29T13:43:44.601Z">
+<meta property="article:modified_time" content="2023-12-29T13:48:50.063Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="可扩展性">
@@ -340,7 +340,7 @@
 </ul>
 <p>第一种策略，在应对超预期的突发流量时比较常见，通过限流、降级等方式避免系统过载。不过这种策略的问题是降低了用户体验。第二种策略，应对的是预期内的正常的负载增长，针对可能的过载资源，通过性能调优或扩展硬件资源解决。</p>
 <p>应对瞬间的峰值流量，最有代表性的场景是秒杀抢购。<strong>类似的，秒杀抢购系统的设计的两种策略是，排队限流和提升扣减库存性能</strong>。通常真实抢购的秒杀系统会结合使用多种策略，但有所侧重。主要策略采用排队限流，典型的案例是小米抢购限流峰值系统<sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup>。主要策略采用提升扣减库存性能，典型的案例是淘宝秒杀系统。具体实现上，淘宝秒杀系统早期是基于 Redis（Tair）实现扣减库存<sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup>，后来针对扣减库存场景优化数据库内核的性能，直接在数据库上实现扣减库存<sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup>。</p>
-<p>本质上来看，互联网应用的峰值流量的应对策略，与日常生活中的峰值流量的应对策略类似，典型的就是节假日和春运期间的交通系统。临时应对策略无非就是增加购票和安检处理窗口、增加车辆班次、以及增加值班人员让排队更加有序等等，长期对应策略主要就是增强交通基础设施的流量处理能力，包括扩建火车站、修建高铁、修建高速公路等等。</p>
+<p>本质上来看，<strong>互联网应用的峰值流量的应对策略，与日常生活中的峰值流量的应对策略类似</strong>，典型的就是节假日和春运期间的交通系统。临时应对策略无非就是增加购票和安检处理窗口、增加车辆班次、以及增加值班人员让排队更加有序等等，长期对应策略主要就是增强交通基础设施的流量处理能力，包括扩建火车站、修建高铁、修建高速公路等等。</p>
 <h1 id="系统扩展策略">系统扩展策略</h1>
 <h2 id="垂直伸缩与水平伸缩">垂直伸缩与水平伸缩</h2>
 <p>扩展系统的硬件资源有两种策略，(1) 垂直伸缩（vertical scaling），也叫做向上伸缩（scaling up）； (2) 水平伸缩（horizontal scaling），也叫做向外伸缩（scaling out）。</p>
@@ -352,7 +352,7 @@
 <p>水平扩展不需要购买更加昂贵的硬件设备，而是需要增加额外的相对廉价的服务器节点。<strong>水平伸缩总是可以增加更多服务器，而不会像垂直伸缩那样遭遇到单台服务器的极限</strong>。但是与垂直伸缩不同，为了让系统架构能支持水平扩展，必须付出相当的开发代价。</p>
 <p>总的来说，更多硬件资源意味着更高的吞吐量和更好的响应时间，同时要付出更高的成本。考虑到成本和性能之间的基本关系，通常要用最少量的硬件，让系统满足性能目标。水平伸缩和垂直伸缩的成本对比，如下图所示，X 轴表示系统的计算能力（容量），Y 轴表示单位计算能力（容量）的价格，虚线表示垂直伸缩的成本，实线表示水平伸缩的成本<sup class="footnote-ref"><a href="#fn3" id="fnref3:1">[3:1]</a></sup>。</p>
 <img width="400" alt="水平伸缩与垂直伸缩成本对比" title="水平伸缩与垂直伸缩成本对比" src="https://static.nullwy.me/scalability-vertical-and-horizontal-scaling-costs.png">
-<p>另外，需要注意的是，向上伸缩（scaling up）的相反方向是向下伸缩（scaling down），向外伸缩（scaling out）的相反方向是向内伸缩（scaling in）。向上伸缩或向外伸缩，增强系统处理能力；向下伸缩或向内伸缩，缩减系统处理能力。需要缩容的场景，比较典型的是为了处理短期大流量的扩容之后的缩容，比如大促，<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E9%BB%91%E8%89%B2%E6%98%9F%E6%9C%9F%E4%BA%94_(%E8%B4%AD%E7%89%A9)">黑色星期五</a>（Black Friday）和双十一等。在大促期间，通常需要增强系统处理能力，即扩容，而在大促结束后，流量回归日常，为了避免资源浪费，需要缩容。</p>
+<p>另外，需要注意的是，向上伸缩（scaling up）的相反方向是向下伸缩（scaling down），向外伸缩（scaling out）的相反方向是向内伸缩（scaling in）。向上伸缩或向外伸缩，增强系统处理能力；向下伸缩或向内伸缩，缩减系统处理能力。需要缩容的场景，比较典型的是为了处理短期大流量的扩容之后的缩容，比如大促，<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E9%BB%91%E8%89%B2%E6%98%9F%E6%9C%9F%E4%BA%94_(%E8%B4%AD%E7%89%A9)">黑色星期五</a>（Black Friday）和<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%8F%8C%E5%8D%81%E4%B8%80">双十一</a>等。在大促期间，通常需要增强系统处理能力，即扩容，而在大促结束后，流量回归日常，为了避免资源浪费，需要缩容。</p>
 <h2 id="扩展立方体模型">扩展立方体模型</h2>
 <p><a target="_blank" rel="noopener" href="https://www.linkedin.com/in/martyabbott/">Martin Abbott</a> 曾经在 eBay 工作 6 年（1999 ~ 2005），并担任 CTO 等职位。基于 eBay 架构的扩展的实践经验<sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup><sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>，Abbott 在《可扩展的艺术》（The Art of Scalability，2009）书中总结了三个维度的扩展方法，创造出<strong>扩展立方体模型</strong>（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Scale_cube">scale cube</a>），如下图所示（图片来源<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup>）。</p>
 <img width="600" alt="扩展立方体" title="扩展立方体" src="https://static.nullwy.me/scalability-scale-cube.png">
