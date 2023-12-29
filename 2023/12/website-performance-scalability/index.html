@@ -40,7 +40,7 @@
 <meta property="og:image" content="https://static.nullwy.me/amazon-november-traffic-static-scaling.png">
 <meta property="og:image" content="https://static.nullwy.me/amazon-november-traffic-elastic-scaling.png">
 <meta property="article:published_time" content="2023-12-08T04:43:00.000Z">
-<meta property="article:modified_time" content="2023-12-29T13:51:40.061Z">
+<meta property="article:modified_time" content="2023-12-29T13:57:43.744Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="可扩展性">
@@ -389,7 +389,7 @@
 <p><strong>Scalability</strong>: The ability to increase or decrease resources for any given workload. You can add additional resources to service a workload (known as scaling out), or add additional capabilities to manage an increase in demand to the existing resource (known as scaling up). Scalability doesn’t have to be done automatically.<br>
 <strong>Elasticity</strong>: The ability to automatically or dynamically increase or decrease resources as needed. Elastic resources match the current needs, and resources are added or removed automatically to meet future needs when it’s needed (and from the most advantageous geographic location). A distinction between scalability and elasticity is that elasticity is done automatically.</p>
 </blockquote>
-<p>可伸缩性是系统架构层面的能力，而弹性是基础设施层面的能力。弹性伸缩的基础设施，让系统的可伸缩性能力进一步提升。2011 年 9月，NIST 发布文档 SP 800-145 “The NIST Definition of Cloud Computing”，文档给出云计算的定义，该定义是目前最被广泛认同的云计算定义。定义包含云计算模型，模型中描述了云计算的五个基本特性，其中“快速的伸缩性”（rapid elasticity）就是五个基本特性之一。弹性是云计算的基本特性之一，也是云计算的一个最重要的优势和价值之一。亚马逊 AWS 在 2006 年推出的 EC2（Elastic Compute Cloud）就以弹性作为其关键词。类似的，阿里云的云服务器 ECS（Elastic Compute Service），也是以弹性作为其关键词。</p>
+<p><strong>可伸缩性是系统架构层面的能力，而弹性是基础设施层面的能力，弹性伸缩的基础设施，让系统的可伸缩性能力进一步提升</strong>。2011 年 9月，NIST 发布文档 SP 800-145 “The NIST Definition of Cloud Computing”，文档给出云计算的定义，该定义是目前最被广泛认同的云计算定义。定义包含云计算模型，模型中描述了云计算的五个基本特性，其中“快速的伸缩性”（rapid elasticity）就是五个基本特性之一。弹性是云计算的基本特性之一，也是云计算的一个最重要的优势和价值之一。亚马逊 AWS 在 2006 年推出的 EC2（Elastic Compute Cloud）就以弹性作为其关键词。类似的，阿里云的云服务器 ECS（Elastic Compute Service），也是以弹性作为其关键词。</p>
 <p>在云环境下，根据系统负载自动增加或减少资源的功能特性，被称为<a target="_blank" rel="noopener" href="https://zh.wikipedia.org/wiki/%E5%BC%B9%E6%80%A7%E4%BC%B8%E7%BC%A9">弹性伸缩</a>（elastic scaling 或 auto scaling）。静态伸缩与弹性伸缩的对比，如下图所示<sup class="footnote-ref"><a href="#fn26" id="fnref26">[26]</a></sup>。</p>
 <p><img src="https://static.nullwy.me/scalability-vs-elasticity.png" alt="静态伸缩与弹性伸缩的对比"></p>
 <p>云环境的弹性伸缩的具体方案有，亚马逊 AWS 的“<a target="_blank" rel="noopener" href="https://aws.amazon.com/cn/autoscaling/">Auto Scaling</a>”、阿里云的<a target="_blank" rel="noopener" href="https://www.alibabacloud.com/help/zh/auto-scaling">弹性伸缩 ESS</a> 、基于 Kubernetes 的容器弹性伸缩等。弹性能力上，云虚拟机可以实现分钟级弹性响应，而以容器技术为基础的云原生技术架构可以实现秒级甚至毫秒级的弹性响应。</p>

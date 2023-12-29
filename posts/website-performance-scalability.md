@@ -123,7 +123,7 @@ Instagram 解决可扩展性问题，主要在数据存储层[^22][^23]。在 In
 > **Scalability**: The ability to increase or decrease resources for any given workload. You can add additional resources to service a workload (known as scaling out), or add additional capabilities to manage an increase in demand to the existing resource (known as scaling up). Scalability doesn’t have to be done automatically.
 > **Elasticity**: The ability to automatically or dynamically increase or decrease resources as needed. Elastic resources match the current needs, and resources are added or removed automatically to meet future needs when it’s needed (and from the most advantageous geographic location). A distinction between scalability and elasticity is that elasticity is done automatically.
 
-可伸缩性是系统架构层面的能力，而弹性是基础设施层面的能力。弹性伸缩的基础设施，让系统的可伸缩性能力进一步提升。2011 年 9月，NIST 发布文档 SP 800-145 “The NIST Definition of Cloud Computing”，文档给出云计算的定义，该定义是目前最被广泛认同的云计算定义。定义包含云计算模型，模型中描述了云计算的五个基本特性，其中“快速的伸缩性”（rapid elasticity）就是五个基本特性之一。弹性是云计算的基本特性之一，也是云计算的一个最重要的优势和价值之一。亚马逊 AWS 在 2006 年推出的 EC2（Elastic Compute Cloud）就以弹性作为其关键词。类似的，阿里云的云服务器 ECS（Elastic Compute Service），也是以弹性作为其关键词。
+**可伸缩性是系统架构层面的能力，而弹性是基础设施层面的能力，弹性伸缩的基础设施，让系统的可伸缩性能力进一步提升**。2011 年 9月，NIST 发布文档 SP 800-145 “The NIST Definition of Cloud Computing”，文档给出云计算的定义，该定义是目前最被广泛认同的云计算定义。定义包含云计算模型，模型中描述了云计算的五个基本特性，其中“快速的伸缩性”（rapid elasticity）就是五个基本特性之一。弹性是云计算的基本特性之一，也是云计算的一个最重要的优势和价值之一。亚马逊 AWS 在 2006 年推出的 EC2（Elastic Compute Cloud）就以弹性作为其关键词。类似的，阿里云的云服务器 ECS（Elastic Compute Service），也是以弹性作为其关键词。
 
 在云环境下，根据系统负载自动增加或减少资源的功能特性，被称为[弹性伸缩](https://zh.wikipedia.org/wiki/%E5%BC%B9%E6%80%A7%E4%BC%B8%E7%BC%A9)（elastic scaling 或 auto scaling）。静态伸缩与弹性伸缩的对比，如下图所示[^26]。
 
