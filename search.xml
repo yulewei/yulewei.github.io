@@ -86,7 +86,7 @@
 <img width="600" alt="Amazon 网站的典型的周流量分布" title="Amazon 网站的典型的周流量分布" src="https://static.nullwy.me/amazon-typical-weekly-traffic.png">
 <img width="600" alt="Amazon 网站的静态伸缩" title="Amazon 网站的静态伸缩" src="https://static.nullwy.me/amazon-november-traffic-static-scaling.png">
 <img width="600" alt="Amazon 网站的弹性伸缩" title="Amazon 网站的弹性伸缩" src="https://static.nullwy.me/amazon-november-traffic-elastic-scaling.png">
-<p>类似的，阿里淘宝、天猫电商系统，为了应对双 11 大促，2015 年开始采用混合云弹性架构，即专有云+公共云，当本地保有云无法支撑时，就快速在公有云上扩容，当流量过去后，再还资源给公有云。2019 年双 11 阿里电商的全部核心应用迁移到公共云，到 2021 年双 11 阿里电商系统实现了 100% 上公共云<sup class="footnote-ref"><a href="#fn25" id="fnref25">[25]</a></sup>。</p>
+<p>类似的，阿里淘宝、天猫电商系统，为了应对双 11 大促，2015 年开始采用混合云弹性架构，即专有云+公共云，当本地保有云无法支撑时，就快速在公有云上扩容，当流量过去后，再还资源给公有云。2019 年双 11，阿里电商的全部核心应用迁移到公共云，到 2021 年双 11，阿里电商系统实现了 100% 上公共云<sup class="footnote-ref"><a href="#fn25" id="fnref25">[25]</a></sup>。</p>
 <h1 id="参考资料">参考资料</h1>
 <hr class="footnotes-sep">
 <section class="footnotes">
@@ -4953,7 +4953,7 @@ b) 在计算机程序中不正确的步骤、过程或数据定义。注：此�
 <img width="600" alt="Amazon 网站的典型的周流量分布" title="Amazon 网站的典型的周流量分布" src="https://static.nullwy.me/amazon-typical-weekly-traffic.png">
 <img width="600" alt="Amazon 网站的静态伸缩" title="Amazon 网站的静态伸缩" src="https://static.nullwy.me/amazon-november-traffic-static-scaling.png">
 <img width="600" alt="Amazon 网站的弹性伸缩" title="Amazon 网站的弹性伸缩" src="https://static.nullwy.me/amazon-november-traffic-elastic-scaling.png">
-<p>类似的，阿里淘宝、天猫电商系统，为了应对双 11 大促，2015 年开始采用混合云弹性架构，即专有云+公共云，当本地保有云无法支撑时，就快速在公有云上扩容，当流量过去后，再还资源给公有云。2019 年双 11 阿里电商的全部核心应用迁移到公共云，到 2021 年双 11 阿里电商系统实现了 100% 上公共云<sup class="footnote-ref"><a href="#fn29" id="fnref29">[29]</a></sup>。</p>
+<p>类似的，阿里淘宝、天猫电商系统，为了应对双 11 大促，2015 年开始采用混合云弹性架构，即专有云+公共云，当本地保有云无法支撑时，就快速在公有云上扩容，当流量过去后，再还资源给公有云。2019 年双 11，阿里电商的全部核心应用迁移到公共云，到 2021 年双 11，阿里电商系统实现了 100% 上公共云<sup class="footnote-ref"><a href="#fn29" id="fnref29">[29]</a></sup>。</p>
 <h1 id="参考资料">参考资料</h1>
 <hr class="footnotes-sep">
 <section class="footnotes">
