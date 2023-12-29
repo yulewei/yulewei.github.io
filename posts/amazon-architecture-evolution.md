@@ -84,6 +84,8 @@ Amazon 网站架构演进的过程，伴随着 AWS 云服务的诞生，促使 A
 
 <img width="600" alt="Amazon 网站的弹性伸缩" title="Amazon 网站的弹性伸缩" src="https://static.nullwy.me/amazon-november-traffic-elastic-scaling.png">
 
+类似的，阿里淘宝、天猫电商系统，为了应对双 11 大促，2015 年开始采用混合云弹性架构，即专有云+公共云，当本地保有云无法支撑时，我们就快速在公有云上扩容，当流量过去后，再还资源给公有云。2019 年双 11 阿里电商的全部核心应用迁移到公共云，到 2021 年双 11 阿里电商系统实现了 100% 上公共云[^25]。
+
 # 参考资料
 
 [^1]: 2006-05 ACM Queue Interview: A Conversation with Amazon CTO Werner Vogels <https://queue.acm.org/detail.cfm?id=1142065>
@@ -113,5 +115,5 @@ Amazon 网站架构演进的过程，伴随着 AWS 云服务的诞生，促使 A
 
 [^23]: 2011-07 2011 AWS Tour Australia, Closing Keynote: How Amazon migrated to AWS, by Jon Jenkins <https://www.slideshare.net/AmazonWebServices/2011-aws-tour-australia-closing-keynote-how-amazoncom-migrated-to-aws-by-jon-jenkins>
 [^24]: 2017-03 AWS: Elasticity and Management <https://www.slideshare.net/AmazonWebServices/elasticity-and-management>
-
+[^25]: 2021-11 2021天猫双11：首个100%的云上双11，体验如丝般顺滑 <https://www.sohu.com/a/500431383_114930>
 
