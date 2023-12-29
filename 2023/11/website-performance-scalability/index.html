@@ -26,7 +26,7 @@
   <meta name="description" content="互联网网站在初期用户量和访问量一般都很小，往往只需要采用最简单的技术架构就能对外提供稳定服务。最简单的架构通常采用的是单机应用服务器、单机数据库服务器这样的单体架构。成功的互联网网站，比如电商平台，流量、用户量、交易量等核心指标是呈指数增长的，所以就需要提升网站系统的性能，来应对更大的负载。通过向系统中增加资源来提升系统性能的能力，被称为可伸缩性（scalability）。为了提升系统的可伸缩性，">
 <meta property="og:type" content="article">
 <meta property="og:title" content="大型网站的性能和可伸缩性">
-<meta property="og:url" content="https://nullwy.me/2023/12/website-performance-scalability/index.html">
+<meta property="og:url" content="https://nullwy.me/2023/11/website-performance-scalability/index.html">
 <meta property="og:site_name" content="nullwy&#39;s blog">
 <meta property="og:description" content="互联网网站在初期用户量和访问量一般都很小，往往只需要采用最简单的技术架构就能对外提供稳定服务。最简单的架构通常采用的是单机应用服务器、单机数据库服务器这样的单体架构。成功的互联网网站，比如电商平台，流量、用户量、交易量等核心指标是呈指数增长的，所以就需要提升网站系统的性能，来应对更大的负载。通过向系统中增加资源来提升系统性能的能力，被称为可伸缩性（scalability）。为了提升系统的可伸缩性，">
 <meta property="og:locale" content="zh_CN">
@@ -39,8 +39,8 @@
 <meta property="og:image" content="https://static.nullwy.me/amazon-typical-weekly-traffic.png">
 <meta property="og:image" content="https://static.nullwy.me/amazon-november-traffic-static-scaling.png">
 <meta property="og:image" content="https://static.nullwy.me/amazon-november-traffic-elastic-scaling.png">
-<meta property="article:published_time" content="2023-12-08T13:08:00.000Z">
-<meta property="article:modified_time" content="2023-12-29T14:27:58.543Z">
+<meta property="article:published_time" content="2023-11-08T13:08:00.000Z">
+<meta property="article:modified_time" content="2023-12-29T17:34:19.045Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="可扩展性">
@@ -51,7 +51,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://static.nullwy.me/scalability-throughput-vs-load.png">
 
-<link rel="canonical" href="https://nullwy.me/2023/12/website-performance-scalability/">
+<link rel="canonical" href="https://nullwy.me/2023/11/website-performance-scalability/">
 
 
 <script id="page-configurations">
@@ -235,7 +235,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2023/12/website-performance-scalability/">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2023/11/website-performance-scalability/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
@@ -258,7 +258,7 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2023-12-08 21:08:00" itemprop="dateCreated datePublished" datetime="2023-12-08T21:08:00+08:00">2023-12-08</time>
+              <time title="创建时间：2023-11-08 21:08:00" itemprop="dateCreated datePublished" datetime="2023-11-08T21:08:00+08:00">2023-11-08</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -274,8 +274,8 @@
   
   <span class="post-meta-item">
     <i class="far fa-comment"></i>
-    <a title="disqus" href="/2023/12/website-performance-scalability/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2023/12/website-performance-scalability/" itemprop="commentCount"></span>
+    <a title="disqus" href="/2023/11/website-performance-scalability/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2023/11/website-performance-scalability/" itemprop="commentCount"></span>
     </a>
   </span>
   
@@ -484,7 +484,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://nullwy.me/2023/12/website-performance-scalability/" title="大型网站的性能和可伸缩性">https://nullwy.me/2023/12/website-performance-scalability/</a>
+    <a href="https://nullwy.me/2023/11/website-performance-scalability/" title="大型网站的性能和可伸缩性">https://nullwy.me/2023/11/website-performance-scalability/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -509,10 +509,13 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2023/12/popular-websites-tech-stack/" rel="prev" title="流行互联网网站技术栈整理">
-      <i class="fa fa-chevron-left"></i> 流行互联网网站技术栈整理
+    <a href="/2023/10/reliability-engineering/" rel="prev" title="可靠性工程概述">
+      <i class="fa fa-chevron-left"></i> 可靠性工程概述
     </a></div>
-      <div class="post-nav-item"></div>
+      <div class="post-nav-item">
+    <a href="/2023/11/amazon-architecture-evolution/" rel="next" title="亚马逊网站架构演进">
+      亚马逊网站架构演进 <i class="fa fa-chevron-right"></i>
+    </a></div>
     </div>
       </footer>
     
@@ -764,8 +767,8 @@
 </script>
 <script>
   var disqus_config = function() {
-    this.page.url = "https://nullwy.me/2023/12/website-performance-scalability/";
-    this.page.identifier = "2023/12/website-performance-scalability/";
+    this.page.url = "https://nullwy.me/2023/11/website-performance-scalability/";
+    this.page.identifier = "2023/11/website-performance-scalability/";
     this.page.title = "大型网站的性能和可伸缩性";
     };
   NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
