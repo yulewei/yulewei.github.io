@@ -30,7 +30,7 @@ tags: [架构, 性能, 可伸缩性, 可扩展性, 技术栈, 微服务, SOA]
 
 术语“scalability”会被翻译为“可扩展性”，而术语“[extensibility](https://en.wikipedia.org/wiki/Extensibility)”在很多中文资料中也会被翻译为“可扩展性”，容易混淆，需要注意区分。“extensibility”指的是系统增加新的功能以及修改现有功能的能力。可扩展性的实现模式有很多[^9]，典型的是插件（[plugin](https://en.wikipedia.org/wiki/Plug-in_%28computing%29)），比如浏览器、编辑器、IDE 等的“扩展”（extension），或直接称为“插件”（plugin）。插件与核心应用程序分开开发，运行时动态加载，使第三方开发人员能够扩展应用程序。除了插件模式外，拦截过滤器（Intercepting Filter）设计模式，也是实现可扩展性的经典模式，通过过滤器对某逻辑做扩展。“[maintainability](https://en.wikipedia.org/wiki/Software_quality#Maintainability)”（可维护性）是相对“extensibility”含义更广的特性。可维护性是指系统可被修改（modification）的难易程度，修改包括纠正（correction）、改进（improvement）和适应（adaption）。可维护性中的改进性的修改，可以认为等同于“extensibility”。
 
-性能、可伸缩性等特性都属于系统的架构特性（architecture characteristics）[^7]，这些特性实现的是系统的非功能性需求，是影响系统是否成功的至关重要的关注点。除了被命名为架构特性外，很多时候也被统称为系统的质量属性（[quality attributes](https://en.wikipedia.org/wiki/List_of_system_quality_attributes)）。
+性能、可伸缩性等特性都属于系统的**架构特性**（architecture characteristics）[^7]，这些特性实现的是系统的非功能性需求，是影响系统是否成功的至关重要的关注点。除了被命名为架构特性外，很多时候也被统称为系统的质量属性（[quality attributes](https://en.wikipedia.org/wiki/List_of_system_quality_attributes)）。
 
 # 性能指标
 
