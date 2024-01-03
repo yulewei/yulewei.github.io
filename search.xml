@@ -5182,7 +5182,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <li><strong>硬件和网络故障</strong>：
 <ul>
 <li>避错：通过提高硬件的<strong>质量</strong>实现避错</li>
-<li>容错：通过<strong>冗余</strong>实现容错，具体的措施包括硬件冗余、数据复制、数据库备份、重试等</li>
+<li>容错：通过<strong>冗余</strong>实现容错，具体的措施包括硬件冗余、数据复制（replication）、数据库备份（backup）、重试（retry）等</li>
 <li>快恢：自动主备、主从或多活<strong>流量切换</strong></li>
 </ul>
 </li>
@@ -5201,7 +5201,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <li><strong>服务过载</strong>：
 <ul>
 <li>避错：通过提前的<strong>容量规划</strong>（capacity planning）实现避错</li>
-<li>容错：通过<strong>弹性扩容</strong>实现负载均衡，通过<strong>限流</strong>（rate limiting）、<strong>优雅降级</strong>（graceful degradation）来降低负载</li>
+<li>容错：通过<strong>弹性扩容</strong>（elastic scaling）实现负载均衡，通过<strong>限流</strong>（rate limiting）、<strong>优雅降级</strong>（graceful degradation）来降低负载</li>
 </ul>
 </li>
 <li><strong>依赖服务</strong>：主要策略是<strong>故障隔离</strong>，将故障的影响限制在较小的范围内，避免发生<strong>连锁故障</strong>（<a href="https://en.wikipedia.org/wiki/Cascading_failure">cascading failure</a>）

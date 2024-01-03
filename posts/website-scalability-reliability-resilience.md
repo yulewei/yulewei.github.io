@@ -163,7 +163,7 @@ AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-ar
 
 - **硬件和网络故障**：
   - 避错：通过提高硬件的**质量**实现避错
-  - 容错：通过**冗余**实现容错，具体的措施包括硬件冗余、数据复制、数据库备份、重试等
+  - 容错：通过**冗余**实现容错，具体的措施包括硬件冗余、数据复制（replication）、数据库备份（backup）、重试（retry）等
   - 快恢：自动主备、主从或多活**流量切换**
 - **软件 bug**：
   - 避错：技术评审、代码评审、测试等实现避错
@@ -173,7 +173,7 @@ AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-ar
   - 快恢：通过**回滚**配置或操作修复错误
 - **服务过载**：
   - 避错：通过提前的**容量规划**（capacity planning）实现避错
-  - 容错：通过**弹性扩容**实现负载均衡，通过**限流**（rate limiting）、**优雅降级**（graceful degradation）来降低负载
+  - 容错：通过**弹性扩容**（elastic scaling）实现负载均衡，通过**限流**（rate limiting）、**优雅降级**（graceful degradation）来降低负载
 - **依赖服务**：主要策略是**故障隔离**，将故障的影响限制在较小的范围内，避免发生**连锁故障**（[cascading failure](https://en.wikipedia.org/wiki/Cascading_failure)）
   - 避错：通过**服务功能拆分**、**服务依赖资源隔离**、**服务强弱依赖治理**等实现故障隔离
   - 容错：通过**熔断**（circuit breaker）实现故障隔离，通过快速失败（fail fast）的方式，避免请求大量阻塞，从而保护调用方
