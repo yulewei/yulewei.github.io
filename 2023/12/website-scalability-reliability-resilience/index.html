@@ -38,7 +38,7 @@
 <meta property="og:image" content="https://static.nullwy.me/stability-google-service-failures-distribution.png">
 <meta property="og:image" content="https://static.nullwy.me/stability-response-alibaba-1-5-10.png">
 <meta property="article:published_time" content="2023-12-20T02:36:00.000Z">
-<meta property="article:modified_time" content="2024-01-03T01:00:15.467Z">
+<meta property="article:modified_time" content="2024-01-03T01:11:17.206Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="可靠性">
@@ -467,7 +467,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </li>
 <li><strong>服务过载</strong>：
 <ul>
-<li>避错：通过提前的<strong>容量规划</strong>实现避错</li>
+<li>避错：通过提前的<strong>容量规划</strong>（capacity planning）实现避错</li>
 <li>容错：通过<strong>弹性扩容</strong>实现负载均衡，通过<strong>限流</strong>（rate limiting）、<strong>优雅降级</strong>（graceful degradation）来降低负载</li>
 </ul>
 </li>
@@ -485,14 +485,14 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <li>可用区级故障：实现跨可用区冗余，复制组件和数据到其他可用区，经典案例是同城灾备、同城双活/多活</li>
 <li>地域级故障：实现跨地域冗余，复制组件和数据到其他区域，经典案例是异地灾备、异地双活/多活</li>
 </ul>
-<p>另外，从故障的<strong>直接原因</strong>角度来看，故障主要由<strong>变更</strong>触发。根据 Google SRE 经验，由变更触发的生产事故占比大概 70%<sup class="footnote-ref"><a href="#fn9" id="fnref9:1">[9:1]</a></sup>。为了提高系统稳定性，Google SRE 总结了变更管理（change management）的三点最佳实践：</p>
+<p>另外，从故障的<strong>直接原因</strong>角度来看，故障主要由<strong>变更</strong>触发。根据 Google SRE 经验，由变更触发的生产事故占比大概 70%<sup class="footnote-ref"><a href="#fn9" id="fnref9:1">[9:1]</a></sup>。为了提高系统稳定性，Google SRE 总结了<strong>变更管理</strong>（change management）的三点最佳实践：</p>
 <ul>
 <li>采用渐进式发布机制</li>
 <li>迅速而准确地检测到问题的发生</li>
 <li>当出现问题时，安全迅速地回退改动</li>
 </ul>
 <p>阿里将这三点变更管理最佳实践总结概括为简单易记的“<strong>变更三板斧</strong>”，可灰度、可监控、可回滚<sup class="footnote-ref"><a href="#fn21" id="fnref21">[21]</a></sup><sup class="footnote-ref"><a href="#fn22" id="fnref22">[22]</a></sup>。另外一个提高系统稳定性的变更管理最佳实践是，在重保活动等重要事件的时候开启<strong>封版</strong>（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Freeze_%28software_engineering%29">change freeze</a>）策略，在封版期间除了特殊的紧急发布外禁止生产环境的全部变更。</p>
-<p>在故障响应方面，提高系统稳定性的最核心的目标就是<strong>缩短故障恢复时间（MTTR）</strong>。阿里的稳定性实践是把这个目标量化，提出“1-5-10 故障快恢”目标，1 分钟发现及启动响应，5 分钟定位，10 分钟恢复<sup class="footnote-ref"><a href="#fn22" id="fnref22:1">[22:1]</a></sup><sup class="footnote-ref"><a href="#fn23" id="fnref23">[23]</a></sup>。阿里的 1-5-10 能力图谱，如下图所示<sup class="footnote-ref"><a href="#fn23" id="fnref23:1">[23:1]</a></sup>：</p>
+<p>在<strong>故障响应</strong>（incident response）方面，提高系统稳定性的最核心的目标就是<strong>缩短故障恢复时间（MTTR）</strong>。阿里的稳定性实践是把这个目标量化，提出“1-5-10 故障快恢”目标，1 分钟发现及启动响应，5 分钟定位，10 分钟恢复<sup class="footnote-ref"><a href="#fn22" id="fnref22:1">[22:1]</a></sup><sup class="footnote-ref"><a href="#fn23" id="fnref23">[23]</a></sup>。阿里的 1-5-10 能力图谱，如下图所示<sup class="footnote-ref"><a href="#fn23" id="fnref23:1">[23:1]</a></sup>：</p>
 <img width="750" alt="阿里“1-5-10 故障快恢”能力图谱" title="阿里“1-5-10 故障快恢”能力图谱" src="https://static.nullwy.me/stability-response-alibaba-1-5-10.png">
 <p>类似的，哈啰的故障响应目标是 5-5-10：5 分钟响应、5 分钟定位、10 分钟恢复<sup class="footnote-ref"><a href="#fn24" id="fnref24">[24]</a></sup>。</p>
 <h1 id="参考资料">参考资料</h1>
