@@ -37,8 +37,8 @@
 <meta property="og:image" content="https://static.nullwy.me/sre-reliability-hierarchy.svg">
 <meta property="og:image" content="https://static.nullwy.me/stability-google-service-failures-distribution.png">
 <meta property="og:image" content="https://static.nullwy.me/stability-response-alibaba-1-5-10.png">
-<meta property="article:published_time" content="2023-12-20T02:36:00.000Z">
-<meta property="article:modified_time" content="2024-01-03T01:14:11.265Z">
+<meta property="article:published_time" content="2023-12-25T02:36:00.000Z">
+<meta property="article:modified_time" content="2024-01-03T01:22:45.389Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="可靠性">
@@ -255,7 +255,7 @@
               </span>
               <span class="post-meta-item-text">发表于</span>
 
-              <time title="创建时间：2023-12-20 10:36:00" itemprop="dateCreated datePublished" datetime="2023-12-20T10:36:00+08:00">2023-12-20</time>
+              <time title="创建时间：2023-12-25 10:36:00" itemprop="dateCreated datePublished" datetime="2023-12-25T10:36:00+08:00">2023-12-25</time>
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -403,7 +403,8 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </tr>
 </tbody>
 </table>
-<p>很多云服务平台在服务级别协议（SLA）中规定了服务可用性承诺，比如 AWS EC2 服务 <a target="_blank" rel="noopener" href="https://aws.amazon.com/cn/compute/sla/">SLA 协议</a>，区域级 SLA 承诺的每月可用性至少是 99.99%，实例级 SLA 承诺的每月可用性至少是 99.5%，若低于该承诺值，会作相应的赔偿，可用性越低，赔偿额度越高，若低于 95% 全额赔偿。一些互联网公司会在公司内部设定自己业务系统的 SLA 可用性目标，比如笔者所在的公司设定的年度 SLA 可用性目标是 99.99%，然后考核技术团队绩效的依据之一就是对这个可用性目标的达成情况。想要提高系统的可用性，需要做的是<strong>延长无故障时间（MTTF）和缩短故障恢复时间（MTTR）</strong>。</p>
+<p>很多云服务平台在服务级别协议（SLA）中规定了服务可用性承诺，比如 AWS EC2 服务 <a target="_blank" rel="noopener" href="https://aws.amazon.com/cn/compute/sla/">SLA 协议</a>，区域级 SLA 承诺的每月可用性至少是 99.99%，实例级 SLA 承诺的每月可用性至少是 99.5%，若低于该承诺值，会作相应的赔偿，可用性越低，赔偿额度越高，若低于 95% 全额赔偿。一些互联网公司会在公司内部设定自己业务系统的 SLA 可用性目标，比如笔者所在的公司设定的年度 SLA 可用性目标是 99.99%，然后考核技术团队绩效的依据之一就是对这个可用性目标的达成情况。</p>
+<p>想要提高系统的可用性，需要做的是<strong>延长无故障时间（MTTF）和缩短故障恢复时间（MTTR）</strong>。</p>
 <h2 id="站点可靠性工程">站点可靠性工程</h2>
 <p>站点可靠性工程（SRE, <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Site_reliability_engineering">Site reliability engineering</a>），起源于 Google，2003 年 Ben Treynor Sloss 在加入 Google 后组建了最早的 SRE 团队。在《SRE：Google运维解密》<sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup>（2016 年出版，该书是关于 SRE 的第一本书）中 Ben Treynor Sloss 解释了 SRE 的内涵：</p>
 <blockquote>
