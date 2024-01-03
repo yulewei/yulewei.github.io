@@ -90,7 +90,7 @@ Google 的《构建安全可靠的系统》一书对术语“韧性”（弹性�
 
 ## 可用性概念
 
-可用性是衡量可靠性和韧性的综合性指标，可以表示为总可用时间除以总可用时间与总不可用时间之和，也可以通过平均无故障时间（MTTF，Mean Time To Failure）和平均故障恢复时间（MTTR，Mean Time To Repair）计算。可用性的计算公式如下：
+可用性（[availability](https://en.wikipedia.org/wiki/Availability)）是衡量可靠性和韧性的综合性指标，可以表示为总可用时间除以总可用时间与总不可用时间之和，也可以通过平均无故障时间（MTTF，Mean Time To Failure）和平均故障恢复时间（MTTR，Mean Time To Repair）计算。可用性的计算公式如下：
 
 $可用性 = \frac{\text{total uptime}}{\text{total uptime} + \text{total downtime}} = \frac {MTTF} {MTTF + MTTR}$
 
