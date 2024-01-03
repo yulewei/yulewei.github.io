@@ -249,19 +249,19 @@ Laprie 等人把提高系统可靠性的方法总结为[四种](https://en.wikip
 
 - **故障避免（fault avoidonce，简称“避错”）**：在系统的设计和实现过程中使用一些开发方法来减少故障发生，并在系统投入使用之前发现系统中的故障。
 - **故障排除（fault removal，简称“排错”）**：故障排除可以细分为两个子类别：开发期间的排除和使用期间的排除。在系统使用之前通过[验证和确认](https://zh.wikipedia.org/wiki/%E9%A9%97%E8%AD%89%E5%8F%8A%E7%A2%BA%E8%AA%8D)（V&V）来发现和去除系统中的故障；如果系统已经投入使用，通过维护周期将其消除。
-- **故障容忍（[fault tolerance](https://en.wikipedia.org/wiki/Fault_tolerance)，简称“容错”）**：容错是使系统在其某些组件中出现一个或多个故障时能够继续提供服务的能力，尽管该服务可能处于降级级别。容错技术主要是采用**冗余**（[redundancy](https://en.wikipedia.org/wiki/Redundancy_(engineering))）方法来消除故障的影响，冗余的含意是指当系统无故障时取消冗余资源不会影响系统正常运行。
+- **故障容忍（[fault tolerance](https://en.wikipedia.org/wiki/Fault_tolerance)，简称“容错”）**：容错是使系统在其某些组件中出现一个或多个故障时能够继续提供服务的能力，尽管该服务可能处于降级级别。容错技术主要是采用**冗余**（[redundancy](https://en.wikipedia.org/wiki/Redundancy_(engineering))）方法来消除故障的影响，冗余的含义是指当系统无故障时取消冗余资源不会影响系统正常运行。
 - **故障预报（fault forecasting）**：通过收集故障数据，建立可靠性建模，预测可能的故障。
 
 针对软件可靠性设计，软件故障避免技术，包括采用优秀的软件设计方法、使用强类型的程序设计语言、全面的编译器检查等；软件故障排除技术，主要是代码评审和软件测试；故障预报，能提高硬件可靠性，但是很少应用于软件可靠性。
 
 系统的资源包括硬件资源、软件资源、信息资源、时间资源，所以冗余区分 4 种方式：
 
-- **硬件冗余**（hardware redundancy）：通过配置额外的硬件组件实现冗余
-- **软件冗余**（software redundancy）：通过配置额外的软件版本实现冗余，例如 N 版本编程（[NVP](https://en.wikipedia.org/wiki/N-version_programming)）
+- **硬件冗余**（hardware redundancy）：通过配置额外的硬件组件实现冗余。
+- **软件冗余**（software redundancy）：通过配置额外的软件版本实现冗余，例如 N 版本编程（[NVP](https://en.wikipedia.org/wiki/N-version_programming)）。
 - **信息冗余**（information redundancy）：通过对信息中外加一部分信息码或将信息存放在多个内存单元或将信息进行备份等实现冗余，例如循环冗余校验码、数据库备份等。
 - **时间冗余**（time redundancy）：多次执行相同的操作（重试）实现冗余，例如多次执行程序或传输数据的多个副本。
 
-硬件冗余和软件冗余被合称为结构冗余（structural redundancy）。相对与时间冗余，硬件冗余、软件冗余、信息冗余被合称为空间冗余（space redundancy）。
+硬件冗余和软件冗余被合称为结构冗余（structural redundancy）。相对与时间冗余，硬件冗余、软件冗余、信息冗余被合称为空间冗余（space redundancy）。硬件冗余比较常见，而软件冗余相对少见。
 
 在工程领域，利用冗余提高可靠性的例子很多，比如汽车的备胎、大货车的多个轮子、飞机的四台发动机或双台发动机、火箭的多台引擎和多台计算机等。《像火箭科学家一样思考》书中的“为什么冗余不是多余的”小节[^19]中有这样一段阐述：
 
