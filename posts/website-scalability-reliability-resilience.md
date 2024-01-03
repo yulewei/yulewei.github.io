@@ -161,7 +161,7 @@ AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-ar
 
 硬件冗余和软件冗余被合称为结构冗余（structural redundancy）。相对与时间冗余，硬件冗余、软件冗余、信息冗余被合称为空间冗余（space redundancy）。硬件冗余比较常见，而软件冗余相对少见。
 
-**应对各种故障的具体典型的可靠性和韧性策略：**
+**应对各种故障的具体典型的可靠性和韧性策略**[^20][^5][^7]：
 
 - **硬件和网络故障**：
   - 避错：通过提高硬件的**质量**实现避错
@@ -180,7 +180,7 @@ AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-ar
   - 避错：通过**服务功能拆分**、**服务依赖资源隔离**、**服务强弱依赖治理**等实现故障隔离
   - 容错：通过**熔断**（circuit breaker）实现故障隔离，通过快速失败（fail fast）的方式，避免请求大量阻塞，从而保护调用方
 
-云环境的硬件基础设施，比如 AWS、Azure、阿里云等，按物理隔离程度区分**可用区**（[Availability Zone](https://en.wikipedia.org/wiki/Availability_zone), AZ）和**地域**（Region，也叫区域）。**地域**指数据中心所在的地理区域，通常按照数据中心所在的城市划分。例如阿里云[^20]，华北 1（青岛）地域表示数据中心所在的城市是青岛。**可用区**是指在同一地域内独立的物理分区，每个可用区包含一个或多个数据中心，这些数据中心配置独立电源、冷却和网络。例如阿里云，华北 1（青岛）地域支持 2 个可用区，包括青岛可用区 B 和青岛可用区 C。在同一地域内，可用区与可用区之间内网互通。各可用区之间可以实现故障隔离，即如果一个可用区出现故障，则不会影响其他可用区的正常运行。
+云环境的硬件基础设施，比如 AWS、Azure、阿里云等，按物理隔离程度区分**可用区**（[Availability Zone](https://en.wikipedia.org/wiki/Availability_zone), AZ）和**地域**（Region，也叫区域）。**地域**指数据中心所在的地理区域，通常按照数据中心所在的城市划分。例如阿里云[^21]，华北 1（青岛）地域表示数据中心所在的城市是青岛。**可用区**是指在同一地域内独立的物理分区，每个可用区包含一个或多个数据中心，这些数据中心配置独立电源、冷却和网络。例如阿里云，华北 1（青岛）地域支持 2 个可用区，包括青岛可用区 B 和青岛可用区 C。在同一地域内，可用区与可用区之间内网互通。各可用区之间可以实现故障隔离，即如果一个可用区出现故障，则不会影响其他可用区的正常运行。
 
 按故障的影响范围，可以区分组件级、可用区级和地域级共三个级别的故障，这三个级别故障的具体的容错措施是：
  - 组件级故障：实现组件冗余，避免单点故障
@@ -192,13 +192,13 @@ AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-ar
   - 迅速而准确地检测到问题的发生
   - 当出现问题时，安全迅速地回退改动
 
-阿里将这三点变更管理最佳实践总结概括为简单易记的“**变更三板斧**”，可灰度、可监控、可回滚[^21][^22]。另外一个提高系统稳定性的变更管理最佳实践是，在重保活动等重要事件的时候开启**封版**（[change freeze](https://en.wikipedia.org/wiki/Freeze_%28software_engineering%29)）策略，在封版期间除了特殊的紧急发布外禁止生产环境的全部变更。
+阿里将这三点变更管理最佳实践总结概括为简单易记的“**变更三板斧**”，可灰度、可监控、可回滚[^22][^23]。另外一个提高系统稳定性的变更管理最佳实践是，在重保活动等重要事件的时候开启**封版**（[change freeze](https://en.wikipedia.org/wiki/Freeze_%28software_engineering%29)）策略，在封版期间除了特殊的紧急发布外禁止生产环境的全部变更。
 
-在**故障响应**（incident response）方面，提高系统稳定性的最核心的目标就是**缩短故障恢复时间（MTTR）**。阿里的稳定性实践是把这个目标量化，提出“1-5-10 故障快恢”目标，1 分钟发现及启动响应，5 分钟定位，10 分钟恢复[^22][^23]。阿里的 1-5-10 能力图谱，如下图所示[^23]：
+在**故障响应**（incident response）方面，提高系统稳定性的最核心的目标就是**缩短故障恢复时间（MTTR）**。阿里的稳定性实践是把这个目标量化，提出“1-5-10 故障快恢”目标，1 分钟发现及启动响应，5 分钟定位，10 分钟恢复[^22][^23]。阿里的 1-5-10 能力图谱，如下图所示[^24]：
 
 <img width="750" alt="阿里“1-5-10 故障快恢”能力图谱" title="阿里“1-5-10 故障快恢”能力图谱" src="https://static.nullwy.me/stability-response-alibaba-1-5-10.png">
 
-类似的，哈啰的故障响应目标是 5-5-10：5 分钟响应、5 分钟定位、10 分钟恢复[^24]。
+类似的，哈啰的故障响应目标是 5-5-10：5 分钟响应、5 分钟定位、10 分钟恢复[^25]。
 
 # 参考资料
 
@@ -221,8 +221,9 @@ AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-ar
 [^17]: 2010-04 Jinesh Varia: Architecting for the Cloud: Best Practices <https://www.slideshare.net/AmazonWebServices/aws-architectingdesantislondon>
 [^18]: 2015-10 The AWS Well-Architected Framework <https://www.infoq.com/news/2015/10/aws-well-architected-framework/>
 [^19]: 数据中心一体化最佳实践，Barroso, Hölzle, Ranganathan，第3版2018，[豆瓣](https://book.douban.com/subject/34950732/)：第7章 故障处理与维修
-[^20]: 阿里云：地域和可用区 <https://help.aliyun.com/document_detail/40654.html>
-[^21]: 2020-03 阿里陈鑫：阿里巴巴DevOps文化浅谈 <https://mp.weixin.qq.com/s/h-F8dopr23pgvSoXjWfE8A>
-[^22]: 阿里云卓越架构：稳定性支柱：稳定性设计方案 <https://help.aliyun.com/document_detail/2573820.html>
-[^23]: 2021-05 阿里暴晓亚若厉：阿里巴巴GOC稳定性保障介绍（slides, 26p） <https://www.modb.pro/doc/31443>
-[^24]: 2022-04 哈啰技术：稳定性建设系列文章1_大纲&方法论 <https://segmentfault.com/a/1190000041671012>
+[^20]: 云系统管理：大规模分布式系统设计与运营，[Tom Limoncelli](https://en.wikipedia.org/wiki/Tom_Limoncelli)，2014，[豆瓣](https://book.douban.com/subject/26865122/)：第6章 弹性设计模式
+[^21]: 阿里云：地域和可用区 <https://help.aliyun.com/document_detail/40654.html>
+[^22]: 2020-03 阿里陈鑫：阿里巴巴DevOps文化浅谈 <https://mp.weixin.qq.com/s/h-F8dopr23pgvSoXjWfE8A>
+[^23]: 阿里云卓越架构：稳定性支柱：稳定性设计方案 <https://help.aliyun.com/document_detail/2573820.html>
+[^24]: 2021-05 阿里暴晓亚若厉：阿里巴巴GOC稳定性保障介绍（slides, 26p） <https://www.modb.pro/doc/31443>
+[^25]: 2022-04 哈啰技术：稳定性建设系列文章1_大纲&方法论 <https://segmentfault.com/a/1190000041671012>
