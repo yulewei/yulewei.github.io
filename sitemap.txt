@@ -1,3 +1,6 @@
+https://nullwy.me/2023/07/io-multiplexing-network-server/
+https://nullwy.me/2020/05/kong-gateway/
+https://nullwy.me/2018/01/java-ffi/
 https://nullwy.me/2023/12/website-performance-scalability/
 https://nullwy.me/2023/12/website-scalability-reliability-resilience/
 https://nullwy.me/2023/10/reliability-engineering/
@@ -10,15 +13,12 @@ https://nullwy.me/2017/01/mysql-data-types/
 https://nullwy.me/2018/06/mysql-binlog/
 https://nullwy.me/2019/06/mysql-5.7-json/
 https://nullwy.me/2016/12/mybatis-generator/
-https://nullwy.me/2020/05/kong-gateway/
 https://nullwy.me/2016/11/java-official-doc/
 https://nullwy.me/2017/05/java-method-parameter/
-https://nullwy.me/2018/01/java-ffi/
 https://nullwy.me/2017/03/java-executor/
 https://nullwy.me/2016/11/java-books/
 https://nullwy.me/2018/10/java-agent/
 https://nullwy.me/2016/12/java-8-stream-api/
-https://nullwy.me/2023/07/io-multiplexing-network-server/
 https://nullwy.me/2023/07/innodb-locking/
 https://nullwy.me/2019/01/elastic-stack/
 https://nullwy.me/2016/11/database-books/
@@ -58,8 +58,6 @@ https://nullwy.me/tags/JNI/
 https://nullwy.me/tags/JNA/
 https://nullwy.me/tags/JNR/
 https://nullwy.me/tags/FFI/
-https://nullwy.me/tags/Pyhon/
-https://nullwy.me/tags/Ruby/
 https://nullwy.me/tags/JVM/
 https://nullwy.me/tags/Kong/
 https://nullwy.me/tags/API/

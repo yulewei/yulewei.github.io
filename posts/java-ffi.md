@@ -2,7 +2,7 @@
 title: Java 外部函数接口：JNI, JNA, JNR
 date: 2018-01-24 16:09:51
 categories: Java
-tags: [Java, JNI, JNA, JNR, FFI, Pyhon, Ruby]
+tags: [Java, JNI, JNA, JNR, FFI]
 ---
 
 # 遇到的问题

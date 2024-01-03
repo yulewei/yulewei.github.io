@@ -2,7 +2,7 @@
 title: I/O 多路复用与网络服务器并发策略
 date: 2023-07-26 00:44:00
 categories: 架构
-tags: [IO, 服务器, 网络, 架构, 并发]
+tags: [IO, 服务器, 网络, 架构, 并发, Nginx]
 ---
 
 目前主流的网络服务器，网络 I/O 相关的底层最核心的技术都是 I/O 多路复用（I/O Multiplexing），比如 Apache HTTP Server、Nginx、Redis 等。本文尝试解释各种 I/O 模型，包括解释什么是 I/O 多路复用，同时也总结 I/O 多路复用底层的系统调用 select、poll、kqueue 和 epoll 的演进和区别，并编写了使用这些函数的示例代码。另外，本文还总结了各种基于 I/O 多路复用实现的网络服务器的并发策略的三种模式，包括对 Apache HTTP Server、Nginx 和 Redis 等网络服务器的并发策略的具体案例的解析。

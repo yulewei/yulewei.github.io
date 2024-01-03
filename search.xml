@@ -1557,6 +1557,7 @@ An asynchronous I/O operation does not cause the requesting process to be blocke
         <tag>服务器</tag>
         <tag>网络</tag>
         <tag>并发</tag>
+        <tag>Nginx</tag>
       </tags>
   </entry>
   <entry>
@@ -2010,8 +2011,6 @@ An asynchronous I/O operation does not cause the requesting process to be blocke
         <tag>JNA</tag>
         <tag>JNR</tag>
         <tag>FFI</tag>
-        <tag>Pyhon</tag>
-        <tag>Ruby</tag>
       </tags>
   </entry>
   <entry>
@@ -2340,6 +2339,7 @@ Generates only some kinds of debugging information, specified by a comma separat
       <tags>
         <tag>架构</tag>
         <tag>微服务</tag>
+        <tag>服务器</tag>
         <tag>Kong</tag>
         <tag>API</tag>
         <tag>Nginx</tag>

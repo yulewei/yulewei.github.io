@@ -2,6 +2,33 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>https://nullwy.me/2023/07/io-multiplexing-network-server/</loc>
+    
+    <lastmod>2024-01-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nullwy.me/2020/05/kong-gateway/</loc>
+    
+    <lastmod>2024-01-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>https://nullwy.me/2018/01/java-ffi/</loc>
+    
+    <lastmod>2024-01-03</lastmod>
+    
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
     <loc>https://nullwy.me/2023/12/website-performance-scalability/</loc>
     
     <lastmod>2024-01-03</lastmod>
@@ -110,15 +137,6 @@
   </url>
   
   <url>
-    <loc>https://nullwy.me/2020/05/kong-gateway/</loc>
-    
-    <lastmod>2023-12-05</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
     <loc>https://nullwy.me/2016/11/java-official-doc/</loc>
     
     <lastmod>2023-12-05</lastmod>
@@ -129,15 +147,6 @@
   
   <url>
     <loc>https://nullwy.me/2017/05/java-method-parameter/</loc>
-    
-    <lastmod>2023-12-05</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nullwy.me/2018/01/java-ffi/</loc>
     
     <lastmod>2023-12-05</lastmod>
     
@@ -174,15 +183,6 @@
   
   <url>
     <loc>https://nullwy.me/2016/12/java-8-stream-api/</loc>
-    
-    <lastmod>2023-12-05</lastmod>
-    
-    <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>https://nullwy.me/2023/07/io-multiplexing-network-server/</loc>
     
     <lastmod>2023-12-05</lastmod>
     
@@ -478,20 +478,6 @@
   
   <url>
     <loc>https://nullwy.me/tags/FFI/</loc>
-    <lastmod>2024-01-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://nullwy.me/tags/Pyhon/</loc>
-    <lastmod>2024-01-03</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.2</priority>
-  </url>
-  
-  <url>
-    <loc>https://nullwy.me/tags/Ruby/</loc>
     <lastmod>2024-01-03</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
