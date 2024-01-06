@@ -114,12 +114,12 @@ $\text{availability} = \frac{\text{total uptime}}{\text{total uptime} + \text{to
 
 > SRE 究竟是如何在 Google 起源的呢？其实我的答案非常简单：SRE 就是让软件工程师来设计一个新型运维团队的结果。... 从本质上来说，SRE 就是在用软件工程的思想和方法论完成以前由运维团队手动完成的任务。这些 SRE 倾向于通过设计、构建自动化工具来取代人工操作。... 我们可以认为 DevOps 是 SRE 核心理念的普适版，可以用于更广范围内的组织结构、管理结构和人员安排。同时，SRE 是 DevOps 模型在 Google 的具体实践，带有一些特别的扩展。
 
-对于 Google 来说，SRE 的内涵主要局限在 IT 运维（IT operations，也翻译为 IT 运营）实践上，SRE 是 DevOps 在 Google 的具体实践，即“class SRE implements interface DevOps”。不过，很多资料扩展了站点可靠性工程的内涵[^10][^11][^12][^13]，典型的代表是微软，微软对站点可靠性工程的定义是[^11]：
+对于 Google 来说，SRE 的内涵主要局限在 IT 运维（IT operations，也翻译为 IT 运营）实践上，SRE 是 DevOps 在 Google 的具体实践，即“class SRE implements interface DevOps”。不过，很多资料扩展了站点可靠性工程的内涵[^10][^11][^3][^12]，典型的代表是微软，微软对站点可靠性工程的定义是[^11]：
 
 > Site Reliability Engineering is an engineering discipline devoted to helping an organization sustainably achieve the appropriate level of reliability in their systems, services, and products.
 > 站点可靠性工程是一门工程学科，致力于帮助组织可持续地实现其系统、服务和产品的适当可靠性水平。
 
-可以看到，这个定义没有与“运维”强绑定，实现可靠性水平相关的工程实践都属于站点可靠性工程。扩展内涵后的站点可靠性工程，除了用软件工程方式完成运维任务外，还涉及韧性架构设计，可靠性工作贯穿软件生命周期的全过程[^12][^13]。SRE 工程师的技能要求，如下图所示[^13]。
+可以看到，这个定义没有与“运维”强绑定，实现可靠性水平相关的工程实践都属于站点可靠性工程。扩展内涵后的站点可靠性工程，除了用软件工程方式完成运维任务外，还涉及韧性架构设计，可靠性工作贯穿软件生命周期的全过程[^3][^12]。SRE 工程师的技能要求，如下图所示[^12]。
 
 <img width="550" alt="SRE 工程师的技能要求" title="SRE 工程师的技能要求" src="https://static.nullwy.me/sre-skills.jpg">
 
@@ -129,22 +129,22 @@ $\text{availability} = \frac{\text{total uptime}}{\text{total uptime} + \text{to
 
 <img width="450" alt="SRE 的可靠性层级模型" title="SRE 的可靠性层级模型" src="https://static.nullwy.me/sre-reliability-hierarchy.svg">
 
-需要注意的是，Dickerson 原始的可靠性层级模型的最低层是监控，而不是韧性架构设计，之所以加上了韧性架构设计，参考的是微软的技术培训师 Unai Huete Beloki 写的关于 SRE 的书籍[^14]。
+需要注意的是，Dickerson 原始的可靠性层级模型的最低层是监控，而不是韧性架构设计，之所以加上了韧性架构设计，参考的是微软的技术培训师 Unai Huete Beloki 写的关于 SRE 的书籍[^13]。
 
 # 可靠性和韧性设计
 
-基于 AWS 的经验，对于分布式系统的故障，亚马逊 CTO Werner Vogels 有如下总结[^15]：
+基于 AWS 的经验，对于分布式系统的故障，亚马逊 CTO Werner Vogels 有如下总结[^14]：
 
 > Failures are a given and everything will eventually fail over time: from routers to hard disks, from operating systems to memory units corrupting TCP packets, from transient errors to permanent failures. This is a given, whether you are using the highest-quality hardware or lowest cost components. ... We needed to build systems that embrace failure as a natural occurrence even if we did not know what the failure might be. Systems need to keep running even if the “house is on fire.” It is important to be able to manage pieces that are impacted without the need to take the overall system down.
 > 故障是注定的；随着时间的流逝，一切终将归于失败：从路由器到硬盘，从操作系统到存储单元损坏的TCP数据包，从瞬时误差到永久失效，无论你用的是最高质量的硬件还是最低成本的组件，这都是理所当然的。... 因此，我们需要构建的是将故障视为自然发生的系统，即使我们并不知道故障是什么。这个系统应该要做到，即使在“后院已经着火”的情况下依然可以继续运行。重要的是在不需要引起整个系统宕机的情况下就能管理好受影响的局部组件。
 
-Werner Vogels 的名言是，“Everything fails, all the time”。**分布式系统，100% 的可靠性是不存在的，必须拥抱故障，假设一切都会失败，面向故障设计，这样没什么会真正失败（design for failure and nothing will really fail）**。面向故障设计（design for failure），或翻译为“面向失败设计”、“防故障设计”等，接受故障总会发生的现实，以提升系统的韧性为目标，也叫做**韧性设计**（design for resilience）。面向故障设计，是亚马逊 AWS 的关于在云环境下构建应用的白皮书“Architecting for The Cloud: Best Practices”中总结的第一条最佳架构实践[^16][^17]。目前这个白皮书已经被最新的“AWS Well-Architected Framework”白皮书替代。
+Werner Vogels 的名言是，“Everything fails, all the time”。**分布式系统，100% 的可靠性是不存在的，必须拥抱故障，假设一切都会失败，面向故障设计，这样没什么会真正失败（design for failure and nothing will really fail）**。面向故障设计（design for failure），或翻译为“面向失败设计”、“防故障设计”等，接受故障总会发生的现实，以提升系统的韧性为目标，也叫做**韧性设计**（design for resilience）。面向故障设计，是亚马逊 AWS 的关于在云环境下构建应用的白皮书“Architecting for The Cloud: Best Practices”中总结的第一条最佳架构实践[^15][^16]。目前这个白皮书已经被最新的“AWS Well-Architected Framework”白皮书替代。
 
-AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-architected/)，最早在 2015 年 10 月发布[^18]，描述了用于在云中设计和运行工作负载的关键概念、设计原则和架构最佳实践。受亚马逊 AWS 的影响和启发，其他云平台也相继发布类似的在云环境下的架构最佳实践的框架，[Google Cloud 架构框架](https://cloud.google.com/architecture/framework?hl=zh-cn)（2015.10）、[Microsoft Azure Well-Architected 框架](https://learn.microsoft.com/zh-cn/azure/well-architected/)（2020.08）、[阿里云卓越架构](https://help.aliyun.com/product/2362200.html)（2023.06）。这些框架都由五个或六个支柱组成，内容上大同小异。AWS 的 Well-Architected 框架基于六大支柱，其中两个支柱是**可靠性支柱（Reliability Pillar）**和**卓越运营支柱（Operational Excellence Pillar）**。可靠性支柱侧重于执行预期职能的工作负载，以及如何从故障快速恢复以满足需求。类似的，Google Cloud 架构框架由六大支柱组成，其中两个支柱是可靠性和卓越运营。Azure 架构良好的框架的由五大要素组成，其中两个要素是可靠性和卓越运营。阿里云卓越架构包含五个架构最佳实践支柱，其中两个支柱是**稳定性**和**卓越运营**。可靠性或稳定性支柱涵盖的内容相对偏向上文提到的**面向故障设计**或**韧性架构设计**，而卓越运营支柱涵盖的内容相对偏向上文提到的**狭义 SER** 或 **DevOps**，不过两个支柱涉及的内容有很重叠的部分。
+AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-architected/)，最早在 2015 年 10 月发布[^17]，描述了用于在云中设计和运行工作负载的关键概念、设计原则和架构最佳实践。受亚马逊 AWS 的影响和启发，其他云平台也相继发布类似的在云环境下的架构最佳实践的框架，[Google Cloud 架构框架](https://cloud.google.com/architecture/framework?hl=zh-cn)（2015.10）、[Microsoft Azure Well-Architected 框架](https://learn.microsoft.com/zh-cn/azure/well-architected/)（2020.08）、[阿里云卓越架构](https://help.aliyun.com/product/2362200.html)（2023.06）。这些框架都由五个或六个支柱组成，内容上大同小异。AWS 的 Well-Architected 框架基于六大支柱，其中两个支柱是**可靠性支柱（Reliability Pillar）**和**卓越运营支柱（Operational Excellence Pillar）**。可靠性支柱侧重于执行预期职能的工作负载，以及如何从故障快速恢复以满足需求。类似的，Google Cloud 架构框架由六大支柱组成，其中两个支柱是可靠性和卓越运营。Azure 架构良好的框架的由五大要素组成，其中两个要素是可靠性和卓越运营。阿里云卓越架构包含五个架构最佳实践支柱，其中两个支柱是**稳定性**和**卓越运营**。可靠性或稳定性支柱涵盖的内容相对偏向上文提到的**面向故障设计**或**韧性架构设计**，而卓越运营支柱涵盖的内容相对偏向上文提到的**狭义 SER** 或 **DevOps**，不过两个支柱涉及的内容有很重叠的部分。
 
 **按故障的根因（root cause）分类**，主要有如下类型：硬件故障（hardware failure）、网络故障（network failure）、软件 bug（software bug）、配置错误（misconfiguration）、运维操作错误（operator error）、过载（overload）、依赖服务（dependency service）等。故障原因的分类，不同的组织各有不同，有些分类可能会把配置错误和运维操作错误一起归类为人为错误（human error）。另外，本质上来看，软件 bug 也是开发时的人为错误引入的，但一般都不把人为错误和软件故障区分为两种类型的故障。
 
-下图所示的是造成谷歌某大型互联网服务可检测到的服务中断所有事件的一个粗略分类，以及故障原因的分布比例[^19]。容易发现，故障更多是由软件错误、错误的配置和人为错误造成的，而非机器或网络故障。由硬件故障导致的服务级别故障占比之所以很低，主要不是依靠这些系统硬件组件的可靠性，而是因为容错技术在防止组件故障影响上层系统行为方面是相当成功的。硬件设备故障以外的因素更容易导致服务级别中断，是因为构建能容忍已知硬件故障的服务相对容易，而处理一般的软件错误和运维人员误操作则比较难。
+下图所示的是造成谷歌某大型互联网服务可检测到的服务中断所有事件的一个粗略分类，以及故障原因的分布比例[^18]。容易发现，故障更多是由软件错误、错误的配置和人为错误造成的，而非机器或网络故障。由硬件故障导致的服务级别故障占比之所以很低，主要不是依靠这些系统硬件组件的可靠性，而是因为容错技术在防止组件故障影响上层系统行为方面是相当成功的。硬件设备故障以外的因素更容易导致服务级别中断，是因为构建能容忍已知硬件故障的服务相对容易，而处理一般的软件错误和运维人员误操作则比较难。
 
 <img width="550" alt="谷歌某一主要服务最可能的故障原因分布" title="谷歌某一主要服务最可能的故障原因分布" src="https://static.nullwy.me/stability-google-service-failures-distribution.png">
 
@@ -161,7 +161,7 @@ AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-ar
 
 硬件冗余和软件冗余被合称为结构冗余（structural redundancy）。相对与时间冗余，硬件冗余、软件冗余、信息冗余被合称为空间冗余（space redundancy）。硬件冗余比较常见，而软件冗余相对少见。
 
-**应对各种故障的具体典型的可靠性和韧性策略**[^20][^5][^7]：
+**应对各种故障的具体典型的可靠性和韧性策略**[^19][^5][^7]：
 
 - **硬件和网络故障**：
   - 避错：通过提高硬件的**质量**实现避错
@@ -180,7 +180,7 @@ AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-ar
   - 避错：通过**服务功能拆分**、**服务依赖资源隔离**、**服务强弱依赖治理**等实现故障隔离
   - 容错：通过**熔断**（circuit breaker）实现故障隔离，通过快速失败（fail fast）的方式，避免请求大量阻塞，从而保护调用方
 
-云环境的硬件基础设施，比如 AWS、Azure、阿里云等，按物理隔离程度区分**可用区**（[Availability Zone](https://en.wikipedia.org/wiki/Availability_zone), AZ）和**地域**（Region，也叫区域）。**地域**指数据中心所在的地理区域，通常按照数据中心所在的城市划分。例如阿里云[^21]，华北 1（青岛）地域表示数据中心所在的城市是青岛。**可用区**是指在同一地域内独立的物理分区，每个可用区包含一个或多个数据中心，这些数据中心配置独立电源、冷却和网络。例如阿里云，华北 1（青岛）地域支持 2 个可用区，包括青岛可用区 B 和青岛可用区 C。在同一地域内，可用区与可用区之间内网互通。各可用区之间可以实现故障隔离，即如果一个可用区出现故障，则不会影响其他可用区的正常运行。
+云环境的硬件基础设施，比如 AWS、Azure、阿里云等，按物理隔离程度区分**可用区**（[Availability Zone](https://en.wikipedia.org/wiki/Availability_zone), AZ）和**地域**（Region，也叫区域）。**地域**指数据中心所在的地理区域，通常按照数据中心所在的城市划分。例如阿里云[^20]，华北 1（青岛）地域表示数据中心所在的城市是青岛。**可用区**是指在同一地域内独立的物理分区，每个可用区包含一个或多个数据中心，这些数据中心配置独立电源、冷却和网络。例如阿里云，华北 1（青岛）地域支持 2 个可用区，包括青岛可用区 B 和青岛可用区 C。在同一地域内，可用区与可用区之间内网互通。各可用区之间可以实现故障隔离，即如果一个可用区出现故障，则不会影响其他可用区的正常运行。
 
 按故障的影响范围，可以区分组件级、可用区级和地域级共三个级别的故障，这三个级别故障的具体的容错措施是：
  - 组件级故障：实现组件冗余，避免单点故障
@@ -192,13 +192,13 @@ AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-ar
   - 迅速而准确地检测到问题的发生
   - 当出现问题时，安全迅速地回退改动
 
-阿里将这三点变更管理最佳实践总结概括为简单易记的“**变更三板斧**”，可灰度、可监控、可回滚[^22][^23]。另外一个提高系统稳定性的变更管理最佳实践是，在重保活动等重要事件的时候开启**封版**（[change freeze](https://en.wikipedia.org/wiki/Freeze_%28software_engineering%29)）策略，在封版期间除了特殊的紧急发布外禁止生产环境的全部变更。
+阿里将这三点变更管理最佳实践总结概括为简单易记的“**变更三板斧**”，可灰度、可监控、可回滚[^21][^22]。另外一个提高系统稳定性的变更管理最佳实践是，在重保活动等重要事件的时候开启**封版**（[change freeze](https://en.wikipedia.org/wiki/Freeze_%28software_engineering%29)）策略，在封版期间除了特殊的紧急发布外禁止生产环境的全部变更。
 
-在**故障响应**（incident response）方面，提高系统稳定性的最核心的目标就是**缩短故障恢复时间（MTTR）**。阿里的稳定性实践是把这个目标量化，提出“1-5-10 故障快恢”目标，1 分钟发现及启动响应，5 分钟定位，10 分钟恢复[^22][^23]。阿里的 1-5-10 能力图谱，如下图所示[^24]：
+在**故障响应**（incident response）方面，提高系统稳定性的最核心的目标就是**缩短故障恢复时间（MTTR）**。阿里的稳定性实践是把这个目标量化，提出“1-5-10 故障快恢”目标，1 分钟发现及启动响应，5 分钟定位，10 分钟恢复[^21][^22]。阿里的 1-5-10 能力图谱，如下图所示[^23]：
 
 <img width="750" alt="阿里“1-5-10 故障快恢”能力图谱" title="阿里“1-5-10 故障快恢”能力图谱" src="https://static.nullwy.me/stability-response-alibaba-1-5-10.png">
 
-类似的，哈啰的故障响应目标是 5-5-10：5 分钟响应、5 分钟定位、10 分钟恢复[^25]。
+类似的，哈啰的故障响应目标是 5-5-10：5 分钟响应、5 分钟定位、10 分钟恢复[^24]。
 
 # 参考资料
 
@@ -213,17 +213,16 @@ AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-ar
 [^9]: SRE：Google运维解密，Beyer, etc. 2016，[豆瓣](https://book.douban.com/subject/26875239/)、[英文版](https://sre.google/sre-book/table-of-contents/)
 [^10]: The Art of Site Reliability Engineering (SRE) with Azure, Unai Huete Beloki, 2022, [springer](https://link.springer.com/book/10.1007/978-1-4842-8704-0): Chapter 1: The Foundation of Site Reliability Engineering
 [^11]: Microsoft Azure: Site reliability engineering documentation <https://learn.microsoft.com/en-us/azure/site-reliability-engineering/>
-[^12]: SRE原理与实践：构建高可靠性互联网应用，张观石，2022，[豆瓣](https://book.douban.com/subject/36202918/)：第1章 互联网软件可靠性概论
-[^13]: Becoming a Rockstar SRE, Proffitt & Anami, 2023, [packtpub](https://www.packtpub.com/product/becoming-a-rockstar-sre/9781803239224): Chapter 1: SRE Job Role – Activities and Responsibilities
-[^14]: The Art of Site Reliability Engineering (SRE) with Azure, Unai Huete Beloki, 2022, [springer](https://link.springer.com/book/10.1007/978-1-4842-8704-0): Chapter 4: Architecting Resilient Solutions in Azure, 4.1 What Is Resiliency?: Figure 4-1. Customized hierarchy of reliability
-[^15]: 2016-03 Amazon CTO Werner Vogels: 10 Lessons from 10 Years of Amazon Web Services <https://www.allthingsdistributed.com/2016/03/10-lessons-from-10-years-of-aws.html> <https://aws.amazon.com/cn/blogs/china/10-lessons-from-10-years-of-aws/>
-[^16]: 2010-01 Jinesh Varia: Architecting for the Cloud: Best Practices (AWS whitepaper) <https://web.archive.org/web/0/https://aws.amazon.com/blogs/aws/new-whitepaper-architecting-for-the-cloud-best-practices/>
-[^17]: 2010-04 Jinesh Varia: Architecting for the Cloud: Best Practices <https://www.slideshare.net/AmazonWebServices/aws-architectingdesantislondon>
-[^18]: 2015-10 The AWS Well-Architected Framework <https://www.infoq.com/news/2015/10/aws-well-architected-framework/>
-[^19]: 数据中心一体化最佳实践，Barroso, Hölzle, Ranganathan，第3版2018，[豆瓣](https://book.douban.com/subject/34950732/)：第7章 故障处理与维修
-[^20]: 云系统管理：大规模分布式系统设计与运营，[Tom Limoncelli](https://en.wikipedia.org/wiki/Tom_Limoncelli)，2014，[豆瓣](https://book.douban.com/subject/26865122/)：第6章 弹性设计模式
-[^21]: 阿里云：地域和可用区 <https://help.aliyun.com/document_detail/40654.html>
-[^22]: 2020-03 阿里陈鑫：阿里巴巴DevOps文化浅谈 <https://mp.weixin.qq.com/s/h-F8dopr23pgvSoXjWfE8A>
-[^23]: 阿里云卓越架构：稳定性支柱：稳定性设计方案 <https://help.aliyun.com/document_detail/2573820.html>
-[^24]: 2021-05 阿里暴晓亚若厉：阿里巴巴GOC稳定性保障介绍（slides, 26p） <https://www.modb.pro/doc/31443>
-[^25]: 2022-04 哈啰技术：稳定性建设系列文章1_大纲&方法论 <https://segmentfault.com/a/1190000041671012>
+[^12]: Becoming a Rockstar SRE, Proffitt & Anami, 2023, [packtpub](https://www.packtpub.com/product/becoming-a-rockstar-sre/9781803239224): Chapter 1: SRE Job Role – Activities and Responsibilities
+[^13]: The Art of Site Reliability Engineering (SRE) with Azure, Unai Huete Beloki, 2022, [springer](https://link.springer.com/book/10.1007/978-1-4842-8704-0): Chapter 4: Architecting Resilient Solutions in Azure, 4.1 What Is Resiliency?: Figure 4-1. Customized hierarchy of reliability
+[^14]: 2016-03 Amazon CTO Werner Vogels: 10 Lessons from 10 Years of Amazon Web Services <https://www.allthingsdistributed.com/2016/03/10-lessons-from-10-years-of-aws.html> <https://aws.amazon.com/cn/blogs/china/10-lessons-from-10-years-of-aws/>
+[^15]: 2010-01 Jinesh Varia: Architecting for the Cloud: Best Practices (AWS whitepaper) <https://web.archive.org/web/0/https://aws.amazon.com/blogs/aws/new-whitepaper-architecting-for-the-cloud-best-practices/>
+[^16]: 2010-04 Jinesh Varia: Architecting for the Cloud: Best Practices <https://www.slideshare.net/AmazonWebServices/aws-architectingdesantislondon>
+[^17]: 2015-10 The AWS Well-Architected Framework <https://www.infoq.com/news/2015/10/aws-well-architected-framework/>
+[^18]: 数据中心一体化最佳实践，Barroso, Hölzle, Ranganathan，第3版2018，[豆瓣](https://book.douban.com/subject/34950732/)：第7章 故障处理与维修
+[^19]: 云系统管理：大规模分布式系统设计与运营，[Tom Limoncelli](https://en.wikipedia.org/wiki/Tom_Limoncelli)，2014，[豆瓣](https://book.douban.com/subject/26865122/)：第6章 弹性设计模式
+[^20]: 阿里云：地域和可用区 <https://help.aliyun.com/document_detail/40654.html>
+[^21]: 2020-03 阿里陈鑫：阿里巴巴DevOps文化浅谈 <https://mp.weixin.qq.com/s/h-F8dopr23pgvSoXjWfE8A>
+[^22]: 阿里云卓越架构：稳定性支柱：稳定性设计方案 <https://help.aliyun.com/document_detail/2573820.html>
+[^23]: 2021-05 阿里暴晓亚若厉：阿里巴巴GOC稳定性保障介绍（slides, 26p） <https://www.modb.pro/doc/31443>
+[^24]: 2022-04 哈啰技术：稳定性建设系列文章1_大纲&方法论 <https://segmentfault.com/a/1190000041671012>
