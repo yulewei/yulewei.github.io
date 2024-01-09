@@ -173,7 +173,7 @@ AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-ar
 - **人为错误**：包括配置错误和运维操作错误
   - 避错：更好的人；消除人为因素，即自动化；预先检测等
   - 快恢：通过**回滚**配置或操作修复错误
-- **服务过载**：
+- **服务过载**：典型的是在**大促**期间可能出现服务过载
   - 避错：通过提前的**容量规划**（capacity planning）、**压测**（stress testing）实现避错
   - 容错：通过**弹性扩容**（elastic scaling）实现负载均衡，通过**限流**（rate limiting）、**优雅降级**（graceful degradation）来降低负载
 - **依赖服务**：主要策略是**故障隔离**，将故障的影响限制在较小的范围内，避免发生**连锁故障**（[cascading failure](https://en.wikipedia.org/wiki/Cascading_failure)）
