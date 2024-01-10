@@ -142,7 +142,7 @@ Werner Vogels 的名言是，“Everything fails, all the time”。**分布式�
 
 AWS 的 [Well-Architected 框架](https://aws.amazon.com/cn/architecture/well-architected/)，最早在 2015 年 10 月发布[^17]，描述了用于在云中设计和运行工作负载的关键概念、设计原则和架构最佳实践。受亚马逊 AWS 的影响和启发，其他云平台也相继发布类似的在云环境下的架构最佳实践的框架，[Google Cloud 架构框架](https://cloud.google.com/architecture/framework?hl=zh-cn)（2015.10）、[Microsoft Azure Well-Architected 框架](https://learn.microsoft.com/zh-cn/azure/well-architected/)（2020.08）、[阿里云卓越架构](https://help.aliyun.com/product/2362200.html)（2023.06）。这些框架都由五个或六个支柱组成，内容上大同小异。AWS 的 Well-Architected 框架基于六大支柱，其中两个支柱是**可靠性支柱（Reliability Pillar）**和**卓越运营支柱（Operational Excellence Pillar）**。可靠性支柱侧重于执行预期职能的工作负载，以及如何从故障快速恢复以满足需求。类似的，Google Cloud 架构框架由六大支柱组成，其中两个支柱是可靠性和卓越运营。Azure 架构良好的框架的由五大要素组成，其中两个要素是可靠性和卓越运营。阿里云卓越架构包含五个架构最佳实践支柱，其中两个支柱是**稳定性**和**卓越运营**。可靠性或稳定性支柱涵盖的内容相对偏向上文提到的**面向故障设计**或**韧性架构设计**，而卓越运营支柱涵盖的内容相对偏向上文提到的**狭义 SER** 或 **DevOps**，不过两个支柱涉及的内容有很重叠的部分。
 
-**按故障的根因（root cause）分类**，主要有如下类型：硬件故障（hardware failure）、网络故障（network failure）、软件 bug（software bug）、配置错误（misconfiguration）、运维操作错误（operator error）、过载（overload）、依赖服务（dependency service）等。故障原因的分类，不同的组织各有不同，有些分类可能会把配置错误和运维操作错误一起归类为人为错误（human error）。另外，本质上来看，软件 bug 也是开发时的人为错误引入的，但一般都不把人为错误和软件故障区分为两种类型的故障。
+**按故障的根因（root cause）分类，主要有如下类型：硬件故障（hardware failure）、网络故障（network failure）、软件 bug（software bug）、配置错误（misconfiguration）、运维操作错误（operator error）、过载（overload）、依赖服务（dependency service）等**。故障原因的分类，不同的组织各有不同，有些分类可能会把配置错误和运维操作错误一起归类为人为错误（human error）。另外，本质上来看，软件 bug 也是开发时的人为错误引入的，但一般都不把人为错误和软件故障区分为两种类型的故障。
 
 下图所示的是造成谷歌某大型互联网服务可检测到的服务中断所有事件的一个粗略分类，以及故障原因的分布比例[^18]。容易发现，故障更多是由软件错误、错误的配置和人为错误造成的，而非机器或网络故障。由硬件故障导致的服务级别故障占比之所以很低，主要不是依靠这些系统硬件组件的可靠性，而是因为容错技术在防止组件故障影响上层系统行为方面是相当成功的。硬件设备故障以外的因素更容易导致服务级别中断，是因为构建能容忍已知硬件故障的服务相对容易，而处理一般的软件错误和运维人员误操作则比较难。
 
