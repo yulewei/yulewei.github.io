@@ -30,7 +30,7 @@
 <meta property="og:site_name" content="nullwy&#39;s blog">
 <meta property="og:description" content="为了应对负载的增长，提升系统性能，目前大型网站普遍都是分布式架构，采用微服务架构风格。分布式系统的最重要的架构特性是伸缩性（scalability），伸缩性的系统具备应对增长的工作负载的能力。关于性能和伸缩性，可以参阅笔者的文章《大型网站的性能和可伸缩性》。相对于采用单体架构的系统，分布式系统中有大量的服务器及设备，各服务之间存在错综复杂的依赖关系，存在更多的不确定性。整个系统的故障率会随服务节点">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://static.nullwy.me/stability-vs-volatility2.png">
+<meta property="og:image" content="https://static.nullwy.me/stability-vs-volatility0.png">
 <meta property="og:image" content="https://static.nullwy.me/stability-goals-caict.png">
 <meta property="og:image" content="https://static.nullwy.me/stability-vs-reliability-vs-resilience.svg">
 <meta property="og:image" content="https://static.nullwy.me/sre-skills.jpg">
@@ -38,7 +38,7 @@
 <meta property="og:image" content="https://static.nullwy.me/stability-google-service-failures-distribution.png">
 <meta property="og:image" content="https://static.nullwy.me/stability-response-alibaba-1-5-10.png">
 <meta property="article:published_time" content="2023-12-25T02:36:00.000Z">
-<meta property="article:modified_time" content="2024-01-10T00:11:12.072Z">
+<meta property="article:modified_time" content="2024-01-10T00:25:34.024Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="可靠性">
@@ -46,7 +46,7 @@
 <meta property="article:tag" content="稳定性">
 <meta property="article:tag" content="韧性">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://static.nullwy.me/stability-vs-volatility2.png">
+<meta name="twitter:image" content="https://static.nullwy.me/stability-vs-volatility0.png">
 
 <link rel="canonical" href="https://nullwy.me/2023/12/website-scalability-reliability-resilience/">
 
@@ -325,7 +325,7 @@ b) 在干扰或破坏性事件之后返回到原始状态的能力。</p>
 <p>稳定性是指在一定工作条件下，业务服务成功率（反向对应失败率）、业务量的指标（如订单数、营收、PCU、QPS等）保持一致可预期的趋势，指标曲线呈现周期性或稳定在同一水平。与稳定性相对应的是异常波动性。系统稳定性代表软件系统能抵御各种异常因素造成系统核心指标抖动的能力。异常波动性度量一般是看实际曲线偏离预期稳定曲线的程度。</p>
 </blockquote>
 <p>如图，曲线 A 的指标呈现周期性变化，表明系统能保持稳定；而曲线 B 的指标在时间 t2 至 t3 之间出现异常波动，表明系统无法保持稳定，是不稳定的。稳定性的反义词是波动性（volatility）。</p>
-<img width="600" alt="稳定性与异常波动" title="稳定性与异常波动" src="https://static.nullwy.me/stability-vs-volatility2.png">
+<img width="600" alt="稳定性与异常波动" title="稳定性与异常波动" src="https://static.nullwy.me/stability-vs-volatility0.png">
 <p>如果业务核心指标出现异常波动，说明很可能出现了故障。互联网应用的典型的故障定级标准的依据就是对业务核心指标的影响情况的判断。阿里的技术文档，给出了故障等级的参考定义<sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup>，故障区分 4 个等级，P1 是最严重的故障，P4 是最轻微的故障。当业务量级为大体量时：对于核心功能，P1 级故障是成功率下跌 30% 及以上，P2 级故障是成功率下跌 20% ~ 30%，P3 级故障的定级标准是成功率下跌 20% 以下；对于非核心功能，P2 级故障是成功率下跌 30% 及以上，P3 级故障是成功率下跌 20%～30%，P4 级故障是成功率下跌 20% 以下。</p>
 <h2 id="稳定性与可靠性">稳定性与可靠性</h2>
 <p>由中国信息通信研究院牵头，并联合多个行业的多家单位（其中互联网公司包括阿里云、华为云、百度、蚂蚁、腾讯、字节跳动、京东、哈啰等），共同参与编制《分布式系统稳定性建设指南》<sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup>，在 2022 年 6 月发布。该指南对系统稳定性有如下描述：</p>
