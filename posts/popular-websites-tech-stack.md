@@ -1,5 +1,5 @@
 ---
-title: 流行互联网网站技术栈整理
+title: 流行互联网网站技术栈整理（万字长文）
 date: 2023-12-03 23:37:00
 categories: 架构
 tags: [技术栈, 架构, 分布式, 微服务, 可伸缩性, 数据库, MySQL, Java]
@@ -264,10 +264,11 @@ eBay，1995 年创立，早期使用的编程语言是 Perl，1997 年迁移到 
 阿里 RocketMQ 的历史演进时间线：
 - 2007，自研 Notify，最早底层的消息存储采用本地文件存储，参考 ActiveMQ 实现了单机 kv 存储引擎，2008 年底层的消息存储改用 Oracle，2010 年从 Oracle 迁移到高可用 MySQL 存储集群[^97]。
 - 2011.01，基于 Kafka 的设计用 Java 完全重写并发布 MetaQ 1.0。
-- [2012.03](https://www.infoq.cn/article/2012/03/metamorphosis)，MetaQ 1.x 对外开源，项目名为 [Metamorphosis](https://github.com/killme2008/Metamorphosis)。
-- 2012.09，淘宝内部发布 MetaQ 2.0 版本，MetaQ 2.0 对架构进行了重新设计，对消息日志文件存储目录结构做了改造[^98]。改造后的 MetaQ 架构与 Kafka 存在很大差异，这个版本的 MetaQ 可以认为是第一代的 RocketMQ。
-- 2013.07，淘宝内部发布 MetaQ 3.0 版本，增加了主从复制（replication）、延迟消息等特性。
-   - 值得注意的是，Kafka 的复制特性，直到 2013.12 发布的 0.8.0 版本才开始支持。MetaQ 实现的复制特性类似与 MySQL 的主从复制，而 Kafka 实现的复制是集群间的分区复制（Intra-cluster Replication），复制的单位是分区（partition），参见 [KAFKA-50](https://issues.apache.org/jira/browse/KAFKA-50)。分区，在其他系统中也被叫做分片（[shard](https://en.wikipedia.org/wiki/Shard_%28database_architecture%29)），含义相同。
+- [2012.03](https://www.infoq.cn/article/2012/03/metamorphosis)，淘宝对外开源 MetaQ 1.x，项目名为 Metamorphosis（[淘蝌蚪](https://web.archive.org/web/20120312015328/http://code.taobao.org/p/metamorphosis/wiki/intro/)、[GitHub](https://github.com/killme2008/Metamorphosis)），版本号为 1.4.0。
+  - Metamorphosis [1.0.1](https://web.archive.org/web/20120312015318/http://code.taobao.org/p/metamorphosis/wiki/changelist/) 开始实现高可用的 HA 方案，支持同步和异步复制，复制特性类似于 MySQL 的主从复制。
+  - Kafka 的复制特性，直到 2013.12 发布的 0.8.0 版本才开始支持。Kafka 实现的复制是集群间的分区复制（Intra-cluster Replication），复制的副本粒度是分区（partition），参见 [KAFKA-50](https://issues.apache.org/jira/browse/KAFKA-50)。
+- 2012.09，淘宝内部发布 MetaQ 2.0 版本，MetaQ 2.0 对架构进行了重新设计，为了解决分区文件数增加后的性能下降问题，对消息日志文件存储目录结构做了改造[^98]。改造后的 MetaQ 架构与 Kafka 存在很大差异，这个版本的 MetaQ 可以认为是第一代的 RocketMQ。
+- 2013.07，淘宝内部发布 MetaQ 3.0 版本。
 - 2013.09，对外开源发布 RocketMQ 3.0。RocketMQ 3.0 和 MetaQ 3.0 等价，阿里内部使用的称为 MetaQ 3.0，外部开源称之为 RocketMQ 3.0[^99]。
 - 2014.10，阿里云消息队列 [ONS](https://help.aliyun.com/zh/apsaramq-for-rocketmq/)（云开放消息服务，Open Notification Service）对外公测，ONS 是基于阿里消息中间件 MetaQ（RocketMQ）打造的云消息产品。
 - [2016.11](https://www.oschina.net/news/89061)，阿里巴巴将 RocketMQ 捐赠给 Apache，成为 Apache 孵化器项目。

@@ -2,7 +2,7 @@
 title: 微服务 API 网关 Kong 实践 
 date: 2020-05-30 15:22:41
 categories: 架构
-tags: [Kong, API, 微服务, Nginx, OpenResty, 网关, 架构, 服务器]
+tags: [Kong, 中间件, 微服务, Nginx, OpenResty, 网关, 架构, 服务器]
 ---
 
 # Kong 简介

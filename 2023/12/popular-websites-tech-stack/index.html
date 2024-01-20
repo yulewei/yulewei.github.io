@@ -25,7 +25,7 @@
 
   <meta name="description" content="本文整理总结主要的流行互联网网站技术栈，以及这些网站的技术栈和架构的历史演进过程。涉及的网站大部分都是当前或曾经访问量或月活用户量 Top 的网站（参见 Similarweb 网站的统计[1]，或访问量 Top 10 网站的历史演变[2]，或 wiki 整理的至少 1 亿月活用户量的社交平台[3]）。国内网站或 APP 涵盖了主流[4]的阿里、腾讯、百度、美团、字节、京东等大厂的互联网产品。整理的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="流行互联网网站技术栈整理">
+<meta property="og:title" content="流行互联网网站技术栈整理（万字长文）">
 <meta property="og:url" content="https://nullwy.me/2023/12/popular-websites-tech-stack/index.html">
 <meta property="og:site_name" content="nullwy&#39;s blog">
 <meta property="og:description" content="本文整理总结主要的流行互联网网站技术栈，以及这些网站的技术栈和架构的历史演进过程。涉及的网站大部分都是当前或曾经访问量或月活用户量 Top 的网站（参见 Similarweb 网站的统计[1]，或访问量 Top 10 网站的历史演变[2]，或 wiki 整理的至少 1 亿月活用户量的社交平台[3]）。国内网站或 APP 涵盖了主流[4]的阿里、腾讯、百度、美团、字节、京东等大厂的互联网产品。整理的">
@@ -47,7 +47,7 @@
 <meta property="og:image" content="https://static.nullwy.me/twitter-architecture-rails.png">
 <meta property="og:image" content="https://static.nullwy.me/twitter-architecture-2013.png">
 <meta property="article:published_time" content="2023-12-03T15:37:00.000Z">
-<meta property="article:modified_time" content="2023-12-24T09:19:07.585Z">
+<meta property="article:modified_time" content="2024-01-20T13:25:50.507Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="技术栈">
@@ -73,7 +73,7 @@
   };
 </script>
 
-  <title>流行互联网网站技术栈整理 | nullwy's blog</title>
+  <title>流行互联网网站技术栈整理（万字长文） | nullwy's blog</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
     <script>
@@ -257,7 +257,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          流行互联网网站技术栈整理
+          流行互联网网站技术栈整理（万字长文）
         </h1>
 
         <div class="post-meta">
@@ -617,13 +617,14 @@
 <ul>
 <li>2007，自研 Notify，最早底层的消息存储采用本地文件存储，参考 ActiveMQ 实现了单机 kv 存储引擎，2008 年底层的消息存储改用 Oracle，2010 年从 Oracle 迁移到高可用 MySQL 存储集群<sup class="footnote-ref"><a href="#fn97" id="fnref97">[97]</a></sup>。</li>
 <li>2011.01，基于 Kafka 的设计用 Java 完全重写并发布 MetaQ 1.0。</li>
-<li><a target="_blank" rel="noopener" href="https://www.infoq.cn/article/2012/03/metamorphosis">2012.03</a>，MetaQ 1.x 对外开源，项目名为 <a target="_blank" rel="noopener" href="https://github.com/killme2008/Metamorphosis">Metamorphosis</a>。</li>
-<li>2012.09，淘宝内部发布 MetaQ 2.0 版本，MetaQ 2.0 对架构进行了重新设计，对消息日志文件存储目录结构做了改造<sup class="footnote-ref"><a href="#fn98" id="fnref98">[98]</a></sup>。改造后的 MetaQ 架构与 Kafka 存在很大差异，这个版本的 MetaQ 可以认为是第一代的 RocketMQ。</li>
-<li>2013.07，淘宝内部发布 MetaQ 3.0 版本，增加了主从复制（replication）、延迟消息等特性。
+<li><a target="_blank" rel="noopener" href="https://www.infoq.cn/article/2012/03/metamorphosis">2012.03</a>，淘宝对外开源 MetaQ 1.x，项目名为 Metamorphosis（<a target="_blank" rel="noopener" href="https://web.archive.org/web/20120312015328/http://code.taobao.org/p/metamorphosis/wiki/intro/">淘蝌蚪</a>、<a target="_blank" rel="noopener" href="https://github.com/killme2008/Metamorphosis">GitHub</a>），版本号为 1.4.0。
 <ul>
-<li>值得注意的是，Kafka 的复制特性，直到 2013.12 发布的 0.8.0 版本才开始支持。MetaQ 实现的复制特性类似与 MySQL 的主从复制，而 Kafka 实现的复制是集群间的分区复制（Intra-cluster Replication），复制的单位是分区（partition），参见 <a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/KAFKA-50">KAFKA-50</a>。分区，在其他系统中也被叫做分片（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Shard_%28database_architecture%29">shard</a>），含义相同。</li>
+<li>Metamorphosis <a target="_blank" rel="noopener" href="https://web.archive.org/web/20120312015318/http://code.taobao.org/p/metamorphosis/wiki/changelist/">1.0.1</a> 开始实现高可用的 HA 方案，支持同步和异步复制，复制特性类似于 MySQL 的主从复制。</li>
+<li>Kafka 的复制特性，直到 2013.12 发布的 0.8.0 版本才开始支持。Kafka 实现的复制是集群间的分区复制（Intra-cluster Replication），复制的副本粒度是分区（partition），参见 <a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/KAFKA-50">KAFKA-50</a>。</li>
 </ul>
 </li>
+<li>2012.09，淘宝内部发布 MetaQ 2.0 版本，MetaQ 2.0 对架构进行了重新设计，为了解决分区文件数增加后的性能下降问题，对消息日志文件存储目录结构做了改造<sup class="footnote-ref"><a href="#fn98" id="fnref98">[98]</a></sup>。改造后的 MetaQ 架构与 Kafka 存在很大差异，这个版本的 MetaQ 可以认为是第一代的 RocketMQ。</li>
+<li>2013.07，淘宝内部发布 MetaQ 3.0 版本。</li>
 <li>2013.09，对外开源发布 RocketMQ 3.0。RocketMQ 3.0 和 MetaQ 3.0 等价，阿里内部使用的称为 MetaQ 3.0，外部开源称之为 RocketMQ 3.0<sup class="footnote-ref"><a href="#fn99" id="fnref99">[99]</a></sup>。</li>
 <li>2014.10，阿里云消息队列 <a target="_blank" rel="noopener" href="https://help.aliyun.com/zh/apsaramq-for-rocketmq/">ONS</a>（云开放消息服务，Open Notification Service）对外公测，ONS 是基于阿里消息中间件 MetaQ（RocketMQ）打造的云消息产品。</li>
 <li><a target="_blank" rel="noopener" href="https://www.oschina.net/news/89061">2016.11</a>，阿里巴巴将 RocketMQ 捐赠给 Apache，成为 Apache 孵化器项目。</li>
@@ -1072,7 +1073,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="https://nullwy.me/2023/12/popular-websites-tech-stack/" title="流行互联网网站技术栈整理">https://nullwy.me/2023/12/popular-websites-tech-stack/</a>
+    <a href="https://nullwy.me/2023/12/popular-websites-tech-stack/" title="流行互联网网站技术栈整理（万字长文）">https://nullwy.me/2023/12/popular-websites-tech-stack/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
@@ -1359,7 +1360,7 @@
   var disqus_config = function() {
     this.page.url = "https://nullwy.me/2023/12/popular-websites-tech-stack/";
     this.page.identifier = "2023/12/popular-websites-tech-stack/";
-    this.page.title = "流行互联网网站技术栈整理";
+    this.page.title = "流行互联网网站技术栈整理（万字长文）";
     };
   NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
     if (window.DISQUS) {

@@ -1,12 +1,12 @@
+https://nullwy.me/2023/12/popular-websites-tech-stack/
+https://nullwy.me/2020/05/kong-gateway/
 https://nullwy.me/2023/12/website-scalability-reliability-resilience/
 https://nullwy.me/about/index.html
 https://nullwy.me/2023/07/io-multiplexing-network-server/
-https://nullwy.me/2020/05/kong-gateway/
 https://nullwy.me/2018/01/java-ffi/
 https://nullwy.me/2023/12/website-performance-scalability/
 https://nullwy.me/2023/10/reliability-engineering/
 https://nullwy.me/2023/11/amazon-architecture-evolution/
-https://nullwy.me/2023/12/popular-websites-tech-stack/
 https://nullwy.me/2017/11/zookeeper-note/
 https://nullwy.me/2018/01/stack-frame-calling-convention/
 https://nullwy.me/2016/12/software-dev-books/
@@ -60,7 +60,6 @@ https://nullwy.me/tags/JNR/
 https://nullwy.me/tags/FFI/
 https://nullwy.me/tags/JVM/
 https://nullwy.me/tags/Kong/
-https://nullwy.me/tags/API/
 https://nullwy.me/tags/Nginx/
 https://nullwy.me/tags/OpenResty/
 https://nullwy.me/tags/%E7%BD%91%E5%85%B3/
@@ -85,6 +84,7 @@ https://nullwy.me/tags/%E7%A8%B3%E5%AE%9A%E6%80%A7/
 https://nullwy.me/tags/%E6%80%A7%E8%83%BD/
 https://nullwy.me/tags/%E9%9F%A7%E6%80%A7/
 https://nullwy.me/tags/%E5%BC%B9%E6%80%A7/
+https://nullwy.me/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/
 https://nullwy.me/categories/%E6%9E%B6%E6%9E%84/
 https://nullwy.me/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/
 https://nullwy.me/categories/MySQL/
