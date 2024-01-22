@@ -284,7 +284,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>为了提升系统的<strong>可扩展性</strong>（scalability），分布式数据库或分布式存储系统通常支持数据<strong>分区</strong>（partitioning）或<strong>分片</strong>（sharding），即将完整的数据拆分存放在多个服务器节点上，拆分后的部分数据称为“partition”或“shard”。数据被拆分后多个服务器节点能分摊负载压力，从而提升系统性能。“分区”和分片”，这两个术语，在很多情况下不区分，可以混用。如果严格区分的话，<strong>分片</strong>拆分的数据分布在多个服务器节点上，而<strong>分区</strong>拆分的数据在单个服务器节点。另外，<strong>复制</strong>（replication）也典型的分布式技术，多个数据副本能实现读请求的负载均衡，提升系统性能。同时复制也提供了冗余容错的能力，提升系统的<strong>可用性</strong>（availability）。本文关注消息中间件的消息存储系统，解析并对比 RocketMQ 和 Kafka 的消息数据的分片和复制的具体实现策略。</p>
+          <p>为了提升系统的<strong>可扩展性</strong>（scalability），分布式数据库或分布式存储系统通常支持数据<strong>分区</strong>（partitioning）或<strong>分片</strong>（sharding），即将完整的数据拆分存放在多个服务器节点上，拆分后的部分数据称为“partition”或“<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Shard_%28database_architecture%29">shard</a>”。数据被拆分后多个服务器节点能分摊负载压力，从而提升系统性能。“分区”和分片”，这两个术语，在很多情况下不区分，可以混用。如果严格区分的话，<strong>分片</strong>拆分的数据分布在多个服务器节点上，而<strong>分区</strong>拆分的数据在单个服务器节点。另外，<strong>复制</strong>（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Replication_%28computing%29">replication</a>）也典型的分布式技术，多个数据副本能实现读请求的负载均衡，提升系统性能。同时复制也提供了冗余容错的能力，提升系统的<strong>可用性</strong>（availability）。本文关注消息中间件的消息存储系统，解析并对比 RocketMQ 和 Kafka 的消息数据的分片和复制的具体实现策略。</p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2024/01/rocketmq-kafka-sharding-replication/#more" rel="contents">
