@@ -2,7 +2,7 @@
 title: RocketMQ 和 Kafka 的数据分片和复制策略
 date: 2024-01-18 20:36:00
 categories: 架构
-tags: [架构, 中间件, 分布式, 可伸缩性, 可扩展性, 可靠性, 高可用, RocketMQ, Kafka]
+tags: [架构, 中间件, 分布式, 可伸缩性, 可扩展性, 可靠性, 可用性, RocketMQ, Kafka]
 ---
 
 为了提升系统的**可扩展性**（scalability），分布式数据库或分布式存储系统通常支持数据**分区**（partitioning）或**分片**（sharding），即将完整的数据拆分存放在多个服务器节点上，拆分后的部分数据称为“partition”或“shard”。数据被拆分后多个服务器节点能分摊负载压力，从而提升系统性能。“分区”和分片”，这两个术语，在很多情况下不区分，可以混用。如果严格区分的话，**分片**拆分的数据分布在多个服务器节点上，而**分区**拆分的数据在单个服务器节点。另外，**复制**（replication）也典型的分布式技术，多个数据副本能实现读请求的负载均衡，提升系统性能。同时复制也提供了冗余容错的能力，提升系统的**可用性**（availability）。本文关注消息中间件的消息存储系统，解析并对比 RocketMQ 和 Kafka 的消息数据的分片和复制的具体实现策略。
@@ -53,8 +53,8 @@ RocketMQ 和 Kafka 的历史演进时间线：
   - **分片再均衡策略**：手动再均衡
     - 在扩容添加新 Broker 节点后，在创建新 Topic 时，可以自动或指定在新 Broker 节点上分配消息队列，而旧的 Topic 也可以通过执行 `mqadmin updateTopic` 命令，在新的 Broker 节点上分配消息队列。
 - **复制策略**：类似于 MySQL 的主从复制
-  - **副本粒度**：以 Master Borker 节点内的全量消息日志数据为粒度
-  - **副本系数**：由消息队列所属的 Broker Group 的下 Borker 总数量决定（每个 Broker Group 下有一个 Master Borker 和零到若干个 Slave Borker）
+  - **副本单位**：以 Master Borker 节点内的全量消息日志数据为单位
+  - **复制系数**：由消息队列所属的 Broker Group 的下 Borker 总数量决定（每个 Broker Group 下有一个 Master Borker 和零到若干个 Slave Borker）
   - **副本更新传播策略**：
     - Borker 节点分为主从（master-slave）两种角色，支持异步复制（默认）和同步复制两种复制模式。配置项 `brokerRole` 用于配置节点的主从角色和复制模式，默认值为 `ASYNC_MASTER`，可配置为 `SYNC_MASTER`/`ASYNC_MASTER`/`SLAVE`。
   - **主从读写分离**[^6]：Master Borker 可写可读，Slave Borker 只允许读。配置项 `slaveReadEnable` 用于配置是否允许消息从从节点读取，默认 `false`。如果 `slaveReadEnable=true`，并且当前消息堆积量超过物理内存 40%（由配置项 `accessMessageInMemoryMaxRatio` 控制），则建议从 Slave Borker 拉取消息，否则还是从 Master Borker 拉取消息。
@@ -91,7 +91,7 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
   - **分片再均衡策略**：手动再均衡
     - 在扩容添加新 Broker 节点后，新的分区和分区副本能自动分配到新的 Broker 节点上，但已有的旧分区和节点的分配关系的固定的。如果要让旧的分区和分区副本能分配新的 Broker 节点，需要手动执行分区重分配命令 `kafka-reassign-partitions.sh`。
 - **复制策略**：
-  - **副本粒度**：以分区为粒度
+  - **副本单位**：以分区为单位
   - **复制系数**：
     - 自动创建 Topic 时，由配置项 `default.replication.factor` 全局控制 Topic 的默认副本个数，默认值 `1`。
     - 手动创建 Topic 时，执行 `kafka-topics.sh --create` 命令，由 `--replication-factor` 命令行参数控制该 Topic 的分区副本的复制系数。

@@ -5377,8 +5377,8 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </li>
 <li><strong>复制策略</strong>：类似于 MySQL 的主从复制
 <ul>
-<li><strong>副本粒度</strong>：以 Master Borker 节点内的全量消息日志数据为粒度</li>
-<li><strong>副本系数</strong>：由消息队列所属的 Broker Group 的下 Borker 总数量决定（每个 Broker Group 下有一个 Master Borker 和零到若干个 Slave Borker）</li>
+<li><strong>副本单位</strong>：以 Master Borker 节点内的全量消息日志数据为单位</li>
+<li><strong>复制系数</strong>：由消息队列所属的 Broker Group 的下 Borker 总数量决定（每个 Broker Group 下有一个 Master Borker 和零到若干个 Slave Borker）</li>
 <li><strong>副本更新传播策略</strong>：
 <ul>
 <li>Borker 节点分为主从（master-slave）两种角色，支持异步复制（默认）和同步复制两种复制模式。配置项 <code>brokerRole</code> 用于配置节点的主从角色和复制模式，默认值为 <code>ASYNC_MASTER</code>，可配置为 <code>SYNC_MASTER</code>/<code>ASYNC_MASTER</code>/<code>SLAVE</code>。</li>
@@ -5452,7 +5452,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </li>
 <li><strong>复制策略</strong>：
 <ul>
-<li><strong>副本粒度</strong>：以分区为粒度</li>
+<li><strong>副本单位</strong>：以分区为单位</li>
 <li><strong>复制系数</strong>：
 <ul>
 <li>自动创建 Topic 时，由配置项 <code>default.replication.factor</code> 全局控制 Topic 的默认副本个数，默认值 <code>1</code>。</li>
@@ -5558,9 +5558,9 @@ Resiliency is the ability of a system to recover from failures and continue to f
         <tag>可靠性</tag>
         <tag>可伸缩性</tag>
         <tag>中间件</tag>
-        <tag>高可用</tag>
         <tag>RocketMQ</tag>
         <tag>Kafka</tag>
+        <tag>可用性</tag>
       </tags>
   </entry>
 </search>
