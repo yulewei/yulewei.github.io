@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.png">
+  <link rel="mask-icon" href="/favicon.png" color="#222">
+  <meta name="baidu-site-verification" content="qxFtDn0ziX">
+  <meta name="sogou_site_verification" content="Wj1N74IImQ" /> 
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"nullwy.me","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="为了提升系统的可扩展性（scalability），分布式数据库或分布式存储系统通常支持数据分区（partitioning）或分片（sharding），即将完整的数据拆分存放在多个服务器节点上，拆分后的部分数据称为“partition”或“shard”。数据被拆分后多个服务器节点能分摊负载压力，从而提升系统性能。“分区”和分片”，这两个术语，在很多情况下不区分，可以混用。如果严格区分的话，分片拆分的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="RocketMQ 和 Kafka 的数据分片和复制策略">
+<meta property="og:url" content="https://nullwy.me/2024/01/rocketmq-kafka-sharding-replication/index.html">
+<meta property="og:site_name" content="nullwy&#39;s blog">
+<meta property="og:description" content="为了提升系统的可扩展性（scalability），分布式数据库或分布式存储系统通常支持数据分区（partitioning）或分片（sharding），即将完整的数据拆分存放在多个服务器节点上，拆分后的部分数据称为“partition”或“shard”。数据被拆分后多个服务器节点能分摊负载压力，从而提升系统性能。“分区”和分片”，这两个术语，在很多情况下不区分，可以混用。如果严格区分的话，分片拆分的">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.nullwy.me/rocketmq-architecture.png">
+<meta property="og:image" content="https://static.nullwy.me/kafka-architecture.png">
+<meta property="og:image" content="https://static.nullwy.me/kafka-kraft-mode.png">
+<meta property="article:published_time" content="2024-01-18T12:36:00.000Z">
+<meta property="article:modified_time" content="2024-01-22T11:52:12.815Z">
+<meta property="article:author" content="nullwy">
+<meta property="article:tag" content="架构">
+<meta property="article:tag" content="可扩展性">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="可靠性">
+<meta property="article:tag" content="可伸缩性">
+<meta property="article:tag" content="中间件">
+<meta property="article:tag" content="高可用">
+<meta property="article:tag" content="RocketMQ">
+<meta property="article:tag" content="Kafka">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.nullwy.me/rocketmq-architecture.png">
+
+<link rel="canonical" href="https://nullwy.me/2024/01/rocketmq-kafka-sharding-replication/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>RocketMQ 和 Kafka 的数据分片和复制策略 | nullwy's blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y4LE29KVMN"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-Y4LE29KVMN');
+      }
+    </script>
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?928b3d50428cc362a2d2ed846517583e";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<!-- hexo injector head_end start -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css">
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/hexo-math@4.0.0/dist/style.css">
+<!-- hexo injector head_end end --><link rel="alternate" href="/atom.xml" title="nullwy's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">nullwy's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2024/01/rocketmq-kafka-sharding-replication/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          RocketMQ 和 Kafka 的数据分片和复制策略
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-01-18 20:36:00" itemprop="dateCreated datePublished" datetime="2024-01-18T20:36:00+08:00">2024-01-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%9E%B6%E6%9E%84/" itemprop="url" rel="index"><span itemprop="name">架构</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2024/01/rocketmq-kafka-sharding-replication/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2024/01/rocketmq-kafka-sharding-replication/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>为了提升系统的<strong>可扩展性</strong>（scalability），分布式数据库或分布式存储系统通常支持数据<strong>分区</strong>（partitioning）或<strong>分片</strong>（sharding），即将完整的数据拆分存放在多个服务器节点上，拆分后的部分数据称为“partition”或“shard”。数据被拆分后多个服务器节点能分摊负载压力，从而提升系统性能。“分区”和分片”，这两个术语，在很多情况下不区分，可以混用。如果严格区分的话，<strong>分片</strong>拆分的数据分布在多个服务器节点上，而<strong>分区</strong>拆分的数据在单个服务器节点。另外，<strong>复制</strong>（replication）也典型的分布式技术，多个数据副本能实现读请求的负载均衡，提升系统性能。同时复制也提供了冗余容错的能力，提升系统的<strong>可用性</strong>（availability）。本文关注消息中间件的消息存储系统，解析并对比 RocketMQ 和 Kafka 的消息数据的分片和复制的具体实现策略。</p>
+<span id="more"></span>
+<p>MySQL 等传统关系数据库支持<strong>表分区</strong>（<a target="_blank" rel="noopener" href="https://dev.mysql.com/doc/refman/8.0/en/partitioning.html">partition</a>），但原生不支持<strong>分片</strong>（sharding），拆分后的表分区都分布在同一个服务器节点上。为了解决数据库的水平扩展问题，出现很多数据库分片方案。其中一类是基于传统关系数据库的“分库分表”中间件，如 <a target="_blank" rel="noopener" href="https://github.com/vitessio/vitess">Vitess</a>、<a target="_blank" rel="noopener" href="https://github.com/apache/shardingsphere">ShardingSphere</a>、阿里 TDDL 和 DRDS 等。另外一类是非关系型的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/NoSQL">NoSQL</a> 数据库，如 BigTable、Dynamo、HBase、Cassandra 等。以及采用全新架构的 NewSQL 数据库，如 Google Spanner、CockroachDB、TiDB 等；或基于云服务的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/NewSQL">NewSQL</a> 数据库，如 Amazon Aurora、阿里 PolarDB 等。分布式数据库不是本文关注的主题，不再展开。消息中间件的消息存储系统与分布式数据库系统类似，为了系统可扩展性和可用性，也需要支持数据分片和复制特性。</p>
+<h1 id="历史演进时间线">历史演进时间线</h1>
+<p>RocketMQ 和 Kafka 的历史演进时间线：</p>
+<ul>
+<li>2007，淘宝自研 Notify，最早底层的消息存储采用本地文件存储，参考 ActiveMQ 实现了单机 kv 存储引擎，2008 年底层的消息存储改用 Oracle，2010 年从 Oracle 迁移到高可用 MySQL 存储集群<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>。</li>
+<li><a target="_blank" rel="noopener" href="https://www.linkedin.com/blog/member/archive/open-source-linkedin-kafka">2011.01</a>，LinkedIn 公司在 Github 上开源 Kafka 项目，项目地址 kafka-dev/<a target="_blank" rel="noopener" href="https://github.com/kafka-dev/kafka">kafka</a>。
+<ul>
+<li>同年，淘宝基于 Kafka 的设计用 Java 完全重写并内部发布 MetaQ 1.0。</li>
+</ul>
+</li>
+<li>2011.07，Kafka 成为 Apache 孵化器项目。</li>
+<li><a target="_blank" rel="noopener" href="https://www.infoq.cn/article/2012/03/metamorphosis">2012.03</a>，淘宝对外开源 MetaQ 1.x，项目名为 Metamorphosis（<a target="_blank" rel="noopener" href="https://web.archive.org/web/20120312015328/http://code.taobao.org/p/metamorphosis/wiki/intro/">淘蝌蚪</a>、<a target="_blank" rel="noopener" href="https://github.com/killme2008/Metamorphosis">GitHub</a>），版本号为 1.4.0。
+<ul>
+<li>Metamorphosis <a target="_blank" rel="noopener" href="https://web.archive.org/web/20120312015318/http://code.taobao.org/p/metamorphosis/wiki/changelist/">1.0.1</a> 开始实现高可用的 HA 方案，支持同步和异步复制，复制特性类似于 MySQL 的主从复制。</li>
+<li>Kafka 的复制特性，直到 2013.12 发布的 0.8.0 版本才开始支持。Kafka 实现的复制是集群间的分区复制（Intra-cluster Replication），复制的副本粒度是分区（partition），参见 <a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/KAFKA-50">KAFKA-50</a>。</li>
+</ul>
+</li>
+<li>2012.09，淘宝内部发布 MetaQ 2.0 版本，MetaQ 2.0 对架构进行了重新设计，为了解决分区文件数增加后的性能下降问题，对消息日志文件存储目录结构做了改造<sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>。改造后的 MetaQ 架构与 Kafka 存在很大差异，这个版本的 MetaQ 可以认为是第一代的 RocketMQ。</li>
+<li>2012.10，Kafka 从孵化器项目毕业，成为 Apache 顶级项目。</li>
+<li>2013.07，淘宝内部发布 MetaQ 3.0 版本。</li>
+<li>2013.09，淘宝对外开源发布 RocketMQ 3.0，项目地址 alibaba/<a target="_blank" rel="noopener" href="https://web.archive.org/web/20170506102903/https://github.com/alibaba/RocketMQ">RocketMQ</a>。RocketMQ 3.0 和 MetaQ 3.0 等价，阿里内部使用的称为 MetaQ 3.0，外部开源称之为 RocketMQ 3.0<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>。</li>
+<li>2013.12，Kafka 发布版本 0.8.0，开始支持集群间的分区复制。</li>
+<li><a target="_blank" rel="noopener" href="https://www.oschina.net/news/89061">2016.11</a>，RocketMQ 成为 Apache 孵化器项目。</li>
+<li><a target="_blank" rel="noopener" href="https://www.oschina.net/news/89061">2017.09</a>，RocketMQ 从孵化器毕业，正式成为 Apache 顶级项目。</li>
+<li><a target="_blank" rel="noopener" href="https://www.oschina.net/news/105805">2019.04</a>，RocketMQ 4.5 发布，开始支持 Borker 节点的自动选主，实现自动故障转移，自动选主模块被命名为 DLedger，DLedger 是基于 Raft 协议实现的轻量级 <a target="_blank" rel="noopener" href="https://github.com/openmessaging/dledger/wiki">Java Library</a>，被集成到各个 Borker 节点的进程中。</li>
+<li>2019.10，Kafka 社区开始尝试用基于 Raft 的控制器替换基于 ZooKeeper 的控制器，新控制器叫作 KRaft，KRaft 模块被集成到 Borker 节点的进程中，去掉了对 ZooKeeper 的依赖，简化了整体架构，具体参见 <a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/KAFKA-9119">KIP-500</a>。
+<ul>
+<li>2021.04，Kafka 2.8 发布，KRaft 模式的早期访问版可用。</li>
+<li>2022.10，Kafka 3.3 发布，KRaft 模式被标记为生产环境可用。</li>
+<li>2023.06，Kafka 3.5 发布，ZooKeeper 模式被标记为废弃，计划在 Kafka 4.0 删除。</li>
+</ul>
+</li>
+<li>2022.09，RocketMQ 5.0 发布，自动选主开始支持 DLedger Controller 模式，Controller 可以独立部署，也可以嵌入在 Nameserver 中，具体参见 <a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq/wiki/RIP-44-Support-DLedger-Controller">RIP-44</a>。</li>
+</ul>
+<h1 id="RocketMQ">RocketMQ</h1>
+<p><strong>RocketMQ 的数据分片和复制策略</strong><sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup>：</p>
+<ul>
+<li><strong>分片策略</strong>：
+<ul>
+<li><strong>分片术语命名</strong>：<a target="_blank" rel="noopener" href="https://rocketmq.apache.org/zh/docs/domainModel/03messagequeue/">消息队列</a>（message queue）
+<ul>
+<li>将单个 Topic 的消息日志拆分到多个消息队列中。</li>
+</ul>
+</li>
+<li><strong>键-分片的分配关系</strong>：默认轮询（round-robin）分配
+<ul>
+<li>默认按 Topic 消息的写入次序轮询分配给各个消息队列，也可以自定义消息队列选择器（MessageQueueSelector）。</li>
+<li>相关源码：DefaultMQProducerImpl#<a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/client/src/main/java/org/apache/rocketmq/client/impl/producer/DefaultMQProducerImpl.java#L554">sendDefaultImpl</a>、DefaultMQProducerImpl#<a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/client/src/main/java/org/apache/rocketmq/client/impl/producer/DefaultMQProducerImpl.java#L1134">sendSelectImpl</a></li>
+</ul>
+</li>
+<li><strong>分片-机器的分配关系</strong><sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup>：可配置某 Topic 在某 Borker 服务器节点的消息队列数。
+<ul>
+<li>若发送消息时自动创建 Topic，配置项 <code>autoCreateTopicEnable</code> 开启，会在发送消息时轮询选择其中一台 Master Borker，在该 Borker 上分配消息队列。消息队列数由全局配置项 <code>defaultTopicQueueNums</code> 控制，默认值 <code>4</code>。
+<ul>
+<li>相关源码：MQClientInstance#<a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/client/src/main/java/org/apache/rocketmq/client/impl/factory/MQClientInstance.java#L605">updateTopicRouteInfoFromNameServer</a>、AbstractSendMessageProcessor#<a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/broker/src/main/java/org/apache/rocketmq/broker/processor/AbstractSendMessageProcessor.java#L166">msgCheck</a>、TopicConfigManager#<a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/broker/src/main/java/org/apache/rocketmq/broker/topic/TopicConfigManager.java#L156">createTopicInSendMessageMethod</a></li>
+</ul>
+</li>
+<li>若预先手动创建 Topic，执行 <code>mqadmin updateTopic</code> 命令，可以通过命令行参数指定在某个 Master Borker 上分配消息队列。也可以通过命令行参数指定 cluster，在 cluster 下的全部的 Master Borker 上分配消息队列，每个 Borker 的消息队列的数量相同。默认队列数 <code>8</code>。
+<ul>
+<li>相关源码：<a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/tools/src/main/java/org/apache/rocketmq/tools/command/topic/UpdateTopicSubCommand.java#L90">UpdateTopicSubCommand</a></li>
+</ul>
+</li>
+<li>Topic 的消息队列的主副本分布在各个 Master Borker，某 Topic 的分区总数量是该 Topic 分布在各个 Master Borker 上的消息队列的数量的总和。</li>
+</ul>
+</li>
+<li><strong>分片再均衡策略</strong>：手动再均衡
+<ul>
+<li>在扩容添加新 Broker 节点后，在创建新 Topic 时，可以自动或指定在新 Broker 节点上分配消息队列，而旧的 Topic 也可以通过执行 <code>mqadmin updateTopic</code> 命令，在新的 Broker 节点上分配消息队列。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>复制策略</strong>：类似于 MySQL 的主从复制
+<ul>
+<li><strong>副本粒度</strong>：以 Master Borker 节点内的全量消息日志数据为粒度</li>
+<li><strong>副本系数</strong>：由消息队列所属的 Broker Group 的下 Borker 总数量决定（每个 Broker Group 下有一个 Master Borker 和零到若干个 Slave Borker）</li>
+<li><strong>副本更新传播策略</strong>：
+<ul>
+<li>Borker 节点分为主从（master-slave）两种角色，支持异步复制（默认）和同步复制两种复制模式。配置项 <code>brokerRole</code> 用于配置节点的主从角色和复制模式，默认值为 <code>ASYNC_MASTER</code>，可配置为 <code>SYNC_MASTER</code>/<code>ASYNC_MASTER</code>/<code>SLAVE</code>。</li>
+</ul>
+</li>
+<li><strong>主从读写分离</strong><sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup>：Master Borker 可写可读，Slave Borker 只允许读。配置项 <code>slaveReadEnable</code> 用于配置是否允许消息从从节点读取，默认 <code>false</code>。如果 <code>slaveReadEnable=true</code>，并且当前消息堆积量超过物理内存 40%（由配置项 <code>accessMessageInMemoryMaxRatio</code> 控制），则建议从 Slave Borker 拉取消息，否则还是从 Master Borker 拉取消息。
+<ul>
+<li>相关源码：PullMessageProcessor#<a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/broker/src/main/java/org/apache/rocketmq/broker/processor/PullMessageProcessor.java#L266">processRequest</a></li>
+</ul>
+</li>
+<li><strong>消息可靠性</strong><sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup><sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup>：主要影响的配置项是主从节点的副本复制方式和磁盘刷盘方式。
+<ul>
+<li>对于 <code>Borker</code> 单点故障情况，若采用主从异步复制，可保证 99% 的消息不丢，但是仍然会有极少量的消息可能丢失。若采用主从同步复制可以完全避免单点，但相对损失影响性能，适合对消息可靠性要求极高的场合。</li>
+<li>配置项 <code>FlushDiskType</code> 用于控制磁盘刷盘方式，可配置为异步刷盘 <code>ASYNC_FLUSH</code>（默认）和同步刷盘 <code>SYNC_FLUSH</code>。同步刷盘会损失很多性能，但是也更可靠。</li>
+<li>生产环境下的<strong>推荐配置</strong>是<sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup>，把主从节点的磁盘刷盘方式都配置为<strong>异步刷盘</strong>，主从节点之间复制方式配置为<strong>同步复制</strong>，这种配置方式是相对兼顾了性能和可靠性。如果对消息丢失零容忍，则建议配置为同步复制、同步刷盘方式。</li>
+<li>对于副本系统来说，在系统设计或配置时，必须要在副本一致性和延迟（性能）之间做<strong>权衡</strong>，参见 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/PACELC_theorem">PACELC</a> 理论（CAP 理论的扩展版）。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>配置和协调服务</strong>：
+<ul>
+<li>NameServer 负责存储消息队列路由信息、Borker 集群注册信息等元数据，是 ZooKeeper 的轻量级替代。</li>
+<li><strong>自动选主</strong><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup><sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup>：
+<ul>
+<li><strong>Raft 模式</strong>：RocketMQ 4.5 开始，DLedger 模块被集成到各个 Borker 节点的进程中，用于 Borker 节点的自动选主，实现自动故障转移，自动选主基于 Raft 协议。</li>
+<li><strong>Controller 模式</strong>：RocketMQ 5.0 开始，自动选主支持 DLedger Controller 模式，Controller 可以独立部署，也可以嵌入在 Nameserver 中。</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>RocketMQ 架构，以及各个 Borker 下分区和副本分布示例，如下图所示：</p>
+<img width="800" alt="RocketMQ 架构与分区和副本分布示例" title="RocketMQ 架构与分区和副本分布示例" src="https://static.nullwy.me/rocketmq-architecture.png">
+<h1 id="Kafka">Kafka</h1>
+<p><strong>Kafka 的数据分片和复制策略</strong><sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup><sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup>：</p>
+<ul>
+<li><strong>分片策略</strong>：
+<ul>
+<li><strong>分片术语命名</strong>：分区（partition）
+<ul>
+<li>将单个 Topic 的消息日志拆分到多个分区</li>
+</ul>
+</li>
+<li><strong>键-分片的分配关系</strong>：按 Hash 拆分或轮询分配。
+<ul>
+<li>若消息 key 有值，按 key 的 Hash 值拆分；若消息 key 值为 null 时，轮询分配给各个分。也可以自定义分区策略。Hash 拆分具体实现是，根据 murmur2 算法计算消息 key 的 Hash 值，然后对总分区数求模得到消息要被发送到的目标分区号。
+<ul>
+<li>相关源码：<a target="_blank" rel="noopener" href="https://github.com/apache/kafka/blob/2.3.0/clients/src/main/java/org/apache/kafka/clients/producer/internals/DefaultPartitioner.java">DefaultPartitioner</a>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>分片-机器的分配关系</strong>：可配置某 Topic 的分区总数量。
+<ul>
+<li>在创建 Topic 时把各个分区和分区的副本<strong>轮询分配</strong>给各个 <code>Broker</code> 节点。
+<ul>
+<li>相关源码：AdminUtils#<a target="_blank" rel="noopener" href="https://github.com/apache/kafka/blob/3.6.0/server-common/src/main/java/org/apache/kafka/admin/AdminUtils.java#L46">assignReplicasToBrokers</a></li>
+</ul>
+</li>
+<li>若发送消息时自动创建 Topic，由配置项 <code>num.partitions</code> 控制 Topic 的默认分区总数量，默认值 <code>1</code>。</li>
+<li>若预先手动创建 Topic，执行 <code>kafka-topics.sh --create</code> 命令，由 <code>--partitions</code> 命令行参数控制该 Topic 的分区总数量。</li>
+</ul>
+</li>
+<li><strong>分片再均衡策略</strong>：手动再均衡
+<ul>
+<li>在扩容添加新 Broker 节点后，新的分区和分区副本能自动分配到新的 Broker 节点上，但已有的旧分区和节点的分配关系的固定的。如果要让旧的分区和分区副本能分配新的 Broker 节点，需要手动执行分区重分配命令 <code>kafka-reassign-partitions.sh</code>。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>复制策略</strong>：
+<ul>
+<li><strong>副本粒度</strong>：以分区为粒度</li>
+<li><strong>复制系数</strong>：
+<ul>
+<li>自动创建 Topic 时，由配置项 <code>default.replication.factor</code> 全局控制 Topic 的默认副本个数，默认值 <code>1</code>。</li>
+<li>手动创建 Topic 时，执行 <code>kafka-topics.sh --create</code> 命令，由 <code>--replication-factor</code> 命令行参数控制该 Topic 的分区副本的复制系数。</li>
+<li>复制系数必须等于或小于可用 Broker 节点数，如果大于可用 Broker 节点数，在创建 Topic 时会报异常。</li>
+<li>推荐的复制系数的配置值是 &gt;= 3，通常配置为 <code>3</code>。复制系数配置为 &gt;= 3 的原因是，允许集群内同时发生一次计划内停机和一次计划外停机，配置为 <code>3</code> 是在避免消息丢失和过度复制之间的常见的权衡选择。HBase（基于 HDFS）和 Cassandra 等分布式存储系统默认的复制系数也是 <code>3</code>。</li>
+</ul>
+</li>
+<li><strong>副本更新传播策略</strong>：
+<ul>
+<li>副本分为主从（leader-follower）两种角色。动态维护 ISR 集合（a set of in-sync replicas），ISR 集合为需要同步复制的 follower 节点的集合。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。ISR 集合大小由 Broker 端的配置项 <code>min.insync.replicas</code> 控制，默认值 <code>1</code>，即只需要 leader。</li>
+<li>Producer 端的配置项 <code>acks</code>，用于控制在确认一个请求发送完成之前需要收到的反馈信息的数量。<code>min.insync.replicas</code> 配置项只有在 <code>acks=all</code> 时才生效。
+<ul>
+<li><code>acks=0</code>：表示 Producer 不等待 Broker 返回确认消息。</li>
+<li><code>acks=1</code>（Kafka &lt; v3.0 默认）：表示 leader 节点会将记录写入本地日志，并且在所有 follower 节点反馈之前就先确认成功。</li>
+<li><code>acks=all</code>（Kafka &gt;= v3.0 默认）：表示 leader 节点会等待所有同步中的副本（ISR集合）确认之后再确认这条记录是否发送完成。</li>
+</ul>
+</li>
+<li>与异步复制、半同步复制、同步复制的对应关系：
+<ul>
+<li>当 <code>acks=0</code> 或 <code>acks=1</code> 时，相当于异步复制。</li>
+<li>当 <code>acks=all</code> 并且 <code>min.insync.replicas</code> 值大于 <code>1</code> 并小于 Broker 节点总数时，相当于半同步复制。</li>
+<li>当 <code>acks=all</code> 并且 <code>min.insync.replicas</code> 值等于 Broker 节点总数时，相当于全同步复制。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>主从读写分离</strong>：
+<ul>
+<li>Kafka 2.4 之前，leader 副本可写可读，follower 副本不可读，仅用于备份。消息消费者只允许读取 leader 副本，follower 副本不处理来自消费者的请求。当 leader 所在的节点发生崩溃，其中一个 follower 就会被 Controller 选举为新 leader。</li>
+<li>Kafka 2.4 开始（2019.12 发布）支持读取 follower 副本来消费消息，参见 <a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/KAFKA-8443">KIP-392</a>。</li>
+</ul>
+</li>
+<li><strong>消息可靠性</strong>：
+<ul>
+<li>优先考虑消息可靠性（无消息丢失）又同时兼顾性能的常用的配置是，复制系数的配置值为 <code>3</code>，ISR 集合大小的配置值为 <code>min.insync.replicas=2</code>，消息发送确认的配置值为 <code>acks=all</code><sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup><sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>。</li>
+<li>Kafka 支持是异步刷盘，没有直接的同步刷盘相关配置项。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作完全交给操作系统完成<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup>。相对于刷盘，复制提供了更强的可靠性保障。</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>配置和协调服务</strong>：
+<ul>
+<li><strong>ZooKeeper 模式</strong><sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup>：ZooKeeper 负责存储元数据，包括 Broker、Topic、分区、副本、路由等信息，以及负责选举 Controller 角色的 Broker，整个集群只有一个 Controller 角色的 Broker。Controller 角色的 Broker 节点的主要职责是 Broker 集群成员管理、Topic 管理（创建、删除、增加分区）、分区重分配、选举新的分区 leader 副本等，这些职责的实现重度依赖 ZooKeeper。</li>
+<li><strong>KRaft 模式</strong><sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup>：Kafka 2.8 开始，Kafka 开始用基于 Raft 的控制器替换基于 ZooKeeper 的控制器，新控制器叫作 KRaft。KRaft 模块被集成在 Borker 节点的进程中，去掉了对 ZooKeeper 的依赖，简化了整体架构。</li>
+</ul>
+</li>
+</ul>
+<p>Kafka 在 ZooKeeper 模式下的架构图，以及各个 Borker 下分区和副本分布示例，如下图所示：</p>
+<img width="800" alt="Kafka 架构与分区和副本分布示例" title="Kafka 架构与分区和副本分布示例" src="https://static.nullwy.me/kafka-architecture.png">
+<p>Kafka 在 KRaft 模式下的架构图，如下图所示<sup class="footnote-ref"><a href="#fn18" id="fnref18:1">[18:1]</a></sup>：</p>
+<img width="600" alt="Kafka 的 KRaft 模式" title="Kafka 的 KRaft 模式" src="https://static.nullwy.me/kafka-kraft-mode.png">
+<h1 id="参考资料">参考资料</h1>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>2017-11 阿里林清山隆基：阿里消息中间件架构演进之路：notify和metaq <a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/302600352">https://zhuanlan.zhihu.com/p/302600352</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn2" class="footnote-item"><p>2013-07 淘宝张乐伟韩彰：淘宝消息中间件技术演变：MetaQ 1.0、MetaQ 2.0、MetaQ 3.0（slides, 30p）<a target="_blank" rel="noopener" href="https://www.modb.pro/doc/109298">https://www.modb.pro/doc/109298</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn3" class="footnote-item"><p>2017-03 阿里冯嘉鼬神：Apache RocketMQ背后的设计思路与最佳实践 <a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/71889">https://developer.aliyun.com/article/71889</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn4" class="footnote-item"><p>Apache RocketMQ 4.9.x开发者指南 <a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq/blob/4.9.x/docs/cn">https://github.com/apache/rocketmq/blob/4.9.x/docs/cn</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn5" class="footnote-item"><p>2019-03 张乘辉：深度解析RocketMQ Topic的创建机制 <a target="_blank" rel="noopener" href="https://objcoding.com/2019/03/31/rocketmq-topic/">https://objcoding.com/2019/03/31/rocketmq-topic/</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn6" class="footnote-item"><p>2019-09 张乘辉：RocketMQ主从读写分离机制 <a target="_blank" rel="noopener" href="https://objcoding.com/2019/09/22/rocketmq-read-write-separation/">https://objcoding.com/2019/09/22/rocketmq-read-write-separation/</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn7" class="footnote-item"><p>Apache RocketMQ 4.9.x开发者指南：特性：4 消息可靠性 <a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq/blob/4.9.x/docs/cn/features.md">https://github.com/apache/rocketmq/blob/4.9.x/docs/cn/features.md</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn8" class="footnote-item"><p>2016-04 Kafka vs RocketMQ——单机系统可靠性 <a target="_blank" rel="noopener" href="https://web.archive.org/web/0/http://jm.taobao.org/2016/04/28/kafka-vs-rocktemq-4">https://web.archive.org/web/0/http://jm.taobao.org/2016/04/28/kafka-vs-rocktemq-4</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn9" class="footnote-item"><p>2018-12 How much memory should we use for broker and namesrv when using cluster mode? #614 <a target="_blank" rel="noopener" href="https://github.com/apache/rocketmq/issues/614">https://github.com/apache/rocketmq/issues/614</a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn10" class="footnote-item"><p>2019-08 金融通、武文良：RocketMQ 实现高可用多副本架构的关键：DLedger—基于raft协议的commitlog存储库 <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/0nmWq29FN17vNzt0njRE-Q">https://mp.weixin.qq.com/s/0nmWq29FN17vNzt0njRE-Q</a> <a target="_blank" rel="noopener" href="https://www.infoq.cn/article/7xeJrpDZBa9v*GDZOFS6">https://www.infoq.cn/article/7xeJrpDZBa9v*GDZOFS6</a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn11" class="footnote-item"><p>2022-09 金融通：RocketMQ 5.0：面向消息与流的云原生高可用架构 <a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/bb6cGUxpsAoU-IqBgmSJHw">https://mp.weixin.qq.com/s/bb6cGUxpsAoU-IqBgmSJHw</a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn12" class="footnote-item"><p>Kafka 2.8 权威指南，第2版2021，<a target="_blank" rel="noopener" href="https://book.douban.com/subject/36161660/">豆瓣</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn13" class="footnote-item"><p>Kafka 文档 <a target="_blank" rel="noopener" href="https://kafka.apachecn.org/">https://kafka.apachecn.org/</a> <a target="_blank" rel="noopener" href="https://kafka.apache.org/36/documentation.html">https://kafka.apache.org/36/documentation.html</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn14" class="footnote-item"><p>Optimize Confluent Cloud Clients for Durability <a target="_blank" rel="noopener" href="https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html">https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn15" class="footnote-item"><p>2019-06 胡夕：Kafka 2.3 核心技术与实战：11 | 无消息丢失配置怎么实现？ <a target="_blank" rel="noopener" href="https://time.geekbang.org/column/article/102931">https://time.geekbang.org/column/article/102931</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn16" class="footnote-item"><p>Kafka Documentation: Application vs. OS Flush Management <a target="_blank" rel="noopener" href="https://kafka.apache.org/36/documentation.html#appvsosflush">https://kafka.apache.org/36/documentation.html#appvsosflush</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn17" class="footnote-item"><p>2019-08 胡夕：Kafka 2.3 核心技术与实战：26 | 你一定不能错过的Kafka控制器（Controller） <a target="_blank" rel="noopener" href="https://time.geekbang.org/column/article/111339">https://time.geekbang.org/column/article/111339</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn18" class="footnote-item"><p>2022-04 Jun Rao: The Apache Kafka Control Plane (ZooKeeper vs. KRaft) <a target="_blank" rel="noopener" href="https://developer.confluent.io/courses/architecture/control-plane/">https://developer.confluent.io/courses/architecture/control-plane/</a> <a href="#fnref18" class="footnote-backref">↩︎</a> <a href="#fnref18:1" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+
+    </div>
+
+    
+    
+    
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>nullwy
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="https://nullwy.me/2024/01/rocketmq-kafka-sharding-replication/" title="RocketMQ 和 Kafka 的数据分片和复制策略">https://nullwy.me/2024/01/rocketmq-kafka-sharding-replication/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7/" rel="tag"># 可扩展性</a>
+              <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag"># 分布式</a>
+              <a href="/tags/%E5%8F%AF%E9%9D%A0%E6%80%A7/" rel="tag"># 可靠性</a>
+              <a href="/tags/%E5%8F%AF%E4%BC%B8%E7%BC%A9%E6%80%A7/" rel="tag"># 可伸缩性</a>
+              <a href="/tags/%E4%B8%AD%E9%97%B4%E4%BB%B6/" rel="tag"># 中间件</a>
+              <a href="/tags/%E9%AB%98%E5%8F%AF%E7%94%A8/" rel="tag"># 高可用</a>
+              <a href="/tags/RocketMQ/" rel="tag"># RocketMQ</a>
+              <a href="/tags/Kafka/" rel="tag"># Kafka</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/12/website-scalability-reliability-resilience/" rel="prev" title="大型网站的稳定性、可靠性和韧性">
+      <i class="fa fa-chevron-left"></i> 大型网站的稳定性、可靠性和韧性
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8E%86%E5%8F%B2%E6%BC%94%E8%BF%9B%E6%97%B6%E9%97%B4%E7%BA%BF"><span class="nav-number">1.</span> <span class="nav-text">历史演进时间线</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RocketMQ"><span class="nav-number">2.</span> <span class="nav-text">RocketMQ</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Kafka"><span class="nav-number">3.</span> <span class="nav-text">Kafka</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%96%99"><span class="nav-number">4.</span> <span class="nav-text">参考资料</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="nullwy"
+      src="https://static.nullwy.me/avatar.png">
+  <p class="site-author-name" itemprop="name">nullwy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">59</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/yulewei" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;yulewei" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="mailto:yulewei@gmail.com" title="E-Mail → mailto:yulewei@gmail.com" rel="noopener" target="_blank"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://segmentfault.com/u/nullwy" title="SegmentFault → https:&#x2F;&#x2F;segmentfault.com&#x2F;u&#x2F;nullwy" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>SegmentFault</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://www.douban.com/people/yulewei/" title="豆瓣 → https:&#x2F;&#x2F;www.douban.com&#x2F;people&#x2F;yulewei&#x2F;" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>豆瓣</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://juejin.cn/user/3670612013220988" title="掘金 → https:&#x2F;&#x2F;juejin.cn&#x2F;user&#x2F;3670612013220988" rel="noopener" target="_blank"><i class="fa fa-globe fa-fw"></i>掘金</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+  <div class="beian">
+    备案号：<a href="https://beian.miit.gov.cn/" rel="noopener" target="_blank">浙ICP备17005717号 </a>
+  </div>
+
+<div class="copyright">
+  
+  &copy; 2016 – 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">nullwy</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+    <span title="站点总字数">340k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="站点阅读时长">5:09</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      总访客量
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    总访问量
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://yulewei.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "https://nullwy.me/2024/01/rocketmq-kafka-sharding-replication/";
+    this.page.identifier = "2024/01/rocketmq-kafka-sharding-replication/";
+    this.page.title = "RocketMQ 和 Kafka 的数据分片和复制策略";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://yulewei.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

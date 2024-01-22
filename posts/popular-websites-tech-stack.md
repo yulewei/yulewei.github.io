@@ -504,7 +504,7 @@ Twitter，2006 年创立，早期采用 Ruby on Rails 技术栈，数据库是 M
 [^95]: Dubbo 用户案例：阿里巴巴升级 Dubbo3 全面取代 HSF2 <https://cn.dubbo.apache.org/zh-cn/users/alibaba/> <https://github.com/apache/dubbo-website/blob/ee727525aa61d68b397cc6ddedb322001f0ca4da/content/zh/users/alibaba.md>
 [^96]: 2023-01 阿里巴巴升级 Dubbo3 全面取代 HSF2 <https://cn.dubbo.apache.org/zh-cn/blog/2023/01/16/%e9%98%bf%e9%87%8c%e5%b7%b4%e5%b7%b4%e5%8d%87%e7%ba%a7-dubbo3-%e5%85%a8%e9%9d%a2%e5%8f%96%e4%bb%a3-hsf2/>
 [^97]: 2017-11 阿里林清山隆基：阿里消息中间件架构演进之路：notify和metaq <https://zhuanlan.zhihu.com/p/302600352>
-[^98]: 2013-07 淘宝张乐伟韩彰：淘宝消息中间件技术演变：MetaQ 1.0、MetaQ 2.0、MetaQ 3.0（sildes, 30p）<https://www.modb.pro/doc/109298>
+[^98]: 2013-07 淘宝张乐伟韩彰：淘宝消息中间件技术演变：MetaQ 1.0、MetaQ 2.0、MetaQ 3.0（slides, 30p）<https://www.modb.pro/doc/109298>
 [^99]: 2017-03 阿里冯嘉鼬神：Apache RocketMQ背后的设计思路与最佳实践 <https://developer.aliyun.com/article/71889>
 
 [^100]: 2008-05 LinkedIn - A Professional Network built with Java Technologies and Agile Practices (JavaOne2008, slides) <https://www.slideshare.net/linkedin/linkedins-communication-architecture>
