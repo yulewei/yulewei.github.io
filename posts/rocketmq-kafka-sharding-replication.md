@@ -70,9 +70,9 @@ RocketMQ 和 Kafka 的历史演进时间线：
     - **Raft 模式**：RocketMQ 4.5 开始，DLedger 模块被集成到各个 Borker 节点的进程中，用于 Borker 节点的自动选主，实现自动故障转移，自动选主基于 Raft 协议。
     - **Controller 模式**：RocketMQ 5.0 开始，自动选主支持 DLedger Controller 模式，Controller 可以独立部署，也可以嵌入在 Nameserver 中。
 
-RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下图所示：
+RocketMQ 架构，以及各个 Borker 下的分片和副本分布示例，如下图所示：
 
-<img width="800" alt="RocketMQ 架构与分区和副本分布示例" title="RocketMQ 架构与分区和副本分布示例" src="https://static.nullwy.me/rocketmq-architecture.png">
+<img width="800" alt="RocketMQ 架构与分片和副本分布示例" title="RocketMQ 架构与分片和副本分布示例" src="https://static.nullwy.me/rocketmq-architecture.png">
 
 # Kafka
 
@@ -117,9 +117,9 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
   - **ZooKeeper 模式**[^17]：ZooKeeper 负责存储元数据，包括 Broker、Topic、分区、副本、路由等信息，以及负责选举 Controller 角色的 Broker，整个集群只有一个 Controller 角色的 Broker。Controller 角色的 Broker 节点的主要职责是 Broker 集群成员管理、Topic 管理（创建、删除、增加分区）、分区重分配、选举新的分区 leader 副本等，这些职责的实现重度依赖 ZooKeeper。
   - **KRaft 模式**[^18]：Kafka 2.8 开始，Kafka 开始用基于 Raft 的控制器替换基于 ZooKeeper 的控制器，新控制器叫作 KRaft。KRaft 模块被集成在 Borker 节点的进程中，去掉了对 ZooKeeper 的依赖，简化了整体架构。
 
-Kafka 在 ZooKeeper 模式下的架构图，以及各个 Borker 下的分区和副本分布示例，如下图所示：
+Kafka 在 ZooKeeper 模式下的架构图，以及各个 Borker 下的分片和副本分布示例，如下图所示：
 
-<img width="800" alt="Kafka 架构与分区和副本分布示例" title="Kafka 架构与分区和副本分布示例" src="https://static.nullwy.me/kafka-architecture.png">
+<img width="800" alt="Kafka 架构与分片和副本分布示例" title="Kafka 架构与分片和副本分布示例" src="https://static.nullwy.me/kafka-architecture.png">
 
 Kafka 在 KRaft 模式下的架构图，如下图所示[^18]：
 
