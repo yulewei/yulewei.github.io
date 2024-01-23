@@ -102,7 +102,7 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
     - 复制系数必须等于或小于可用 Broker 节点数，如果大于可用 Broker 节点数，在创建 Topic 时会报异常。
     - 推荐的复制系数的配置值是 >= 3，通常配置为 `3`。复制系数配置为 >= 3 的原因是，允许集群内同时发生一次计划内停机和一次计划外停机，配置为 `3` 是在避免消息丢失和过度复制之间的常见的权衡选择。HBase（基于 HDFS）和 Cassandra 等分布式存储系统默认的复制系数也是 `3`。
   - **副本更新传播策略**：
-    - 副本分为主从（leader-follower）两种角色。Kafka 动态维护**同步副本集合**（a set of in-sync replicas），简称 **ISR 集合**。如果一个 follower 副本落后 leader 的时间超过 `replica.lag.time.max.ms` 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被移除 ISR 集合。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。ISR 集合大小由 Broker 端的配置项 `min.insync.replicas` 控制，默认值 `1`，即只需要 leader。
+    - 副本分为主从（leader-follower）两种角色。Kafka 动态维护**同步副本集合**（in-sync replica set），简称 **ISR 集合**。如果一个 follower 副本落后 leader 的时间超过 `replica.lag.time.max.ms` 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被移除 ISR 集合。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。ISR 集合大小由 Broker 端的配置项 `min.insync.replicas` 控制，默认值 `1`，即只需要 leader。
     - Producer 端的配置项 `acks`，用于控制在确认一个请求发送完成之前需要收到的反馈信息的数量。`min.insync.replicas` 配置项只有在 `acks=all` 时才生效。
       - `acks=0`：表示 Producer 不等待 Broker 返回确认消息。
       - `acks=1`（Kafka < v3.0 默认）：表示 leader 节点会将记录写入本地日志，并且在所有 follower 节点反馈之前就先确认成功。
