@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://static.nullwy.me/kafka-architecture.png">
 <meta property="og:image" content="https://static.nullwy.me/kafka-kraft-mode.png">
 <meta property="article:published_time" content="2024-01-18T12:36:00.000Z">
-<meta property="article:modified_time" content="2024-01-23T04:29:34.147Z">
+<meta property="article:modified_time" content="2024-01-23T07:32:19.334Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="可扩展性">
@@ -379,7 +379,7 @@
 </li>
 <li><strong>复制策略</strong>：类似于 MySQL 的主从复制
 <ul>
-<li><strong>副本单位</strong>：以 Master Borker 节点内的全量消息日志数据为单位</li>
+<li><strong>复制单位</strong>：以 Master Borker 节点内的全量消息日志数据为单位</li>
 <li><strong>复制系数</strong>：由消息队列所属的 Broker Group 的下 Borker 总数量决定（每个 Broker Group 下有一个 Master Borker 和零到若干个 Slave Borker）</li>
 <li><strong>副本更新传播策略</strong>：
 <ul>
@@ -454,7 +454,7 @@
 </li>
 <li><strong>复制策略</strong>：
 <ul>
-<li><strong>副本单位</strong>：以分区为单位</li>
+<li><strong>复制单位</strong>：以分区为单位</li>
 <li><strong>复制系数</strong>：
 <ul>
 <li>自动创建 Topic 时，由配置项 <code>default.replication.factor</code> 全局控制 Topic 的默认副本个数，默认值 <code>1</code>。</li>

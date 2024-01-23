@@ -57,7 +57,7 @@ RocketMQ 和 Kafka 的历史演进时间线：
   - **分片再均衡策略**：手动再均衡
     - 在扩容添加新 Broker 节点后，在创建新 Topic 时，可以自动或指定在新 Broker 节点上分配消息队列，而旧的 Topic 也可以通过执行 `mqadmin updateTopic` 命令，在新的 Broker 节点上分配消息队列。
 - **复制策略**：类似于 MySQL 的主从复制
-  - **副本单位**：以 Master Borker 节点内的全量消息日志数据为单位
+  - **复制单位**：以 Master Borker 节点内的全量消息日志数据为单位
   - **复制系数**：由消息队列所属的 Broker Group 的下 Borker 总数量决定（每个 Broker Group 下有一个 Master Borker 和零到若干个 Slave Borker）
   - **副本更新传播策略**：
     - Borker 节点分为主从（master-slave）两种角色，支持异步复制（默认）和同步复制两种复制模式。配置项 `brokerRole` 用于配置节点的主从角色和复制模式，默认值为 `ASYNC_MASTER`，可配置为 `SYNC_MASTER`/`ASYNC_MASTER`/`SLAVE`。
@@ -95,7 +95,7 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
   - **分片再均衡策略**：手动再均衡
     - 在扩容添加新 Broker 节点后，新的分区和分区副本能自动分配到新的 Broker 节点上，但已有的旧分区和节点的分配关系的固定的。如果要让旧的分区和分区副本能分配新的 Broker 节点，需要手动执行分区重分配命令 `kafka-reassign-partitions.sh`。
 - **复制策略**：
-  - **副本单位**：以分区为单位
+  - **复制单位**：以分区为单位
   - **复制系数**：
     - 自动创建 Topic 时，由配置项 `default.replication.factor` 全局控制 Topic 的默认副本个数，默认值 `1`。
     - 手动创建 Topic 时，执行 `kafka-topics.sh --create` 命令，由 `--replication-factor` 命令行参数控制该 Topic 的分区副本的复制系数。
