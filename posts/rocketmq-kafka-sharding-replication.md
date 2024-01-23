@@ -9,7 +9,11 @@ tags: [架构, 中间件, 分布式, 可伸缩性, 可扩展性, 可靠性, 可�
 
 <!--more-->
 
-MySQL 等传统关系数据库支持**表分区**（[partition](https://dev.mysql.com/doc/refman/8.0/en/partitioning.html)），但原生不支持**分片**（sharding），拆分后的表分区都分布在同一个服务器节点上。为了解决数据库的水平扩展问题，出现很多数据库分片方案。其中一类是基于传统关系数据库的“分库分表”中间件，如 [Vitess](https://github.com/vitessio/vitess)、[ShardingSphere](https://github.com/apache/shardingsphere)、阿里 TDDL 和 DRDS 等。另外一类是非关系型的 [NoSQL](https://en.wikipedia.org/wiki/NoSQL) 数据库，如 BigTable、Dynamo、HBase、Cassandra 等。以及采用全新架构的 NewSQL 数据库，如 Google Spanner、CockroachDB、TiDB 等；或基于云服务的 [NewSQL](https://en.wikipedia.org/wiki/NewSQL) 数据库，如 Amazon Aurora、阿里 PolarDB 等。分布式数据库不是本文关注的主题，不再展开。消息中间件的消息存储系统与分布式数据库系统类似，为了系统可扩展性和可用性，也需要支持数据分片和复制特性。
+MySQL 等传统关系数据库支持**表分区**（[partition](https://dev.mysql.com/doc/refman/8.0/en/partitioning.html)），但原生不支持**分片**（sharding），拆分后的表分区都分布在同一个服务器节点上。为了解决数据库的水平扩展问题，出现很多数据库分片方案。其中一类是基于传统关系数据库的“分库分表”中间件，如 [Vitess](https://github.com/vitessio/vitess)、[ShardingSphere](https://github.com/apache/shardingsphere)、阿里 TDDL 和 DRDS 等。另外一类是非关系型的 [NoSQL](https://en.wikipedia.org/wiki/NoSQL) 数据库，如 BigTable、Dynamo、HBase、Cassandra 等。以及采用全新架构的 NewSQL 数据库，如 Google Spanner、CockroachDB、TiDB 等；或基于云服务的 [NewSQL](https://en.wikipedia.org/wiki/NewSQL) 数据库，如 Amazon Aurora、阿里 PolarDB 等。
+
+术语分片（shard）或分区（partition），在具体的不同系统下有着不同的称呼，例如它对应于 MongoDB、Elasticsearch 和 SolrCloud 中的 `shard`，HBase 中的 `region`，Bigtable 中的 `tablet`，Cassandra 和 Riak 中的 `vnode`，以及 Couchbase 中 的 `vBucket`。总体而言，分片和分区使用最普遍。
+
+分布式数据库不是本文关注的主题，不再展开。消息中间件的消息存储系统与分布式数据库系统类似，为了系统可扩展性和可用性，也需要支持数据分片和复制特性。
 
 # 历史演进时间线
 
