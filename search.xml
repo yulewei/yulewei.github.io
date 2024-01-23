@@ -5465,7 +5465,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </li>
 <li><strong>副本更新传播策略</strong>：
 <ul>
-<li>副本分为主从（leader-follower）两种角色。Kafka 动态维护同步状态的副本集合（a set of in-sync replicas），简称 ISR。如果一个 follower 副本落后 leader 的时间超过 <code>replica.lag.time.max.ms</code> 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步”（out-of-sync）的，会被移除 ISR 集合。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。ISR 集合大小由 Broker 端的配置项 <code>min.insync.replicas</code> 控制，默认值 <code>1</code>，即只需要 leader。</li>
+<li>副本分为主从（leader-follower）两种角色。Kafka 动态维护<strong>同步副本集合</strong>（a set of in-sync replicas），简称 <strong>ISR 集合</strong>。如果一个 follower 副本落后 leader 的时间超过 <code>replica.lag.time.max.ms</code> 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步”（out-of-sync）的，会被移除 ISR 集合。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。ISR 集合大小由 Broker 端的配置项 <code>min.insync.replicas</code> 控制，默认值 <code>1</code>，即只需要 leader。</li>
 <li>Producer 端的配置项 <code>acks</code>，用于控制在确认一个请求发送完成之前需要收到的反馈信息的数量。<code>min.insync.replicas</code> 配置项只有在 <code>acks=all</code> 时才生效。
 <ul>
 <li><code>acks=0</code>：表示 Producer 不等待 Broker 返回确认消息。</li>
@@ -5475,9 +5475,9 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </li>
 <li>与异步复制、半同步复制、同步复制的对应关系：
 <ul>
-<li>当 <code>acks=0</code> 或 <code>acks=1</code> 时，相当于异步复制。</li>
-<li>当 <code>acks=all</code> 并且 <code>min.insync.replicas</code> 值大于 <code>1</code> 并小于 Broker 节点总数时，相当于半同步复制。</li>
-<li>当 <code>acks=all</code> 并且 <code>min.insync.replicas</code> 值等于 Broker 节点总数时，相当于全同步复制。</li>
+<li>当 <code>acks=0</code> 或 <code>acks=1</code> 时，相当于<strong>异步复制</strong>。</li>
+<li>当 <code>acks=all</code> 并且 <code>min.insync.replicas</code> 值大于 <code>1</code> 并小于 Broker 节点总数时，相当于<strong>半同步复制</strong>。</li>
+<li>当 <code>acks=all</code> 并且 <code>min.insync.replicas</code> 值等于 Broker 节点总数时，相当于<strong>全同步复制</strong>。</li>
 </ul>
 </li>
 </ul>

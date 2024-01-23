@@ -102,15 +102,15 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
     - 复制系数必须等于或小于可用 Broker 节点数，如果大于可用 Broker 节点数，在创建 Topic 时会报异常。
     - 推荐的复制系数的配置值是 >= 3，通常配置为 `3`。复制系数配置为 >= 3 的原因是，允许集群内同时发生一次计划内停机和一次计划外停机，配置为 `3` 是在避免消息丢失和过度复制之间的常见的权衡选择。HBase（基于 HDFS）和 Cassandra 等分布式存储系统默认的复制系数也是 `3`。
   - **副本更新传播策略**：
-    - 副本分为主从（leader-follower）两种角色。Kafka 动态维护同步状态的副本集合（a set of in-sync replicas），简称 ISR。如果一个 follower 副本落后 leader 的时间超过 `replica.lag.time.max.ms` 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步”（out-of-sync）的，会被移除 ISR 集合。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。ISR 集合大小由 Broker 端的配置项 `min.insync.replicas` 控制，默认值 `1`，即只需要 leader。
+    - 副本分为主从（leader-follower）两种角色。Kafka 动态维护**同步副本集合**（a set of in-sync replicas），简称 **ISR 集合**。如果一个 follower 副本落后 leader 的时间超过 `replica.lag.time.max.ms` 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步”（out-of-sync）的，会被移除 ISR 集合。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。ISR 集合大小由 Broker 端的配置项 `min.insync.replicas` 控制，默认值 `1`，即只需要 leader。
     - Producer 端的配置项 `acks`，用于控制在确认一个请求发送完成之前需要收到的反馈信息的数量。`min.insync.replicas` 配置项只有在 `acks=all` 时才生效。
       - `acks=0`：表示 Producer 不等待 Broker 返回确认消息。
       - `acks=1`（Kafka < v3.0 默认）：表示 leader 节点会将记录写入本地日志，并且在所有 follower 节点反馈之前就先确认成功。
       - `acks=all`（Kafka >= v3.0 默认）：表示 leader 节点会等待所有同步中的副本（ISR集合）确认之后再确认这条记录是否发送完成。
     - 与异步复制、半同步复制、同步复制的对应关系：
-      - 当 `acks=0` 或 `acks=1` 时，相当于异步复制。
-      - 当 `acks=all` 并且 `min.insync.replicas` 值大于 `1` 并小于 Broker 节点总数时，相当于半同步复制。
-      - 当 `acks=all` 并且 `min.insync.replicas` 值等于 Broker 节点总数时，相当于全同步复制。
+      - 当 `acks=0` 或 `acks=1` 时，相当于**异步复制**。
+      - 当 `acks=all` 并且 `min.insync.replicas` 值大于 `1` 并小于 Broker 节点总数时，相当于**半同步复制**。
+      - 当 `acks=all` 并且 `min.insync.replicas` 值等于 Broker 节点总数时，相当于**全同步复制**。
   - **主从读写分离**：
     - Kafka 2.4 之前，leader 副本可写可读，follower 副本不可读，仅用于备份。消息消费者只允许读取 leader 副本，follower 副本不处理来自消费者的请求。当 leader 所在的节点发生崩溃，其中一个 follower 就会被 Controller 选举为新 leader。
     - Kafka 2.4 开始（2019.12 发布）支持读取 follower 副本来消费消息，参见 [KIP-392](https://issues.apache.org/jira/browse/KAFKA-8443)。
