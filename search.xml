@@ -5404,7 +5404,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <li><strong>配置和协调服务</strong>：
 <ul>
 <li>NameServer 负责存储消息队列路由信息、Borker 集群注册信息等元数据，是 ZooKeeper 的轻量级替代。</li>
-<li><strong>自动选主</strong><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup><sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup>：
+<li><strong>自动选举主节点</strong><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup><sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup>：
 <ul>
 <li><strong>Raft 模式</strong>：RocketMQ 4.5 开始，DLedger 模块被集成到各个 Borker 节点的进程中，用于 Borker 节点的自动选主，实现自动故障转移，自动选主基于 Raft 协议。</li>
 <li><strong>Controller 模式</strong>：RocketMQ 5.0 开始，自动选主支持 DLedger Controller 模式，Controller 可以独立部署，也可以嵌入在 Nameserver 中。</li>
@@ -5491,7 +5491,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <li><strong>消息可靠性</strong>：
 <ul>
 <li>优先考虑消息可靠性（无消息丢失）又同时兼顾性能的常用的配置是，复制系数的配置值为 <code>3</code>，ISR 集合大小的配置值为 <code>min.insync.replicas=2</code>，消息发送确认的配置值为 <code>acks=all</code><sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup><sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>。</li>
-<li>Kafka 支持是异步刷盘，没有直接的同步刷盘相关配置项。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作完全交给操作系统完成<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup>。相对于刷盘，复制提供了更强的可靠性保障。</li>
+<li>Kafka 是默认异步刷盘的，没有直接的同步刷盘相关配置项。Kafka 会在重启之前和关闭日志片段（默认1 GB 大小时关闭）时将消息冲刷到磁盘上，或者等到 Linux 系统页面缓存被填满时冲刷。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作交给操作系统完成<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup>。相对于刷盘，复制提供了更强的可靠性保障。</li>
 </ul>
 </li>
 </ul>
