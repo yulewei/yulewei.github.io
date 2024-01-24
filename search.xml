@@ -5379,7 +5379,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </li>
 <li><strong>复制策略</strong>：类似于 MySQL 的主从复制
 <ul>
-<li><strong>复制单位</strong>：以 Master Borker 节点内的全量消息日志数据为单位</li>
+<li><strong>复制单位</strong>：以机器为单位，副本 Borker 节点之间的数据完全相同</li>
 <li><strong>复制系数</strong>：由消息队列所属的 Broker Group 的下 Borker 总数量决定（每个 Broker Group 下有一个 Master Borker 和零到若干个 Slave Borker）</li>
 <li><strong>副本更新传播策略</strong>：
 <ul>

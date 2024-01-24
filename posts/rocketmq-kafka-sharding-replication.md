@@ -57,7 +57,7 @@ RocketMQ 和 Kafka 的历史演进时间线：
   - **分片再均衡策略**：手动再均衡
     - 在扩容添加新 Broker 节点后，在创建新 Topic 时，可以自动或指定在新 Broker 节点上分配消息队列，而旧的 Topic 也可以通过执行 `mqadmin updateTopic` 命令，在新的 Broker 节点上分配消息队列。
 - **复制策略**：类似于 MySQL 的主从复制
-  - **复制单位**：以 Master Borker 节点内的全量消息日志数据为单位
+  - **复制单位**：以机器为单位，副本 Borker 节点之间的数据完全相同
   - **复制系数**：由消息队列所属的 Broker Group 的下 Borker 总数量决定（每个 Broker Group 下有一个 Master Borker 和零到若干个 Slave Borker）
   - **副本更新传播策略**：
     - Borker 节点分为主从（master-slave）两种角色，支持异步复制（默认）和同步复制两种复制模式。配置项 `brokerRole` 用于配置节点的主从角色和复制模式，默认值为 `ASYNC_MASTER`，可配置为 `SYNC_MASTER`/`ASYNC_MASTER`/`SLAVE`。
