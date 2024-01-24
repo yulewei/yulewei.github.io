@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://static.nullwy.me/kafka-architecture.png">
 <meta property="og:image" content="https://static.nullwy.me/kafka-kraft-mode.png">
 <meta property="article:published_time" content="2024-01-18T12:36:00.000Z">
-<meta property="article:modified_time" content="2024-01-24T12:46:00.895Z">
+<meta property="article:modified_time" content="2024-01-24T13:17:59.046Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="可扩展性">
@@ -401,9 +401,9 @@
 </li>
 </ul>
 </li>
-<li><strong>集群配置和协调</strong>：
+<li><strong>集群配置和协调</strong>：由 NameServer 集群和 DLedger 模块负责
 <ul>
-<li>NameServer 负责存储消息队列路由信息、Borker 集群注册信息等元数据，是 ZooKeeper 的轻量级替代。</li>
+<li>NameServer 集群负责存储消息队列路由信息、Borker 集群注册信息等元数据，是 ZooKeeper 的轻量级替代。</li>
 <li><strong>自动选举主节点</strong><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup><sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup>：
 <ul>
 <li><strong>Raft 模式</strong>：RocketMQ 4.5 开始，DLedger 模块被集成到各个 Borker 节点的进程中，用于 Borker 节点的自动选主，实现自动故障转移，自动选主基于 Raft 协议。</li>
@@ -500,7 +500,7 @@
 </li>
 </ul>
 </li>
-<li><strong>集群配置和协调</strong>：
+<li><strong>集群配置和协调</strong>：由 <strong>Controller 控制器</strong>负责
 <ul>
 <li><strong>ZooKeeper 模式</strong><sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup>：ZooKeeper 负责存储元数据，包括 Broker、Topic、分区、副本、路由等信息，以及负责选举 Controller 角色的 Broker，整个集群只有一个 Controller 角色的 Broker。Controller 角色的 Broker 节点的主要职责是 Broker 集群成员管理、Topic 管理（创建、删除、增加分区）、分区重分配、选举新的分区 leader 副本等，这些职责的实现重度依赖 ZooKeeper。</li>
 <li><strong>KRaft 模式</strong><sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup>：Kafka 2.8 开始，Kafka 开始用基于 Raft 的控制器替换基于 ZooKeeper 的控制器，新控制器叫作 KRaft。KRaft 模块被集成在 Borker 节点的进程中，去掉了对 ZooKeeper 的依赖，简化了整体架构。</li>
