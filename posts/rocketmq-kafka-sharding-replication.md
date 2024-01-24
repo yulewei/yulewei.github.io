@@ -56,11 +56,11 @@ RocketMQ 和 Kafka 的历史演进时间线：
     - Topic 的消息队列的主副本分布在各个 Master Borker，某 Topic 的分区总数量是该 Topic 分布在各个 Master Borker 上的消息队列的数量的总和。
   - **分片再均衡策略**：手动再均衡
     - 在扩容添加新 Broker 节点后，在创建新 Topic 时，可以自动或指定在新 Broker 节点上分配消息队列，而旧的 Topic 也可以通过执行 `mqadmin updateTopic` 命令，在新的 Broker 节点上分配消息队列。
-- **复制策略**：类似于 MySQL 的主从复制
+- **复制策略**：主从（Master/Slave）模式，类似于 MySQL 的主从复制
   - **复制单位**：以机器为单位，副本 Borker 节点之间的数据完全相同
   - **复制系数**：由消息队列所属的 Broker Group 的下 Borker 总数量决定（每个 Broker Group 下有一个 Master Borker 和零到若干个 Slave Borker）
   - **副本更新传播策略**：
-    - Borker 节点分为主从（master-slave）两种角色，支持异步复制（默认）和同步复制两种复制模式。配置项 `brokerRole` 用于配置节点的主从角色和复制模式，默认值为 `ASYNC_MASTER`，可配置为 `SYNC_MASTER`/`ASYNC_MASTER`/`SLAVE`。
+    - Borker 节点分为主从（Master/Slave）两种角色，支持异步复制（默认）和同步复制两种复制模式。配置项 `brokerRole` 用于配置节点的主从角色和复制模式，默认值为 `ASYNC_MASTER`，可配置为 `SYNC_MASTER`/`ASYNC_MASTER`/`SLAVE`。
   - **主从读写分离**[^6]：Master Borker 可写可读，Slave Borker 只允许读。配置项 `slaveReadEnable` 用于配置是否允许消息从从节点读取，默认 `false`。如果 `slaveReadEnable=true`，并且当前消息堆积量超过物理内存 40%（由配置项 `accessMessageInMemoryMaxRatio` 控制），则建议从 Slave Borker 拉取消息，否则还是从 Master Borker 拉取消息。
     - 相关源码：PullMessageProcessor#[processRequest](https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/broker/src/main/java/org/apache/rocketmq/broker/processor/PullMessageProcessor.java#L266)
   - **消息可靠性**[^7][^8]：主要影响的配置项是主从节点的副本复制方式和磁盘刷盘方式。
