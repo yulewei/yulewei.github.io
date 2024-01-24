@@ -89,11 +89,12 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
       - 相关源码：[DefaultPartitioner](https://github.com/apache/kafka/blob/2.3.0/clients/src/main/java/org/apache/kafka/clients/producer/internals/DefaultPartitioner.java)。
   - **分片-机器的分配关系**：可配置某 Topic 的分区总数量。
     - 在创建 Topic 时把各个分区和分区的副本**轮询分配**给各个 `Broker` 节点。
-      - 相关源码：AdminUtils#[assignReplicasToBrokers](https://github.com/apache/kafka/blob/3.6.0/server-common/src/main/java/org/apache/kafka/admin/AdminUtils.java#L46)
+      - 相关源码：AdminUtils#[assignReplicasToBrokers](https://github.com/apache/kafka/blob/3.6.1/server-common/src/main/java/org/apache/kafka/admin/AdminUtils.java#L46)
     - 若发送消息时自动创建 Topic，由配置项 `num.partitions` 控制 Topic 的默认分区总数量，默认值 `1`。
     - 若预先手动创建 Topic，执行 `kafka-topics.sh --create` 命令，由 `--partitions` 命令行参数控制该 Topic 的分区总数量。
   - **分片再均衡策略**：手动再均衡
     - 在扩容添加新 Broker 节点后，新的分区和分区副本能自动分配到新的 Broker 节点上，但已有的旧分区和节点的分配关系的固定的。如果要让旧的分区和分区副本能分配新的 Broker 节点，需要手动执行分区重分配命令 `kafka-reassign-partitions.sh`。
+      - 相关源码：[ReassignPartitionsCommand](https://github.com/apache/kafka/blob/3.7.0-rc2/tools/src/main/java/org/apache/kafka/tools/reassign/ReassignPartitionsCommand.java)
 - **复制策略**：
   - **复制单位**：以分区为单位
   - **复制系数**：
@@ -116,7 +117,7 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
     - Kafka 2.4 开始（2019.12 发布）支持读取 follower 副本来消费消息，参见 [KIP-392](https://issues.apache.org/jira/browse/KAFKA-8443)。
   - **消息可靠性**：
     - 优先考虑消息可靠性（无消息丢失）又同时兼顾性能的常用的配置是，复制系数的配置值为 `3`，ISR 集合大小的配置值为 `min.insync.replicas=2`，消息发送确认的配置值为 `acks=all`[^14][^15]。
-    - Kafka 是默认异步刷盘的，没有直接的同步刷盘相关配置项。Kafka 会在重启之前和关闭日志片段（默认1 GB 大小时关闭）时将消息冲刷到磁盘上，或者等到 Linux 系统页面缓存被填满时冲刷。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作交给操作系统完成[^16]。相对于刷盘，复制提供了更强的可靠性保障。
+    - Kafka 是默认异步刷盘的，没有直接的同步刷盘相关配置项。Kafka 会在重启之前和关闭日志片段（默认 1 GB 大小时关闭）时将消息冲刷到磁盘上，或者等到 Linux 系统页面缓存被填满时冲刷。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作交给操作系统完成[^16]。相对于刷盘，复制提供了更强的可靠性保障。
 - **配置和协调服务**：
   - **ZooKeeper 模式**[^17]：ZooKeeper 负责存储元数据，包括 Broker、Topic、分区、副本、路由等信息，以及负责选举 Controller 角色的 Broker，整个集群只有一个 Controller 角色的 Broker。Controller 角色的 Broker 节点的主要职责是 Broker 集群成员管理、Topic 管理（创建、删除、增加分区）、分区重分配、选举新的分区 leader 副本等，这些职责的实现重度依赖 ZooKeeper。
   - **KRaft 模式**[^18]：Kafka 2.8 开始，Kafka 开始用基于 Raft 的控制器替换基于 ZooKeeper 的控制器，新控制器叫作 KRaft。KRaft 模块被集成在 Borker 节点的进程中，去掉了对 ZooKeeper 的依赖，简化了整体架构。

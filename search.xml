@@ -5438,7 +5438,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <ul>
 <li>在创建 Topic 时把各个分区和分区的副本<strong>轮询分配</strong>给各个 <code>Broker</code> 节点。
 <ul>
-<li>相关源码：AdminUtils#<a href="https://github.com/apache/kafka/blob/3.6.0/server-common/src/main/java/org/apache/kafka/admin/AdminUtils.java#L46">assignReplicasToBrokers</a></li>
+<li>相关源码：AdminUtils#<a href="https://github.com/apache/kafka/blob/3.6.1/server-common/src/main/java/org/apache/kafka/admin/AdminUtils.java#L46">assignReplicasToBrokers</a></li>
 </ul>
 </li>
 <li>若发送消息时自动创建 Topic，由配置项 <code>num.partitions</code> 控制 Topic 的默认分区总数量，默认值 <code>1</code>。</li>
@@ -5447,7 +5447,11 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </li>
 <li><strong>分片再均衡策略</strong>：手动再均衡
 <ul>
-<li>在扩容添加新 Broker 节点后，新的分区和分区副本能自动分配到新的 Broker 节点上，但已有的旧分区和节点的分配关系的固定的。如果要让旧的分区和分区副本能分配新的 Broker 节点，需要手动执行分区重分配命令 <code>kafka-reassign-partitions.sh</code>。</li>
+<li>在扩容添加新 Broker 节点后，新的分区和分区副本能自动分配到新的 Broker 节点上，但已有的旧分区和节点的分配关系的固定的。如果要让旧的分区和分区副本能分配新的 Broker 节点，需要手动执行分区重分配命令 <code>kafka-reassign-partitions.sh</code>。
+<ul>
+<li>相关源码：<a href="https://github.com/apache/kafka/blob/3.7.0-rc2/tools/src/main/java/org/apache/kafka/tools/reassign/ReassignPartitionsCommand.java">ReassignPartitionsCommand</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -5491,7 +5495,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <li><strong>消息可靠性</strong>：
 <ul>
 <li>优先考虑消息可靠性（无消息丢失）又同时兼顾性能的常用的配置是，复制系数的配置值为 <code>3</code>，ISR 集合大小的配置值为 <code>min.insync.replicas=2</code>，消息发送确认的配置值为 <code>acks=all</code><sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup><sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>。</li>
-<li>Kafka 是默认异步刷盘的，没有直接的同步刷盘相关配置项。Kafka 会在重启之前和关闭日志片段（默认1 GB 大小时关闭）时将消息冲刷到磁盘上，或者等到 Linux 系统页面缓存被填满时冲刷。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作交给操作系统完成<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup>。相对于刷盘，复制提供了更强的可靠性保障。</li>
+<li>Kafka 是默认异步刷盘的，没有直接的同步刷盘相关配置项。Kafka 会在重启之前和关闭日志片段（默认 1 GB 大小时关闭）时将消息冲刷到磁盘上，或者等到 Linux 系统页面缓存被填满时冲刷。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作交给操作系统完成<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup>。相对于刷盘，复制提供了更强的可靠性保障。</li>
 </ul>
 </li>
 </ul>
