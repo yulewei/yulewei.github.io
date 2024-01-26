@@ -56,11 +56,10 @@ RocketMQ 和 Kafka 的历史演进时间线：
     - Topic 的消息队列的主副本分布在各个 Master Borker，某 Topic 的分区总数量是该 Topic 分布在各个 Master Borker 上的消息队列的数量的总和。
   - **分片再均衡策略**：手动再均衡
     - 在扩容添加新 Broker 节点后，在创建新 Topic 时，可以自动或指定在新 Broker 节点上分配消息队列，而旧的 Topic 也可以通过执行 `mqadmin updateTopic` 命令，在新的 Broker 节点上分配消息队列。
-- **复制策略**：主从（Master/Slave）模式，类似于 MySQL 的主从复制
-  - **复制单位**：以机器为单位，副本 Borker 节点之间的数据完全相同
-  - **复制系数**：由消息队列所属的 Broker Group 的下 Borker 总数量决定（每个 Broker Group 下有一个 Master Borker 和零到若干个 Slave Borker）
-  - **副本更新传播策略**：
-    - Borker 节点分为主从（Master/Slave）两种角色，支持异步复制（默认）和同步复制两种复制模式。配置项 `brokerRole` 用于配置节点的主从角色和复制模式，默认值为 `ASYNC_MASTER`，可配置为 `SYNC_MASTER`/`ASYNC_MASTER`/`SLAVE`。
+- **复制策略**：主从（Master/Slave）模式，类似于 MySQL 的主从复制。Borker 节点分为主从（Master/Slave）两种角色，由一个 Master Borker 和零到多个 Slave Borker 组成复制组，复制组内的 Broker 数据保持同步。
+  - **复制单位**：以机器为单位
+  - **复制系数**：即复制组内的服务器节点数量
+  - **副本更新传播策略**：支持异步复制（默认）和同步复制两种复制模式。配置项 `brokerRole` 用于配置节点的主从角色和复制模式，默认值为 `ASYNC_MASTER`，可配置为 `SYNC_MASTER`/`ASYNC_MASTER`/`SLAVE`。
   - **消息可靠性**[^6][^7]：主要影响的配置项是主从节点的副本复制方式和磁盘刷盘方式。
     - 对于 `Borker` 单点故障情况，若采用主从异步复制，可保证 99% 的消息不丢，但是仍然会有极少量的消息可能丢失。若采用主从同步复制可以完全避免单点，但相对损失影响性能，适合对消息可靠性要求极高的场合。
     - 配置项 `FlushDiskType` 用于控制磁盘刷盘方式，可配置为异步刷盘 `ASYNC_FLUSH`（默认）和同步刷盘 `SYNC_FLUSH`。同步刷盘会损失很多性能，但是也更可靠。
@@ -103,8 +102,8 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
     - 手动创建 Topic 时，执行 `kafka-topics.sh --create` 命令，由 `--replication-factor` 命令行参数控制该 Topic 的分区副本的复制系数。
     - 复制系数必须等于或小于可用 Broker 节点数，如果大于可用 Broker 节点数，在创建 Topic 时会报异常。
     - 推荐的复制系数的配置值是 >= 3，通常配置为 `3`。复制系数配置为 >= 3 的原因是，允许集群内同时发生一次计划内停机和一次计划外停机，配置为 `3` 是在避免消息丢失和过度复制之间的常见的权衡选择。HBase（基于 HDFS）和 Cassandra 等分布式存储系统默认的复制系数也是 `3`。
-  - **副本更新传播策略**：类似于微软的 PacificA 复制协议，Elasticsearch 的[分片复制](https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html)也采用 PacificA 协议
-    - 副本分为主从（leader-follower）两种角色。Kafka 动态维护**同步副本集合**（in-sync replica set），简称 **ISR 集合**。如果一个 follower 副本落后 leader 的时间超过 `replica.lag.time.max.ms` 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被移除 ISR 集合。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。ISR 集合大小由 Broker 端的配置项 `min.insync.replicas` 控制，默认值 `1`，即只需要 leader。
+  - **副本更新传播策略**：副本分为主从（leader-follower）两种角色，一个 leader，零到多个 follower。复制策略类似于微软的 PacificA 复制协议，Elasticsearch 的[分片复制](https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html)也采用 PacificA 协议。
+    - Kafka 动态维护**同步副本集合**（in-sync replica set），简称 **ISR 集合**。如果一个 follower 副本落后 leader 的时间超过 `replica.lag.time.max.ms` 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被移除 ISR 集合。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。ISR 集合大小由 Broker 端的配置项 `min.insync.replicas` 控制，默认值 `1`，即只需要 leader。
     - Producer 端的配置项 `acks`，用于控制在确认一个请求发送完成之前需要收到的反馈信息的数量。`min.insync.replicas` 配置项只有在 `acks=all` 时才生效。
       - `acks=0`：表示 Producer 不等待 Broker 返回确认消息。
       - `acks=1`（Kafka < v3.0 默认）：表示 leader 节点会将记录写入本地日志，并且在所有 follower 节点反馈之前就先确认成功。
