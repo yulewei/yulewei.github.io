@@ -88,7 +88,7 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
     - 若消息 key 有值，按 key 的 Hash 值拆分；若消息 key 值为 null 时，轮询分配给各个分。也可以自定义分区策略。Hash 拆分具体实现是，根据 murmur2 算法计算消息 key 的 Hash 值，然后对总分区数求模得到消息要被发送到的目标分区号。
       - 相关源码：[DefaultPartitioner](https://github.com/apache/kafka/blob/2.3.0/clients/src/main/java/org/apache/kafka/clients/producer/internals/DefaultPartitioner.java)。
   - **分片-机器的分配关系**：可配置某 Topic 的分区总数量。
-    - 在创建 Topic 时把各个分区和分区的副本**轮询分配**给各个 `Broker` 节点。
+    - 在创建 Topic 时把各个分区和分区副本**轮询分配**给各个 Broker 节点。分配的目标是尽量让各个分区和分区副本分布在不同的 Broker 节点上。举例来说，假设 Topic 的分区数为 2，复制系数为 3。给某 Topic 分配 Broker 节点，先随机选择一个 Broker（假设是 Broker0），然后使用轮询的方式给每个 Broker 分配分区 leader。于是，partition0 的 leader 在 Broker0 上，partition1 的 leader 在 Broker1 上。接下来，依次分配 follower 副本。如果 partition0 的 leader 在 Broker0 上，那么它的第一个 follower 副本就在 Broker1 上，第二个跟随者副本就在 Broker2 上。如果 partition1 的 leader 在 Broker1 上，那么它的第一个 follower 副本就在 Broker2 上，第二个跟随者副本在 Broker3 上。如下图的 `topic1` 的分区和分区副本的分布。
       - 相关源码：AdminUtils#[assignReplicasToBrokers](https://github.com/apache/kafka/blob/3.6.1/server-common/src/main/java/org/apache/kafka/admin/AdminUtils.java#L46)
     - 若发送消息时自动创建 Topic，由配置项 `num.partitions` 控制 Topic 的默认分区总数量，默认值 `1`。
     - 若预先手动创建 Topic，执行 `kafka-topics.sh --create` 命令，由 `--partitions` 命令行参数控制该 Topic 的分区总数量。
