@@ -151,6 +151,6 @@ Kafka 在 KRaft 模式下的架构图，如下图所示[^18]：
 [^15]: 2013-02 Jun Rao: Intra-cluster Replication in Apache Kafka <https://engineering.linkedin.com/kafka/intra-cluster-replication-apache-kafka> <https://www.slideshare.net/junrao/kafka-replication-apachecon2013>
 [^16]: Optimize Confluent Cloud Clients for Durability <https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html>
 [^17]: 2019-06 胡夕：Kafka 2.3 核心技术与实战：11 | 无消息丢失配置怎么实现？ <https://time.geekbang.org/column/article/102931>
-[^18]: Kafka Documentation: 6.7 Hardware and OS: Application vs. OS Flush Management <https://kafka.apache.org/36/documentation.html#appvsosflush>
+[^18]: Kafka Documentation: 6.7 Hardware and OS: Application vs. OS Flush Management <https://kafka1x.apachecn.org/documentation.html#appvsosflush> <https://kafka.apache.org/36/documentation.html#appvsosflush>
 [^19]: 2019-08 胡夕：Kafka 2.3 核心技术与实战：26 | 你一定不能错过的Kafka控制器（Controller） <https://time.geekbang.org/column/article/111339>
 [^20]: 2022-04 Jun Rao: The Apache Kafka Control Plane (ZooKeeper vs. KRaft) <https://developer.confluent.io/courses/architecture/control-plane/>
