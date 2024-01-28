@@ -5456,7 +5456,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </li>
 </ul>
 </li>
-<li><strong>复制策略</strong><sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup><sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>：
+<li><strong>复制策略</strong>：
 <ul>
 <li><strong>复制单位</strong>：以分区为单位</li>
 <li><strong>复制系数</strong>：
@@ -5467,9 +5467,9 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <li>推荐的复制系数的配置值是 &gt;= 3，通常配置为 <code>3</code>。复制系数配置为 &gt;= 3 的原因是，允许集群内同时发生一次计划内停机和一次计划外停机，配置为 <code>3</code> 是在避免消息丢失和过度复制之间的常见的权衡选择。HBase（基于 HDFS）和 Cassandra 等分布式存储系统默认的复制系数也是 <code>3</code>。</li>
 </ul>
 </li>
-<li><strong>副本更新传播策略</strong>：副本分为主从（leader-follower）两种角色，由一个 leader 和零到多个 follower 组成复制组，复制组内的分区数据保持同步。复制策略类似于微软的 PacificA 复制协议，Elasticsearch 的<a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html">分片复制</a>也采用 PacificA 协议。
+<li><strong>副本更新传播策略</strong><sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup><sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>：副本分为主从（leader-follower）两种角色，由一个 leader 和零到多个 follower 组成复制组，复制组内的分区数据保持同步。复制策略类似于微软的 PacificA 复制协议，Elasticsearch 的<a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html">分片复制</a>也采用 PacificA 协议。
 <ul>
-<li>Kafka 动态维护<strong>同步副本集合</strong>（in-sync replica set），简称 <strong>ISR 集合</strong>。如果一个 follower 副本落后 leader 的时间超过 <code>replica.lag.time.max.ms</code> 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被<strong>移除</strong> ISR 集合。当不同步副本重新同步后，会被<strong>加回</strong>到 ISR 集合中。当 leader 所在的节点发生崩溃，ISR 集合中的一个 follower 会被 Controller 选举为新 leader。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。最小 ISR 集合大小由 Broker 端的配置项 <code>min.insync.replicas</code> 控制，默认值 <code>1</code>，即只需要 leader。如果同步副本小于 <code>min.insync.replicas</code>，尝试向 Broker 发送数据的生产者会收到 <code>NotEnoughReplicasException</code> 或 <code>NotEnoughReplicasAfterAppendException</code> 异常。</li>
+<li>Kafka 动态维护<strong>同步副本集合</strong>（in-sync replica set），简称 <strong>ISR 集合</strong>。如果一个 follower 副本落后 leader 的时间超过 <code>replica.lag.time.max.ms</code> 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被<strong>移出</strong> ISR 集合。当不同步副本重新同步后，会被<strong>加回</strong>到 ISR 集合中。当 leader 所在的节点发生崩溃，ISR 集合中的一个 follower 会被 Controller 选举为新 leader。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。最小 ISR 集合大小由 Broker 端的配置项 <code>min.insync.replicas</code> 控制，默认值 <code>1</code>，即只需要 leader。如果同步副本小于 <code>min.insync.replicas</code>，尝试向 Broker 发送数据的生产者会收到 <code>NotEnoughReplicasException</code> 或 <code>NotEnoughReplicasAfterAppendException</code> 异常。</li>
 <li>Producer 端的配置项 <code>acks</code>，用于控制在确认一个请求发送完成之前需要收到的反馈信息的数量。<code>min.insync.replicas</code> 配置项只有在 <code>acks=all</code> 时才生效。
 <ul>
 <li><code>acks=0</code>：表示 Producer 不等待 Broker 返回确认消息。</li>
@@ -5545,7 +5545,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </li>
 <li id="fn13" class="footnote-item"><p>Kafka 文档 <a href="https://kafka.apachecn.org/">https://kafka.apachecn.org/</a> <a href="https://kafka.apache.org/36/documentation.html">https://kafka.apache.org/36/documentation.html</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn14" class="footnote-item"><p>Kafka 文档：4. 设计思想：4.7 Replication <a href="https://kafka1x.apachecn.org/documentation.html#replication">https://kafka1x.apachecn.org/documentation.html#replication</a> <a href="https://kafka.apache.org/36/documentation.html#replication">https://kafka.apache.org/36/documentation.html#replication</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
+<li id="fn14" class="footnote-item"><p>Kafka Documentation: 4.7 Replication <a href="https://kafka1x.apachecn.org/documentation.html#replication">https://kafka1x.apachecn.org/documentation.html#replication</a> <a href="https://kafka.apache.org/36/documentation.html#replication">https://kafka.apache.org/36/documentation.html#replication</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
 </li>
 <li id="fn15" class="footnote-item"><p>2013-02 Jun Rao: Intra-cluster Replication in Apache Kafka <a href="https://engineering.linkedin.com/kafka/intra-cluster-replication-apache-kafka">https://engineering.linkedin.com/kafka/intra-cluster-replication-apache-kafka</a> <a href="https://www.slideshare.net/junrao/kafka-replication-apachecon2013">https://www.slideshare.net/junrao/kafka-replication-apachecon2013</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
 </li>
