@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://static.nullwy.me/kafka-architecture.png">
 <meta property="og:image" content="https://static.nullwy.me/kafka-kraft-mode.png">
 <meta property="article:published_time" content="2024-01-18T12:36:00.000Z">
-<meta property="article:modified_time" content="2024-01-27T07:54:03.158Z">
+<meta property="article:modified_time" content="2024-01-28T07:22:30.039Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="可扩展性">
@@ -282,7 +282,7 @@
                 <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">本文字数：</span>
-              <span>9.5k</span>
+              <span>10k</span>
             </span>
             <span class="post-meta-item" title="阅读时长">
               <span class="post-meta-item-icon">
@@ -456,7 +456,7 @@
 </li>
 </ul>
 </li>
-<li><strong>复制策略</strong>：
+<li><strong>复制策略</strong><sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup><sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>：
 <ul>
 <li><strong>复制单位</strong>：以分区为单位</li>
 <li><strong>复制系数</strong>：
@@ -467,9 +467,9 @@
 <li>推荐的复制系数的配置值是 &gt;= 3，通常配置为 <code>3</code>。复制系数配置为 &gt;= 3 的原因是，允许集群内同时发生一次计划内停机和一次计划外停机，配置为 <code>3</code> 是在避免消息丢失和过度复制之间的常见的权衡选择。HBase（基于 HDFS）和 Cassandra 等分布式存储系统默认的复制系数也是 <code>3</code>。</li>
 </ul>
 </li>
-<li><strong>副本更新传播策略</strong>：副本分为主从（leader-follower）两种角色，一个 leader，零到多个 follower。复制策略类似于微软的 PacificA 复制协议，Elasticsearch 的<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html">分片复制</a>也采用 PacificA 协议。
+<li><strong>副本更新传播策略</strong>：副本分为主从（leader-follower）两种角色，由一个 leader 和零到多个 follower 组成复制组，复制组内的分区数据保持同步。复制策略类似于微软的 PacificA 复制协议，Elasticsearch 的<a target="_blank" rel="noopener" href="https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html">分片复制</a>也采用 PacificA 协议。
 <ul>
-<li>Kafka 动态维护<strong>同步副本集合</strong>（in-sync replica set），简称 <strong>ISR 集合</strong>。如果一个 follower 副本落后 leader 的时间超过 <code>replica.lag.time.max.ms</code> 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被移除 ISR 集合。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。ISR 集合大小由 Broker 端的配置项 <code>min.insync.replicas</code> 控制，默认值 <code>1</code>，即只需要 leader。</li>
+<li>Kafka 动态维护<strong>同步副本集合</strong>（in-sync replica set），简称 <strong>ISR 集合</strong>。如果一个 follower 副本落后 leader 的时间超过 <code>replica.lag.time.max.ms</code> 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被<strong>移除</strong> ISR 集合。当不同步副本重新同步后，会被<strong>加回</strong>到 ISR 集合中。当 leader 所在的节点发生崩溃，ISR 集合中的一个 follower 会被 Controller 选举为新 leader。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。最小 ISR 集合大小由 Broker 端的配置项 <code>min.insync.replicas</code> 控制，默认值 <code>1</code>，即只需要 leader。如果同步副本小于 <code>min.insync.replicas</code>，尝试向 Broker 发送数据的生产者会收到 <code>NotEnoughReplicasException</code> 或 <code>NotEnoughReplicasAfterAppendException</code> 异常。</li>
 <li>Producer 端的配置项 <code>acks</code>，用于控制在确认一个请求发送完成之前需要收到的反馈信息的数量。<code>min.insync.replicas</code> 配置项只有在 <code>acks=all</code> 时才生效。
 <ul>
 <li><code>acks=0</code>：表示 Producer 不等待 Broker 返回确认消息。</li>
@@ -488,8 +488,8 @@
 </li>
 <li><strong>消息可靠性</strong>：
 <ul>
-<li>优先考虑消息可靠性（无消息丢失）又同时兼顾性能的常用的配置是，复制系数的配置值为 <code>3</code>，ISR 集合大小的配置值为 <code>min.insync.replicas=2</code>，消息发送确认的配置值为 <code>acks=all</code><sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup><sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>。</li>
-<li>Kafka 默认异步刷盘，没有直接的同步刷盘相关配置项。Kafka 会在重启之前和关闭日志片段（默认 1 GB 大小时关闭）时将消息冲刷到磁盘上，或者等到 Linux 系统页面缓存被填满时冲刷。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作交给操作系统完成<sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup>。相对于刷盘，复制提供了更强的可靠性保障。</li>
+<li>优先考虑消息可靠性（无消息丢失）又同时兼顾性能的常用的配置是，复制系数的配置值为 <code>3</code>，ISR 集合大小的配置值为 <code>min.insync.replicas=2</code>，消息发送确认的配置值为 <code>acks=all</code><sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup><sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup>。</li>
+<li>Kafka 默认异步刷盘，没有直接的同步刷盘相关配置项。Kafka 会在重启之前和关闭日志片段（默认 1 GB 大小时关闭）时将消息冲刷到磁盘上，或者等到 Linux 系统页面缓存被填满时冲刷。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作交给操作系统完成<sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup>。相对于刷盘，复制提供了更强的可靠性保障。</li>
 </ul>
 </li>
 </ul>
@@ -498,7 +498,7 @@
 <ul>
 <li><strong>读写分离</strong>：
 <ul>
-<li>Kafka 2.4 之前，leader 副本可写可读，follower 副本不可写、不可读，仅用于备份。消息消费者只允许读取 leader 副本，follower 副本不处理来自消费者的请求。当 leader 所在的节点发生崩溃，其中一个 follower 就会被 Controller 选举为新 leader。</li>
+<li>Kafka 2.4 之前，leader 副本可写可读，follower 副本不可写、不可读，仅用于备份。消息消费者只允许读取 leader 副本，follower 副本不处理来自消费者的请求。</li>
 <li>Kafka 2.4 开始（2019.12 发布）支持读取 follower 副本来消费消息，参见 <a target="_blank" rel="noopener" href="https://issues.apache.org/jira/browse/KAFKA-8443">KIP-392</a>。</li>
 </ul>
 </li>
@@ -506,8 +506,8 @@
 </li>
 <li><strong>集群配置和协调</strong>：由 <strong>Controller 控制器</strong>负责
 <ul>
-<li><strong>ZooKeeper 模式</strong><sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup>：ZooKeeper 负责存储元数据，包括 Broker、Topic、分区、副本、路由等信息，以及负责选举 Controller 角色的 Broker，整个集群只有一个 Controller 角色的 Broker。Controller 角色的 Broker 节点的主要职责是 Broker 集群成员管理、Topic 管理（创建、删除、增加分区）、分区重分配、选举新的分区 leader 副本等，这些职责的实现重度依赖 ZooKeeper。</li>
-<li><strong>KRaft 模式</strong><sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup>：Kafka 2.8 开始，Kafka 开始用基于 Raft 的控制器替换基于 ZooKeeper 的控制器，新控制器叫作 KRaft。KRaft 模块被集成在 Borker 节点的进程中，去掉了对 ZooKeeper 的依赖，简化了整体架构。</li>
+<li><strong>ZooKeeper 模式</strong><sup class="footnote-ref"><a href="#fn19" id="fnref19">[19]</a></sup>：ZooKeeper 负责存储元数据，包括 Broker、Topic、分区、副本、路由等信息，以及负责选举 Controller 角色的 Broker，整个集群只有一个 Controller 角色的 Broker。Controller 角色的 Broker 节点的主要职责是 Broker 集群成员管理、Topic 管理（创建、删除、增加分区）、分区重分配、选举新的分区 leader 副本等，这些职责的实现重度依赖 ZooKeeper。</li>
+<li><strong>KRaft 模式</strong><sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup>：Kafka 2.8 开始，Kafka 开始用基于 Raft 的控制器替换基于 ZooKeeper 的控制器，新控制器叫作 KRaft。KRaft 模块被集成在 Borker 节点的进程中，去掉了对 ZooKeeper 的依赖，简化了整体架构。</li>
 </ul>
 </li>
 </ul>
@@ -545,15 +545,19 @@
 </li>
 <li id="fn13" class="footnote-item"><p>Kafka 文档 <a target="_blank" rel="noopener" href="https://kafka.apachecn.org/">https://kafka.apachecn.org/</a> <a target="_blank" rel="noopener" href="https://kafka.apache.org/36/documentation.html">https://kafka.apache.org/36/documentation.html</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn14" class="footnote-item"><p>Optimize Confluent Cloud Clients for Durability <a target="_blank" rel="noopener" href="https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html">https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
+<li id="fn14" class="footnote-item"><p>Kafka 文档：4. 设计思想：4.7 Replication <a target="_blank" rel="noopener" href="https://kafka1x.apachecn.org/documentation.html#replication">https://kafka1x.apachecn.org/documentation.html#replication</a> <a target="_blank" rel="noopener" href="https://kafka.apache.org/36/documentation.html#replication">https://kafka.apache.org/36/documentation.html#replication</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn15" class="footnote-item"><p>2019-06 胡夕：Kafka 2.3 核心技术与实战：11 | 无消息丢失配置怎么实现？ <a target="_blank" rel="noopener" href="https://time.geekbang.org/column/article/102931">https://time.geekbang.org/column/article/102931</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
+<li id="fn15" class="footnote-item"><p>2013-02 Jun Rao: Intra-cluster Replication in Apache Kafka <a target="_blank" rel="noopener" href="https://engineering.linkedin.com/kafka/intra-cluster-replication-apache-kafka">https://engineering.linkedin.com/kafka/intra-cluster-replication-apache-kafka</a> <a target="_blank" rel="noopener" href="https://www.slideshare.net/junrao/kafka-replication-apachecon2013">https://www.slideshare.net/junrao/kafka-replication-apachecon2013</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn16" class="footnote-item"><p>Kafka Documentation: Application vs. OS Flush Management <a target="_blank" rel="noopener" href="https://kafka.apache.org/36/documentation.html#appvsosflush">https://kafka.apache.org/36/documentation.html#appvsosflush</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
+<li id="fn16" class="footnote-item"><p>Optimize Confluent Cloud Clients for Durability <a target="_blank" rel="noopener" href="https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html">https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn17" class="footnote-item"><p>2019-08 胡夕：Kafka 2.3 核心技术与实战：26 | 你一定不能错过的Kafka控制器（Controller） <a target="_blank" rel="noopener" href="https://time.geekbang.org/column/article/111339">https://time.geekbang.org/column/article/111339</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
+<li id="fn17" class="footnote-item"><p>2019-06 胡夕：Kafka 2.3 核心技术与实战：11 | 无消息丢失配置怎么实现？ <a target="_blank" rel="noopener" href="https://time.geekbang.org/column/article/102931">https://time.geekbang.org/column/article/102931</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn18" class="footnote-item"><p>2022-04 Jun Rao: The Apache Kafka Control Plane (ZooKeeper vs. KRaft) <a target="_blank" rel="noopener" href="https://developer.confluent.io/courses/architecture/control-plane/">https://developer.confluent.io/courses/architecture/control-plane/</a> <a href="#fnref18" class="footnote-backref">↩︎</a> <a href="#fnref18:1" class="footnote-backref">↩︎</a></p>
+<li id="fn18" class="footnote-item"><p>Kafka Documentation: Application vs. OS Flush Management <a target="_blank" rel="noopener" href="https://kafka.apache.org/36/documentation.html#appvsosflush">https://kafka.apache.org/36/documentation.html#appvsosflush</a> <a href="#fnref18" class="footnote-backref">↩︎</a> <a href="#fnref18:1" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn19" class="footnote-item"><p>2019-08 胡夕：Kafka 2.3 核心技术与实战：26 | 你一定不能错过的Kafka控制器（Controller） <a target="_blank" rel="noopener" href="https://time.geekbang.org/column/article/111339">https://time.geekbang.org/column/article/111339</a> <a href="#fnref19" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn20" class="footnote-item"><p>2022-04 Jun Rao: The Apache Kafka Control Plane (ZooKeeper vs. KRaft) <a target="_blank" rel="noopener" href="https://developer.confluent.io/courses/architecture/control-plane/">https://developer.confluent.io/courses/architecture/control-plane/</a> <a href="#fnref20" class="footnote-backref">↩︎</a></p>
 </li>
 </ol>
 </section>

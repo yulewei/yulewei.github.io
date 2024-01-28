@@ -95,15 +95,15 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
   - **分片再均衡策略**：手动再均衡
     - 在扩容添加新 Broker 节点后，新的分区和分区副本能自动分配到新的 Broker 节点上，但已有的旧分区和节点的分配关系的固定的。如果要让旧的分区和分区副本能分配新的 Broker 节点，需要手动执行分区重分配命令 `kafka-reassign-partitions.sh`。
       - 相关源码：[ReassignPartitionsCommand](https://github.com/apache/kafka/blob/3.7.0-rc2/tools/src/main/java/org/apache/kafka/tools/reassign/ReassignPartitionsCommand.java)
-- **复制策略**：
+- **复制策略**[^14][^15]：
   - **复制单位**：以分区为单位
   - **复制系数**：
     - 自动创建 Topic 时，由配置项 `default.replication.factor` 全局控制 Topic 的默认副本个数，默认值 `1`。
     - 手动创建 Topic 时，执行 `kafka-topics.sh --create` 命令，由 `--replication-factor` 命令行参数控制该 Topic 的分区副本的复制系数。
     - 复制系数必须等于或小于可用 Broker 节点数，如果大于可用 Broker 节点数，在创建 Topic 时会报异常。
     - 推荐的复制系数的配置值是 >= 3，通常配置为 `3`。复制系数配置为 >= 3 的原因是，允许集群内同时发生一次计划内停机和一次计划外停机，配置为 `3` 是在避免消息丢失和过度复制之间的常见的权衡选择。HBase（基于 HDFS）和 Cassandra 等分布式存储系统默认的复制系数也是 `3`。
-  - **副本更新传播策略**：副本分为主从（leader-follower）两种角色，一个 leader，零到多个 follower。复制策略类似于微软的 PacificA 复制协议，Elasticsearch 的[分片复制](https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html)也采用 PacificA 协议。
-    - Kafka 动态维护**同步副本集合**（in-sync replica set），简称 **ISR 集合**。如果一个 follower 副本落后 leader 的时间超过 `replica.lag.time.max.ms` 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被移除 ISR 集合。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。ISR 集合大小由 Broker 端的配置项 `min.insync.replicas` 控制，默认值 `1`，即只需要 leader。
+  - **副本更新传播策略**：副本分为主从（leader-follower）两种角色，由一个 leader 和零到多个 follower 组成复制组，复制组内的分区数据保持同步。复制策略类似于微软的 PacificA 复制协议，Elasticsearch 的[分片复制](https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html)也采用 PacificA 协议。
+    - Kafka 动态维护**同步副本集合**（in-sync replica set），简称 **ISR 集合**。如果一个 follower 副本落后 leader 的时间超过 `replica.lag.time.max.ms` 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被**移除** ISR 集合。当不同步副本重新同步后，会被**加回**到 ISR 集合中。当 leader 所在的节点发生崩溃，ISR 集合中的一个 follower 会被 Controller 选举为新 leader。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成同步复制。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。最小 ISR 集合大小由 Broker 端的配置项 `min.insync.replicas` 控制，默认值 `1`，即只需要 leader。如果同步副本小于 `min.insync.replicas`，尝试向 Broker 发送数据的生产者会收到 `NotEnoughReplicasException` 或 `NotEnoughReplicasAfterAppendException` 异常。
     - Producer 端的配置项 `acks`，用于控制在确认一个请求发送完成之前需要收到的反馈信息的数量。`min.insync.replicas` 配置项只有在 `acks=all` 时才生效。
       - `acks=0`：表示 Producer 不等待 Broker 返回确认消息。
       - `acks=1`（Kafka < v3.0 默认）：表示 leader 节点会将记录写入本地日志，并且在所有 follower 节点反馈之前就先确认成功。
@@ -113,15 +113,15 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
       - 当 `acks=all` 并且 `min.insync.replicas` 值大于 `1` 并小于 Broker 节点总数时，相当于**半同步复制**。
       - 当 `acks=all` 并且 `min.insync.replicas` 值等于 Broker 节点总数时，相当于**全同步复制**。
   - **消息可靠性**：
-    - 优先考虑消息可靠性（无消息丢失）又同时兼顾性能的常用的配置是，复制系数的配置值为 `3`，ISR 集合大小的配置值为 `min.insync.replicas=2`，消息发送确认的配置值为 `acks=all`[^14][^15]。
-    - Kafka 默认异步刷盘，没有直接的同步刷盘相关配置项。Kafka 会在重启之前和关闭日志片段（默认 1 GB 大小时关闭）时将消息冲刷到磁盘上，或者等到 Linux 系统页面缓存被填满时冲刷。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作交给操作系统完成[^16]。相对于刷盘，复制提供了更强的可靠性保障。
+    - 优先考虑消息可靠性（无消息丢失）又同时兼顾性能的常用的配置是，复制系数的配置值为 `3`，ISR 集合大小的配置值为 `min.insync.replicas=2`，消息发送确认的配置值为 `acks=all`[^16][^17]。
+    - Kafka 默认异步刷盘，没有直接的同步刷盘相关配置项。Kafka 会在重启之前和关闭日志片段（默认 1 GB 大小时关闭）时将消息冲刷到磁盘上，或者等到 Linux 系统页面缓存被填满时冲刷。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作交给操作系统完成[^18]。相对于刷盘，复制提供了更强的可靠性保障。
 - **请求路由寻址**：leader 副本可写可读，follower 副本不可写、默认不可读，仅用于备份
   - **读写分离**：
-    - Kafka 2.4 之前，leader 副本可写可读，follower 副本不可写、不可读，仅用于备份。消息消费者只允许读取 leader 副本，follower 副本不处理来自消费者的请求。当 leader 所在的节点发生崩溃，其中一个 follower 就会被 Controller 选举为新 leader。
+    - Kafka 2.4 之前，leader 副本可写可读，follower 副本不可写、不可读，仅用于备份。消息消费者只允许读取 leader 副本，follower 副本不处理来自消费者的请求。
     - Kafka 2.4 开始（2019.12 发布）支持读取 follower 副本来消费消息，参见 [KIP-392](https://issues.apache.org/jira/browse/KAFKA-8443)。
 - **集群配置和协调**：由 **Controller 控制器**负责
-  - **ZooKeeper 模式**[^17]：ZooKeeper 负责存储元数据，包括 Broker、Topic、分区、副本、路由等信息，以及负责选举 Controller 角色的 Broker，整个集群只有一个 Controller 角色的 Broker。Controller 角色的 Broker 节点的主要职责是 Broker 集群成员管理、Topic 管理（创建、删除、增加分区）、分区重分配、选举新的分区 leader 副本等，这些职责的实现重度依赖 ZooKeeper。
-  - **KRaft 模式**[^18]：Kafka 2.8 开始，Kafka 开始用基于 Raft 的控制器替换基于 ZooKeeper 的控制器，新控制器叫作 KRaft。KRaft 模块被集成在 Borker 节点的进程中，去掉了对 ZooKeeper 的依赖，简化了整体架构。
+  - **ZooKeeper 模式**[^19]：ZooKeeper 负责存储元数据，包括 Broker、Topic、分区、副本、路由等信息，以及负责选举 Controller 角色的 Broker，整个集群只有一个 Controller 角色的 Broker。Controller 角色的 Broker 节点的主要职责是 Broker 集群成员管理、Topic 管理（创建、删除、增加分区）、分区重分配、选举新的分区 leader 副本等，这些职责的实现重度依赖 ZooKeeper。
+  - **KRaft 模式**[^20]：Kafka 2.8 开始，Kafka 开始用基于 Raft 的控制器替换基于 ZooKeeper 的控制器，新控制器叫作 KRaft。KRaft 模块被集成在 Borker 节点的进程中，去掉了对 ZooKeeper 的依赖，简化了整体架构。
 
 Kafka 在 ZooKeeper 模式下的架构图，以及各个 Borker 下的分区和副本分布示例，如下图所示：
 
@@ -147,8 +147,10 @@ Kafka 在 KRaft 模式下的架构图，如下图所示[^18]：
 
 [^12]: Kafka 2.8 权威指南，第2版2021，[豆瓣](https://book.douban.com/subject/36161660/)
 [^13]: Kafka 文档 <https://kafka.apachecn.org/> <https://kafka.apache.org/36/documentation.html>
-[^14]: Optimize Confluent Cloud Clients for Durability <https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html>
-[^15]: 2019-06 胡夕：Kafka 2.3 核心技术与实战：11 | 无消息丢失配置怎么实现？ <https://time.geekbang.org/column/article/102931>
-[^16]: Kafka Documentation: Application vs. OS Flush Management <https://kafka.apache.org/36/documentation.html#appvsosflush>
-[^17]: 2019-08 胡夕：Kafka 2.3 核心技术与实战：26 | 你一定不能错过的Kafka控制器（Controller） <https://time.geekbang.org/column/article/111339>
-[^18]: 2022-04 Jun Rao: The Apache Kafka Control Plane (ZooKeeper vs. KRaft) <https://developer.confluent.io/courses/architecture/control-plane/>
+[^14]: Kafka 文档：4. 设计思想：4.7 Replication <https://kafka1x.apachecn.org/documentation.html#replication> <https://kafka.apache.org/36/documentation.html#replication>
+[^15]: 2013-02 Jun Rao: Intra-cluster Replication in Apache Kafka <https://engineering.linkedin.com/kafka/intra-cluster-replication-apache-kafka> <https://www.slideshare.net/junrao/kafka-replication-apachecon2013>
+[^16]: Optimize Confluent Cloud Clients for Durability <https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html>
+[^17]: 2019-06 胡夕：Kafka 2.3 核心技术与实战：11 | 无消息丢失配置怎么实现？ <https://time.geekbang.org/column/article/102931>
+[^18]: Kafka Documentation: Application vs. OS Flush Management <https://kafka.apache.org/36/documentation.html#appvsosflush>
+[^19]: 2019-08 胡夕：Kafka 2.3 核心技术与实战：26 | 你一定不能错过的Kafka控制器（Controller） <https://time.geekbang.org/column/article/111339>
+[^20]: 2022-04 Jun Rao: The Apache Kafka Control Plane (ZooKeeper vs. KRaft) <https://developer.confluent.io/courses/architecture/control-plane/>
