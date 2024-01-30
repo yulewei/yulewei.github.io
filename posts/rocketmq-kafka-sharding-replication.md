@@ -59,7 +59,7 @@ RocketMQ 和 Kafka 的历史演进时间线：
 - **复制策略**：主从（Master/Slave）模式，类似于 MySQL 的主从复制。Borker 节点分为主从（Master/Slave）两种角色，由一个 Master Borker 和零到多个 Slave Borker 组成复制组，Master Borker 负责处理写和读请求，Slave Borker 不可写、默认不可读，默认仅用于备份，复制组内的节点数据保持同步。
   - **复制单位**：以机器为单位
   - **复制系数**：即复制组内的服务器节点数量
-  - **副本更新传播策略**：支持异步复制（默认）和同步复制两种复制模式。配置项 `brokerRole` 用于配置节点的主从角色和复制模式，默认值为 `ASYNC_MASTER`，可配置为 `SYNC_MASTER`/`ASYNC_MASTER`/`SLAVE`。
+  - **副本更新策略**：支持异步复制（默认）和同步复制两种复制模式。配置项 `brokerRole` 用于配置节点的主从角色和复制模式，默认值为 `ASYNC_MASTER`，可配置为 `SYNC_MASTER`/`ASYNC_MASTER`/`SLAVE`。
   - **副本读取策略**：Slave Borker 默认不可读，仅用于备份。配置项 `slaveReadEnable` 用于配置是否允许消息从从节点读取，默认 `false`。如果 `slaveReadEnable=true`，并且当前消息堆积量超过物理内存 40%（由配置项 `accessMessageInMemoryMaxRatio` 控制），则建议从 Slave Borker 拉取消息，否则还是从 Master Borker 拉取消息。
     - 相关源码：PullMessageProcessor#[processRequest](https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/broker/src/main/java/org/apache/rocketmq/broker/processor/PullMessageProcessor.java#L266)
   - **消息可靠性**[^6][^7]：主要影响的配置项是主从节点的副本复制方式和磁盘刷盘方式。
@@ -101,7 +101,7 @@ RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下
     - 手动创建 Topic 时，执行 `kafka-topics.sh --create` 命令，由 `--replication-factor` 命令行参数控制该 Topic 的分区副本的复制系数。
     - 复制系数必须等于或小于可用 Broker 节点数，如果大于可用 Broker 节点数，在创建 Topic 时会报异常。
     - 推荐的复制系数的配置值是 >= 3，通常配置为 `3`。复制系数配置为 >= 3 的原因是，允许集群内同时发生一次计划内停机和一次计划外停机，配置为 `3` 是在避免消息丢失和过度复制之间的常见的权衡选择。HBase（基于 HDFS）和 Cassandra 等分布式存储系统默认的复制系数也是 `3`。
-  - **副本更新传播策略**[^14][^15]：复制策略类似于微软的 PacificA 复制协议，Elasticsearch 的[分片复制](https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html)也采用 PacificA 协议。
+  - **副本更新策略**[^14][^15]：复制策略类似于微软的 PacificA 复制协议，Elasticsearch 的[分片复制](https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html)也采用 PacificA 协议。
     - Kafka 动态维护**同步副本集合**（in-sync replica set），简称 **ISR 集合**。如果一个 follower 副本落后 leader 的时间超过 `replica.lag.time.max.ms` 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被**移出** ISR 集合。当不同步副本重新同步后，会被**加回**到 ISR 集合中。当 leader 所在的节点发生崩溃，ISR 集合中的一个 follower 会被 Controller 选举为新 leader。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成**同步复制**。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。最小 ISR 集合大小由 Broker 端的配置项 `min.insync.replicas` 控制，默认值 `1`，即只需要 leader。如果同步副本小于 `min.insync.replicas`，尝试向 Broker 发送数据的生产者会收到 [NotEnoughReplicasException](https://kafka.apache.org/36/javadoc/org/apache/kafka/common/errors/NotEnoughReplicasException.html) 或 [NotEnoughReplicasAfterAppendException](https://kafka.apache.org/36/javadoc/org/apache/kafka/common/errors/NotEnoughReplicasAfterAppendException.html) 异常。生产者收到异常后，会重试消息投递，直到投递超时为止（`delivery.timeout.ms`）。
     - Producer 端的配置项 `acks`，用于控制在确认一个请求发送完成之前需要收到的反馈信息的数量。`min.insync.replicas` 配置项只有在 `acks=all` 时才生效。
       - `acks=0`：表示 Producer 不等待 Broker 返回确认消息。
