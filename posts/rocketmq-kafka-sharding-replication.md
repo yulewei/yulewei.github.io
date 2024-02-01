@@ -60,12 +60,12 @@ RocketMQ 和 Kafka 的历史演进时间线：
   - **复制单位**：以机器为单位
   - **复制系数**：即复制组内的服务器节点数量
   - **副本更新策略**：支持异步复制（默认）和同步复制两种复制模式。配置项 `brokerRole` 用于配置节点的主从角色和复制模式，默认值为 `ASYNC_MASTER`，可配置为 `SYNC_MASTER`/`ASYNC_MASTER`/`SLAVE`。
-  - **副本读取策略**：Slave Borker 默认不可读，仅用于备份。配置项 `slaveReadEnable` 用于配置是否允许消息从从节点读取，默认 `false`。如果 `slaveReadEnable=true`，并且当前消息堆积量超过物理内存 40%（由配置项 `accessMessageInMemoryMaxRatio` 控制），则建议从 Slave Borker 拉取消息，否则还是从 Master Borker 拉取消息。
+  - **副本读取策略**：Slave Borker 默认不可读，仅用于备份。配置项 `slaveReadEnable` 用于配置是否允许消息从从节点读取，默认 `false`。如果 `slaveReadEnable=true`，并且当前消息堆积量超过物理内存 40%（由配置项 `accessMessageInMemoryMaxRatio` 控制），则建议从 Slave Borker 拉取消息，否则还是从 Master Borker 拉取消息[^6]。
     - 相关源码：PullMessageProcessor#[processRequest](https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/broker/src/main/java/org/apache/rocketmq/broker/processor/PullMessageProcessor.java#L266)
-  - **消息可靠性**[^6][^7]：主要影响的配置项是主从节点的副本复制方式和磁盘刷盘方式。
+  - **消息可靠性**[^7][^8]：主要影响的配置项是主从节点的副本复制方式和磁盘刷盘方式。
     - 对于 `Borker` 单点故障情况，若采用主从异步复制，可保证 99% 的消息不丢，但是仍然会有极少量的消息可能丢失。若采用主从同步复制可以完全避免单点，但相对损失影响性能，适合对消息可靠性要求极高的场合。
     - 配置项 `FlushDiskType` 用于控制磁盘刷盘方式，可配置为异步刷盘 `ASYNC_FLUSH`（默认）和同步刷盘 `SYNC_FLUSH`。同步刷盘会损失很多性能，但是也更可靠。
-    - 生产环境下的**推荐配置**是[^8]，把主从节点的磁盘刷盘方式都配置为**异步刷盘**，主从节点之间复制方式配置为**同步复制**，这种配置方式是相对兼顾了性能和可靠性。如果对消息丢失零容忍，则建议配置为同步复制、同步刷盘方式。
+    - 生产环境下的**推荐配置**是[^9]，把主从节点的磁盘刷盘方式都配置为**异步刷盘**，主从节点之间复制方式配置为**同步复制**，这种配置方式是相对兼顾了性能和可靠性。如果对消息丢失零容忍，则建议配置为同步复制、同步刷盘方式。
     - 对于副本系统来说，在系统设计或配置时，必须要在副本一致性和延迟（性能）之间做**权衡**，参见 [PACELC](https://en.wikipedia.org/wiki/PACELC_theorem) 理论（CAP 理论的扩展版）。
 - **集群配置和协调**：由 NameServer 集群和 DLedger 模块负责
   - NameServer 集群负责存储消息队列路由信息、Borker 集群注册信息等元数据，是 ZooKeeper 的轻量级替代。
@@ -125,7 +125,7 @@ Kafka 在 ZooKeeper 模式下的架构图，以及各个 Borker 下的分区和�
 
 <img width="800" alt="Kafka 架构与分区和副本分布示例" title="Kafka 架构与分区和副本分布示例" src="https://static.nullwy.me/kafka-architecture.png">
 
-Kafka 在 KRaft 模式下的架构图，如下图所示[^18]：
+Kafka 在 KRaft 模式下的架构图，如下图所示[^20]：
 
 <img width="600" alt="Kafka 的 KRaft 模式" title="Kafka 的 KRaft 模式" src="https://static.nullwy.me/kafka-kraft-mode.png">
 
@@ -136,10 +136,10 @@ Kafka 在 KRaft 模式下的架构图，如下图所示[^18]：
 [^3]: 2017-03 阿里冯嘉鼬神：Apache RocketMQ背后的设计思路与最佳实践 <https://developer.aliyun.com/article/71889>
 [^4]: Apache RocketMQ 4.9.x开发者指南 <https://github.com/apache/rocketmq/blob/4.9.x/docs/cn>
 [^5]: 2019-03 张乘辉：深度解析RocketMQ Topic的创建机制 <https://objcoding.com/2019/03/31/rocketmq-topic/>
-[^6]: Apache RocketMQ 4.9.x开发者指南：特性：4 消息可靠性 <https://github.com/apache/rocketmq/blob/4.9.x/docs/cn/features.md>
-[^7]: 2016-04 Kafka vs RocketMQ——单机系统可靠性 <https://web.archive.org/web/0/http://jm.taobao.org/2016/04/28/kafka-vs-rocktemq-4>
-[^8]: 2018-12 How much memory should we use for broker and namesrv when using cluster mode? #614 <https://github.com/apache/rocketmq/issues/614>
-[^9]: 2019-09 张乘辉：RocketMQ主从读写分离机制 <https://objcoding.com/2019/09/22/rocketmq-read-write-separation/>
+[^6]: 2019-09 张乘辉：RocketMQ主从读写分离机制 <https://objcoding.com/2019/09/22/rocketmq-read-write-separation/>
+[^7]: Apache RocketMQ 4.9.x开发者指南：特性：4 消息可靠性 <https://github.com/apache/rocketmq/blob/4.9.x/docs/cn/features.md>
+[^8]: 2016-04 Kafka vs RocketMQ——单机系统可靠性 <https://web.archive.org/web/0/http://jm.taobao.org/2016/04/28/kafka-vs-rocktemq-4>
+[^9]: 2018-12 How much memory should we use for broker and namesrv when using cluster mode? #614 <https://github.com/apache/rocketmq/issues/614>
 [^10]: 2019-08 金融通、武文良：RocketMQ 实现高可用多副本架构的关键：DLedger—基于raft协议的commitlog存储库 <https://mp.weixin.qq.com/s/0nmWq29FN17vNzt0njRE-Q> <https://www.infoq.cn/article/7xeJrpDZBa9v*GDZOFS6>
 [^11]: 2022-09 金融通：RocketMQ 5.0：面向消息与流的云原生高可用架构 <https://mp.weixin.qq.com/s/bb6cGUxpsAoU-IqBgmSJHw>
 

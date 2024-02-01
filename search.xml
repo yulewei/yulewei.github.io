@@ -5382,16 +5382,16 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <li><strong>复制单位</strong>：以机器为单位</li>
 <li><strong>复制系数</strong>：即复制组内的服务器节点数量</li>
 <li><strong>副本更新策略</strong>：支持异步复制（默认）和同步复制两种复制模式。配置项 <code>brokerRole</code> 用于配置节点的主从角色和复制模式，默认值为 <code>ASYNC_MASTER</code>，可配置为 <code>SYNC_MASTER</code>/<code>ASYNC_MASTER</code>/<code>SLAVE</code>。</li>
-<li><strong>副本读取策略</strong>：Slave Borker 默认不可读，仅用于备份。配置项 <code>slaveReadEnable</code> 用于配置是否允许消息从从节点读取，默认 <code>false</code>。如果 <code>slaveReadEnable=true</code>，并且当前消息堆积量超过物理内存 40%（由配置项 <code>accessMessageInMemoryMaxRatio</code> 控制），则建议从 Slave Borker 拉取消息，否则还是从 Master Borker 拉取消息。
+<li><strong>副本读取策略</strong>：Slave Borker 默认不可读，仅用于备份。配置项 <code>slaveReadEnable</code> 用于配置是否允许消息从从节点读取，默认 <code>false</code>。如果 <code>slaveReadEnable=true</code>，并且当前消息堆积量超过物理内存 40%（由配置项 <code>accessMessageInMemoryMaxRatio</code> 控制），则建议从 Slave Borker 拉取消息，否则还是从 Master Borker 拉取消息<sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup>。
 <ul>
 <li>相关源码：PullMessageProcessor#<a href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/broker/src/main/java/org/apache/rocketmq/broker/processor/PullMessageProcessor.java#L266">processRequest</a></li>
 </ul>
 </li>
-<li><strong>消息可靠性</strong><sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup><sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup>：主要影响的配置项是主从节点的副本复制方式和磁盘刷盘方式。
+<li><strong>消息可靠性</strong><sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup><sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup>：主要影响的配置项是主从节点的副本复制方式和磁盘刷盘方式。
 <ul>
 <li>对于 <code>Borker</code> 单点故障情况，若采用主从异步复制，可保证 99% 的消息不丢，但是仍然会有极少量的消息可能丢失。若采用主从同步复制可以完全避免单点，但相对损失影响性能，适合对消息可靠性要求极高的场合。</li>
 <li>配置项 <code>FlushDiskType</code> 用于控制磁盘刷盘方式，可配置为异步刷盘 <code>ASYNC_FLUSH</code>（默认）和同步刷盘 <code>SYNC_FLUSH</code>。同步刷盘会损失很多性能，但是也更可靠。</li>
-<li>生产环境下的<strong>推荐配置</strong>是<sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup>，把主从节点的磁盘刷盘方式都配置为<strong>异步刷盘</strong>，主从节点之间复制方式配置为<strong>同步复制</strong>，这种配置方式是相对兼顾了性能和可靠性。如果对消息丢失零容忍，则建议配置为同步复制、同步刷盘方式。</li>
+<li>生产环境下的<strong>推荐配置</strong>是<sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup>，把主从节点的磁盘刷盘方式都配置为<strong>异步刷盘</strong>，主从节点之间复制方式配置为<strong>同步复制</strong>，这种配置方式是相对兼顾了性能和可靠性。如果对消息丢失零容忍，则建议配置为同步复制、同步刷盘方式。</li>
 <li>对于副本系统来说，在系统设计或配置时，必须要在副本一致性和延迟（性能）之间做<strong>权衡</strong>，参见 <a href="https://en.wikipedia.org/wiki/PACELC_theorem">PACELC</a> 理论（CAP 理论的扩展版）。</li>
 </ul>
 </li>
@@ -5400,7 +5400,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <li><strong>集群配置和协调</strong>：由 NameServer 集群和 DLedger 模块负责
 <ul>
 <li>NameServer 集群负责存储消息队列路由信息、Borker 集群注册信息等元数据，是 ZooKeeper 的轻量级替代。</li>
-<li><strong>自动选举主节点</strong><sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup>：
+<li><strong>自动选举主节点</strong><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup><sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup>：
 <ul>
 <li><strong>Raft 模式</strong>：RocketMQ 4.5 开始，DLedger 模块被集成到各个 Borker 节点的进程中，用于 Borker 节点的自动选主，实现自动故障转移，自动选主基于 Raft 协议。</li>
 <li><strong>Controller 模式</strong>：RocketMQ 5.0 开始，自动选主支持 DLedger Controller 模式，Controller 可以独立部署，也可以嵌入在 Nameserver 中。</li>
@@ -5412,7 +5412,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <p>RocketMQ 架构，以及各个 Borker 下的分区和副本分布示例，如下图所示：</p>
 <img width="800" alt="RocketMQ 架构与分区和副本分布示例" title="RocketMQ 架构与分区和副本分布示例" src="https://static.nullwy.me/rocketmq-architecture.png">
 <h1 id="Kafka">Kafka</h1>
-<p><strong>Kafka 的数据分片和复制策略</strong><sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup><sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup>：</p>
+<p><strong>Kafka 的数据分片和复制策略</strong><sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup><sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup>：</p>
 <ul>
 <li><strong>分片策略</strong>：
 <ul>
@@ -5463,7 +5463,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
 <li>推荐的复制系数的配置值是 &gt;= 3，通常配置为 <code>3</code>。复制系数配置为 &gt;= 3 的原因是，允许集群内同时发生一次计划内停机和一次计划外停机，配置为 <code>3</code> 是在避免消息丢失和过度复制之间的常见的权衡选择。HBase（基于 HDFS）和 Cassandra 等分布式存储系统默认的复制系数也是 <code>3</code>。</li>
 </ul>
 </li>
-<li><strong>副本更新策略</strong><sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup><sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup>：复制策略类似于微软的 PacificA 复制协议，Elasticsearch 的<a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html">分片复制</a>也采用 PacificA 协议。
+<li><strong>副本更新策略</strong><sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup><sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>：复制策略类似于微软的 PacificA 复制协议，Elasticsearch 的<a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html">分片复制</a>也采用 PacificA 协议。
 <ul>
 <li>Kafka 动态维护<strong>同步副本集合</strong>（in-sync replica set），简称 <strong>ISR 集合</strong>。如果一个 follower 副本落后 leader 的时间超过 <code>replica.lag.time.max.ms</code> 配置值（Kafka 2.5 开始从默认 10 秒改为 30 秒），那么该 follower 副本会被认为是“不同步副本”（out-of-sync replica，OSR），会被<strong>移出</strong> ISR 集合。当不同步副本重新同步后，会被<strong>加回</strong>到 ISR 集合中。当 leader 所在的节点发生崩溃，ISR 集合中的一个 follower 会被 Controller 选举为新 leader。在消息 commit 之前必须保证 ISR 集合中的全部节点都完成<strong>同步复制</strong>。这种机制确保了只要 ISR 中有一个或者以上的 follower，一条被 commit 的消息就不会丢失。最小 ISR 集合大小由 Broker 端的配置项 <code>min.insync.replicas</code> 控制，默认值 <code>1</code>，即只需要 leader。如果同步副本小于 <code>min.insync.replicas</code>，尝试向 Broker 发送数据的生产者会收到 <a href="https://kafka.apache.org/36/javadoc/org/apache/kafka/common/errors/NotEnoughReplicasException.html">NotEnoughReplicasException</a> 或 <a href="https://kafka.apache.org/36/javadoc/org/apache/kafka/common/errors/NotEnoughReplicasAfterAppendException.html">NotEnoughReplicasAfterAppendException</a> 异常。生产者收到异常后，会重试消息投递，直到投递超时为止（<code>delivery.timeout.ms</code>）。</li>
 <li>Producer 端的配置项 <code>acks</code>，用于控制在确认一个请求发送完成之前需要收到的反馈信息的数量。<code>min.insync.replicas</code> 配置项只有在 <code>acks=all</code> 时才生效。
@@ -5490,22 +5490,22 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </li>
 <li><strong>消息可靠性</strong>：
 <ul>
-<li>优先考虑消息可靠性（无消息丢失）又同时兼顾性能的常用的配置是，复制系数的配置值为 <code>3</code>，ISR 集合大小的配置值为 <code>min.insync.replicas=2</code>，消息发送确认的配置值为 <code>acks=all</code><sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup><sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup>。</li>
-<li>Kafka 默认异步刷盘，没有直接的同步刷盘相关配置项。Kafka 会在重启之前和关闭日志片段（默认 1 GB 大小时关闭）时将消息冲刷到磁盘上，或者等到 Linux 系统页面缓存被填满时冲刷。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作交给操作系统完成<sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup>。相对于刷盘，复制提供了更强的可靠性保障。</li>
+<li>优先考虑消息可靠性（无消息丢失）又同时兼顾性能的常用的配置是，复制系数的配置值为 <code>3</code>，ISR 集合大小的配置值为 <code>min.insync.replicas=2</code>，消息发送确认的配置值为 <code>acks=all</code><sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup><sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup>。</li>
+<li>Kafka 默认异步刷盘，没有直接的同步刷盘相关配置项。Kafka 会在重启之前和关闭日志片段（默认 1 GB 大小时关闭）时将消息冲刷到磁盘上，或者等到 Linux 系统页面缓存被填满时冲刷。虽然 Kafka 提供刷盘的时间间隔和刷盘的消息条数的配置项，但是官方文档不建议设置，推荐将刷盘的工作交给操作系统完成<sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup>。相对于刷盘，复制提供了更强的可靠性保障。</li>
 </ul>
 </li>
 </ul>
 </li>
 <li><strong>集群配置和协调</strong>：由 <strong>Controller 控制器</strong>负责
 <ul>
-<li><strong>ZooKeeper 模式</strong><sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup>：ZooKeeper 负责存储元数据，包括 Broker、Topic、分区、副本、路由等信息，以及负责选举 Controller 角色的 Broker，整个集群只有一个 Controller 角色的 Broker。Controller 角色的 Broker 节点的主要职责是 Broker 集群成员管理、Topic 管理（创建、删除、增加分区）、分区重分配、选举新的分区 leader 副本等，这些职责的实现重度依赖 ZooKeeper。</li>
-<li><strong>KRaft 模式</strong><sup class="footnote-ref"><a href="#fn19" id="fnref19">[19]</a></sup>：Kafka 2.8 开始，Kafka 开始用基于 Raft 的控制器替换基于 ZooKeeper 的控制器，新控制器叫作 KRaft。KRaft 模块被集成在 Borker 节点的进程中，去掉了对 ZooKeeper 的依赖，简化了整体架构。</li>
+<li><strong>ZooKeeper 模式</strong><sup class="footnote-ref"><a href="#fn19" id="fnref19">[19]</a></sup>：ZooKeeper 负责存储元数据，包括 Broker、Topic、分区、副本、路由等信息，以及负责选举 Controller 角色的 Broker，整个集群只有一个 Controller 角色的 Broker。Controller 角色的 Broker 节点的主要职责是 Broker 集群成员管理、Topic 管理（创建、删除、增加分区）、分区重分配、选举新的分区 leader 副本等，这些职责的实现重度依赖 ZooKeeper。</li>
+<li><strong>KRaft 模式</strong><sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup>：Kafka 2.8 开始，Kafka 开始用基于 Raft 的控制器替换基于 ZooKeeper 的控制器，新控制器叫作 KRaft。KRaft 模块被集成在 Borker 节点的进程中，去掉了对 ZooKeeper 的依赖，简化了整体架构。</li>
 </ul>
 </li>
 </ul>
 <p>Kafka 在 ZooKeeper 模式下的架构图，以及各个 Borker 下的分区和副本分布示例，如下图所示：</p>
 <img width="800" alt="Kafka 架构与分区和副本分布示例" title="Kafka 架构与分区和副本分布示例" src="https://static.nullwy.me/kafka-architecture.png">
-<p>Kafka 在 KRaft 模式下的架构图，如下图所示<sup class="footnote-ref"><a href="#fn17" id="fnref17:1">[17:1]</a></sup>：</p>
+<p>Kafka 在 KRaft 模式下的架构图，如下图所示<sup class="footnote-ref"><a href="#fn20" id="fnref20:1">[20:1]</a></sup>：</p>
 <img width="600" alt="Kafka 的 KRaft 模式" title="Kafka 的 KRaft 模式" src="https://static.nullwy.me/kafka-kraft-mode.png">
 <h1 id="参考资料">参考资料</h1>
 <hr class="footnotes-sep">
@@ -5521,33 +5521,35 @@ Resiliency is the ability of a system to recover from failures and continue to f
 </li>
 <li id="fn5" class="footnote-item"><p>2019-03 张乘辉：深度解析RocketMQ Topic的创建机制 <a href="https://objcoding.com/2019/03/31/rocketmq-topic/">https://objcoding.com/2019/03/31/rocketmq-topic/</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn6" class="footnote-item"><p>Apache RocketMQ 4.9.x开发者指南：特性：4 消息可靠性 <a href="https://github.com/apache/rocketmq/blob/4.9.x/docs/cn/features.md">https://github.com/apache/rocketmq/blob/4.9.x/docs/cn/features.md</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
+<li id="fn6" class="footnote-item"><p>2019-09 张乘辉：RocketMQ主从读写分离机制 <a href="https://objcoding.com/2019/09/22/rocketmq-read-write-separation/">https://objcoding.com/2019/09/22/rocketmq-read-write-separation/</a> <a href="#fnref6" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn7" class="footnote-item"><p>2016-04 Kafka vs RocketMQ——单机系统可靠性 <a href="https://web.archive.org/web/0/http://jm.taobao.org/2016/04/28/kafka-vs-rocktemq-4">https://web.archive.org/web/0/http://jm.taobao.org/2016/04/28/kafka-vs-rocktemq-4</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+<li id="fn7" class="footnote-item"><p>Apache RocketMQ 4.9.x开发者指南：特性：4 消息可靠性 <a href="https://github.com/apache/rocketmq/blob/4.9.x/docs/cn/features.md">https://github.com/apache/rocketmq/blob/4.9.x/docs/cn/features.md</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn8" class="footnote-item"><p>2018-12 How much memory should we use for broker and namesrv when using cluster mode? #614 <a href="https://github.com/apache/rocketmq/issues/614">https://github.com/apache/rocketmq/issues/614</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
+<li id="fn8" class="footnote-item"><p>2016-04 Kafka vs RocketMQ——单机系统可靠性 <a href="https://web.archive.org/web/0/http://jm.taobao.org/2016/04/28/kafka-vs-rocktemq-4">https://web.archive.org/web/0/http://jm.taobao.org/2016/04/28/kafka-vs-rocktemq-4</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn9" class="footnote-item"><p>2019-08 金融通、武文良：RocketMQ 实现高可用多副本架构的关键：DLedger—基于raft协议的commitlog存储库 <a href="https://mp.weixin.qq.com/s/0nmWq29FN17vNzt0njRE-Q">https://mp.weixin.qq.com/s/0nmWq29FN17vNzt0njRE-Q</a> <a href="https://www.infoq.cn/article/7xeJrpDZBa9v*GDZOFS6">https://www.infoq.cn/article/7xeJrpDZBa9v*GDZOFS6</a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
+<li id="fn9" class="footnote-item"><p>2018-12 How much memory should we use for broker and namesrv when using cluster mode? #614 <a href="https://github.com/apache/rocketmq/issues/614">https://github.com/apache/rocketmq/issues/614</a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn10" class="footnote-item"><p>2022-09 金融通：RocketMQ 5.0：面向消息与流的云原生高可用架构 <a href="https://mp.weixin.qq.com/s/bb6cGUxpsAoU-IqBgmSJHw">https://mp.weixin.qq.com/s/bb6cGUxpsAoU-IqBgmSJHw</a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
+<li id="fn10" class="footnote-item"><p>2019-08 金融通、武文良：RocketMQ 实现高可用多副本架构的关键：DLedger—基于raft协议的commitlog存储库 <a href="https://mp.weixin.qq.com/s/0nmWq29FN17vNzt0njRE-Q">https://mp.weixin.qq.com/s/0nmWq29FN17vNzt0njRE-Q</a> <a href="https://www.infoq.cn/article/7xeJrpDZBa9v*GDZOFS6">https://www.infoq.cn/article/7xeJrpDZBa9v*GDZOFS6</a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn11" class="footnote-item"><p>Kafka 2.8 权威指南，第2版2021，<a href="https://book.douban.com/subject/36161660/">豆瓣</a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
+<li id="fn11" class="footnote-item"><p>2022-09 金融通：RocketMQ 5.0：面向消息与流的云原生高可用架构 <a href="https://mp.weixin.qq.com/s/bb6cGUxpsAoU-IqBgmSJHw">https://mp.weixin.qq.com/s/bb6cGUxpsAoU-IqBgmSJHw</a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn12" class="footnote-item"><p>Kafka 文档 <a href="https://kafka.apachecn.org/">https://kafka.apachecn.org/</a> <a href="https://kafka.apache.org/36/documentation.html">https://kafka.apache.org/36/documentation.html</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
+<li id="fn12" class="footnote-item"><p>Kafka 2.8 权威指南，第2版2021，<a href="https://book.douban.com/subject/36161660/">豆瓣</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn13" class="footnote-item"><p>Kafka Documentation: 4.7 Replication <a href="https://kafka1x.apachecn.org/documentation.html#replication">https://kafka1x.apachecn.org/documentation.html#replication</a> <a href="https://kafka.apache.org/36/documentation.html#replication">https://kafka.apache.org/36/documentation.html#replication</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
+<li id="fn13" class="footnote-item"><p>Kafka 文档 <a href="https://kafka.apachecn.org/">https://kafka.apachecn.org/</a> <a href="https://kafka.apache.org/36/documentation.html">https://kafka.apache.org/36/documentation.html</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn14" class="footnote-item"><p>2013-02 Jun Rao: Intra-cluster Replication in Apache Kafka <a href="https://engineering.linkedin.com/kafka/intra-cluster-replication-apache-kafka">https://engineering.linkedin.com/kafka/intra-cluster-replication-apache-kafka</a> <a href="https://www.slideshare.net/junrao/kafka-replication-apachecon2013">https://www.slideshare.net/junrao/kafka-replication-apachecon2013</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
+<li id="fn14" class="footnote-item"><p>Kafka Documentation: 4.7 Replication <a href="https://kafka1x.apachecn.org/documentation.html#replication">https://kafka1x.apachecn.org/documentation.html#replication</a> <a href="https://kafka.apache.org/36/documentation.html#replication">https://kafka.apache.org/36/documentation.html#replication</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn15" class="footnote-item"><p>Optimize Confluent Cloud Clients for Durability <a href="https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html">https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
+<li id="fn15" class="footnote-item"><p>2013-02 Jun Rao: Intra-cluster Replication in Apache Kafka <a href="https://engineering.linkedin.com/kafka/intra-cluster-replication-apache-kafka">https://engineering.linkedin.com/kafka/intra-cluster-replication-apache-kafka</a> <a href="https://www.slideshare.net/junrao/kafka-replication-apachecon2013">https://www.slideshare.net/junrao/kafka-replication-apachecon2013</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn16" class="footnote-item"><p>2019-06 胡夕：Kafka 2.3 核心技术与实战：11 | 无消息丢失配置怎么实现？ <a href="https://time.geekbang.org/column/article/102931">https://time.geekbang.org/column/article/102931</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
+<li id="fn16" class="footnote-item"><p>Optimize Confluent Cloud Clients for Durability <a href="https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html">https://docs.confluent.io/cloud/current/client-apps/optimizing/durability.html</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn17" class="footnote-item"><p>Kafka Documentation: 6.7 Hardware and OS: Application vs. OS Flush Management <a href="https://kafka1x.apachecn.org/documentation.html#appvsosflush">https://kafka1x.apachecn.org/documentation.html#appvsosflush</a> <a href="https://kafka.apache.org/36/documentation.html#appvsosflush">https://kafka.apache.org/36/documentation.html#appvsosflush</a> <a href="#fnref17" class="footnote-backref">↩︎</a> <a href="#fnref17:1" class="footnote-backref">↩︎</a></p>
+<li id="fn17" class="footnote-item"><p>2019-06 胡夕：Kafka 2.3 核心技术与实战：11 | 无消息丢失配置怎么实现？ <a href="https://time.geekbang.org/column/article/102931">https://time.geekbang.org/column/article/102931</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn18" class="footnote-item"><p>2019-08 胡夕：Kafka 2.3 核心技术与实战：26 | 你一定不能错过的Kafka控制器（Controller） <a href="https://time.geekbang.org/column/article/111339">https://time.geekbang.org/column/article/111339</a> <a href="#fnref18" class="footnote-backref">↩︎</a></p>
+<li id="fn18" class="footnote-item"><p>Kafka Documentation: 6.7 Hardware and OS: Application vs. OS Flush Management <a href="https://kafka1x.apachecn.org/documentation.html#appvsosflush">https://kafka1x.apachecn.org/documentation.html#appvsosflush</a> <a href="https://kafka.apache.org/36/documentation.html#appvsosflush">https://kafka.apache.org/36/documentation.html#appvsosflush</a> <a href="#fnref18" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn19" class="footnote-item"><p>2022-04 Jun Rao: The Apache Kafka Control Plane (ZooKeeper vs. KRaft) <a href="https://developer.confluent.io/courses/architecture/control-plane/">https://developer.confluent.io/courses/architecture/control-plane/</a> <a href="#fnref19" class="footnote-backref">↩︎</a></p>
+<li id="fn19" class="footnote-item"><p>2019-08 胡夕：Kafka 2.3 核心技术与实战：26 | 你一定不能错过的Kafka控制器（Controller） <a href="https://time.geekbang.org/column/article/111339">https://time.geekbang.org/column/article/111339</a> <a href="#fnref19" class="footnote-backref">↩︎</a></p>
+</li>
+<li id="fn20" class="footnote-item"><p>2022-04 Jun Rao: The Apache Kafka Control Plane (ZooKeeper vs. KRaft) <a href="https://developer.confluent.io/courses/architecture/control-plane/">https://developer.confluent.io/courses/architecture/control-plane/</a> <a href="#fnref20" class="footnote-backref">↩︎</a> <a href="#fnref20:1" class="footnote-backref">↩︎</a></p>
 </li>
 </ol>
 </section>
