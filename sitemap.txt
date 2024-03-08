@@ -1,6 +1,4 @@
 https://nullwy.me/2023/12/popular-websites-tech-stack/
-https://nullwy.me/2024/02/java-synchronization-implementation.md/
-https://nullwy.me/2024/02/java-synchronization-implementation/
 https://nullwy.me/2024/01/rocketmq-kafka-sharding-replication/
 https://nullwy.me/2023/12/website-scalability-reliability-resilience/
 https://nullwy.me/2020/05/kong-gateway/
@@ -92,8 +90,6 @@ https://nullwy.me/tags/%E9%AB%98%E5%8F%AF%E7%94%A8/
 https://nullwy.me/tags/RocketMQ/
 https://nullwy.me/tags/Kafka/
 https://nullwy.me/tags/%E5%8F%AF%E7%94%A8%E6%80%A7/
-https://nullwy.me/tags/%E5%90%8C%E6%AD%A5/
-https://nullwy.me/tags/%E5%A4%9A%E7%BA%BF%E7%A8%8B/
 https://nullwy.me/categories/%E6%9E%B6%E6%9E%84/
 https://nullwy.me/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F/
 https://nullwy.me/categories/MySQL/
