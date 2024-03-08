@@ -43,7 +43,7 @@ tags: [技术栈, 架构, 分布式, 微服务, 可伸缩性, 数据库, MySQL, 
 - 2005.07，Python 的 [Django](https://en.wikipedia.org/wiki/Django_%28web_framework%29) 框架首次对外发布，源码采用 BSD 协议。
 - 2006.06，Rails 的创造者 DHH 在 RailsConf 2006 会议上做了题为“Discovering a world of Resources on Rails”的演讲，介绍了将要发布的 Rails 1.2（2007.01 正式发布）对 REST 开发的支持。Rails 框架支持 REST 开发，大力推动了 REST 的普及。受 Rails 的影响，其他编程语言的 Web 开发框架[模仿 Rails 的方式](https://groups.google.com/g/rest_in_action/c/G7sBHhkNdsw)开始对支持 REST 开发。
 - 2007.02，[HBase](https://en.wikipedia.org/wiki/Apache_HBase) 宣布在 Hadoop 项目中成立，成为 Hadoop 的子项目。HBase 是 Google 的 [BigTable](https://en.wikipedia.org/wiki/Bigtable)（OSDI'2006）论文的开源实现。
-- 2007.01，iPhone 手机首次对外发布，同年 6 月 iPhone 正式发售，11 月 Android 系统首次对外公布，移到互联网开始大爆发。
+- 2007.01，iPhone 手机首次对外发布，同年 6 月 iPhone 正式发售，11 月 Android 系统首次对外公布，移动互联网开始大爆发。
 - 2008.07，Facebook 对外开源 [Cassandra](https://en.wikipedia.org/wiki/Apache_Cassandra) 项目，项目受 Amazon 的 [Dynamo](https://en.wikipedia.org/wiki/Dynamo_%28storage_system%29)（SOSP'2007）论文和 Google 的 BigTable（OSDI'2006）论文的。
 - 2009.06，“[NoSQL](https://en.wikipedia.org/wiki/NoSQL)”术语诞生。“NoSQL”术语诞生于在旧金山举行的一场关于“开源、分布式、非关系数据库”的技术聚会，该技术聚会被命名为“[NoSQL meetup](https://web.archive.org/web/20110710205509/http://nosql.eventbrite.com/)”。NoSQL 的两大起源是 BigTable 和 Dynamo。
 - 2009.11，Google 对外公开 [Go](https://en.wikipedia.org/wiki/Go_%28programming_language%29) 语言，BSD 协议开源。
@@ -78,13 +78,13 @@ tags: [技术栈, 架构, 分布式, 微服务, 可伸缩性, 数据库, MySQL, 
 
 <img width="600" alt="编程语言 Fun vs. Fast" title="编程语言 Fun vs. Fast" src="https://static.nullwy.me/gocon-tokyo-2014-fitzpatrick-go-fun-fast.png">
 
-早期由 Go 语言实现的经典开源项目主要是基础设施软件，比如 YouTube 的 [Vitess](https://github.com/vitessio/vitess) 数据库分片中间件（[2012.02](https://www.reddit.com/r/programming/comments/qakq4) 对外开源）、[Docker](https://en.wikipedia.org/wiki/Docker_%28software%29) 容器（2013.03 对外开源）、Red Hat 的 CoreOS 团队的 [Etcd](https://github.com/etcd-io/etcd) 分布式配置服务（[2013.07](https://web.archive.org/web/0/http://coreos.com/blog/distributed-configuration-with-etcd/) 对外开源，实现 [Raft](https://en.wikipedia.org/wiki/Raft_%28algorithm%29) 共识协议）、前 Google 工程师创建的 [CockroachDB](https://en.wikipedia.org/wiki/CockroachDB) 分布式数据库（2014.02 对外开源，受 Google Spanner 启发）、Google 的 [Kubernetes](https://en.wikipedia.org/wiki/Kubernetes) 容器编排系统（2014.06 对外开源）、SoundCloud 的 [Prometheus](https://en.wikipedia.org/wiki/Prometheus_%28software%29) 监控工具（2015.01 对外开源）等。大规模使用 Go 语言的代表性的国外的互联网公司有 **SoundCloud**[^23][^24]、**Dropbox**[^34][^35]、**Uber**[^42] 等，国内的有**七牛云**、**字节跳动**[^44][^45]、**哔哩哔哩**[^16]、**滴滴**[^20]、**知乎**[^43]、**百度**[^54][^55]、**腾讯**[^56]等，在这些互联网公司 Go 语言通常主要被用于构建基础设施软件（网关、数据存储、监控、视频处理等）或高性能要求的业务服务，部分公司的大量核心业务也从 Python、PHP 等迁移到 Go 语言。使用 Go 语言的公司的更加完整的列表，可以参见官方整理的“[GoUsers](https://github.com/golang/go/wiki/GoUsers)”。
+早期由 Go 语言实现的经典开源项目主要是基础设施软件，比如 YouTube 的 [Vitess](https://github.com/vitessio/vitess) 数据库分片中间件（[2012.02](https://www.reddit.com/r/programming/comments/qakq4) 对外开源）、[Docker](https://en.wikipedia.org/wiki/Docker_%28software%29) 容器（2013.03 对外开源）、Red Hat 的 CoreOS 团队的 [Etcd](https://github.com/etcd-io/etcd) 分布式配置服务（[2013.07](https://web.archive.org/web/0/http://coreos.com/blog/distributed-configuration-with-etcd/) 对外开源，实现 [Raft](https://en.wikipedia.org/wiki/Raft_%28algorithm%29) 共识协议）、前 Google 工程师创建的 [CockroachDB](https://en.wikipedia.org/wiki/CockroachDB) 分布式数据库（2014.02 对外开源，受 Google Spanner 启发）、Google 的 [Kubernetes](https://en.wikipedia.org/wiki/Kubernetes) 容器编排系统（2014.06 对外开源）、SoundCloud 的 [Prometheus](https://en.wikipedia.org/wiki/Prometheus_%28software%29) 监控工具（2015.01 对外开源）等。大规模使用 Go 语言的代表性的国外的互联网公司有 **SoundCloud**[^23][^24]、**Dropbox**[^34][^35]、**Uber**[^42] 等，国内的有**七牛云**、**字节跳动**[^44][^45]、**哔哩哔哩**[^16]、**滴滴**[^20]、**知乎**[^43]、**百度**[^54][^55]、**腾讯**[^56]等，在这些互联网公司 Go 语言通常主要被用于构建基础设施软件（网关、数据存储、监控、视频处理等）或高性能要求的业务服务，部分公司的大量核心业务也从 Python、PHP 等迁移到 Go 语言。使用 Go 语言的公司的更加完整的列表，可以参见官方整理的“[GoUsers](https://go.dev/wiki/GoUsers)”。
 
 ## 数据库选择
 
 数据库方面，根据 [DB-Engines Ranking](https://db-engines.com/en/ranking_trend/relational+dbms) 的统计，流行的关系数据库主要是 4 个，开源免费的 MySQL 和 PostgreSQL，专有收费的 Oracle 和 Microsoft SQL Server。多数互联网产品使用的数据库是 MySQL，部分是 PostgreSQL 或 Oracle。一些早期使用 Oracle 数据库的网站选择部分或完全从 Oracle 数据库中迁出，代表性的案例是，Amazon 从 Oracle 完全迁移到 Amazon RDS 和 NoSQL，淘宝从 Oracle 完全迁移到 MySQL。以 PostgreSQL 为主数据库的互联网应用有 Skype、Reddit、Spotify、Disqus、Heroku、Instagram 等[^57]。
 
-MySQL 相对 PostgreSQL 更加流行的主要原因是[^58][^59]，在早期 MySQL 入门槛更低。MySQL 就支持在 Windows 下安装，而 PostgreSQL 只能在 Cygwin 下安装，MySQL 对 Windows 平台的支持使得初学者更容易上手，并且 MySQL 更加易于管理，能够快速简单地启动和使用，而且 MySQL 拥有一个非常简洁、易于导航和用户友好的在线文档和支持社区。另外一个重要原因是，MySQL 很早就默认支持复制（replication），而 PostgreSQL 的复制是第三方的，而且极其难用。之后的几年即便 PostgreSQL 完善了不足，但错过了流行的时间窗口，MySQL 成为了主流选择，有更完善的生态。不过，受 MySQL 被 Oracle 公司收购的影响，近几年 PostgreSQL 开始越来越流行，根据 DB-Engines Ranking 的统计，最新的 PostgreSQL 的流行度分数是 10 年前的三倍，流行度与前三名越来越接近。
+MySQL 相对 PostgreSQL 更加流行的主要原因是[^58][^59]，在早期 MySQL 入门槛更低。MySQL 很早就支持在 Windows 下安装，而 PostgreSQL 只能在 Cygwin 下安装，MySQL 对 Windows 平台的支持使得初学者更容易上手，并且 MySQL 更加易于管理，能够快速简单地启动和使用，而且 MySQL 拥有一个非常简洁、易于导航和用户友好的在线文档和支持社区。另外一个重要原因是，MySQL 很早就默认支持复制（replication），而 PostgreSQL 的复制是第三方的，而且极其难用。之后的几年即便 PostgreSQL 完善了不足，但错过了流行的时间窗口，MySQL 成为了主流选择，有更完善的生态。不过，受 MySQL 被 Oracle 公司收购的影响，近几年 PostgreSQL 开始越来越流行，根据 DB-Engines Ranking 的统计，最新的 PostgreSQL 的流行度分数是 10 年前的三倍，流行度与前三名越来越接近。
 
 传统关系数据库，因为在面对大数据量和高负载量时的性能和可扩展性较差，以及对数据模型的支持有限，逐渐演变出了分布式非关系数据库 NoSQL 和分布式关系数据库 NewSQL。NoSQL 数据库的按数据模型分类包括：键值数据库（比如 Redis、DynamoDB 等）、列族数据库（比如 Cassandra、HBase 等）、文档数据库（比如 MongoDB）、图数据库（比如 Neo4j）等。
 
@@ -248,7 +248,7 @@ eBay，1995 年创立，早期使用的编程语言是 Perl，1997 年迁移到 
 - 2010.04，重构后发布 Dubbo 2.0 版本。
 - [2011.10](https://www.iteye.com/topic/1116866)，Dubbo 对外开源，版本为 2.0.7。因为在功能完善性、架构优雅性、使用简便性等方面有其相对独特的优势，开源后被国内很多互联网公司广泛使用[^93]，包括去哪儿，京东、当当网、网易考拉、有赞等。
 - 2012 年，阿里内部架构调整，开始统一技术基础设施，合并重复项目，决定把 Dubbo 合并到 HSF 里面去[^94]。随后，HSF 发布 2.0 的版本，兼容 Dubbo 的协议，HSF 推出后很快就在阿里集团全面铺开[^92]。Dubbo 项目在阿里内部被抛弃，在 2012.10 发布 2.5.3 版本之后就停止更新，2013 年和 2014 年更新了 2 次 Dubbo 2.4 的维护版本，然后停止了所有维护工作。
-- [2014.10](www.infoq.com/cn/news/2014/10/dubbox-open-source)，当当网开源 Dubbox，基于 Dubbo 2.5.3 的代码，为 Dubbo 新增了 REST 风格远程调用、Kryo/FST 序列化等特性。
+- [2014.10](https://www.infoq.com/cn/news/2014/10/dubbox-open-source)，当当网开源 Dubbox，基于 Dubbo 2.5.3 的代码，为 Dubbo 新增了 REST 风格远程调用、Kryo/FST 序列化等特性。
 - [2016.01](https://mp.weixin.qq.com/s/P5p7jMcaZVW15sknDbgdRQ)，阿里云互联网中间件产品 [EDAS](https://help.aliyun.com/zh/edas/product-overview/what-is-edas) 正式商用，EDAS 所提供的分布式服务框架源自阿里的 HSF。
 - [2017.09](https://www.oschina.net/news/88477)，Dubbo 重启维护，对外发布恢复维护后的第一个版本是 2.5.4。之所以重启是因为阿里云上的客户大部分使用 Dubbo，阿里云想要将基于 Dubbo 的解决方案作为自己的一个产品，卖给这些客户[^92][^94]。
 - 2018.01，Dubbo 2.6.0 发布，合并了当当网提供的 Dubbox 分支。

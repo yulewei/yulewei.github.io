@@ -47,7 +47,7 @@
 <meta property="og:image" content="https://static.nullwy.me/twitter-architecture-rails.png">
 <meta property="og:image" content="https://static.nullwy.me/twitter-architecture-2013.png">
 <meta property="article:published_time" content="2023-12-03T15:37:00.000Z">
-<meta property="article:modified_time" content="2024-01-21T07:17:58.223Z">
+<meta property="article:modified_time" content="2024-03-08T11:25:00.294Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
 <meta property="article:tag" content="技术栈">
@@ -344,7 +344,7 @@
 <li>2005.07，Python 的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Django_%28web_framework%29">Django</a> 框架首次对外发布，源码采用 BSD 协议。</li>
 <li>2006.06，Rails 的创造者 DHH 在 RailsConf 2006 会议上做了题为“Discovering a world of Resources on Rails”的演讲，介绍了将要发布的 Rails 1.2（2007.01 正式发布）对 REST 开发的支持。Rails 框架支持 REST 开发，大力推动了 REST 的普及。受 Rails 的影响，其他编程语言的 Web 开发框架<a target="_blank" rel="noopener" href="https://groups.google.com/g/rest_in_action/c/G7sBHhkNdsw">模仿 Rails 的方式</a>开始对支持 REST 开发。</li>
 <li>2007.02，<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Apache_HBase">HBase</a> 宣布在 Hadoop 项目中成立，成为 Hadoop 的子项目。HBase 是 Google 的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Bigtable">BigTable</a>（OSDI'2006）论文的开源实现。</li>
-<li>2007.01，iPhone 手机首次对外发布，同年 6 月 iPhone 正式发售，11 月 Android 系统首次对外公布，移到互联网开始大爆发。</li>
+<li>2007.01，iPhone 手机首次对外发布，同年 6 月 iPhone 正式发售，11 月 Android 系统首次对外公布，移动互联网开始大爆发。</li>
 <li>2008.07，Facebook 对外开源 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Apache_Cassandra">Cassandra</a> 项目，项目受 Amazon 的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Dynamo_%28storage_system%29">Dynamo</a>（SOSP'2007）论文和 Google 的 BigTable（OSDI'2006）论文的。</li>
 <li>2009.06，“<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/NoSQL">NoSQL</a>”术语诞生。“NoSQL”术语诞生于在旧金山举行的一场关于“开源、分布式、非关系数据库”的技术聚会，该技术聚会被命名为“<a target="_blank" rel="noopener" href="https://web.archive.org/web/20110710205509/http://nosql.eventbrite.com/">NoSQL meetup</a>”。NoSQL 的两大起源是 BigTable 和 Dynamo。</li>
 <li>2009.11，Google 对外公开 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Go_%28programming_language%29">Go</a> 语言，BSD 协议开源。</li>
@@ -390,10 +390,10 @@
 <p>早期部分网站选择 .NET 技术栈，比如<strong>京东</strong>、<strong>携程</strong>。但是，Java 平台生态更完善，有非常多的经验可以借鉴。另外，.NET 平台本身虽然不收费，但是 Windows 操作系统是收费的，开发工具也不便宜。于是京东在 2012 年从 .NET 迁移到 Java，携程在 2017 左右从 .NET 迁移到 Java。目前在国内，多数互联网大厂都选择 Java 技术栈，如淘宝、美团、京东、微博、携程等，Java 相对来说是主流选择。</p>
 <p>编程语言的另外一个流行趋势是 Go 语言。Go 语言诞生于 Google，在 2009 年 11 月对外公开。在发明 Go 语言前，Google 内部主要使用的语言是 C++、Java 和 Python 等，但是 Go 发明者认为这些语言无法同时满足高效编译、高效执行和易于编程的特性诉求，所以创造了 Go 语言<sup class="footnote-ref"><a href="#fn52" id="fnref52">[52]</a></sup>。Go 比 C++ 能更高效编译和易于编程，比 Java 更易于编程，比 Python 能更高效执行。在 GoCon Tokyo 2014 会议上，Go 语言研发团队的 Brad Fitzpatrick 对各种编程语言在编程乐趣和执行速度（Fun vs. Fast）的对比<sup class="footnote-ref"><a href="#fn53" id="fnref53">[53]</a></sup>，如下图所示：</p>
 <img width="600" alt="编程语言 Fun vs. Fast" title="编程语言 Fun vs. Fast" src="https://static.nullwy.me/gocon-tokyo-2014-fitzpatrick-go-fun-fast.png">
-<p>早期由 Go 语言实现的经典开源项目主要是基础设施软件，比如 YouTube 的 <a target="_blank" rel="noopener" href="https://github.com/vitessio/vitess">Vitess</a> 数据库分片中间件（<a target="_blank" rel="noopener" href="https://www.reddit.com/r/programming/comments/qakq4">2012.02</a> 对外开源）、<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Docker_%28software%29">Docker</a> 容器（2013.03 对外开源）、Red Hat 的 CoreOS 团队的 <a target="_blank" rel="noopener" href="https://github.com/etcd-io/etcd">Etcd</a> 分布式配置服务（<a target="_blank" rel="noopener" href="https://web.archive.org/web/0/http://coreos.com/blog/distributed-configuration-with-etcd/">2013.07</a> 对外开源，实现 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Raft_%28algorithm%29">Raft</a> 共识协议）、前 Google 工程师创建的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/CockroachDB">CockroachDB</a> 分布式数据库（2014.02 对外开源，受 Google Spanner 启发）、Google 的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Kubernetes">Kubernetes</a> 容器编排系统（2014.06 对外开源）、SoundCloud 的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Prometheus_%28software%29">Prometheus</a> 监控工具（2015.01 对外开源）等。大规模使用 Go 语言的代表性的国外的互联网公司有 <strong>SoundCloud</strong><sup class="footnote-ref"><a href="#fn23" id="fnref23:1">[23:1]</a></sup><sup class="footnote-ref"><a href="#fn24" id="fnref24:1">[24:1]</a></sup>、<strong>Dropbox</strong><sup class="footnote-ref"><a href="#fn34" id="fnref34:1">[34:1]</a></sup><sup class="footnote-ref"><a href="#fn35" id="fnref35:1">[35:1]</a></sup>、<strong>Uber</strong><sup class="footnote-ref"><a href="#fn42" id="fnref42:1">[42:1]</a></sup> 等，国内的有<strong>七牛云</strong>、<strong>字节跳动</strong><sup class="footnote-ref"><a href="#fn44" id="fnref44:1">[44:1]</a></sup><sup class="footnote-ref"><a href="#fn45" id="fnref45:1">[45:1]</a></sup>、<strong>哔哩哔哩</strong><sup class="footnote-ref"><a href="#fn16" id="fnref16:1">[16:1]</a></sup>、<strong>滴滴</strong><sup class="footnote-ref"><a href="#fn20" id="fnref20:1">[20:1]</a></sup>、<strong>知乎</strong><sup class="footnote-ref"><a href="#fn43" id="fnref43:1">[43:1]</a></sup>、<strong>百度</strong><sup class="footnote-ref"><a href="#fn54" id="fnref54">[54]</a></sup><sup class="footnote-ref"><a href="#fn55" id="fnref55">[55]</a></sup>、<strong>腾讯</strong><sup class="footnote-ref"><a href="#fn56" id="fnref56">[56]</a></sup>等，在这些互联网公司 Go 语言通常主要被用于构建基础设施软件（网关、数据存储、监控、视频处理等）或高性能要求的业务服务，部分公司的大量核心业务也从 Python、PHP 等迁移到 Go 语言。使用 Go 语言的公司的更加完整的列表，可以参见官方整理的“<a target="_blank" rel="noopener" href="https://github.com/golang/go/wiki/GoUsers">GoUsers</a>”。</p>
+<p>早期由 Go 语言实现的经典开源项目主要是基础设施软件，比如 YouTube 的 <a target="_blank" rel="noopener" href="https://github.com/vitessio/vitess">Vitess</a> 数据库分片中间件（<a target="_blank" rel="noopener" href="https://www.reddit.com/r/programming/comments/qakq4">2012.02</a> 对外开源）、<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Docker_%28software%29">Docker</a> 容器（2013.03 对外开源）、Red Hat 的 CoreOS 团队的 <a target="_blank" rel="noopener" href="https://github.com/etcd-io/etcd">Etcd</a> 分布式配置服务（<a target="_blank" rel="noopener" href="https://web.archive.org/web/0/http://coreos.com/blog/distributed-configuration-with-etcd/">2013.07</a> 对外开源，实现 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Raft_%28algorithm%29">Raft</a> 共识协议）、前 Google 工程师创建的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/CockroachDB">CockroachDB</a> 分布式数据库（2014.02 对外开源，受 Google Spanner 启发）、Google 的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Kubernetes">Kubernetes</a> 容器编排系统（2014.06 对外开源）、SoundCloud 的 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Prometheus_%28software%29">Prometheus</a> 监控工具（2015.01 对外开源）等。大规模使用 Go 语言的代表性的国外的互联网公司有 <strong>SoundCloud</strong><sup class="footnote-ref"><a href="#fn23" id="fnref23:1">[23:1]</a></sup><sup class="footnote-ref"><a href="#fn24" id="fnref24:1">[24:1]</a></sup>、<strong>Dropbox</strong><sup class="footnote-ref"><a href="#fn34" id="fnref34:1">[34:1]</a></sup><sup class="footnote-ref"><a href="#fn35" id="fnref35:1">[35:1]</a></sup>、<strong>Uber</strong><sup class="footnote-ref"><a href="#fn42" id="fnref42:1">[42:1]</a></sup> 等，国内的有<strong>七牛云</strong>、<strong>字节跳动</strong><sup class="footnote-ref"><a href="#fn44" id="fnref44:1">[44:1]</a></sup><sup class="footnote-ref"><a href="#fn45" id="fnref45:1">[45:1]</a></sup>、<strong>哔哩哔哩</strong><sup class="footnote-ref"><a href="#fn16" id="fnref16:1">[16:1]</a></sup>、<strong>滴滴</strong><sup class="footnote-ref"><a href="#fn20" id="fnref20:1">[20:1]</a></sup>、<strong>知乎</strong><sup class="footnote-ref"><a href="#fn43" id="fnref43:1">[43:1]</a></sup>、<strong>百度</strong><sup class="footnote-ref"><a href="#fn54" id="fnref54">[54]</a></sup><sup class="footnote-ref"><a href="#fn55" id="fnref55">[55]</a></sup>、<strong>腾讯</strong><sup class="footnote-ref"><a href="#fn56" id="fnref56">[56]</a></sup>等，在这些互联网公司 Go 语言通常主要被用于构建基础设施软件（网关、数据存储、监控、视频处理等）或高性能要求的业务服务，部分公司的大量核心业务也从 Python、PHP 等迁移到 Go 语言。使用 Go 语言的公司的更加完整的列表，可以参见官方整理的“<a target="_blank" rel="noopener" href="https://go.dev/wiki/GoUsers">GoUsers</a>”。</p>
 <h2 id="数据库选择">数据库选择</h2>
 <p>数据库方面，根据 <a target="_blank" rel="noopener" href="https://db-engines.com/en/ranking_trend/relational+dbms">DB-Engines Ranking</a> 的统计，流行的关系数据库主要是 4 个，开源免费的 MySQL 和 PostgreSQL，专有收费的 Oracle 和 Microsoft SQL Server。多数互联网产品使用的数据库是 MySQL，部分是 PostgreSQL 或 Oracle。一些早期使用 Oracle 数据库的网站选择部分或完全从 Oracle 数据库中迁出，代表性的案例是，Amazon 从 Oracle 完全迁移到 Amazon RDS 和 NoSQL，淘宝从 Oracle 完全迁移到 MySQL。以 PostgreSQL 为主数据库的互联网应用有 Skype、Reddit、Spotify、Disqus、Heroku、Instagram 等<sup class="footnote-ref"><a href="#fn57" id="fnref57">[57]</a></sup>。</p>
-<p>MySQL 相对 PostgreSQL 更加流行的主要原因是<sup class="footnote-ref"><a href="#fn58" id="fnref58">[58]</a></sup><sup class="footnote-ref"><a href="#fn59" id="fnref59">[59]</a></sup>，在早期 MySQL 入门槛更低。MySQL 就支持在 Windows 下安装，而 PostgreSQL 只能在 Cygwin 下安装，MySQL 对 Windows 平台的支持使得初学者更容易上手，并且 MySQL 更加易于管理，能够快速简单地启动和使用，而且 MySQL 拥有一个非常简洁、易于导航和用户友好的在线文档和支持社区。另外一个重要原因是，MySQL 很早就默认支持复制（replication），而 PostgreSQL 的复制是第三方的，而且极其难用。之后的几年即便 PostgreSQL 完善了不足，但错过了流行的时间窗口，MySQL 成为了主流选择，有更完善的生态。不过，受 MySQL 被 Oracle 公司收购的影响，近几年 PostgreSQL 开始越来越流行，根据 DB-Engines Ranking 的统计，最新的 PostgreSQL 的流行度分数是 10 年前的三倍，流行度与前三名越来越接近。</p>
+<p>MySQL 相对 PostgreSQL 更加流行的主要原因是<sup class="footnote-ref"><a href="#fn58" id="fnref58">[58]</a></sup><sup class="footnote-ref"><a href="#fn59" id="fnref59">[59]</a></sup>，在早期 MySQL 入门槛更低。MySQL 很早就支持在 Windows 下安装，而 PostgreSQL 只能在 Cygwin 下安装，MySQL 对 Windows 平台的支持使得初学者更容易上手，并且 MySQL 更加易于管理，能够快速简单地启动和使用，而且 MySQL 拥有一个非常简洁、易于导航和用户友好的在线文档和支持社区。另外一个重要原因是，MySQL 很早就默认支持复制（replication），而 PostgreSQL 的复制是第三方的，而且极其难用。之后的几年即便 PostgreSQL 完善了不足，但错过了流行的时间窗口，MySQL 成为了主流选择，有更完善的生态。不过，受 MySQL 被 Oracle 公司收购的影响，近几年 PostgreSQL 开始越来越流行，根据 DB-Engines Ranking 的统计，最新的 PostgreSQL 的流行度分数是 10 年前的三倍，流行度与前三名越来越接近。</p>
 <p>传统关系数据库，因为在面对大数据量和高负载量时的性能和可扩展性较差，以及对数据模型的支持有限，逐渐演变出了分布式非关系数据库 NoSQL 和分布式关系数据库 NewSQL。NoSQL 数据库的按数据模型分类包括：键值数据库（比如 Redis、DynamoDB 等）、列族数据库（比如 Cassandra、HBase 等）、文档数据库（比如 MongoDB）、图数据库（比如 Neo4j）等。</p>
 <h2 id="技术栈和架构演进">技术栈和架构演进</h2>
 <p>容易发现多数网站的技术栈的演进模式类似。在创建网站早期通常选择使用 PHP、Ruby、Python 脚本语言和框架来开发，这些脚本语言和框架具有更快的开发效率，能快速交付上线。随着网站流量的增长，面临性能和可扩展性问题，通常会将网站服务化，从单体架构向面向服务的 SOA 和微服务架构演进，一大部分网站在服务化过程中会选择将核心业务改由其他性能更佳的编译型编程语言来实现，如 Java、Scala、C++、Go，原先的脚本语言可能全部废弃，也可能仅用于前端展示层的 Web 动态页面渲染，比如 Facebook、Twitter 等。当然也有一部分网站，演进为 SOA 和微服务架构后，业务逻辑的实现一直以最初的脚本语言为主。</p>
@@ -600,7 +600,7 @@
 <li>2010.04，重构后发布 Dubbo 2.0 版本。</li>
 <li><a target="_blank" rel="noopener" href="https://www.iteye.com/topic/1116866">2011.10</a>，Dubbo 对外开源，版本为 2.0.7。因为在功能完善性、架构优雅性、使用简便性等方面有其相对独特的优势，开源后被国内很多互联网公司广泛使用<sup class="footnote-ref"><a href="#fn93" id="fnref93">[93]</a></sup>，包括去哪儿，京东、当当网、网易考拉、有赞等。</li>
 <li>2012 年，阿里内部架构调整，开始统一技术基础设施，合并重复项目，决定把 Dubbo 合并到 HSF 里面去<sup class="footnote-ref"><a href="#fn94" id="fnref94">[94]</a></sup>。随后，HSF 发布 2.0 的版本，兼容 Dubbo 的协议，HSF 推出后很快就在阿里集团全面铺开<sup class="footnote-ref"><a href="#fn92" id="fnref92:1">[92:1]</a></sup>。Dubbo 项目在阿里内部被抛弃，在 2012.10 发布 2.5.3 版本之后就停止更新，2013 年和 2014 年更新了 2 次 Dubbo 2.4 的维护版本，然后停止了所有维护工作。</li>
-<li><a href="www.infoq.com/cn/news/2014/10/dubbox-open-source">2014.10</a>，当当网开源 Dubbox，基于 Dubbo 2.5.3 的代码，为 Dubbo 新增了 REST 风格远程调用、Kryo/FST 序列化等特性。</li>
+<li><a target="_blank" rel="noopener" href="https://www.infoq.com/cn/news/2014/10/dubbox-open-source">2014.10</a>，当当网开源 Dubbox，基于 Dubbo 2.5.3 的代码，为 Dubbo 新增了 REST 风格远程调用、Kryo/FST 序列化等特性。</li>
 <li><a target="_blank" rel="noopener" href="https://mp.weixin.qq.com/s/P5p7jMcaZVW15sknDbgdRQ">2016.01</a>，阿里云互联网中间件产品 <a target="_blank" rel="noopener" href="https://help.aliyun.com/zh/edas/product-overview/what-is-edas">EDAS</a> 正式商用，EDAS 所提供的分布式服务框架源自阿里的 HSF。</li>
 <li><a target="_blank" rel="noopener" href="https://www.oschina.net/news/88477">2017.09</a>，Dubbo 重启维护，对外发布恢复维护后的第一个版本是 2.5.4。之所以重启是因为阿里云上的客户大部分使用 Dubbo，阿里云想要将基于 Dubbo 的解决方案作为自己的一个产品，卖给这些客户<sup class="footnote-ref"><a href="#fn92" id="fnref92:2">[92:2]</a></sup><sup class="footnote-ref"><a href="#fn94" id="fnref94:1">[94:1]</a></sup>。</li>
 <li>2018.01，Dubbo 2.6.0 发布，合并了当当网提供的 Dubbox 分支。</li>
@@ -1188,7 +1188,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-count">30</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1201,7 +1201,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">60</span>
+        <span class="site-state-item-count">62</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1257,12 +1257,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">341k</span>
+    <span title="站点总字数">380k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:10</span>
+    <span title="站点阅读时长">5:46</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
   </div>
