@@ -6108,7 +6108,7 @@ We implement Solaris and Linux PlatformEvents with the obvious condvar-mutex-fla
 </li>
 <li id="fn6" class="footnote-item"><p>Shared-Memory Synchronization, Michael L. Scott, 2013，<a href="https://book.douban.com/subject/25732314/">豆瓣</a> <a href="#fnref6" class="footnote-backref">↩︎</a> <a href="#fnref6:1" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn7" class="footnote-item"><p>Java 并发编程实战，Brian Goetz &amp; etc，2006，<a href="https://book.douban.com/subject/10484692/">豆瓣</a>（多位作者都是“JSR-166: Concurrency Utilities”规范的专家组成员） <a href="#fnref7" class="footnote-backref">↩︎</a></p>
+<li id="fn7" class="footnote-item"><p>Java 并发编程实战，Brian Goetz &amp; etc，2006，<a href="https://book.douban.com/subject/10484692/">豆瓣</a>（多位作者都是“<a href="https://jcp.org/en/jsr/detail?id=166">JSR-166</a>: Concurrency Utilities”规范的专家组成员） <a href="#fnref7" class="footnote-backref">↩︎</a></p>
 </li>
 <li id="fn8" class="footnote-item"><p>HotSpot Runtime Overview <a href="https://openjdk.org/groups/hotspot/docs/RuntimeOverview.html">https://openjdk.org/groups/hotspot/docs/RuntimeOverview.html</a>（概括性介绍 HotSpot，内容包括 Synchronization、Thread Management 等） <a href="#fnref8" class="footnote-backref">↩︎</a> <a href="#fnref8:1" class="footnote-backref">↩︎</a></p>
 </li>

@@ -524,7 +524,7 @@ protected final boolean tryAcquire(int acquires) {
 [^5]: 多处理器编程的艺术，Maurice Herlihy & Nir Shavit，第2版2021，[豆瓣](https://book.douban.com/subject/35913539/)
 [^6]: Shared-Memory Synchronization, Michael L. Scott, 2013，[豆瓣](https://book.douban.com/subject/25732314/)
 
-[^7]: Java 并发编程实战，Brian Goetz & etc，2006，[豆瓣](https://book.douban.com/subject/10484692/)（多位作者都是“JSR-166: Concurrency Utilities”规范的专家组成员）
+[^7]: Java 并发编程实战，Brian Goetz & etc，2006，[豆瓣](https://book.douban.com/subject/10484692/)（多位作者都是“[JSR-166](https://jcp.org/en/jsr/detail?id=166): Concurrency Utilities”规范的专家组成员）
 [^8]: HotSpot Runtime Overview <https://openjdk.org/groups/hotspot/docs/RuntimeOverview.html>（概括性介绍 HotSpot，内容包括 Synchronization、Thread Management 等）
 [^9]: 2008-04 Synchronization and Object Locking <https://wiki.openjdk.org/display/HotSpot/Synchronization>
 [^10]: 2005-10 Dave Dice: Synchronization (with a focus on J2SE) (slides, 89p) <https://web.archive.org/web/0/https://blogs.oracle.com/dave/resource/synchronization-public2.pdf> <https://speakerdeck.com/xy/synchronization-public2>（该 slides 是在 Hotspot 源码注释中被推荐阅读的 slides，作者是 Sun 公司的 Hotspot 工程师，是 Hotspot 同步子系统的核心实现者之一）
