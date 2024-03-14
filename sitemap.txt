@@ -1,3 +1,4 @@
+https://nullwy.me/2023/07/innodb-locking/
 https://nullwy.me/2024/02/java-synchronization-implementation/
 https://nullwy.me/2023/12/popular-websites-tech-stack/
 https://nullwy.me/2024/01/rocketmq-kafka-sharding-replication/
@@ -22,7 +23,6 @@ https://nullwy.me/2017/03/java-executor/
 https://nullwy.me/2016/11/java-books/
 https://nullwy.me/2018/10/java-agent/
 https://nullwy.me/2016/12/java-8-stream-api/
-https://nullwy.me/2023/07/innodb-locking/
 https://nullwy.me/2019/01/elastic-stack/
 https://nullwy.me/2016/11/database-books/
 https://nullwy.me/2016/11/lang-and-compiler-books/

@@ -2,7 +2,7 @@
 title: InnoDB 的并发控制：锁与 MVCC
 date: 2023-07-10 21:20:00
 categories: MySQL
-tags: [MySQL, InnoDB, 数据库, 锁, MVCC]
+tags: [MySQL, InnoDB, 数据库, 锁, 并发, MVCC]
 ---
 
 目前主流数据库事务的并发控制实现，如 MySQL InnoDB、PostgreSQL、Oracle，都使用两阶段封锁 [2PL](https://en.wikipedia.org/wiki/Two-phase_locking) 与 [MVCC](https://en.wikipedia.org/wiki/Multiversion_concurrency_control) 技术，但具体实现细节上存在差异。InnoDB 是在以封锁技术为主体的情况下，用 MVCC 技术辅助实现读-写、写-读操作的并发。PostgreSQL 的并发控制技术是以 MVCC 技术为主，封锁技术为辅。本文主要关注 InnoDB 事务的并发控制实现。

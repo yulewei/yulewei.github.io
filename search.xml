@@ -1137,6 +1137,7 @@ This WRITE COMMITTED implementation of REPEATABLE READ is not typical of any oth
         <tag>InnoDB</tag>
         <tag>锁</tag>
         <tag>MVCC</tag>
+        <tag>并发</tag>
       </tags>
   </entry>
   <entry>
