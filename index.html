@@ -214,6 +214,106 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2024/02/java-synchronization-implementation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
+      <meta itemprop="name" content="nullwy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="nullwy's blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2024/02/java-synchronization-implementation/" class="post-title-link" itemprop="url">Java 线程同步实现原理深度解析</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2024-02-10 15:58:00" itemprop="dateCreated datePublished" datetime="2024-02-10T15:58:00+08:00">2024-02-10</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index"><span itemprop="name">Java</span></a>
+                </span>
+            </span>
+
+          
+  
+  <span class="post-meta-item">
+    <i class="far fa-comment"></i>
+    <a title="disqus" href="/2024/02/java-synchronization-implementation/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2024/02/java-synchronization-implementation/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>31k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>28 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>本文内容主要是，以官方文档资料和 Java 8 的 JDK 和 HotSpot 源码为依据，对 Java 的基于 <code>synchronized</code> 和 <code>ReentrantLock</code> 线程同步的底层实现原理进行总结梳理和深度解析。同时，也在广度上对线程同步相关的基础概念做总结概括。</p>
+<h1 id="基础概念">基础概念</h1>
+<p>在并发编程模型中，需要处理的两个最关键的问题就是<strong>通信</strong>（communication）和<strong>同步</strong>（synchronization）<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>。通信指线程可用于获得其他线程产生的信息的各种机制。通信机制通常都基于<strong>共享内存</strong>（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Shared_memory">shared memory</a>）或<strong>消息传递</strong>（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Message_passing">message passing</a>）。在共享内存的编程模型中，某些或全部程序变量可以由多个线程访问。如果一对线程之间需要通信，只要一个线程将值写入某个变量，另一线程来读它即可。在消息传递编程模型中，不同线程没有公共的状态。当一对线程之间需要通信时，其中的一个必须执行一次明确的 send 操作，将数据传送给另一个线程。</p>
+<p><strong>同步</strong><sup class="footnote-ref"><a href="#fn1" id="fnref1:1">[1:1]</a></sup>是控制不同线程之间操作发生的相对顺序的各种机制，用以排除导致不正确结果的交错。消息传递模型中的同步通常是隐式的，消息的发送必须在接收之前。如果某个线程企图接收一个尚未发送的消息，那么它就必须等到发送方赶上来。在共享内存编程模型中，同步通常不是隐式的，除非我们做了某些特殊的事情，否则“接收方”就可能在某个变量被“发送方”修改之前读到其中的“老”值。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2024/02/java-synchronization-implementation/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="https://nullwy.me/2024/01/rocketmq-kafka-sharding-replication/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2070,106 +2170,6 @@
   
   
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://nullwy.me/2017/01/mysql-data-types/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="https://static.nullwy.me/avatar.png">
-      <meta itemprop="name" content="nullwy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="nullwy's blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2017/01/mysql-data-types/" class="post-title-link" itemprop="url">MySQL数据库字段类型杂记</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2017-01-04 23:26:28" itemprop="dateCreated datePublished" datetime="2017-01-04T23:26:28+08:00">2017-01-04</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/MySQL/" itemprop="url" rel="index"><span itemprop="name">MySQL</span></a>
-                </span>
-            </span>
-
-          
-  
-  <span class="post-meta-item">
-    <i class="far fa-comment"></i>
-    <a title="disqus" href="/2017/01/mysql-data-types/#disqus_thread" itemprop="discussionUrl">
-      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2017/01/mysql-data-types/" itemprop="commentCount"></span>
-    </a>
-  </span>
-  
-  <br>
-            <span class="post-meta-item" title="本文字数">
-              <span class="post-meta-item-icon">
-                <i class="far fa-file-word"></i>
-              </span>
-                <span class="post-meta-item-text">本文字数：</span>
-              <span>4.6k</span>
-            </span>
-            <span class="post-meta-item" title="阅读时长">
-              <span class="post-meta-item-icon">
-                <i class="far fa-clock"></i>
-              </span>
-                <span class="post-meta-item-text">阅读时长 &asymp;</span>
-              <span>4 分钟</span>
-            </span>
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>文本整理MySQL字段类型的常见问题和用法。</p>
-<h1 id="数值类型">数值类型</h1>
-<h2 id="int和int-3">int和int(3)</h2>
-<p>新手在定义整数字段时，常常想当然通过，如<code>int(3)</code>，来限制整数的有效长度，然而这样仅仅只是指定了显示宽度。选择有效长度不同的整数，需要使用<code>tinyint</code>（1个字节）、<code>smallint</code>（2个字节）、<code>mediumint</code>（3个字节）、<code>int</code>（4个字节）或<code>bigint</code>（8个字节）。MySQL的相关文档如下[<a target="_blank" rel="noopener" href="http://dev.mysql.com/doc/refman/5.7/en/numeric-type-attributes.html">doc</a>]：</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2017/01/mysql-data-types/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
 
   
   <nav class="pagination">
@@ -2241,7 +2241,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">28</span>
+          <span class="site-state-item-count">29</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -2254,7 +2254,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">60</span>
+        <span class="site-state-item-count">62</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -2310,12 +2310,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">341k</span>
+    <span title="站点总字数">372k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:10</span>
+    <span title="站点阅读时长">5:39</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
   </div>
