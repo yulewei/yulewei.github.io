@@ -235,7 +235,7 @@ Monitor 的底层实现，如下图所示。图中线程 A 持有锁，线程 B�
 
 阻塞线程相对耗时较大，至少需要执行两次线程上下文切换。自旋会浪费 CPU 资源，所以自旋等待的时间应该尽量短，自旋时间最好小于完成两次上下文切换的耗时。单次请求锁的 CAS 原子操作消耗的 CPU 时钟周期数大概是 15 ~ 30，而单次线程上下文切换的总消耗的 CPU 时钟周期数大概是 10,000 ~ 1,000,000，消耗的 CPU 时钟周期数相差约 100 ~ 10000 倍[^21]。
 
-自旋和阻塞策略存在各自缺点，所以目前很多操作系统内核的互斥锁实现采用**混合策略**，即“自旋后阻塞”（spin-then-block）的等待策略，实现的互斥锁称为**自适应互斥锁**（adaptive mutex）。目前 Solaris、Mac OS X、Linux 和 FreeBSD 内核实现的互斥锁，默认都是“adaptive mutex”。另外，pthread 线程库也支持创建**自适应类型的 mutex**。
+自旋和阻塞策略存在各自缺点，所以目前很多操作系统内核的互斥锁实现采用**混合策略**，即“**自旋后阻塞**”（spin-then-block）的等待策略，实现的互斥锁称为**自适应互斥锁**（adaptive mutex）。目前 Solaris、Mac OS X、Linux 和 FreeBSD 内核实现的互斥锁，默认都是“adaptive mutex”。另外，pthread 线程库也支持创建**自适应类型的 mutex**。
 
 操作系统内核和 pthread 线程库的自适应互斥锁的历史演进：
 
@@ -253,9 +253,9 @@ FreeBSD 实现的 pthread 线程库的自适应互斥锁的自旋策略是：先
 
 HotSpot 的 Monitor 的互斥锁实现方式的历史演进：
 
-- 2000.05，J2SE 1.3 发布，并同时发布 HotSpot 2.0，从这版本的 HotSpot 开始，Monitor 内部的互斥锁（mutex）实现的锁等待策略是“自旋后阻塞”（spin-then-block），参见 [JDK-4256394](https://bugs.openjdk.org/browse/JDK-4256394)。自旋策略是**固定自旋**（fixed spinning），按固定配置的次数自旋（默认 10 次）。
+- 2000.05，J2SE 1.3 发布，并同时发布 HotSpot 2.0，从这版本的 HotSpot 开始，Monitor 内部的互斥锁（mutex）实现的锁等待策略是“**自旋后阻塞**”（spin-then-block），参见 [JDK-4256394](https://bugs.openjdk.org/browse/JDK-4256394)。自旋策略是**固定自旋**（fixed spinning），按固定配置的次数自旋（默认 10 次）。
    - **JVM 参数选项**：-XX:+[UseSpinning](https://chriswhocodes.com/hotspot_options_openjdk6.html?s=UseSpinning)，是否自旋，默认关闭；-XX:[PreBlockSpin](https://chriswhocodes.com/hotspot_options_openjdk6.html?s=PreBlockSpin)，阻塞前的自旋次数，默认值 10。Java 6 开始，旧的 -XX:+UseSpinning 和 -XX:PreBlockSpin 等自旋 JVM 参数选项不再有效，Java 7 发布后，相关参数被删除。
-- 2006.12，Java 6 发布，HotSpot 的 Monitor 内部的互斥锁实现的锁等待策略改为“adaptive spin-then-block”，自旋策略改为**自适应自旋**（[adaptive spinning](https://openjdk.org/groups/hotspot/docs/HotSpotGlossary.html#adaptiveSpinning)），自旋次数在 0 ~ 5000 之间动态调整。每个 Monitor 各自独立维护动态自旋次数，当前的自旋次数根据最近的自旋获得锁的成功/失败率动态调整，如果最近的自旋成功率高，说明当前的自旋也很有可能成功，则尝试更多次数的自旋。若成功率低，则减少自旋次数。最大的自旋次数是 5000。
+- 2006.12，Java 6 发布，HotSpot 的 Monitor 内部的互斥锁实现的锁等待策略改为“**自适应自旋后阻塞**”（adaptive spin-then-block），自旋策略改为**自适应自旋**（[adaptive spinning](https://openjdk.org/groups/hotspot/docs/HotSpotGlossary.html#adaptiveSpinning)），自旋次数在 0 ~ 5000 之间动态调整。每个 Monitor 各自独立维护动态自旋次数，当前的自旋次数根据最近的自旋获得锁的成功/失败率动态调整，如果最近的自旋成功率高，说明当前的自旋也很有可能成功，则尝试更多次数的自旋。若成功率低，则减少自旋次数。最大的自旋次数是 5000。
    - 底层实现函数为 `ObjectMonitor::TrySpin_VaryDuration(..)`，参见源码 [objectMonitor.cpp](https://github.com/openjdk/jdk/blob/jdk8-b120/hotspot/src/share/vm/runtime/objectMonitor.cpp#L1905)。
 
 ## park-unpark 同步原语
