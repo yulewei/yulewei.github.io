@@ -521,7 +521,7 @@ protected final boolean tryAcquire(int acquires) {
 [^2]: 操作系统导论，Arpaci-Dusseau，2018，[豆瓣](https://book.douban.com/subject/33463930/)：第2部分 并发
 [^3]: 2011，Michael L. Scott: **Synchronization**. Encyclopedia of Parallel Computing 2011: 1989-1996，[dblp](https://dblp.org/rec/reference/parallel/Scott11.html)、[doi](https://doi.org/10.1007/978-0-387-09766-4_252)
 [^4]: 2011，Danny Hendler: **Non-Blocking Algorithms**. Encyclopedia of Parallel Computing 2011: 1321-1329，[dblp](https://dblp.org/rec/reference/parallel/Hendler11.html)、[doi](https://doi.org/10.1007/978-0-387-09766-4_185)
-[^5]: 多处理器编程的艺术，Maurice Herlihy & Nir Shavit，第2版2021，[豆瓣](https://book.douban.com/subject/35913539/)
+[^5]: 多处理器编程的艺术，Maurice Herlihy & Nir Shavit，第2版2020，[豆瓣](https://book.douban.com/subject/35913539/)
 [^6]: Shared-Memory Synchronization, Michael L. Scott, 2013，[豆瓣](https://book.douban.com/subject/25732314/)
 
 [^7]: Java 并发编程实战，Brian Goetz & etc，2006，[豆瓣](https://book.douban.com/subject/10484692/)（多位作者都是“[JSR-166](https://jcp.org/en/jsr/detail?id=166): Concurrency Utilities”规范的专家组成员）

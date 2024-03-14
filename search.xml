@@ -6104,7 +6104,7 @@ We implement Solaris and Linux PlatformEvents with the obvious condvar-mutex-fla
 </li>
 <li id="fn4" class="footnote-item"><p>2011，Danny Hendler: <strong>Non-Blocking Algorithms</strong>. Encyclopedia of Parallel Computing 2011: 1321-1329，<a href="https://dblp.org/rec/reference/parallel/Hendler11.html">dblp</a>、<a href="https://doi.org/10.1007/978-0-387-09766-4_185">doi</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
 </li>
-<li id="fn5" class="footnote-item"><p>多处理器编程的艺术，Maurice Herlihy &amp; Nir Shavit，第2版2021，<a href="https://book.douban.com/subject/35913539/">豆瓣</a> <a href="#fnref5" class="footnote-backref">↩︎</a> <a href="#fnref5:1" class="footnote-backref">↩︎</a></p>
+<li id="fn5" class="footnote-item"><p>多处理器编程的艺术，Maurice Herlihy &amp; Nir Shavit，第2版2020，<a href="https://book.douban.com/subject/35913539/">豆瓣</a> <a href="#fnref5" class="footnote-backref">↩︎</a> <a href="#fnref5:1" class="footnote-backref">↩︎</a></p>
 </li>
 <li id="fn6" class="footnote-item"><p>Shared-Memory Synchronization, Michael L. Scott, 2013，<a href="https://book.douban.com/subject/25732314/">豆瓣</a> <a href="#fnref6" class="footnote-backref">↩︎</a> <a href="#fnref6:1" class="footnote-backref">↩︎</a></p>
 </li>
