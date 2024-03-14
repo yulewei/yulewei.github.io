@@ -61,8 +61,8 @@ Java 创建线程，`java.lang.Thread.start()` 的实现原理：
 
 | **锁定技术** | **官方支持时间** | **使用场景** | **相对其他锁定技术的优缺点** |
 | --- | --- | --- | --- |
-| **重量级锁** | 最早版本的 Java（1995.05） | 有竞争 | 实现 [Monitor](https://en.wikipedia.org/wiki/Monitor_%28synchronization%29)，在无竞争场景下，性能较差 |
-| **轻量级锁** | 最早版本的 HotSpot（[1999.04](https://web.archive.org/web/19991005170608/http://java.sun.com/pr/1999/04/pr990427-01.html)） | 有共享、无竞争 | 在无竞争场景下，避免创建 Monitor，从而提升性能 |
+| **重量级锁** | 最早版本的 Java（1995.05） | 有竞争 | 实现 Monitor，在无竞争场景下，性能较差 |
+| **轻量级锁** | 最早版本的 HotSpot（1999.04） | 有共享、无竞争 | 在无竞争场景下，避免创建 Monitor，从而提升性能 |
 | **偏向锁** | Java 6 开始支持（2006.12），Java 15 开始废弃（2020.09） | 无共享、无竞争 | 相对轻量级锁，需要更少的 CAS 原子操作，除第一次加偏向锁外，锁重入和解锁都**无需 CAS 原子操作** |
 
 早期版本的 Java 实现的管程的**性能较差**。典型的例子是，早期 Java 标准库中的 `Hashtable`、`Vector`、`StringBuffer` 等类存在**过度同步**（over-synchronized）问题，这些类的全部方法都用 `synchronized` 关键字包裹，即便是在单个线程无竞争的场景下运行，内部也总是执行同步逻辑。于是就有了针对**无竞争**（uncontended）场景下的互斥锁的性能优化，出现了**轻量级锁定**（lightweight locking）技术。
