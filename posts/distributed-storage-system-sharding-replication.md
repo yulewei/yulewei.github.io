@@ -5,7 +5,7 @@ categories: 架构
 tags: [架构, 分布式, 数据库, MySQL, RocketMQ, Kafka, Redis]
 ---
 
-{% pdf media/middleware.pdf %}
+{% pdf https://static.nullwy.me/cache.pdf?pagemode=none %}
 
 
 # MySQL（2001）

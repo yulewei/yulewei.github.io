@@ -6163,7 +6163,7 @@ We implement Solaris and Linux PlatformEvents with the obvious condvar-mutex-fla
   <entry>
     <title>分布式存储系统的分片和复制策略案例解析</title>
     <url>/2024/01/distributed-storage-system-sharding-replication/</url>
-    <content><![CDATA[<div class="pdfobject-container" data-target="media/middleware.pdf" data-height="500px"></div>
+    <content><![CDATA[<div class="pdfobject-container" data-target="https://static.nullwy.me/cache.pdf?pagemode=none" data-height="500px"></div>
 <h1 id="MySQL（2001）">MySQL（2001）</h1>
 <p><strong>MySQL 的数据分片和复制的历史演进时间线</strong>：</p>
 <ul>
