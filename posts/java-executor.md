@@ -27,8 +27,8 @@ tags: [Java, 并发]
 
 涉及到的类与接口的层次结构，如下图所示：
 
-<img width="400" alt="Executor 相关类" src="/media/executor.png">
-<img width="400" alt="任务相关类" src="/media/future.png">
+<img width="400" alt="Executor 相关类" src="https://static.nullwy.me/java-executor.png">
+<img width="400" alt="任务相关类" src="https://static.nullwy.me/java-future.png">
 
 ## 线程池
 
@@ -108,8 +108,8 @@ public ThreadPoolExecutor(int corePoolSize,
 ```
 
 ThreadPoolExecutor 的处理流程如下图所示（参考自《Java并发编程的艺术》第9章 Java中的线程池）：
-<img width="700" alt="线程池的主要处理流程" src="/media/ThreadPoolExecutor.jpg">
-<img width="500" alt="ThreadPoolExecutor 执行示意图" src="/media/ThreadPoolExecutor%202.jpg">
+<img width="700" alt="线程池的主要处理流程" src="https://static.nullwy.me/java-thread-pool-executor.jpg">
+<img width="500" alt="ThreadPoolExecutor 执行示意图" src="https://static.nullwy.me/java-thread-pool-executor2.jpg">
 
 基本上预定义的三个线程池已经满足常见的使用需求，若有特殊需求也可以，特殊构造 ThreadPoolExecutor 实例。此类提供 protected 的 [beforeExecute](http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html#beforeExecute(java.lang.Thread,%20java.lang.Runnable)) 和 [afterExecute](http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html#afterExecute(java.lang.Runnable,%20java.lang.Throwable)) 钩子 (hook) 方法，就是预留扩展用的。
 
@@ -458,7 +458,7 @@ ListenableFuture API 功能的完整介绍参见 [ListenableFutureExplained](htt
 
 一个大的任务可能会由多个子任务组成，比如整个任务A，由任务B 和任务C 组成，而任务B 又可以被分解为任务D 和任务E，如下图所示。任务分解组合问题，利用 ListenableFuture 的回调将子任务组合起来是一种解决办法，但还是不够优雅简洁。Java 7 引入的 Fork/Join 框架，就是以这种方式设计的。Fork/Join 框架编程的风格就是，将任务分解为多个子任务，并行执行，然后将结果组合起来，即分而治之。ExecutorService 适合解决相互独立的任务，而 Fork/Join 框架适合解决任务分解组合的情况 [ [ref](https://stackoverflow.com/q/21156599) ]。
 
-<img width="300" alt="任务的分治" src="/media/task.png">
+<img width="300" alt="任务的分治" src="https://static.nullwy.me/java-task.png">
 
 其实整个 java.util.concurrent 包是由 [JSR-166](http://g.oswego.edu/dl/concurrency-interest/) [规范](https://www.jcp.org/en/jsr/detail?id=166)引入的，Fork/Join 框架就是其中的 jsr166y。JSR-166 由 [Doug Lea](https://en.wikipedia.org/wiki/Doug_Lea) 主导，是主要设计和代码实现者，而 jsr166y 最初源自他发表于 2000 年的论文“A Java Fork/Join Framework”（[msa](https://academic.microsoft.com/#/detail/1975579741) [pdf](http://gee.cs.oswego.edu/dl/papers/fj.pdf)）。
 
@@ -474,7 +474,7 @@ Fork/Join 框架采用工作窃取（[work stealing](https://en.wikipedia.org/wi
  - 当一个工作线程触及了 join 操作，如果可能的话它将处理其他任务，直到目标任务被告知已经结束（通过 isDone 方法）。所有的任务都会无阻塞的完成。
  - 当一个工作线程无法再从其他线程中获取任务和失败处理的时候，它就会退出（通过 yields, sleeps, 和/或者优先级调整）并经过一段时间之后再度尝试直到所有的工作线程都被告知他们都处于空闲的状态。在这种情况下，他们都会阻塞直到其他的任务再度被上层调用。
 
-<img width="350" alt="work stealing" src="/media/work-stealing.png">
+<img width="350" alt="work stealing" src="https://static.nullwy.me/java-work-stealing.png">
 
 使用 LIFO 规则来处理每个工作线程的自己任务，窃取别的工作线程的任务却使用 FIFO 规则，这是一种被广泛使用的进行递归 fork/join 设计的一种调优手段。这种模式有以下两个优点：它通过窃取工作线程队列反方向的任务减少了竞争。同时，它利用了递归的分治算法越早的产生大任务这一特点。因此，更早期被窃取的任务有可能会提供一个更大的单元任务，从而使得窃取线程能够在将来进行递归分解。
 
@@ -539,7 +539,7 @@ public class ForkJoinMain {
 
 这个计算过程如下图所示：
 
-![fork-join](/media/fork-join.png)
+![fork-join](https://static.nullwy.me/java-fork-join.png)
 
 
 

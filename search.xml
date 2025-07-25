@@ -452,7 +452,7 @@ What resources exist for Database performance-tuning? <a href="http://stackoverf
 <th><strong>隔离级别</strong></th>
 <th><strong>P1 脏读</strong></th>
 <th><strong>P2 不可重复读</strong></th>
-<th><strong>P4 幻读</strong></th>
+<th><strong>P3 幻读</strong></th>
 </tr>
 </thead>
 <tbody>
@@ -567,7 +567,7 @@ What resources exist for Database performance-tuning? <a href="http://stackoverf
 <th><strong>P1 脏读</strong></th>
 <th><strong>P4 丢失更新</strong></th>
 <th><strong>P2 不可重复读</strong></th>
-<th><strong>P4 幻读</strong></th>
+<th><strong>P3 幻读</strong></th>
 </tr>
 </thead>
 <tbody>
@@ -1768,8 +1768,8 @@ An asynchronous I/O operation does not cause the requesting process to be blocke
 <li>其他基于 Executor 的实用工具包括具体类 <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/FutureTask.html">FutureTask</a>，它提供 Future 的常见可扩展实现，以及 <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ExecutorCompletionService.html">ExecutorCompletionService</a>，它有助于协调对异步任务组的处理。</li>
 </ul>
 <p>涉及到的类与接口的层次结构，如下图所示：</p>
-<img width="400" alt="Executor 相关类" src="/media/executor.png">
-<img width="400" alt="任务相关类" src="/media/future.png">
+<img width="400" alt="Executor 相关类" src="https://static.nullwy.me/java-executor.png">
+<img width="400" alt="任务相关类" src="https://static.nullwy.me/java-future.png">
 <h2 id="线程池">线程池</h2>
 <p>Executor，此接口提供一种将任务提交与每个任务将如何运行的机制（包括线程使用的细节、调度等）分离开来的方法。接口只定义唯一一个方法：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(Runnable command)</span></span><br><span class="line">    在未来某个时间执行给定的命令</span><br></pre></td></tr></table></figure>
@@ -1791,8 +1791,8 @@ An asynchronous I/O operation does not cause the requesting process to be blocke
 <p>可以看到 <code>newFixedThreadPool</code>、<code>newCachedThreadPool</code> 和 <code>newSingleThreadExecutor</code> 内部都是通过类 <code>ThreadPoolExecutor</code> 实现。<a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html">ThreadPoolExecutor</a> 的构造方法的 javadoc 如下：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">ThreadPoolExecutor</span><span class="params">(<span class="type">int</span> corePoolSize,</span></span><br><span class="line"><span class="params">                          <span class="type">int</span> maximumPoolSize,</span></span><br><span class="line"><span class="params">                          <span class="type">long</span> keepAliveTime,</span></span><br><span class="line"><span class="params">                          TimeUnit unit,</span></span><br><span class="line"><span class="params">                          BlockingQueue&lt;Runnable&gt; workQueue)</span></span><br><span class="line"></span><br><span class="line">    用给定的初始参数和默认的线程工厂及被拒绝的执行处理程序创建新的 ThreadPoolExecutor。使用 Executors 工厂方法之一比使用此通用构造方法方便得多。</span><br><span class="line"></span><br><span class="line">    参数：</span><br><span class="line">        corePoolSize - 池中所保存的线程数，包括空闲线程。</span><br><span class="line">        maximumPoolSize - 池中允许的最大线程数。</span><br><span class="line">        keepAliveTime - 当线程数大于核心时，此为终止前多余的空闲线程等待新任务的最长时间。</span><br><span class="line">        unit - keepAliveTime 参数的时间单位。</span><br><span class="line">        workQueue - 执行前用于保持任务的队列。此队列仅保持由 execute 方法提交的 Runnable 任务。 </span><br></pre></td></tr></table></figure>
 <p>ThreadPoolExecutor 的处理流程如下图所示（参考自《Java并发编程的艺术》第9章 Java中的线程池）：<br>
-<img width="700" alt="线程池的主要处理流程" src="/media/ThreadPoolExecutor.jpg"><br>
-<img width="500" alt="ThreadPoolExecutor 执行示意图" src="/media/ThreadPoolExecutor%202.jpg"></p>
+<img width="700" alt="线程池的主要处理流程" src="https://static.nullwy.me/java-thread-pool-executor.jpg"><br>
+<img width="500" alt="ThreadPoolExecutor 执行示意图" src="https://static.nullwy.me/java-thread-pool-executor2.jpg"></p>
 <p>基本上预定义的三个线程池已经满足常见的使用需求，若有特殊需求也可以，特殊构造 ThreadPoolExecutor 实例。此类提供 protected 的 <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html#beforeExecute(java.lang.Thread,%20java.lang.Runnable)">beforeExecute</a> 和 <a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html#afterExecute(java.lang.Runnable,%20java.lang.Throwable)">afterExecute</a> 钩子 (hook) 方法，就是预留扩展用的。</p>
 <p><a href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ScheduledExecutorService.html">ScheduledExecutorService</a> 类提供的方法：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line">ScheduledFuture&lt;V&gt; <span class="title function_">schedule</span><span class="params">(Callable&lt;V&gt; callable, <span class="type">long</span> delay, TimeUnit unit)</span></span><br><span class="line">    创建并执行在给定延迟后启用的 ScheduledFuture</span><br><span class="line">ScheduledFuture&lt;?&gt; schedule(Runnable command, <span class="type">long</span> delay, TimeUnit unit)</span><br><span class="line">    创建并执行在给定延迟后启用的一次性操作</span><br><span class="line">ScheduledFuture&lt;?&gt; scheduleAtFixedRate(Runnable command, <span class="type">long</span> initialDelay, <span class="type">long</span> period, TimeUnit unit)</span><br><span class="line">    创建并执行一个在给定初始延迟后首次启用的定期操作，后续操作具有给定的周期</span><br><span class="line">ScheduledFuture&lt;?&gt; scheduleWithFixedDelay(Runnable command, <span class="type">long</span> initialDelay, <span class="type">long</span> delay, TimeUnit unit)</span><br><span class="line">    创建并执行一个在给定初始延迟后首次启用的定期操作，随后，在每一次执行终止和下一次执行开始之间都存在给定的延迟</span><br></pre></td></tr></table></figure>
@@ -1859,7 +1859,7 @@ An asynchronous I/O operation does not cause the requesting process to be blocke
 <p>ListenableFuture API 功能的完整介绍参见 <a href="https://github.com/google/guava/wiki/ListenableFutureExplained">ListenableFutureExplained</a>，本文不再展开。</p>
 <h1 id="Fork-Join-框架">Fork/Join 框架</h1>
 <p>一个大的任务可能会由多个子任务组成，比如整个任务A，由任务B 和任务C 组成，而任务B 又可以被分解为任务D 和任务E，如下图所示。任务分解组合问题，利用 ListenableFuture 的回调将子任务组合起来是一种解决办法，但还是不够优雅简洁。Java 7 引入的 Fork/Join 框架，就是以这种方式设计的。Fork/Join 框架编程的风格就是，将任务分解为多个子任务，并行执行，然后将结果组合起来，即分而治之。ExecutorService 适合解决相互独立的任务，而 Fork/Join 框架适合解决任务分解组合的情况 [ <a href="https://stackoverflow.com/q/21156599">ref</a> ]。</p>
-<img width="300" alt="任务的分治" src="/media/task.png">
+<img width="300" alt="任务的分治" src="https://static.nullwy.me/java-task.png">
 <p>其实整个 java.util.concurrent 包是由 <a href="http://g.oswego.edu/dl/concurrency-interest/">JSR-166</a> <a href="https://www.jcp.org/en/jsr/detail?id=166">规范</a>引入的，Fork/Join 框架就是其中的 jsr166y。JSR-166 由 <a href="https://en.wikipedia.org/wiki/Doug_Lea">Doug Lea</a> 主导，是主要设计和代码实现者，而 jsr166y 最初源自他发表于 2000 年的论文“A Java Fork/Join Framework”（<a href="https://academic.microsoft.com/#/detail/1975579741">msa</a> <a href="http://gee.cs.oswego.edu/dl/papers/fj.pdf">pdf</a>）。</p>
 <h2 id="工作窃取">工作窃取</h2>
 <p>Fork/Join 框架采用工作窃取（<a href="https://en.wikipedia.org/wiki/Work_stealing">work stealing</a>）的任务调度机制 [ <a href="http://ifeve.com/a-java-fork-join-framework-3-2/">ref</a> ]：</p>
@@ -1872,7 +1872,7 @@ An asynchronous I/O operation does not cause the requesting process to be blocke
 <li>当一个工作线程触及了 join 操作，如果可能的话它将处理其他任务，直到目标任务被告知已经结束（通过 isDone 方法）。所有的任务都会无阻塞的完成。</li>
 <li>当一个工作线程无法再从其他线程中获取任务和失败处理的时候，它就会退出（通过 yields, sleeps, 和/或者优先级调整）并经过一段时间之后再度尝试直到所有的工作线程都被告知他们都处于空闲的状态。在这种情况下，他们都会阻塞直到其他的任务再度被上层调用。</li>
 </ul>
-<img width="350" alt="work stealing" src="/media/work-stealing.png">
+<img width="350" alt="work stealing" src="https://static.nullwy.me/java-work-stealing.png">
 <p>使用 LIFO 规则来处理每个工作线程的自己任务，窃取别的工作线程的任务却使用 FIFO 规则，这是一种被广泛使用的进行递归 fork/join 设计的一种调优手段。这种模式有以下两个优点：它通过窃取工作线程队列反方向的任务减少了竞争。同时，它利用了递归的分治算法越早的产生大任务这一特点。因此，更早期被窃取的任务有可能会提供一个更大的单元任务，从而使得窃取线程能够在将来进行递归分解。</p>
 <p>这些规则的结果是，拥有相对细粒度的基本任务，比那些仅仅使用粗粒度划分或没有使用递归分解的任务运行更快。</p>
 <h2 id="使用示例">使用示例</h2>
@@ -1887,7 +1887,7 @@ An asynchronous I/O operation does not cause the requesting process to be blocke
 <p>使用 Fork/Join 框架计算斐波那契数的示例代码如下：</p>
 <figure class="highlight java"><table><tr><td class="code"><pre><span class="line"><span class="keyword">package</span> concurrent;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ForkJoinPool;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.RecursiveTask;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ForkJoinMain</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Fibonacci</span> <span class="keyword">extends</span> <span class="title class_">RecursiveTask</span>&lt;Integer&gt; &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">int</span> n;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">Fibonacci</span><span class="params">(<span class="type">int</span> n)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.n = n;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">protected</span> Integer <span class="title function_">compute</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (n &lt;= <span class="number">1</span>)</span><br><span class="line">                <span class="keyword">return</span> n;</span><br><span class="line">            <span class="type">Fibonacci</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fibonacci</span>(n - <span class="number">1</span>);</span><br><span class="line">            <span class="type">Fibonacci</span> <span class="variable">f2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fibonacci</span>(n - <span class="number">2</span>);</span><br><span class="line">            f1.fork();</span><br><span class="line">            <span class="keyword">return</span> f2.compute() + f1.join();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ForkJoinPool</span> <span class="variable">pool</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ForkJoinPool</span>();</span><br><span class="line">        <span class="type">Fibonacci</span> <span class="variable">fib</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fibonacci</span>(<span class="number">3</span>);</span><br><span class="line">        pool.invoke(fib); <span class="comment">// 等待计算完成</span></span><br><span class="line">        <span class="type">Integer</span> <span class="variable">result</span> <span class="operator">=</span> fib.get();</span><br><span class="line">        System.out.println(result);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这个计算过程如下图所示：</p>
-<p><img src="/media/fork-join.png" alt="fork-join"></p>
+<p><img src="https://static.nullwy.me/java-fork-join.png" alt="fork-join"></p>
 <h1 id="参考资料">参考资料</h1>
 <ol>
 <li>Java 并发编程实战，Goetz，2006；第6章 任务执行 <a href="https://book.douban.com/subject/10484692/">https://book.douban.com/subject/10484692/</a></li>
@@ -5572,7 +5572,7 @@ Resiliency is the ability of a system to recover from failures and continue to f
   </entry>
   <entry>
     <title>Java 线程同步实现原理深度解析</title>
-    <url>/2024/02/java-synchronization-implementation/</url>
+    <url>/2023/02/java-synchronization-implementation/</url>
     <content><![CDATA[<p>本文内容主要是，以官方文档资料和 Java 8 的 JDK 和 HotSpot 源码为依据，对 Java 的基于 <code>synchronized</code> 和 <code>ReentrantLock</code> 线程同步的底层实现原理进行总结梳理和深度解析。同时，也在广度上对线程同步相关的基础概念做总结概括。</p>
 <h1 id="基础概念">基础概念</h1>
 <p>在并发编程模型中，需要处理的两个最关键的问题就是<strong>通信</strong>（communication）和<strong>同步</strong>（synchronization）<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup>。通信指线程可用于获得其他线程产生的信息的各种机制。通信机制通常都基于<strong>共享内存</strong>（<a href="https://en.wikipedia.org/wiki/Shared_memory">shared memory</a>）或<strong>消息传递</strong>（<a href="https://en.wikipedia.org/wiki/Message_passing">message passing</a>）。在共享内存的编程模型中，某些或全部程序变量可以由多个线程访问。如果一对线程之间需要通信，只要一个线程将值写入某个变量，另一线程来读它即可。在消息传递编程模型中，不同线程没有公共的状态。当一对线程之间需要通信时，其中的一个必须执行一次明确的 send 操作，将数据传送给另一个线程。</p>
@@ -6158,413 +6158,6 @@ We implement Solaris and Linux PlatformEvents with the obvious condvar-mutex-fla
         <tag>并发</tag>
         <tag>同步</tag>
         <tag>多线程</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>分布式存储系统的分片和复制策略案例解析</title>
-    <url>/2024/01/distributed-storage-system-sharding-replication/</url>
-    <content><![CDATA[<div class="pdfobject-container" data-target="https://static.nullwy.me/cache.pdf?pagemode=none" data-height="500px"></div>
-<h1 id="MySQL（2001）">MySQL（2001）</h1>
-<p><strong>MySQL 的数据分片和复制的历史演进时间线</strong>：</p>
-<ul>
-<li><a href="https://web.archive.org/web/20010126203700/http://www.mysql.com/news/article-54.html">2001.01</a>，MySQL 3.23 GA 版发布，开始提供复制（replication）功能，参见官方文档 <a href="https://dev.mysql.com/doc/refman/8.0/en/replication.html">doc</a>。</li>
-<li><a href="https://www.infoq.com/news/2007/10/mysqlproxyrwsplitting/">2007.06</a>，MySQL 官方发布 <a href="https://web.archive.org/web/20160413134318/http://dev.mysql.com/doc/mysql-proxy/en/mysql-proxy-introduction.html">MySQL Proxy</a>，MySQL 代理服务器，支持内嵌 Lua 脚本，通过 Lua 脚本能实现负载均衡、主从自动故障切换、读写分离等。不过 MySQL Proxy 一直处于 Alpha 版状态，不推荐生产环境使用。2015 年发布 MySQL Router 后，MySQL Proxy 被废弃。</li>
-<li>2008.11，MySQL 5.1 GA 版发布，开始提供分区（partition）的功能，参见官方文档 <a href="https://dev.mysql.com/doc/refman/8.0/en/partitioning.html">doc</a>。</li>
-<li>2014.05，<a href="https://web.archive.org/web/20150806192507/http://dev.mysql.com/doc/mysql-fabric/1.6/en/">MySQL Fabric</a> GA 版发布，官方的高可用（HA）和数据分片（sharding）方案，基于客户端库（Fabric-aware Connector）实现分片路由，不支持跨分片查询。
-<ul>
-<li>2017.07，MySQL Fabric 被官方废弃，推荐迁移到 MySQL InnoDB Cluster。</li>
-</ul>
-</li>
-<li><a href="https://finance.yahoo.com/news/news/oracle-announces-general-availability-mysql-140000831.html">2015.10</a>，MySQL 5.7 GA 版发布，代理服务器 <a href="https://dev.mysql.com/doc/mysql-router/8.0/en/">MySQL Router</a> 也开始 GA 版可用，是 MySQL Proxy 的替代方案。同时，MySQL Group Replication 早期版可访问。</li>
-<li><a href="https://dev.mysql.com/blog-archive/mysql-group-replication-its-in-5-7-17-ga/">2016.12</a>，MySQL 5.7.17 发布，MySQL 组复制（<a href="https://dev.mysql.com/doc/refman/8.0/en/group-replication.html">Group Replication</a>）特性开始 GA 版可用。MySQL 组复制基于 Paxos 协议实现节点间的数据复制，实现主从自动故障切换，最多能容忍不超过半数的节点故障。</li>
-<li><a href="https://dev.mysql.com/blog-archive/mysql-innodb-cluster-ga/">2017.04</a>，MySQL 官方的 <a href="https://dev.mysql.com/doc/refman/8.0/en/mysql-innodb-cluster-introduction.html">InnoDB Cluster</a> 开始 GA 版可用，三个核心组件 Group Replication、MySQL Shell、MySQL Router。</li>
-</ul>
-<p><strong>MySQL 官方版的数据分片和复制策略</strong><sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup><sup class="footnote-ref"><a href="#fn2" id="fnref2">[2]</a></sup>：</p>
-<ul>
-<li><strong>分片策略</strong>：
-<ul>
-<li><strong>分片术语命名</strong>：分区（<a href="https://dev.mysql.com/doc/refman/8.0/en/partitioning.html">partition</a>）
-<ul>
-<li>将单个表数据拆分为多个表分区中</li>
-</ul>
-</li>
-<li><strong>键-分片的分配关系</strong>：同时支持按 Range 和 Hash 拆分，在定义表时手动指定分区规则</li>
-<li><strong>分片-机器的分配关系</strong>：拆分后的多个分区分布同一个服务器节点上</li>
-<li><strong>分片再均衡</strong>：无</li>
-</ul>
-</li>
-<li><strong>复制策略</strong>：主从（Master/Slave）模式，服务器节点区分主从（Master/Slave）两种角色，由一个 Master 节点和零到多个 Slave 节点组成复制组，Master 节点负责处理写和读请求，Slave 节点可用于读，复制组内的节点数据保持同步。虽然理论上从库允许直接修改，但修改可能会导致主从库数据不一致，不推荐对从库做写操作。
-<ul>
-<li><strong>复制单位</strong>：以服务器节点（机器）为单位</li>
-<li><strong>复制系数</strong>：即复制组内的服务器节点数量</li>
-<li><strong>副本更新传播策略</strong>：支持异步复制（asynchronous replication）（默认）、半同步复制（<a href="https://dev.mysql.com/doc/refman/8.0/en/replication-semisync.html">semisynchronous replication</a>）和组复制（<a href="https://dev.mysql.com/doc/refman/8.0/en/group-replication.html">group replication</a>）三种模式
-<ul>
-<li><strong>组复制</strong>（group replication），MySQL 5.7 开始支持，基于 <strong>Paxos 协议</strong>实现，是强一致性的复制，InnoDB Cluster 基于组复制实现。采用组复制的事务要求过半数以上节点同意后才提交，最多能容忍不超过半数的节点故障。</li>
-<li><strong>全同步复制</strong>（fully synchronous replication），指的是强一致性的全同步复制，<a href="https://en.wikipedia.org/wiki/MySQL_Cluster">MySQL NDB Cluster</a> 采用基于 <strong>2PC 协议</strong>实现的全同步复制，MySQL NDB Cluster 基于 NDB 存储引擎，InnoDB 存储引擎不支持全同步复制。采用全同步复制的事务要求全部节点同意后才提交，对于共 n 个节点的集群，最多能容忍 n-1 个节点故障。</li>
-<li>全同步复制相对异步复制、半同步复制的性能最差，半同步复制介于异步复制和全同步复制之间。基于 Paxos 协议实现的组复制和基于 2PC 协议实现的全同步复制，都是强一致性，但组复制的性能优于全同步复制。</li>
-</ul>
-</li>
-<li><strong>副本读取策略</strong>：Slave 节点可以用于处理读请求，需要依赖客户端或代理将写请求路由到 Master 节点，将读请求路由到 Slave 节点，从而实现<strong>读写分离</strong>，实现对读请求处理能力的水平扩展。</li>
-</ul>
-</li>
-<li><strong>请求路由寻址</strong>：可以将读请求路由到 Slave 节点，可以实现读写分离
-<ul>
-<li>基于客户端的读写路由：MySQL Connector/J (JDBC) 3.1.7（2005.02 发布）开始支持读写分离，支持将读请求负载均衡到从库<sup class="footnote-ref"><a href="#fn3" id="fnref3">[3]</a></sup>。</li>
-<li>基于代理的读写路由：MySQL Router 也支持读写分离（Read/Write Splitting）<sup class="footnote-ref"><a href="#fn4" id="fnref4">[4]</a></sup>。</li>
-</ul>
-</li>
-<li><strong>集群配置和协调</strong>：
-<ul>
-<li>分片策略在新建表时的 SQL 语句中指定；复制策略在配置文件中指定</li>
-<li><strong>高可用方案</strong>：实现主从自动故障切换
-<ul>
-<li>MGR（MySQL Group Replication）：MySQL 5.7 提供官方高可用方案，基于 Paxos 协议实现节点间的数据复制，最多能容忍不超过半数的节点故障。</li>
-<li><a href="https://github.com/yoshinorim/mha4mysql-manager">MHA</a>（Master High Availability）：在 MySQL 官方推出在 MGR 之前，最流行的第三方高可用方案，<a href="https://yoshinorimatsunobu.blogspot.com/2011/07/announcing-mysql-mha-mysql-master-high.html">2011.07</a> 最早对外发布，实现 Master 节点的自动故障切换。</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p>MySQL InnoDB Cluster 架构，如下图所示<sup class="footnote-ref"><a href="#fn5" id="fnref5">[5]</a></sup>：</p>
-<p><img src="media/innodb_cluster_overview.png" alt="MySQL InnoDB Cluster 架构"></p>
-<p>MySQL 等传统关系数据库支持<strong>表分区</strong>（<a href="https://dev.mysql.com/doc/refman/8.0/en/partitioning.html">partition</a>），但原生不支持<strong>分片</strong>（sharding），拆分后的表分区都分布在同一个服务器节点上。为了解决数据库的水平扩展问题，出现很多数据库分片方案。其中一类是基于传统关系数据库的“分库分表”中间件，如 <a href="https://github.com/vitessio/vitess">Vitess</a>（基于代理服务器）、阿里 <a href="https://github.com/alibaba/tb_tddl">TDDL</a>（基于客户端库）、阿里 <a href="https://github.com/alibaba/cobar">Cobar</a>/DRDS（基于代理服务器）、<a href="https://github.com/apache/shardingsphere">ShardingSphere</a>（包括基于客户端库的 ShardingSphere-JDBC 和基于代理服务器 ShardingSphere-Proxy）等。另外一类是非关系型的 <a href="https://en.wikipedia.org/wiki/NoSQL">NoSQL</a> 数据库，如 BigTable、Dynamo、HBase、Cassandra 等。以及采用全新架构的 <a href="https://en.wikipedia.org/wiki/NewSQL">NewSQL</a> 数据库，如 Google Spanner、CockroachDB、TiDB 等；或基于云服务的 NewSQL 数据库，如 Amazon Aurora、阿里 PolarDB 等。</p>
-<h1 id="Redis（2009）">Redis（2009）</h1>
-<p><strong>Redis 的数据分片和复制的历史演进时间线</strong>：</p>
-<ul>
-<li>2009.09，Redis 1.0 发布，开始支持主从节点数据复制，参见官方文档 <a href="https://redis.io/docs/management/replication/">doc</a></li>
-<li>2013.11，Redis 2.8 发布，开始提供 Redis Sentinel，用于监控各个 Redis 节点，实现主从节点自动故障切换，参见官方文档 <a href="https://redis.io/docs/management/sentinel/">doc</a></li>
-<li>2015.04，Redis 3.0 发布，开始提供 Redis Cluster，实现数据分片，参见官方文档 <a href="https://redis.io/docs/management/scaling/">doc</a></li>
-</ul>
-<p><strong>Redis 的数据分片和复制策略</strong><sup class="footnote-ref"><a href="#fn6" id="fnref6">[6]</a></sup><sup class="footnote-ref"><a href="#fn7" id="fnref7">[7]</a></sup><sup class="footnote-ref"><a href="#fn8" id="fnref8">[8]</a></sup><sup class="footnote-ref"><a href="#fn9" id="fnref9">[9]</a></sup><sup class="footnote-ref"><a href="#fn10" id="fnref10">[10]</a></sup>：</p>
-<ul>
-<li><strong>分片策略</strong>：基于 Redis Cluster 实现数据分片
-<ul>
-<li><strong>分片术语命名</strong>：哈希槽（hash slot）
-<ul>
-<li>将全量数据拆分到多个哈希槽中。</li>
-</ul>
-</li>
-<li><strong>键-分片的分配关系</strong>：按 Hash 拆分，基于哈希槽，哈希槽的总数固定为 <code>16384</code> (2^14)。
-<ul>
-<li>某 key 分配的哈希槽的计算公式：<code>HASH_SLOT = CRC16(key) mod 16384</code>。</li>
-</ul>
-</li>
-<li><strong>分片-机器的分配关系</strong>：手动配置哈希槽与服务器节点的分配关系
-<ul>
-<li>相关命令：<a href="https://redis.io/commands/cluster-addslots/">cluster addslots</a>（分配槽给某节点）、<a href="https://redis.io/commands/cluster-slots/">cluster slots</a>（查看槽分配信息）等</li>
-<li>创建集群并自动分配槽的简化操作的命令工具：<code>redis-cli --cluster create --cluster-replicas </code>（Redis &gt;= 5.0）或 <code>./redis-trib.rb create --replicas</code>（Redis &lt; 5.0）</li>
-</ul>
-</li>
-<li><strong>分片再均衡策略</strong>：手动 reshard
-<ul>
-<li>相关命令：<a href="https://redis.io/commands/cluster-setslot/">cluster setslot</a>（设置迁移槽状态）、<a href="https://redis.io/commands/cluster-getkeysinslot/">cluster getkeysinslot</a>（获取属于某槽的 keys）、<a href="https://redis.io/commands/migrate/">migrate</a>（迁移某 key 数据）等</li>
-<li>简化操作的命令工具：<code>redis-cli --cluster reshard</code>（Redis &gt;= 5.0）或 <code>./redis-trib.rb reshard</code>（Redis &lt; 5.0）</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><strong>复制策略</strong>：主从（Master/Slave）模式，服务器节点区分主从（Master/Slave）两种角色，由一个 Master 节点和零到多个 Slave 节点组成复制组，Master 节点负责处理写和读请求，Slave 库默认不可写，复制组内的节点数据保持同步。
-<ul>
-<li><strong>复制单位</strong>：以服务器节点（机器）为单位</li>
-<li><strong>复制系数</strong>：即复制组内的服务器节点数量</li>
-<li><strong>副本更新传播策略</strong>：默认异步复制，通过 <a href="https://redis.io/commands/wait/">wait</a>、<a href="https://redis.io/commands/waitaof/">waitaof</a> 命令支持同步复制。</li>
-<li><strong>副本读取策略</strong>：Slave 节点可以用于处理读请求，需要依赖客户端将写请求路由到 Master 节点，将读请求路由到 Slave 节点，从而实现<strong>读写分离</strong>，实现对读请求处理能力的水平扩展。Redis 默认是异步复制，从副本节点中读到的数据可能是旧的，Redis 本身性能非常高，一般不建议开启读写分离。
-<ul>
-<li><strong>副本是否可读</strong>：非 Redis Cluster 模式下，主库可写可读，从库默认不可写可读。因为历史原因从库可以配置为可写，但修改副本会导致主从库数据不一致，不推荐开启，参见文档 <a href="https://redis.io/docs/management/replication/#read-only-replica">doc</a>。在 Redis Cluster 模式下，Slave 节点默认不接受任何读写请求，发送过来的键命令会重定向到负责槽的 Master 节点上。<a href="https://redis.io/commands/readonly/">readonly</a> 命令允许将读请求重定向到 Slave 节点。</li>
-<li><strong>读写分离</strong>：Lettuce 客户端库的 <a href="https://github.com/lettuce-io/lettuce-core/wiki/ReadFrom-Settings">ReadFrom</a> 参数（默认 <code>MASTER</code>），Redisson 客户端库的 <a href="https://github.com/redisson/redisson/wiki/2.-configuration">readMode</a> 参数（默认 <code>SLAVE</code>），支持将读请求路由到 Slave 节点。Jedis 客户端库暂时<a href="https://github.com/redis/jedis/issues/3484">不支持</a> 读 Slave 节点，只支持读 Master 节点。</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><strong>请求路由寻址</strong>：
-<ul>
-<li><strong>基于客户端的分片路由</strong>：在 Redis Cluster 模式下，需要客户端实现分片的路由寻址。Redis 接收任何键相关命令时首先计算键对应的槽，再根据槽找出所对应的节点，如果节点是自身，则处理键命令；否则回复 MOVED 重定向错误，通知客户端请求正确的节点。为了避免重定向错误，一般客户端（Jedis、Lettuce、Redisson 等）都会在本地缓存槽与节点的分配关系，即缓存路由信息，然后客户端基于缓存的路由信息直接将命令发送到键所属的节点。</li>
-</ul>
-</li>
-<li><strong>集群配置和协调</strong>：
-<ul>
-<li>Redis Cluster 采用<strong>去中心化架构</strong>，每个节点都维护全量元数据，节点间采用 Gossip 协议同步元数据，同步的元数据包括集群节点成员、槽分配信息、节点主从角色、节点存活状态等。</li>
-<li><strong>自动选举主节点</strong>
-<ul>
-<li>Redis Cluster 自身实现了高可用方案，如果 Master 节点出现故障，支持自动从 Slave 节点选举新的 Master 节点，实现主从节点自动故障切换。</li>
-<li>在非 Redis Cluster 模式下，Redis 的高可用方案是 Redis Sentinel，Sentinel 监控各个 Redis 节点，实现主从节点自动故障切换。</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<p>Redis Cluster 架构与分区和副本分布示例，如下图所示：</p>
-<p><img src="media/redis-cluster-ha-architecture.png" alt="Redis Cluster 架构与分区和副本分布示例"></p>
-<h1 id="Elasticsearch（2010）">Elasticsearch（2010）</h1>
-<p><strong>Elasticsearch 的数据分片和复制策略</strong><sup class="footnote-ref"><a href="#fn11" id="fnref11">[11]</a></sup><sup class="footnote-ref"><a href="#fn12" id="fnref12">[12]</a></sup>：</p>
-<ul>
-<li><strong>分片策略</strong>：
-<ul>
-<li><strong>分片术语命名</strong>：分片（shard）
-<ul>
-<li>将单个索引数据拆分到多个分片中</li>
-</ul>
-</li>
-<li><strong>键-分片的分配关系</strong>：按 Hash 拆分
-<ul>
-<li>分片号的<a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.11/mapping-routing-field.html">计算公式</a>为（简化后）：<code>shard_num = hash(_routing) % num_primary_shards</code>。默认情况下，哈希函数采用 Murmur3 算法，<code>_routing</code> 值为文档 <code>_id</code>，<code>num_primary_shards</code> 值为 <a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.11/index-modules.html#index-number-of-shards">number_of_shards</a>， <code>number_of_shards</code> 配置项是在创建该索引时配置的分片总数，ES &gt;= 7.0 默认值 <code>1</code>，ES &lt; 7.0 默认值 <code>5</code>。</li>
-<li>相关源码：<a href="https://github.com/elastic/elasticsearch/blob/v8.11.0/server/src/main/java/org/elasticsearch/cluster/routing/IndexRouting.java">IndexRouting</a>（<a href="https://javadoc.io/doc/org.elasticsearch/elasticsearch/8.11.0/org.elasticsearch.server/org/elasticsearch/cluster/routing/IndexRouting.html">javadoc</a>）</li>
-</ul>
-</li>
-<li><strong>分片-机器的分配关系</strong>：默认自动将分片均衡分配到各个节点。分配考虑的权重因素包括节点内的总分片数量、节点内的该索引的分片数量等。分片分配策略由分片分配器（ShardsAllocator）实现，分片分配器职责是分配未指定的分片、移动分片和重新均衡分片。触发分片分配的时机包括索引增删、节点增删、手工 reroute、副本数量改变、集群重启。
-<ul>
-<li>Elasticsearch 8.6.0 开始，默认分片分配器类型是 <code>desired_balance</code>，8.6.0 之前默认是 <code>balanced</code>，0.90.0 之前默认是 <code>even_shard</code>（在 Elasticsearch 2.0 被删除），由配置项 <code>cluster.routing.allocation.type</code> 控制。</li>
-<li>相关源码：AllocationService#reroute（<a href="https://javadoc.io/doc/org.elasticsearch/elasticsearch/8.11.0/org.elasticsearch.server/org/elasticsearch/cluster/routing/allocation/AllocationService.html">javadoc</a>）、<a href="https://github.com/elastic/elasticsearch/blob/v8.11.0/server/src/main/java/org/elasticsearch/cluster/routing/allocation/allocator/ShardsAllocator.java">ShardsAllocator</a>（<a href="https://javadoc.io/doc/org.elasticsearch/elasticsearch/8.11.0/org.elasticsearch.server/org/elasticsearch/cluster/routing/allocation/allocator/ShardsAllocator.html">javadoc</a>）、<a href="https://github.com/elastic/elasticsearch/blob/v8.11.0/server/src/main/java/org/elasticsearch/cluster/routing/allocation/allocator/BalancedShardsAllocator.java">BalancedShardsAllocator</a>（<a href="https://javadoc.io/doc/org.elasticsearch/elasticsearch/8.11.0/org.elasticsearch.server/org/elasticsearch/cluster/routing/allocation/allocator/BalancedShardsAllocator.html">javadoc</a>）、<a href="https://github.com/elastic/elasticsearch/blob/v8.11.0/server/src/main/java/org/elasticsearch/cluster/routing/allocation/allocator/DesiredBalanceShardsAllocator.java">DesiredBalanceShardsAllocator</a>（<a href="https://javadoc.io/doc/org.elasticsearch/elasticsearch/8.11.0/org.elasticsearch.server/org/elasticsearch/cluster/routing/allocation/allocator/DesiredBalanceShardsAllocator.html">javadoc</a>）、<a href="https://github.com/elastic/elasticsearch/blob/v1.7.0/src/main/java/org/elasticsearch/cluster/routing/allocation/allocator/EvenShardsCountAllocator.java">EvenShardsCountAllocator</a></li>
-</ul>
-</li>
-<li><strong>分片再均衡策略</strong>：默认自动再均衡，由分片分配器（ShardsAllocator）实现</li>
-</ul>
-</li>
-<li><strong>复制策略</strong><sup class="footnote-ref"><a href="#fn13" id="fnref13">[13]</a></sup><sup class="footnote-ref"><a href="#fn14" id="fnref14">[14]</a></sup>：主备（Primary/Backup）模式，或称为 Primary/Replica、Primary/Secondary、Master/Slave、Leader/Follower 等。分片副本分为主副两种角色，由一个 Primary 分片和零到多个 Replica 分片组成复制组，Primary 分片负责承担写请求，读请求由 Primary 分片和 Replica 分片共同承担，复制组内的分片数据保持同步。
-<ul>
-<li><strong>复制单位</strong>：以分片为单位</li>
-<li><strong>复制系数</strong>：由配置项 <a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.11/index-modules.html#dynamic-index-number-of-replicas">number_of_replicas</a> 控制，即 Replica 分片的总数，默认值 <code>1</code>，即一个 Primary 分片和一个 Replica 分片</li>
-<li><strong>副本更新传播策略</strong>：复制策略类似于微软的 PacificA 复制协议，Kafka 的<a href="https://kafka.apache.org/36/documentation.html#replication">分片复制</a>也类似于 PacificA 协议。
-<ul>
-<li><strong>Master 节点</strong>维护<strong>同步副本集合</strong>（in-sync replica set）。协调节点将写操作请求转发到 Primary 分片上，在 Primary 分片上执行<strong>写入前先检查</strong>处于活动副本（active shard）数（活动副本近似等于同步副本<sup class="footnote-ref"><a href="#fn15" id="fnref15">[15]</a></sup>），如果小于最小活动副本数（由配置项 <code>wait_for_active_shards</code> 控制，默认 <code>1</code>，只等待 Primary 分片），则等待直到数量满足或超时。检查通过后，在 Primary 分片上执行操作，执行成功后，转发该操作到当前同步副本集合的所有 Replica 分片。如果有多个 Replica 分片，则会并行转发。等所有的 Replica 分片执行操作并响应（可能成功，也可能失败）后，Primary 分片会把请求响应返回给协调节点，协调节点返回给客户端。如果 Replica 写入失败，会执行重试逻辑，但最终并不强求一定要在多少个节点写入成功。
-<ul>
-<li>如果在 Primary 分片上执行写入操作失败，Primary 分片所在节点将发送消息到 Marter 节点。这个索引操作会等待（默认为最多一分钟）Master 节点提升一个 Replica 分片为新的 Primary 分片。然后这个操作会被转发给新的 Primary 分片。</li>
-<li>如果在 Replica 分片上执行写入操作失败，Primary 分片会向 Marter 节点发送一条消息，请求从同步副本集合中删除有问题的分片。只有在 Master 节点确认删除分片后，Primary 分片才会确认该操作。请注意，Master 节点还将指示另一个节点开始构建新的分片副本，以便将系统恢复到正常状态。</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><strong>副本读取策略</strong>：Primary 分片和同步的 Replica 分片都可以承担读请求，若 Replica 分片被移出同步副本集合，将不再承担读请求。</li>
-</ul>
-</li>
-<li><strong>请求路由寻址</strong><sup class="footnote-ref"><a href="#fn16" id="fnref16">[16]</a></sup>：集群中任意节点隐式都是<strong>协调节点</strong>（Coordinating Node），并且节点的协调角色无法被禁用，每个节点都有能力处理任意请求，每个节点都知道集群中任一文档位置。客户端请求可以发送到集群的任何节点，收到请求的节点扮演协调节点角色，将请求转发给保存数据的数据节点。各个数据节点在本地执行请求，并将结果返回协调节点。协调节点收集数据，将每个数据节点的结果合并为单个全局结果，并将结果返回给客户端。</li>
-<li><strong>集群配置和协调</strong>：由 <strong>Master 节点</strong> 负责
-<ul>
-<li>由 <strong>Master 节点</strong>（Master Node）负责存储内容路由信息、配置信息等集群元数据，以及负责轻量级集群范围的操作，包括创建或删除索引、集群成员管理、分片分配等。如果集群元数据发生变更，Master 节点会把变更广播到集群的其他节点，让每个节点上的集群元数据保持同步。</li>
-<li><strong>Master 节点自动选举</strong><sup class="footnote-ref"><a href="#fn17" id="fnref17">[17]</a></sup><sup class="footnote-ref"><a href="#fn18" id="fnref18">[18]</a></sup>：在集群启动或 Master 节点故障时，会从全部有 Master 资格的节点（Master-eligible Node）中自动选举中新的 Master 节点，选举基于过半（quorum）投票决策。Elasticsearch 7.0 之前节点选举默认基于内置的 Zen Discovery 模块，底层是变种的 Bully 算法，Elasticsearch 7.0（2019.04 发布）开始重新实现，类似于 Raft 算法。</li>
-</ul>
-</li>
-</ul>
-<p><img src="media/elasticsearch-architecture.png" alt="Elasticsearch 架构与分片和副本分布示例"></p>
-<h1 id="HBase（2007）">HBase（2007）</h1>
-<p><strong>HBase 的数据分片和复制的历史演进时间线</strong>：</p>
-<ul>
-<li>2007.02，HBase 宣布在 Hadoop 项目中成立，成为 Hadoop 的子项目，参见 HADOOP-1045/<a href="https://issues.apache.org/jira/browse/HBASE-287">HBASE-287</a>、first <a href="https://github.com/apache/hbase/tree/948d0cdec4fb35d70404b9b6e27743616400656d">commit</a>。HBase 是 Google BigTable 的开源实现版，采用与 BigTable 类似的数据模型。表支持分片，单个表被拆分为多个 HRegion。</li>
-<li>2011.01，HBase 0.90 发布，开始支持集群间复制（inter-cluster replication），复制方式采用异步复制。</li>
-<li><a href="https://blogsarchive.apache.org/hbase/entry/start_of_a_new_era">2015.02</a>，HBase 1.0 发布，开始实验性支持 Region 复制（region replication），也叫时间线一致的高可用读（timeline consistent high available reads），参见 <a href="https://issues.apache.org/jira/browse/HBASE-10070">HBASE-10070</a>。该特性发布后，陆陆续续修复了一些 bug，比如 <a href="https://issues.apache.org/jira/browse/HBASE-18223">HBASE-18223</a>，直到 HBase 1.4 才稳定下来。</li>
-</ul>
-<p><strong>HBase 的数据分片和复制策略</strong><sup class="footnote-ref"><a href="#fn19" id="fnref19">[19]</a></sup><sup class="footnote-ref"><a href="#fn20" id="fnref20">[20]</a></sup>：</p>
-<ul>
-<li><strong>分片策略</strong>：
-<ul>
-<li><strong>分片术语命名</strong>：Region</li>
-<li><strong>键-分片的分配关系</strong>
-<ul>
-<li><strong>Range 拆分</strong>：根据 Region 的文件大小阈值等负载因素自动触发 Region 拆分，配置项 <code>hbase.regionserver.region.split.policy</code>，Region 的拆分策略：
-<ul>
-<li>HBase 0.94 之前，默认是 <a href="https://github.com/apache/hbase/blob/branch-2.5/hbase-server/src/main/java/org/apache/hadoop/hbase/regionserver/ConstantSizeRegionSplitPolicy.java">ConstantSizeRegionSplitPolicy</a>（<a href="https://hbase.apache.org/2.5/devapidocs/org/apache/hadoop/hbase/regionserver/ConstantSizeRegionSplitPolicy.html">javadoc</a>），当一个 Region 最大文件大小超过设置阈值（<code>hbase.hregion.max.filesize</code>，默认 <code>1G</code>），触发 Region 分裂。</li>
-<li>HBase 0.94 开始，默认 <a href="https://github.com/apache/hbase/blob/branch-2.5/hbase-server/src/main/java/org/apache/hadoop/hbase/regionserver/IncreasingToUpperBoundRegionSplitPolicy.java">IncreasingToUpperBoundRegionSplitPolicy</a>（<a href="https://hbase.apache.org/2.5/devapidocs/org/apache/hadoop/hbase/regionserver/IncreasingToUpperBoundRegionSplitPolicy.html">javadoc</a>）</li>
-<li>HBase 2.0 开始，默认 <a href="https://github.com/apache/hbase/blob/branch-2.5/hbase-server/src/main/java/org/apache/hadoop/hbase/regionserver/SteppingSplitPolicy.java">SteppingSplitPolicy</a>（<a href="https://hbase.apache.org/2.5/devapidocs/org/apache/hadoop/hbase/regionserver/SteppingSplitPolicy.html">javadoc</a>）。如果 Region 个数等于 1，分裂阈值为 flush size * 2，否则阈值为最大文件大小。flush size 的配置项是 <code>hbase.hregion.memstore.flush.size</code>，默认 128MB。</li>
-</ul>
-</li>
-<li><strong>Region 合并</strong>：使用 <code>merge_region</code> 命令可以人为触发执行 Region 合并。</li>
-</ul>
-</li>
-<li><strong>分片-机器的分配关系</strong><sup class="footnote-ref"><a href="#fn21" id="fnref21">[21]</a></sup>：根据负载均衡策略自动分配放置
-<ul>
-<li>配置项 <code>hbase.master.loadbalancer.class</code>，负载均衡策略
-<ul>
-<li>HBase 1.0 之前，默认 <a href="https://github.com/apache/hbase/blob/branch-2.5/hbase-server/src/main/java/org/apache/hadoop/hbase/master/balancer/SimpleLoadBalancer.java">SimpleLoadBalancer</a>（<a href="https://hbase.apache.org/2.5/devapidocs/org/apache/hadoop/hbase/master/balancer/SimpleLoadBalancer.html">javadoc</a>），策略是保证每个 RegionServer 的 Region 个数基本相等。</li>
-<li>HBase 1.0 开始，默认 <a href="https://github.com/apache/hbase/blob/branch-2.5/hbase-server/src/main/java/org/apache/hadoop/hbase/master/balancer/StochasticLoadBalancer.java">StochasticLoadBalancer</a>（<a href="https://hbase.apache.org/2.5/devapidocs/org/apache/hadoop/hbase/master/balancer/StochasticLoadBalancer.html">javadoc</a>），不再单纯根据 Region 个数，而是由多种独立的影响负载因素加权计算的复合值。</li>
-<li>相关源码：<a href="https://github.com/apache/hbase/blob/branch-2.5/hbase-server/src/main/java/org/apache/hadoop/hbase/master/assignment/AssignmentManager.java">AssignmentManager</a>（<a href="https://hbase.apache.org/2.5/devapidocs/org/apache/hadoop/hbase/master/assignment/AssignmentManager.html">javadoc</a>）</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><strong>分片再均衡策略</strong>：根据负载均衡策略自动 reshard</li>
-</ul>
-</li>
-<li><strong>集群间的复制策略</strong><sup class="footnote-ref"><a href="#fn22" id="fnref22">[22]</a></sup>：类似于 MySQL 的主从复制，HBase 复制，区分主集群（master cluster）和从集群（slave cluster）。主集群也称为源集群（source cluster）；从集群也称为目标集群（target cluster）或 peer 集群（peer cluster）。复制的主集群与从集群规模大小通常不一样，主集群会使用随机选择复制目标 HRegionServer 来平衡发送到每台 HRegionServer 的数据量。主集群内的每个 HRegionServer 都将自己的 HLog 日志（WAL 日志）的变更<strong>推送</strong>（push）到目标集群的其他 HRegionServer。
-<ul>
-<li><strong>复制单位</strong>：以整个集群为服务单位</li>
-<li><strong>复制系数</strong>：与配置的从集群的数量直接相关</li>
-<li><strong>副本更新传播策略</strong>：采用异步复制（asynchronous replication），HBase 3.0 开始支持同步复制（<a href="https://hbase.apache.org/book.html#syncreplication">synchronous replication</a>），参见 <a href="https://issues.apache.org/jira/browse/HBASE-19064">HBASE-19064</a>。</li>
-</ul>
-</li>
-<li><strong>分片的复制策略</strong><sup class="footnote-ref"><a href="#fn23" id="fnref23">[23]</a></sup><sup class="footnote-ref"><a href="#fn24" id="fnref24">[24]</a></sup><sup class="footnote-ref"><a href="#fn25" id="fnref25">[25]</a></sup>：副本区分两种类型 Primary Region 副本和 Secondary Region 副本，同一 Region 的各个副本分布在不同的 HRegionServer 上，只有 Primary Region 副本可以接收客户端的写请求，Secondary Region 副本对客户端总是只读。默认不开启 Region 复制，在同个集群内只有单个 Region 副本，若开启，Region 副本将在集群内复制。
-<ul>
-<li><strong>复制单位</strong>：以分片为单位</li>
-<li><strong>复制系数</strong>：在创建表时可以指定某表的复制系数，并且支持动态修改，默认复制系数为 1。
-<ul>
-<li>如 <code>create 't1', &#123;REGION_REPLICATION =&gt; 2&#125;</code> 和 <code>alter 't1', &#123;REGION_REPLICATION =&gt; 1&#125;</code></li>
-</ul>
-</li>
-<li><strong>副本更新传播策略</strong>：采用异步复制，更新传播的具体实现机制有两种，storefile refresher 和 async wal replication。
-<ul>
-<li>配置项 <code>hbase.regionserver.storefile.refresh.period</code>，默认值 0，若值非零，表示开启 storefile refresher。</li>
-<li>配置项 <code>hbase.region.replica.replication.enabled</code>，默认值 <code>false</code>，若值为 <code>true</code>，表示开启 async wal replication。</li>
-</ul>
-</li>
-<li><strong>副本读取策略</strong>：读取一致性等级（consistency level）的分两种，<code>STRONG</code>（强）和 <code>TIMELINE</code>（时间线），默认强一致性。每次读取操作都可以设置不同的一致性等级。在强一致性等级下，只读取 Primary Region 副本。在时间线一致性等级下，先尝试读取 Primary Region 副本，在很短的间隔（默认为 10 毫秒），如果 Primary Region 副本没有响应，则还将发送 Secondary Region 副本的并行 RPC，从最先完成的 RPC 返回结果。结果可能从 Primary Region 副本中读到，也可能从 Secondary Region 副本中读到。Primary Region 副本总最新的，而 Secondary Region 副本可能过时。
-<ul>
-<li>相关源码：<a href="https://hbase.apache.org/2.5/devapidocs/org/apache/hadoop/hbase/client/Consistency.html">Consistency</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><strong>请求路由寻址</strong>：
-<ul>
-<li>HBase 客户端会将 Region 路由信息缓存到本地，客户端可以直接根据本地缓存的 Region 路由信息将请求路由到正确的 HRegionServer 节点上。绝大部分的请求都属于这种情况。如果 Region 路由缓存为空，客户端先读取 ZooKeeper 上的 <code>hbase:meta</code> 表的 HRegionServer 访问地址，然后访问 HRegionServer 读取 Region 路由信息并缓存到本地。如 Region 路由缓存非空，但是根据缓存请求某 HRegionServer 后发现 Region 并不在该 HRegionServer 上，则说明缓存过期，需要读取最新的 <code>hbase:meta</code> 表数据，刷新缓存。
-<ul>
-<li>相关源码：<a href="https://github.com/apache/hbase/blob/branch-2.5/hbase-client/src/main/java/org/apache/hadoop/hbase/client/MetaCache.java">MetaCache</a>（<a href="https://hbase.apache.org/2.5/devapidocs/org/apache/hadoop/hbase/client/MetaCache.html">javadoc</a>）</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><strong>集群配置和协调</strong>：
-<ul>
-<li>HMaster 主要负责 HBase 系统管理，包括 table 的操作管理、Region 的负载均衡和迁移等。</li>
-<li>ZooKeeper 用于实现 HMaster 高可用、维护元数据、实现分布式表锁等。元数据，包括全部的 HMaster 的主备节点信息、全部的 HRegionServer 节点信息、全部的表信息、元数据表 <code>hbase:meta</code> 的 HRegionServer 访问地址等。<code>hbase:meta</code> 表用于保存全部 Region 信息。</li>
-</ul>
-</li>
-</ul>
-<p>HBase 架构，如下图所示<sup class="footnote-ref"><a href="#fn20" id="fnref20:1">[20:1]</a></sup>：</p>
-<p><img src="media/hbase-architecture.png" alt="HBase 架构"></p>
-<h1 id="Cassandra（2008）">Cassandra（2008）</h1>
-<p>Cassandra，分布式设计基于 Amazon Dynamo，数据模型基于 Google BigTable。</p>
-<p><strong>Cassandra 的数据分片和复制策略</strong>：</p>
-<ul>
-<li><strong>分片策略</strong>：
-<ul>
-<li><strong>分片术语命名</strong>：虚拟节点（virtual node）</li>
-<li><strong>键-分片的分配关系</strong>：按 Hash 拆分。基于虚拟节点，一种改进版的一致性哈希算法</li>
-<li><strong>分片-机器的分配关系</strong>：手动配置每个物理节点包含的虚拟节点数（默认 256 个）</li>
-<li><strong>分片副本-机器的分配关系</strong>：轮询（round-robin）分配
-<ul>
-<li><code>SimpleStrategy</code> 和 <code>NetworkTopologyStrategy</code></li>
-</ul>
-</li>
-<li><strong>分片再均衡策略</strong>：自动 reshard
-<ul>
-<li>基于虚拟节点的一致性哈希，在节点加入或删除时触发自动 reshard</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><strong>复制策略</strong>：
-<ul>
-<li><strong>复制单位</strong>：以分片为单位</li>
-<li><strong>复制系数</strong>：</li>
-<li><strong>副本更新传播策略</strong>：</li>
-</ul>
-</li>
-<li><strong>请求路由寻址</strong>：</li>
-<li><strong>集群配置和协调</strong>：
-<ul>
-<li>采用<strong>去中心化架构</strong>，每个节点都维护全量元数据，节点间采用 Gossip 协议同步元数据</li>
-</ul>
-</li>
-</ul>
-<h1 id="TiDB（2017）">TiDB（2017）</h1>
-<p>2017.10，TiDB 对外发布 1.0 GA，设计上受 Google 的 Spanner / F1 数据库启发。</p>
-<p><strong>TiDB 的数据分片和复制策略</strong>：</p>
-<ul>
-<li><strong>分片策略</strong>：
-<ul>
-<li><strong>分片术语命名</strong>：Region</li>
-<li><strong>键-分片的分配关系</strong>：按 Range 拆分</li>
-<li><strong>分片-机器的分配关系</strong>：根据负载自动分片（auto-sharding）</li>
-<li><strong>分片再均衡策略</strong>：自动 reshard
-<ul>
-<li>根据分区的数据量大小阈值触发自动拆分或合并</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><strong>复制策略</strong>：
-<ul>
-<li><strong>复制单位</strong>：以分片为单位</li>
-<li><strong>复制系数</strong>：</li>
-<li><strong>副本更新传播策略</strong>：基于 Raft 协议</li>
-<li><strong>副本读取策略</strong>：</li>
-</ul>
-</li>
-<li><strong>请求路由寻址</strong>：</li>
-<li><strong>集群配置和协调</strong>：
-<ul>
-<li>由 PD Server 分配分区和维护元数据（包括分区和节点的分配信息）</li>
-</ul>
-</li>
-</ul>
-<h1 id="参考资料">参考资料</h1>
-<p>数据密集型应用系统设计，Martin Kleppmann，2015，<a href="https://book.douban.com/subject/30329536/">豆瓣</a>：第5章 数据复制，第6章 数据分区</p>
-<hr class="footnotes-sep">
-<section class="footnotes">
-<ol class="footnotes-list">
-<li id="fn1" class="footnote-item"><p>MySQL 8.0 Reference Manual: Chapter 24 Partitioning <a href="https://dev.mysql.com/doc/refman/8.0/en/partitioning.html">https://dev.mysql.com/doc/refman/8.0/en/partitioning.html</a> <a href="#fnref1" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn2" class="footnote-item"><p>MySQL 8.0 Reference Manual: Chapter 17 Replication <a href="https://dev.mysql.com/doc/refman/8.0/en/replication.html">https://dev.mysql.com/doc/refman/8.0/en/replication.html</a> <a href="#fnref2" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn3" class="footnote-item"><p>MySQL Connector/J Developer Guide: Chapter 9 Multi-Host Connections: 9.4 Configuring Source/Replica Replication with Connector/J <a href="https://dev.mysql.com/doc/connector-j/en/connector-j-source-replica-replication-connection.html">https://dev.mysql.com/doc/connector-j/en/connector-j-source-replica-replication-connection.html</a> <a href="#fnref3" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn4" class="footnote-item"><p>MySQL Router: Chapter 3 Deploying MySQL Router: 3.5 Read/Write Splitting <a href="https://dev.mysql.com/doc/mysql-router/8.3/en/router-read-write-splitting.html">https://dev.mysql.com/doc/mysql-router/8.3/en/router-read-write-splitting.html</a> <a href="#fnref4" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn5" class="footnote-item"><p>MySQL 8.0 Reference Manual: Chapter 21 InnoDB Cluster <a href="https://dev.mysql.com/doc/refman/8.0/en/mysql-innodb-cluster-introduction.html">https://dev.mysql.com/doc/refman/8.0/en/mysql-innodb-cluster-introduction.html</a> <a href="#fnref5" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn6" class="footnote-item"><p>Redis 3.2 开发与运维，付磊、张益军，2017，<a href="https://book.douban.com/subject/26971561/">豆瓣</a>：第6章 复制，第9章 哨兵，第10章 集群 <a href="#fnref6" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn7" class="footnote-item"><p>Redis Documentation &gt; Manage Redis &gt; Redis replication <a href="https://redis.io/docs/management/replication/">https://redis.io/docs/management/replication/</a> <a href="#fnref7" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn8" class="footnote-item"><p>Redis Documentation &gt; Manage Redis &gt; Scale with Redis Cluster <a href="https://redis.io/docs/management/scaling/">https://redis.io/docs/management/scaling/</a> <a href="#fnref8" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn9" class="footnote-item"><p>Redis Documentation &gt; Reference &gt; Redis cluster specification <a href="https://redis.io/docs/reference/cluster-spec/">https://redis.io/docs/reference/cluster-spec/</a> <a href="#fnref9" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn10" class="footnote-item"><p>Redis Documentation &gt; Manage Redis &gt; High availability with Redis Sentinel <a href="https://redis.io/docs/management/sentinel/">https://redis.io/docs/management/sentinel/</a> <a href="#fnref10" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn11" class="footnote-item"><p>Elasticsearch 6.1 源码解析与优化实战，张超，2019，<a href="https://book.douban.com/subject/30386800/">豆瓣</a> <a href="#fnref11" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn12" class="footnote-item"><p>Elasticsearch 2.x 权威指南：分布式文档存储 <a href="https://www.elastic.co/guide/cn/elasticsearch/guide/current/distributed-docs.html">https://www.elastic.co/guide/cn/elasticsearch/guide/current/distributed-docs.html</a> <a href="#fnref12" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn13" class="footnote-item"><p>Elasticsearch Guide &gt; Reading and Writing documents <a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html">https://www.elastic.co/guide/en/elasticsearch/reference/8.12/docs-replication.html</a> <a href="#fnref13" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn14" class="footnote-item"><p>2018-04 阿里王怀远：Elasticsearch分布式一致性原理剖析(三)-Data篇 <a href="https://zhuanlan.zhihu.com/p/35285514">https://zhuanlan.zhihu.com/p/35285514</a> <a href="#fnref14" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn15" class="footnote-item"><p>2020-06 Clarifying the difference between Active shards and in-sync copies <a href="https://discuss.elastic.co/t/238716">https://discuss.elastic.co/t/238716</a> <a href="#fnref15" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn16" class="footnote-item"><p>Elasticsearch Guide &gt; Node <a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.12/modules-node.html">https://www.elastic.co/guide/en/elasticsearch/reference/8.12/modules-node.html</a> <a href="#fnref16" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn17" class="footnote-item"><p>Elasticsearch Guide &gt; Quorum-based decision making <a href="https://www.elastic.co/guide/en/elasticsearch/reference/8.12/modules-discovery-quorums.html">https://www.elastic.co/guide/en/elasticsearch/reference/8.12/modules-discovery-quorums.html</a> <a href="#fnref17" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn18" class="footnote-item"><p>2019-03 Elasticsearch 集群协调迎来新时代（7.0） <a href="https://www.elastic.co/cn/blog/a-new-era-for-cluster-coordination-in-elasticsearch">https://www.elastic.co/cn/blog/a-new-era-for-cluster-coordination-in-elasticsearch</a> <a href="#fnref18" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn19" class="footnote-item"><p>HBase 2.x 原理与实践，胡争，2019，<a href="https://book.douban.com/subject/34819650/">豆瓣</a> <a href="#fnref19" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn20" class="footnote-item"><p>HBase 0.91 权威指南，Lars George，2011，<a href="https://book.douban.com/subject/25784835/">豆瓣</a> <a href="#fnref20" class="footnote-backref">↩︎</a> <a href="#fnref20:1" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn21" class="footnote-item"><p>Apache HBase Reference Guide: 72.2. Region-RegionServer Assignment <a href="https://hbase.apache.org/book.html#regions.arch.assignment">https://hbase.apache.org/book.html#regions.arch.assignment</a> <a href="#fnref21" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn22" class="footnote-item"><p>Apache HBase Reference Guide: 165. Cluster Replication <a href="https://hbase.apache.org/book.html#_cluster_replication">https://hbase.apache.org/book.html#_cluster_replication</a> <a href="#fnref22" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn23" class="footnote-item"><p>Apache HBase Reference Guide: 75. Timeline-consistent High Available Reads <a href="https://hbase.apache.org/book.html#arch.timelineconsistent.reads">https://hbase.apache.org/book.html#arch.timelineconsistent.reads</a> <a href="#fnref23" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn24" class="footnote-item"><p>2014-06 HBase Read High Availability Using Timeline-Consistent Region Replicas <a href="https://www.slideshare.net/slideshow/features-session-1/35938207">https://www.slideshare.net/slideshow/features-session-1/35938207</a> <a href="#fnref24" class="footnote-backref">↩︎</a></p>
-</li>
-<li id="fn25" class="footnote-item"><p>2018-06 阿里杨文龙：深入解读 HBase2.0 新功能之高可用读 Region Replica <a href="https://developer.aliyun.com/article/599162">https://developer.aliyun.com/article/599162</a> <a href="#fnref25" class="footnote-backref">↩︎</a></p>
-</li>
-</ol>
-</section>
-]]></content>
-      <categories>
-        <category>架构</category>
-      </categories>
-      <tags>
-        <tag>架构</tag>
-        <tag>MySQL</tag>
-        <tag>数据库</tag>
-        <tag>分布式</tag>
-        <tag>RocketMQ</tag>
-        <tag>Kafka</tag>
-        <tag>Redis</tag>
       </tags>
   </entry>
 </search>

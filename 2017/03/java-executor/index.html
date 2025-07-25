@@ -30,20 +30,20 @@
 <meta property="og:site_name" content="nullwy&#39;s blog">
 <meta property="og:description" content="本文整理 Java 并发框架 Executor 的用法，并对结合 JDK 相关的实现源码作简单分析。 任务与线程池 先来看下 Executor 框架的 javadoc 描述 [ ref1 ref2 ]">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://nullwy.me/media/executor.png">
-<meta property="og:image" content="https://nullwy.me/media/future.png">
-<meta property="og:image" content="https://nullwy.me/media/ThreadPoolExecutor.jpg">
-<meta property="og:image" content="https://nullwy.me/media/ThreadPoolExecutor%202.jpg">
-<meta property="og:image" content="https://nullwy.me/media/task.png">
-<meta property="og:image" content="https://nullwy.me/media/work-stealing.png">
-<meta property="og:image" content="https://nullwy.me/media/fork-join.png">
+<meta property="og:image" content="https://static.nullwy.me/java-executor.png">
+<meta property="og:image" content="https://static.nullwy.me/java-future.png">
+<meta property="og:image" content="https://static.nullwy.me/java-thread-pool-executor.jpg">
+<meta property="og:image" content="https://static.nullwy.me/java-thread-pool-executor2.jpg">
+<meta property="og:image" content="https://static.nullwy.me/java-task.png">
+<meta property="og:image" content="https://static.nullwy.me/java-work-stealing.png">
+<meta property="og:image" content="https://static.nullwy.me/java-fork-join.png">
 <meta property="article:published_time" content="2017-03-23T07:09:51.000Z">
-<meta property="article:modified_time" content="2023-12-05T06:14:46.382Z">
+<meta property="article:modified_time" content="2025-07-24T17:09:47.000Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="并发">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://nullwy.me/media/executor.png">
+<meta name="twitter:image" content="https://static.nullwy.me/java-executor.png">
 
 <link rel="canonical" href="https://nullwy.me/2017/03/java-executor/">
 
@@ -315,8 +315,8 @@
 <li>其他基于 Executor 的实用工具包括具体类 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/FutureTask.html">FutureTask</a>，它提供 Future 的常见可扩展实现，以及 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ExecutorCompletionService.html">ExecutorCompletionService</a>，它有助于协调对异步任务组的处理。</li>
 </ul>
 <p>涉及到的类与接口的层次结构，如下图所示：</p>
-<img width="400" alt="Executor 相关类" src="/media/executor.png">
-<img width="400" alt="任务相关类" src="/media/future.png">
+<img width="400" alt="Executor 相关类" src="https://static.nullwy.me/java-executor.png">
+<img width="400" alt="任务相关类" src="https://static.nullwy.me/java-future.png">
 <h2 id="线程池">线程池</h2>
 <p>Executor，此接口提供一种将任务提交与每个任务将如何运行的机制（包括线程使用的细节、调度等）分离开来的方法。接口只定义唯一一个方法：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(Runnable command)</span></span><br><span class="line">    在未来某个时间执行给定的命令</span><br></pre></td></tr></table></figure>
@@ -338,8 +338,8 @@
 <p>可以看到 <code>newFixedThreadPool</code>、<code>newCachedThreadPool</code> 和 <code>newSingleThreadExecutor</code> 内部都是通过类 <code>ThreadPoolExecutor</code> 实现。<a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html">ThreadPoolExecutor</a> 的构造方法的 javadoc 如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="title function_">ThreadPoolExecutor</span><span class="params">(<span class="type">int</span> corePoolSize,</span></span><br><span class="line"><span class="params">                          <span class="type">int</span> maximumPoolSize,</span></span><br><span class="line"><span class="params">                          <span class="type">long</span> keepAliveTime,</span></span><br><span class="line"><span class="params">                          TimeUnit unit,</span></span><br><span class="line"><span class="params">                          BlockingQueue&lt;Runnable&gt; workQueue)</span></span><br><span class="line"></span><br><span class="line">    用给定的初始参数和默认的线程工厂及被拒绝的执行处理程序创建新的 ThreadPoolExecutor。使用 Executors 工厂方法之一比使用此通用构造方法方便得多。</span><br><span class="line"></span><br><span class="line">    参数：</span><br><span class="line">        corePoolSize - 池中所保存的线程数，包括空闲线程。</span><br><span class="line">        maximumPoolSize - 池中允许的最大线程数。</span><br><span class="line">        keepAliveTime - 当线程数大于核心时，此为终止前多余的空闲线程等待新任务的最长时间。</span><br><span class="line">        unit - keepAliveTime 参数的时间单位。</span><br><span class="line">        workQueue - 执行前用于保持任务的队列。此队列仅保持由 execute 方法提交的 Runnable 任务。 </span><br></pre></td></tr></table></figure>
 <p>ThreadPoolExecutor 的处理流程如下图所示（参考自《Java并发编程的艺术》第9章 Java中的线程池）：<br>
-<img width="700" alt="线程池的主要处理流程" src="/media/ThreadPoolExecutor.jpg"><br>
-<img width="500" alt="ThreadPoolExecutor 执行示意图" src="/media/ThreadPoolExecutor%202.jpg"></p>
+<img width="700" alt="线程池的主要处理流程" src="https://static.nullwy.me/java-thread-pool-executor.jpg"><br>
+<img width="500" alt="ThreadPoolExecutor 执行示意图" src="https://static.nullwy.me/java-thread-pool-executor2.jpg"></p>
 <p>基本上预定义的三个线程池已经满足常见的使用需求，若有特殊需求也可以，特殊构造 ThreadPoolExecutor 实例。此类提供 protected 的 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html#beforeExecute(java.lang.Thread,%20java.lang.Runnable)">beforeExecute</a> 和 <a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ThreadPoolExecutor.html#afterExecute(java.lang.Runnable,%20java.lang.Throwable)">afterExecute</a> 钩子 (hook) 方法，就是预留扩展用的。</p>
 <p><a target="_blank" rel="noopener" href="http://www.cjsdn.net/Doc/JDK60/java/util/concurrent/ScheduledExecutorService.html">ScheduledExecutorService</a> 类提供的方法：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">ScheduledFuture&lt;V&gt; <span class="title function_">schedule</span><span class="params">(Callable&lt;V&gt; callable, <span class="type">long</span> delay, TimeUnit unit)</span></span><br><span class="line">    创建并执行在给定延迟后启用的 ScheduledFuture</span><br><span class="line">ScheduledFuture&lt;?&gt; schedule(Runnable command, <span class="type">long</span> delay, TimeUnit unit)</span><br><span class="line">    创建并执行在给定延迟后启用的一次性操作</span><br><span class="line">ScheduledFuture&lt;?&gt; scheduleAtFixedRate(Runnable command, <span class="type">long</span> initialDelay, <span class="type">long</span> period, TimeUnit unit)</span><br><span class="line">    创建并执行一个在给定初始延迟后首次启用的定期操作，后续操作具有给定的周期</span><br><span class="line">ScheduledFuture&lt;?&gt; scheduleWithFixedDelay(Runnable command, <span class="type">long</span> initialDelay, <span class="type">long</span> delay, TimeUnit unit)</span><br><span class="line">    创建并执行一个在给定初始延迟后首次启用的定期操作，随后，在每一次执行终止和下一次执行开始之间都存在给定的延迟</span><br></pre></td></tr></table></figure>
@@ -406,7 +406,7 @@
 <p>ListenableFuture API 功能的完整介绍参见 <a target="_blank" rel="noopener" href="https://github.com/google/guava/wiki/ListenableFutureExplained">ListenableFutureExplained</a>，本文不再展开。</p>
 <h1 id="Fork-Join-框架">Fork/Join 框架</h1>
 <p>一个大的任务可能会由多个子任务组成，比如整个任务A，由任务B 和任务C 组成，而任务B 又可以被分解为任务D 和任务E，如下图所示。任务分解组合问题，利用 ListenableFuture 的回调将子任务组合起来是一种解决办法，但还是不够优雅简洁。Java 7 引入的 Fork/Join 框架，就是以这种方式设计的。Fork/Join 框架编程的风格就是，将任务分解为多个子任务，并行执行，然后将结果组合起来，即分而治之。ExecutorService 适合解决相互独立的任务，而 Fork/Join 框架适合解决任务分解组合的情况 [ <a target="_blank" rel="noopener" href="https://stackoverflow.com/q/21156599">ref</a> ]。</p>
-<img width="300" alt="任务的分治" src="/media/task.png">
+<img width="300" alt="任务的分治" src="https://static.nullwy.me/java-task.png">
 <p>其实整个 java.util.concurrent 包是由 <a target="_blank" rel="noopener" href="http://g.oswego.edu/dl/concurrency-interest/">JSR-166</a> <a target="_blank" rel="noopener" href="https://www.jcp.org/en/jsr/detail?id=166">规范</a>引入的，Fork/Join 框架就是其中的 jsr166y。JSR-166 由 <a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Doug_Lea">Doug Lea</a> 主导，是主要设计和代码实现者，而 jsr166y 最初源自他发表于 2000 年的论文“A Java Fork/Join Framework”（<a target="_blank" rel="noopener" href="https://academic.microsoft.com/#/detail/1975579741">msa</a> <a target="_blank" rel="noopener" href="http://gee.cs.oswego.edu/dl/papers/fj.pdf">pdf</a>）。</p>
 <h2 id="工作窃取">工作窃取</h2>
 <p>Fork/Join 框架采用工作窃取（<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/Work_stealing">work stealing</a>）的任务调度机制 [ <a target="_blank" rel="noopener" href="http://ifeve.com/a-java-fork-join-framework-3-2/">ref</a> ]：</p>
@@ -419,7 +419,7 @@
 <li>当一个工作线程触及了 join 操作，如果可能的话它将处理其他任务，直到目标任务被告知已经结束（通过 isDone 方法）。所有的任务都会无阻塞的完成。</li>
 <li>当一个工作线程无法再从其他线程中获取任务和失败处理的时候，它就会退出（通过 yields, sleeps, 和/或者优先级调整）并经过一段时间之后再度尝试直到所有的工作线程都被告知他们都处于空闲的状态。在这种情况下，他们都会阻塞直到其他的任务再度被上层调用。</li>
 </ul>
-<img width="350" alt="work stealing" src="/media/work-stealing.png">
+<img width="350" alt="work stealing" src="https://static.nullwy.me/java-work-stealing.png">
 <p>使用 LIFO 规则来处理每个工作线程的自己任务，窃取别的工作线程的任务却使用 FIFO 规则，这是一种被广泛使用的进行递归 fork/join 设计的一种调优手段。这种模式有以下两个优点：它通过窃取工作线程队列反方向的任务减少了竞争。同时，它利用了递归的分治算法越早的产生大任务这一特点。因此，更早期被窃取的任务有可能会提供一个更大的单元任务，从而使得窃取线程能够在将来进行递归分解。</p>
 <p>这些规则的结果是，拥有相对细粒度的基本任务，比那些仅仅使用粗粒度划分或没有使用递归分解的任务运行更快。</p>
 <h2 id="使用示例">使用示例</h2>
@@ -434,7 +434,7 @@
 <p>使用 Fork/Join 框架计算斐波那契数的示例代码如下：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> concurrent;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.ForkJoinPool;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.RecursiveTask;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ForkJoinMain</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">Fibonacci</span> <span class="keyword">extends</span> <span class="title class_">RecursiveTask</span>&lt;Integer&gt; &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">int</span> n;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">Fibonacci</span><span class="params">(<span class="type">int</span> n)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.n = n;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">protected</span> Integer <span class="title function_">compute</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> (n &lt;= <span class="number">1</span>)</span><br><span class="line">                <span class="keyword">return</span> n;</span><br><span class="line">            <span class="type">Fibonacci</span> <span class="variable">f1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fibonacci</span>(n - <span class="number">1</span>);</span><br><span class="line">            <span class="type">Fibonacci</span> <span class="variable">f2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fibonacci</span>(n - <span class="number">2</span>);</span><br><span class="line">            f1.fork();</span><br><span class="line">            <span class="keyword">return</span> f2.compute() + f1.join();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">ForkJoinPool</span> <span class="variable">pool</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ForkJoinPool</span>();</span><br><span class="line">        <span class="type">Fibonacci</span> <span class="variable">fib</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Fibonacci</span>(<span class="number">3</span>);</span><br><span class="line">        pool.invoke(fib); <span class="comment">// 等待计算完成</span></span><br><span class="line">        <span class="type">Integer</span> <span class="variable">result</span> <span class="operator">=</span> fib.get();</span><br><span class="line">        System.out.println(result);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>这个计算过程如下图所示：</p>
-<p><img src="/media/fork-join.png" alt="fork-join"></p>
+<p><img src="https://static.nullwy.me/java-fork-join.png" alt="fork-join"></p>
 <h1 id="参考资料">参考资料</h1>
 <ol>
 <li>Java 并发编程实战，Goetz，2006；第6章 任务执行 <a target="_blank" rel="noopener" href="https://book.douban.com/subject/10484692/">https://book.douban.com/subject/10484692/</a></li>
@@ -567,7 +567,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-count">29</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -580,7 +580,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-count">62</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -627,7 +627,7 @@
 <div class="copyright">
   
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2024</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -636,12 +636,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">386k</span>
+    <span title="站点总字数">372k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:51</span>
+    <span title="站点阅读时长">5:39</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
   </div>
