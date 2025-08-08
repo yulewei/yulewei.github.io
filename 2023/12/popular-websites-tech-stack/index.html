@@ -47,16 +47,16 @@
 <meta property="og:image" content="https://static.nullwy.me/twitter-architecture-rails.png">
 <meta property="og:image" content="https://static.nullwy.me/twitter-architecture-2013.png">
 <meta property="article:published_time" content="2023-12-03T15:37:00.000Z">
-<meta property="article:modified_time" content="2024-03-08T11:25:00.294Z">
+<meta property="article:modified_time" content="2024-03-08T11:25:00.000Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="架构">
+<meta property="article:tag" content="分布式">
+<meta property="article:tag" content="可伸缩性">
 <meta property="article:tag" content="技术栈">
 <meta property="article:tag" content="微服务">
 <meta property="article:tag" content="MySQL">
 <meta property="article:tag" content="数据库">
 <meta property="article:tag" content="Java">
-<meta property="article:tag" content="分布式">
-<meta property="article:tag" content="可伸缩性">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://static.nullwy.me/gocon-tokyo-2014-fitzpatrick-go-fun-fast.png">
 
@@ -1085,13 +1085,13 @@
       <footer class="post-footer">
           <div class="post-tags">
               <a href="/tags/%E6%9E%B6%E6%9E%84/" rel="tag"># 架构</a>
+              <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag"># 分布式</a>
+              <a href="/tags/%E5%8F%AF%E4%BC%B8%E7%BC%A9%E6%80%A7/" rel="tag"># 可伸缩性</a>
               <a href="/tags/%E6%8A%80%E6%9C%AF%E6%A0%88/" rel="tag"># 技术栈</a>
               <a href="/tags/%E5%BE%AE%E6%9C%8D%E5%8A%A1/" rel="tag"># 微服务</a>
               <a href="/tags/MySQL/" rel="tag"># MySQL</a>
               <a href="/tags/%E6%95%B0%E6%8D%AE%E5%BA%93/" rel="tag"># 数据库</a>
               <a href="/tags/Java/" rel="tag"># Java</a>
-              <a href="/tags/%E5%88%86%E5%B8%83%E5%BC%8F/" rel="tag"># 分布式</a>
-              <a href="/tags/%E5%8F%AF%E4%BC%B8%E7%BC%A9%E6%80%A7/" rel="tag"># 可伸缩性</a>
           </div>
 
         
@@ -1188,7 +1188,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-count">29</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -1201,7 +1201,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-count">62</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -1248,7 +1248,7 @@
 <div class="copyright">
   
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2024</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -1257,12 +1257,12 @@
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">386k</span>
+    <span title="站点总字数">373k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:51</span>
+    <span title="站点阅读时长">5:39</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
   </div>
@@ -1338,6 +1338,26 @@
 
 
 
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'none',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
 
 
 

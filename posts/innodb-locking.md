@@ -21,7 +21,7 @@ tags: [MySQL, InnoDB, 数据库, 锁, 并发, MVCC]
 
 早期各大数据库厂商实现并发控制时多采用基于封锁的并发控制技术，所以在基于封锁的技术背景下，才在 [ANSI SQL-92](https://en.wikipedia.org/wiki/SQL-92) 标准中提出了四种隔离级别：未提交读（Read Uncommitted）、己提交读（Read Committed）、可重复读（Repeatable Read）、可串行化（Serializable）（附注：为了书写简便本文将各个隔离级别依次缩写为 RU、RC、RR、SER）。ANSI SQL-92 标准的四种隔离级别，是根据三种读异常现象（phenomena）定义的，隔离级别和异常现象的关系如下：
 
-| **隔离级别** | **P1 脏读** | **P2 不可重复读** | **P4 幻读** |
+| **隔离级别** | **P1 脏读** | **P2 不可重复读** | **P3 幻读** |
 | --- | --- | --- | --- |
 | **Read Uncommitted** | 可能 | 可能 | 可能 |
 | **Read Committed** | 避免 | 可能 | 可能 |
@@ -31,15 +31,18 @@ tags: [MySQL, InnoDB, 数据库, 锁, 并发, MVCC]
 ANSI SQL-92 标准文档对三种读异常现象的定义原文如下 [[ref](http://www.contrib.andrew.cmu.edu/~shadow/sql/sql1992.txt)]：
 
 > The isolation level specifies the kind of phenomena that can occur during the execution of concurrent SQL-transactions. The following phenomena are possible:
+> 
 > **1) P1 ("Dirty read")**: SQL-transaction T1 modifies a row. SQL-transaction T2 then reads that row before T1 performs a COMMIT. If T1 then performs a ROLLBACK, T2 will have read a row that was never committed and that may thus be considered to have never existed.
+> 
 > **2) P2 ("Non-repeatable read")**: SQL-transaction T1 reads a row. SQL-transaction T2 then modifies or deletes that row and performs a COMMIT. If T1 then attempts to reread the row, it may receive the modified value or discover that the row has been deleted.
-> **3) P3 ("Phantom")**: SQL-transaction T1 reads the set of rows N that satisfy some <search condition>. SQL-transaction T2 then executes SQL-statements that generate one or more rows that satisfy the <search condition> used by SQL-transaction T1. If SQL-transaction T1 then repeats the initial read with the same <search condition>, it obtains a different collection of rows.
+> 
+> **3) P3 ("Phantom")**: SQL-transaction T1 reads the set of rows N that satisfy some \<search condition\>. SQL-transaction T2 then executes SQL-statements that generate one or more rows that satisfy the \<search condition\> used by SQL-transaction T1. If SQL-transaction T1 then repeats the initial read with the same \<search condition\>, it obtains a different collection of rows.
 
 除了脏读、不可重复读和幻读这 3 种读数据异常外，还有写数据异常，即脏写和丢失更新。各个异常的含义如下：
   - **P0 脏写（Dirty Write）**：事务 T1 写某数据项，并且未提交或回滚，事务 T2 也写该数据项，然后事务 T1 或事务 T2 回滚，回滚导致另外一个事务的修改被连带回滚。脏写异常会导致事务无法回滚，原子性无法得到保障，所以全部隔离级别下都应该避免。脏写也可以叫回滚丢失。
   - **P1 脏读（Dirty Read）**：读到了其他事务还未提交的数据。
   - **P2 不可重复读（Non-Repeatable）**：事务 T1 读取某数据项，事务 T2 修改 update 或删除 delete 该数据项，事务 T1 再次读取该数据项，结果不同。
-  - **P3 幻读（Phantom）**：事务 T1 读取满足某条件的数据项集合，事务 T2 生成新的满足该条件的数据项，事务 T2 再次读取满足该条件的数据项集合，结果不同。
+  - **P3 幻读（Phantom）**：事务 T1 读取满足某谓词条件的数据项集合，事务 T2 生成新的满足该谓词条件的数据项，事务 T2 再次读取满足该谓词条件的数据项集合，结果不同。
   - **P4 丢失更新（Lost Update）**：事务 T1 读取某数据项，事务 T2 更新该数据项并提交，事务 T1 忽略事务 T2 的更新，直接基于最初的读取数据项做更新并提交，导致事务 T2 的更新丢失。丢失更新也可以叫覆盖丢失。
 
 各个异常的读写操作序列的简化符号表示如下 [Berenson 1995]：
@@ -54,12 +57,12 @@ P4: r1[x]...w2[x]...w1[x]...c1                 事务 T2 更新丢失，c1 导�
 
 其中 w1[x] 表示事务 T1 写入记录 x，r1[x] 表示事务 T1 读取记录 x，c1 表示事务 T1 提交，a1 表示事务 T1 回滚，r1[P] 表示事务 T1 按照谓词 P 的条件读取若干条记录，w1[y in P] 表示事务 T1 写入记录 y 满足谓词 P 的条件。
 
-Berenson 的论文评判了 ANSI SQL-92 标准的异常定义。ANSI SQL-92 标准的异常的定义存在歧义，可以严格解释，也可以宽松解释，A1、A2 和 A3 的符号表示为严格解释，按严格解释，某些特殊的异常无法囊括，所以推荐宽松解释。按照标准的定义，容易引起误解的是，在排除 P1 脏读、P2 不可重复、P3 幻读这三种读异常后就会得到可串行化隔离级别，但是事实并非如此。标准没有定义 P0 脏写和 P4 更新丢失异常。另外，基于 MVCC 技术实现的快照隔离（[Snapshot Isolation](https://en.wikipedia.org/wiki/Snapshot_isolation)），能避免标准定义的 P1 脏读、P2 不可重复、P3 幻读，并且避免 P0 脏写和 P4 更新丢失，但还存在写偏序（Write Skew）异常。
+Berenson 的论文评判了 ANSI SQL-92 标准的异常定义。ANSI SQL-92 标准的异常的定义存在歧义，可以严格解释，也可以宽松解释，A1、A2 和 A3 的符号表示为严格解释，按严格解释，某些特殊的异常无法囊括，所以推荐宽松解释。按照标准的定义，容易引起误解的是，在排除 P1 脏读、P2 不可重复、P3 幻读这三种读异常后就会得到可串行化隔离级别，但是事实并非如此。**标准没有定义 P0 脏写和 P4 更新丢失异常**。另外，基于 MVCC 技术实现的快照隔离（[Snapshot Isolation](https://en.wikipedia.org/wiki/Snapshot_isolation)），能避免标准定义的 P1 脏读、P2 不可重复、P3 幻读，并且避免 P0 脏写和 P4 更新丢失，但还存在**写偏序**（Write Skew）异常。
 
 **不可重复读和幻读的区别：**
   - 不可重复读对于事务 T2 的写操作是更新或删除操作，而幻读对于事务 T2 的写操作是插入（插入的新数据满足条件）或更新（使不满足条件的数据在更新后满足条件）操作。
   - 对于幻读现象中事务 T2 的操作，如果操作是对现有数据的更新或删除操作，则表明这样的操作等同于不可重复读，即是在多个行数据上进行更新或删除，**即在多个行数据上批量化重演了不可重复读现象**。
-  - 不可重复读和幻象最大的区别就是前者只需要“锁住”（考虑）已经读过的数据，而幻读需要**对“还不存在的数据“做出预防**。不可重复读现象中事务 T2 着眼于**对现有数据进行操作**；而幻读现象中事务 T2 **着眼于对新增**（或不在锁定范围内已经存在的数据上做更新后而得的数据满足了谓词条件）**数据**。
+  - 不可重复读和幻象最大的区别就是前者只需要“锁住”（考虑）已经读过的数据，而幻读需要**对“还不存在的数据“做出预防**。不可重复读现象中事务 T2 着眼于**对现有数据进行操作**；而幻读现象中事务 T2 **着眼于对新增数据**（或不在锁定范围内已经存在的数据上做更新后而得的数据满足了谓词条件）。
 
 **异常由并发冲突引起，对应关系如下：**
   + 写写冲突：P0 脏写、P4 丢失更新
@@ -76,7 +79,8 @@ Berenson 的论文评判了 ANSI SQL-92 标准的异常定义。ANSI SQL-92 标�
 | **Serializable** | 长写锁 | 长读锁 | 长谓词锁 |
 
 **说明：**
-  +  短锁（short duration lock），当前正在执行的语句持有锁，语句执行完毕锁被释放。长锁（long duration lock），当锁被持有后，直到事务提交之后才被释放。
+  +  短锁（short duration lock），当前正在执行的语句持有锁，语句执行完毕锁被释放。
+  +  长锁（long duration lock），当锁被持有后，直到事务提交之后才被释放。
   + RU 隔离级别，阻止 P0，长写锁
   + RC 隔离级别，阻止 P0、P1，长写锁 + 短读锁 + 短谓词锁
   + RR 隔离级别，阻止 P0、P1、P4、P2，长写锁 + 长写锁 + 短谓词锁
@@ -84,7 +88,7 @@ Berenson 的论文评判了 ANSI SQL-92 标准的异常定义。ANSI SQL-92 标�
 
 基于锁的并发控制下，隔离级别和异常现象的关系：
 
-| **隔离级别** | **P0 脏写** | **P1 脏读** | **P4 丢失更新** | **P2 不可重复读** | **P4 幻读** |
+| **隔离级别** | **P0 脏写** | **P1 脏读** | **P4 丢失更新** | **P2 不可重复读** | **P3 幻读** |
 | --- | --- | --- | --- | --- | --- |
 | **Read Uncommitted** | 避免 | 可能 | 可能 | 可能 | 可能 |
 | **Read Committed** | 避免 | 避免 | 可能 | 可能 | 可能 |
@@ -95,7 +99,7 @@ Berenson 的论文评判了 ANSI SQL-92 标准的异常定义。ANSI SQL-92 标�
 
 <img width="700" alt="基于锁的并发控制" title="基于锁的并发控制" src="https://static.nullwy.me/db-lock-based.png">
 
-基于锁的并发控制，读-读操作可以并发执行，但读-写、写-读、写-写操作无法并发执行，阻塞等待。MVCC 结合封锁技术，使得读－写、写－读操作互不阻塞，即只有写－写操作不能并发，并发度被提高到 75%，这就是 MVCC 被广为使用的原因。
+基于锁的并发控制，读-读操作可以并发执行，但读-写、写-读、写-写操作无法并发执行，阻塞等待。MVCC 结合封锁技术，使得读-写、写-读操作互不阻塞，即只有写-写操作不能并发，并发度被提高到 75%，这就是 MVCC 被广为使用的原因。
 
 InnoDB 的并发控制以封锁技术为主，MVCC 技术为辅助。让我们先看下 InnoDB 的封锁技术。
 
@@ -762,24 +766,27 @@ select * from tbl where c >= 90 and c < 91 for update;
 
 上文提到，PostgreSQL 的并发控制技术是以 MVCC 技术为主，封锁技术为辅。先看下 PostgreSQL 对隔离级别的实现 [[doc](https://www.postgresql.org/docs/15/transaction-iso.html)]：
 
-- PostgreSQL 支持 SQL 标准的 4 种隔离级别，默认的隔离级别是 RC。但 PostgreSQL 内部只实现 3 种隔离级别 RC、RR 和 SER。若选择 RU 隔离，实际上是 RC。
-- PostgreSQL 的 RR 隔离级别，底层是基于 MVCC 技术实现的快照隔离（SI，[Snapshot Isolation](https://en.wikipedia.org/wiki/Snapshot_isolation)）。快照隔离下，能避免 SQL-92 定义的三种异常，脏读、不可重复读和幻读异常，但是可能会出现写偏序（Write Skew）异常。
-- PostgreSQL 的 SER 隔离，底层是可串行化的快照隔离（SSI，Serializable Snapshot Isolation）。
+- PostgreSQL 支持 SQL 标准的 4 种隔离级别，默认的隔离级别是 RC。但 PostgreSQL 内部只实现 3 种隔离级别 RC、RR 和 SER。若选择 RU 隔离，实际上是 RC。RR 隔离级别，底层是基于 MVCC 技术实现的**快照隔离**（SI，[Snapshot Isolation](https://en.wikipedia.org/wiki/Snapshot_isolation)）。快照隔离下，能避免 SQL-92 定义的三种异常，脏读、不可重复读和幻读异常，但是可能会出现**写偏序**（Write Skew）异常。
+- RC 隔离级别：
+    - 事务内的每个查询都会获取最新的快照，快照获取已提交的数据
+- RR 隔离级别：基于**快照隔离** SI
+    - 事务内的所有查询都会读取该事务中第一次此类读取建立的快照
+- SER 隔离级别：底层是**可串行化的快照隔离**（SSI，Serializable Snapshot Isolation）
 
 InnoDB 的并发控制以封锁技术为主，MVCC 技术辅助，各个隔离级别的具体实现是：
 
 - RC 隔离级别：快照读 + 写长锁
-   - 快照读，能避免脏读
-- RR 隔离级别：快照读 + 写长锁 + 间隙锁（没有实现真正的快照隔离 SI）
-   - 快照读，能一定程度避免不可重复读和幻读异常，但因为 InnoDB 的刷新快照的特殊实现，不能完全避免
+   - 快照读，能避免脏读。事务内的每个查询都会获取最新的快照，快照获取已提交的数据
+- RR 隔离级别：快照读 + 写长锁 + 间隙锁
+   - 快照读，能一定程度避免不可重复读和幻读异常，但因为 InnoDB 的**刷新快照**的特殊实现，不能完全避免（实现的是**非标准版的快照隔离** SI）
    - 间隙锁，能避免幻读异常，只有锁定读时才会申请获取间隙锁
-- 可串行化隔离级别：读长锁 + 写长锁 + 间隙锁
+- SER 隔离级别：读长锁 + 写长锁 + 间隙锁
    - 完全基于锁实现串行化，并发度很低，性能不好
 
-InnoDB 实现的 MVCC 技术，能让事务以**快照读**的方式执行查询。**快照读**（[snapshot read](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read)），或者叫一致性非锁定读（consistent nonlocking read），或者一致性读（consistent read），即使用多版本技术实现的读取数据在某个时间点的快照的查询。在 RR 和 RC 隔离级别下，一致性读是普通的 `select` 语句的默认模式。快照读**避免加锁**，从而提高并发度。在 RR 和 RC 隔离级别下快照读的区别：
+InnoDB 实现的 MVCC 技术，能让事务以**快照读**的方式执行查询。**快照读**（[snapshot read](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_consistent_read)），或者叫**一致性非锁定读**（consistent nonlocking read），或者**一致性读**（consistent read），即使用多版本技术实现的读取数据在某个时间点的快照的查询。在 RR 和 RC 隔离级别下，一致性读是普通的 `select` 语句的默认模式。快照读**避免加锁**，从而提高并发度。在 RR 和 RC 隔离级别下快照读的区别：
 
-- RR 隔离级别时，事务中的所有一致性读都会读取该事务中第一次此类读取建立的快照。
-- RC 隔离级别时，事务中的每个一致性读都会设置并读取其自己的最新快照，快照是最新已提交的数据。
+- RR 隔离级别时，事务内的所有一致性读都会读取该事务中第一次此类读取建立的快照。
+- RC 隔离级别时，事务内的每个一致性读都会设置并读取其自己的最新快照，快照是最新已提交的数据。
 
 如果事务在查询数据后，要对该数据做修改操作，快照读无法提供足够的保护，因为其他事务可以对这些数据做修改操作。为了提供额外的保护，InnoDB 提供**锁定读**（[locking read](https://dev.mysql.com/doc/refman/8.0/en/glossary.html#glos_locking_read)），即同时执行锁定操作的 `select` 语句，锁持有直到事务结束。锁定读分两种：
 
@@ -805,9 +812,9 @@ InnoDB 实现的 MVCC 技术，能让事务以**快照读**的方式执行查询
 > Rejecting this bug because InnoDB is working as designed for the following reason;
 > ...
 > But when InnoDB Repeatable Read transactions modify the database, it is possible to get phantom reads added into the static view of the database, just as the ANSI description allows.  Moreover, **InnoDB relaxes the ANSI description for Repeatable Read isolation in that it will also allow non-repeatable reads during an UPDATE or DELETE. Specifically, it will write to newly committed records within its read view**.  And because of gap locking, it will actually wait on other transactions that have pending records that may become committed within its read view.  So not only is an UPDATE or DELETE affected by pending or newly committed records that satisfy the predicate, but also 'SELECT … LOCK IN SHARE MODE' and 'SELECT … FOR UPDATE'.
-> This WRITE COMMITTED implementation of REPEATABLE READ is not typical of any other database that I am aware of.  But it has some real advantages over a standard 'Snapshot' isolation.  When an update conflict would occur in other database engines that implement a snapshot isolation for Repeatable Read, an error message would typically say that you need to restart your transaction in order to see the current data. So the normal activity would be to restart the entire transaction and do the same changes over again.  But InnoDB allows you to just keep going with the current transaction by waiting on other records which might join your view of the data and including them on the fly when the UPDATE or DELETE is done.  This WRITE COMMITTED implementation combined with implicit record and gap locking actually adds a serializable component to Repeatable Read isolation.
+> This WRITE COMMITTED implementation of REPEATABLE READ is not typical of any other database that I am aware of.  But it has some real advantages over a standard 'Snapshot' isolation.  When an **update conflict** would occur in other database engines that implement a snapshot isolation for Repeatable Read, an error message would typically say that you need to restart your transaction in order to see the current data. So the normal activity would be to restart the entire transaction and do the same changes over again.  But InnoDB allows you to **just keep going with the current transaction by waiting on other records which might join your view of the data and including them on the fly when the UPDATE or DELETE is done**.  This WRITE COMMITTED implementation combined with implicit record and gap locking actually adds a serializable component to Repeatable Read isolation.
 
-就是说，InnoDB 实现的 RR 隔离级别，放松了 SQL 标准对 RR 隔离级别的要求。事务 T1 在快照读后，如果其他事务 T2 修改了快照对应的记录并提交，之后事务 T1 执行涉及快照的 DML 语句（update、delete、insert）或锁定读，会触发快照刷新，事务 T2 最新提交的修改会刷新进快照。最终导致事务 T1 再次执行相同条件的快照读，读取结果不同，出现不可重复读或幻读异常。**简单概括就是，在快照失效后，又刷新快照，导致两次读到的快照不同。另外，如果实现上选择不刷新快照，并且事务 T1 正常执行，会出现 P4 丢失更新异常。**
+就是说，InnoDB 实现的 RR 隔离级别，放松了 SQL 标准对 RR 隔离级别的要求。事务 T1 在快照读后，如果其他事务 T2 修改了快照对应的记录并提交，之后事务 T1 执行涉及快照的 DML 语句（update、delete、insert）或锁定读，**会触发快照刷新，事务 T2 最新提交的修改会刷新到事务 T1 的快照中**。最终导致事务 T1 再次执行相同条件的快照读，读取结果不同，出现不可重复读或幻读异常。**简单概括就是，在快照失效后，又刷新快照，导致两次读到的快照不同。另外，如果实现上选择不刷新快照，并且事务 T1 正常执行，会出现 P4 丢失更新异常。**
 
 **不可重复读异常的避免（一定程度上避免，但没有完全避免）：**
 
@@ -821,7 +828,7 @@ InnoDB 实现的 MVCC 技术，能让事务以**快照读**的方式执行查询
 - 如果事务重复的两次读都是当前读（`select for update/share`），因为第一次当前读加间隙锁，其他事务无法插入，被阻塞，所以也不会出现幻读异常。
 - 如果事务重复的两次读都是快照读，但是中间执行涉及快照的 DML 或锁定读，触发了快照刷新，如果快照被更新，就会出现幻读异常。
 
-上述的**快照失效**的场景，PostgreSQL 的处理方式是，事务会被回滚并报错提示，应用程序收到这个报错，可以尝试重试，重试的事务读到的快照是最新的，这样即避免丢失更新异常，也避免了幻读和不可重复读异常（参见官方文档 [doc](https://www.postgresql.org/docs/15/transaction-iso.html#XACT-REPEATABLE-READ)）。
+上述的**快照失效**的场景，PostgreSQL 的处理方式是，事务会被回滚并报错提示，“ERROR: could not serialize access due to concurrent update”，应用程序收到这个报错，可以尝试重试，重试的事务读到的快照是最新的，这样即避免丢失更新异常，也避免了幻读和不可重复读异常（参见官方文档 [doc](https://www.postgresql.org/docs/15/transaction-iso.html#XACT-REPEATABLE-READ)）。
 
 # 参考资料
 

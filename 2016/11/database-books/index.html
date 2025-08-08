@@ -31,7 +31,7 @@
 <meta property="og:description" content="本文整理一些经典的数据库教材以及MySQL相关书籍。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2016-11-26T07:56:02.000Z">
-<meta property="article:modified_time" content="2023-12-05T06:14:01.699Z">
+<meta property="article:modified_time" content="2023-12-05T06:14:01.000Z">
 <meta property="article:author" content="nullwy">
 <meta property="article:tag" content="MySQL">
 <meta property="article:tag" content="数据库">
@@ -482,7 +482,7 @@ What resources exist for Database performance-tuning? <a target="_blank" rel="no
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-count">29</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -495,7 +495,7 @@ What resources exist for Database performance-tuning? <a target="_blank" rel="no
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">63</span>
+        <span class="site-state-item-count">62</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -542,7 +542,7 @@ What resources exist for Database performance-tuning? <a target="_blank" rel="no
 <div class="copyright">
   
   &copy; 2016 – 
-  <span itemprop="copyrightYear">2024</span>
+  <span itemprop="copyrightYear">2025</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
@@ -551,12 +551,12 @@ What resources exist for Database performance-tuning? <a target="_blank" rel="no
     <span class="post-meta-item-icon">
       <i class="fa fa-chart-area"></i>
     </span>
-    <span title="站点总字数">386k</span>
+    <span title="站点总字数">373k</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
       <i class="fa fa-coffee"></i>
     </span>
-    <span title="站点阅读时长">5:51</span>
+    <span title="站点阅读时长">5:39</span>
 </div>
   <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
   </div>
@@ -632,6 +632,26 @@ What resources exist for Database performance-tuning? <a target="_blank" rel="no
 
 
 
+<script>
+document.querySelectorAll('.pdfobject-container').forEach(element => {
+  let url = element.dataset.target;
+  let pdfOpenParams = {
+    navpanes : 0,
+    toolbar  : 0,
+    statusbar: 0,
+    pagemode : 'none',
+    view     : 'FitH'
+  };
+  let pdfOpenFragment = '#' + Object.entries(pdfOpenParams).map(([key, value]) => `${key}=${encodeURIComponent(value)}`).join('&');
+  let fullURL = `/lib/pdf/web/viewer.html?file=${encodeURIComponent(url)}${pdfOpenFragment}`;
+
+  if (NexT.utils.supportsPDFs()) {
+    element.innerHTML = `<embed class="pdfobject" src="${url + pdfOpenFragment}" type="application/pdf" style="height: ${element.dataset.height};">`;
+  } else {
+    element.innerHTML = `<iframe src="${fullURL}" style="height: ${element.dataset.height};" frameborder="0"></iframe>`;
+  }
+});
+</script>
 
 
 
