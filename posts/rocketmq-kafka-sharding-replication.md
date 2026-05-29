@@ -51,7 +51,7 @@ RocketMQ 和 Kafka 的历史演进时间线：
   - **分片-机器的分配关系**[^5]：可配置某 Topic 在某 Borker 服务器节点的消息队列数。
     - 若发送消息时自动创建 Topic，配置项 `autoCreateTopicEnable` 开启，会在发送消息时轮询选择其中一台 Master Borker，在该 Borker 上分配消息队列。消息队列数由全局配置项 `defaultTopicQueueNums` 控制，默认值 `4`。
       - 相关源码：MQClientInstance#[updateTopicRouteInfoFromNameServer](https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/client/src/main/java/org/apache/rocketmq/client/impl/factory/MQClientInstance.java#L605)、AbstractSendMessageProcessor#[msgCheck](https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/broker/src/main/java/org/apache/rocketmq/broker/processor/AbstractSendMessageProcessor.java#L166)、TopicConfigManager#[createTopicInSendMessageMethod](https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/broker/src/main/java/org/apache/rocketmq/broker/topic/TopicConfigManager.java#L156)
-    - 若预先手动创建 Topic，执行 `mqadmin updateTopic` 命令，可以通过命令行参数指定在某个 Master Borker 上分配消息队列。也可以通过命令行参数指定 cluster，在 cluster 下的全部的 Master Borker 上分配消息队列，每个 Borker 的消息队列的数量相同。默认队列数 `8`。
+    - 若预先手动创建 Topic，执行 `mqadmin updateTopic` 命令，可以通过命令行参数指定在某个 Master Borker 上分配消息队列。也可以通过命令行参数指定 cluster，在 cluster 下的全部的 Master Borker 上分配消息队列，每个 Borker 的消息队列的数量相同，各 Borker 的默认队列数为 `8`。
       - 相关源码：[UpdateTopicSubCommand](https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/tools/src/main/java/org/apache/rocketmq/tools/command/topic/UpdateTopicSubCommand.java#L90)
     - Topic 的消息队列的主副本分布在各个 Master Borker，某 Topic 的分区总数量是该 Topic 分布在各个 Master Borker 上的消息队列的数量的总和。
   - **分片再均衡策略**：手动再均衡

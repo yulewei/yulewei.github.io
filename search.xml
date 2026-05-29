@@ -4004,7 +4004,7 @@ We implement Solaris and Linux PlatformEvents with the obvious condvar-mutex-fla
 <li>相关源码：MQClientInstance#<a href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/client/src/main/java/org/apache/rocketmq/client/impl/factory/MQClientInstance.java#L605">updateTopicRouteInfoFromNameServer</a>、AbstractSendMessageProcessor#<a href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/broker/src/main/java/org/apache/rocketmq/broker/processor/AbstractSendMessageProcessor.java#L166">msgCheck</a>、TopicConfigManager#<a href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/broker/src/main/java/org/apache/rocketmq/broker/topic/TopicConfigManager.java#L156">createTopicInSendMessageMethod</a></li>
 </ul>
 </li>
-<li>若预先手动创建 Topic，执行 <code>mqadmin updateTopic</code> 命令，可以通过命令行参数指定在某个 Master Borker 上分配消息队列。也可以通过命令行参数指定 cluster，在 cluster 下的全部的 Master Borker 上分配消息队列，每个 Borker 的消息队列的数量相同。默认队列数 <code>8</code>。
+<li>若预先手动创建 Topic，执行 <code>mqadmin updateTopic</code> 命令，可以通过命令行参数指定在某个 Master Borker 上分配消息队列。也可以通过命令行参数指定 cluster，在 cluster 下的全部的 Master Borker 上分配消息队列，每个 Borker 的消息队列的数量相同，各 Borker 的默认队列数为 <code>8</code>。
 <ul>
 <li>相关源码：<a href="https://github.com/apache/rocketmq/blob/rocketmq-all-4.9.0/tools/src/main/java/org/apache/rocketmq/tools/command/topic/UpdateTopicSubCommand.java#L90">UpdateTopicSubCommand</a></li>
 </ul>
